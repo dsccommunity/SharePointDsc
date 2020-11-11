@@ -101,18 +101,30 @@ function Set-TargetResource
 
     if ($Ensure -eq "Absent")
     {
-        throw "This resource cannot remove Diagnostics Provider. Please use ensure equals Present."
+        $message = "This resource cannot remove Diagnostics Provider. Please use ensure equals Present."
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+        -Arguments -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
+        $eventSource = $args[1]
+
         $diagnosticProvider = Get-SPDiagnosticsProvider | Where-Object { $_.Name -eq $params.Name }
 
         if ($null -eq $diagnosticProvider)
         {
-            throw "The specified Diagnostic Provider {" + $params.Name + "} could not be found."
+            $message = "The specified Diagnostic Provider {" + $params.Name + "} could not be found."
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
 
         $newParams = @{

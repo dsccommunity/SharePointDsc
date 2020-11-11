@@ -70,8 +70,13 @@ function Get-TargetResource
 
     if ($ProxyLibraries -and (($ProxyLibrariesToInclude) -or ($ProxyLibrariesToExclude)))
     {
-        throw ("Cannot use the ProxyLibraries parameter together with the ProxyLibrariesToInclude or " + `
+        $message = ("Cannot use the ProxyLibraries parameter together with the ProxyLibrariesToInclude or " + `
                 "ProxyLibrariesToExclude parameters")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
@@ -211,19 +216,30 @@ function Set-TargetResource
 
     if ($ProxyLibraries -and (($ProxyLibrariesToInclude) -or ($ProxyLibrariesToExclude)))
     {
-        throw ("Cannot use the ProxyLibraries parameter together with the ProxyLibrariesToInclude or " + `
+        $message = ("Cannot use the ProxyLibraries parameter together with the ProxyLibrariesToInclude or " + `
                 "ProxyLibrariesToExclude parameters")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters) `
+    -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
+        $eventSource = $args[1]
 
         $webApplication = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
         if ($null -eq $webApplication)
         {
-            throw "Web application $($params.WebAppUrl) was not found"
+            $message = "Web application $($params.WebAppUrl) was not found"
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
 
         $clientCallableSettings = $webApplication.ClientCallableSettings
@@ -595,15 +611,15 @@ function Test-TargetResource
         -Source $($MyInvocation.MyCommand.Source) `
         -DesiredValues $PSBoundParameters `
         -ValuesToCheck @("WebAppUrl",
-            "MaxResourcesPerRequest",
-            "MaxObjectPaths",
-            "ExecutionTimeout",
-            "RequestXmlMaxDepth",
-            "EnableXsdValidation",
-            "EnableStackTrace",
-            "RequestUsageExecutionTimeThreshold",
-            "LogActionsIfHasRequestException",
-            "EnableRequestUsage")
+        "MaxResourcesPerRequest",
+        "MaxObjectPaths",
+        "ExecutionTimeout",
+        "RequestXmlMaxDepth",
+        "EnableXsdValidation",
+        "EnableStackTrace",
+        "RequestUsageExecutionTimeThreshold",
+        "LogActionsIfHasRequestException",
+        "EnableRequestUsage")
 
     Write-Verbose -Message "Test-TargetResource returned $result"
 

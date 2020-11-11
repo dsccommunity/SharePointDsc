@@ -34,15 +34,21 @@ function Get-TargetResource()
     Write-Verbose -Message "Looking for SPSite property '$Key'"
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
+        $eventSource = $args[1]
 
         $spSite = Get-SPSite -Identity $params.Url -ErrorAction SilentlyContinue
 
         if ($null -eq $spSite)
         {
-            throw "Specified site collection could not be found."
+            $message = "Specified site collection could not be found."
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
 
         if ($null -ne $spSite.RootWeb.Properties -and `
@@ -97,15 +103,21 @@ function Set-TargetResource()
     Write-Verbose -Message "Setting SPSite property '$Key'"
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
+        $eventSource = $args[1]
 
         $spSite = Get-SPSite -Identity $params.Url -ErrorAction SilentlyContinue
 
         if ($null -eq $spSite)
         {
-            throw "Specified site collection could not be found."
+            $message = "Specified site collection could not be found."
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
 
         $spWeb = $spSite.OpenWeb()
@@ -128,7 +140,12 @@ function Set-TargetResource()
         }
         else
         {
-            throw "Cannot retrieve the property bag. Please check if you have the correct permissions."
+            $message = "Cannot retrieve the property bag. Please check if you have the correct permissions."
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
     }
 }

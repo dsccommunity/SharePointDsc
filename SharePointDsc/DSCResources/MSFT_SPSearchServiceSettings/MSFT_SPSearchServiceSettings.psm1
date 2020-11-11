@@ -124,18 +124,24 @@ function Set-TargetResource
         $PSBoundParameters.ContainsKey("ContactEmail") -eq $false -and `
             $PSBoundParameters.ContainsKey("WindowsServiceAccount") -eq $false)
     {
-        throw ("You have to specify at least one of the following parameters: " + `
+        $message = ("You have to specify at least one of the following parameters: " + `
                 "PerformanceLevel, ContactEmail or WindowsServiceAccount")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     $result = Get-TargetResource @PSBoundParameters
 
     # Update the service app that already exists
     Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $result) `
+        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $result) `
         -ScriptBlock {
         $params = $args[0]
-        $result = $args[1]
+        $eventSource = $args[1]
+        $result = $args[2]
 
         try
         {
@@ -143,8 +149,13 @@ function Set-TargetResource
         }
         catch
         {
-            throw ("No local SharePoint farm was detected. Search service " + `
+            $message = ("No local SharePoint farm was detected. Search service " + `
                     "settings will not be applied")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
 
         $setParams = @{ }

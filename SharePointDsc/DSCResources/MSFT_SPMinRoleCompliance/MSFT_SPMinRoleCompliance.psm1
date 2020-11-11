@@ -29,7 +29,12 @@ function Get-TargetResource
     $installedVersion = Get-SPDscInstalledProductVersion
     if ($installedVersion.FileMajorPart -ne 16)
     {
-        throw [Exception] "MinRole is only supported in SharePoint 2016 and 2019."
+        $message = "MinRole is only supported in SharePoint 2016 and 2019."
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
@@ -91,13 +96,23 @@ function Set-TargetResource
     $installedVersion = Get-SPDscInstalledProductVersion
     if ($installedVersion.FileMajorPart -ne 16)
     {
-        throw [Exception] "MinRole is only supported in SharePoint 2016 and 2019."
+        $message = "MinRole is only supported in SharePoint 2016 and 2019."
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     if ($State -eq "NonCompliant")
     {
-        throw ("State can only be configured to 'Compliant'. The 'NonCompliant' value is only " + `
+        $message = ("State can only be configured to 'Compliant'. The 'NonCompliant' value is only " + `
                 "used to report when the farm is not compliant")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     Invoke-SPDscCommand -Credential $InstallAccount `
@@ -154,8 +169,13 @@ function Test-TargetResource
 
     if ($State -eq "NonCompliant")
     {
-        throw ("State can only be configured to 'Compliant'. The 'NonCompliant' value is only " + `
+        $message = ("State can only be configured to 'Compliant'. The 'NonCompliant' value is only " + `
                 "used to report when the farm is not compliant")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters

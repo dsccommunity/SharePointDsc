@@ -329,4 +329,3 @@ function Remove-SPDscConfigDBLock
         }
     }
 }
-

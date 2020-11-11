@@ -56,8 +56,14 @@ function Get-TargetResource
 
             if ($null -ne $workflowProxy)
             {
+                $workflowHostUri = $workflowProxy.GetHostname($site)
+
+                if ($null -ne $workflowHostUri)
+                {
+                    $workflowHostUri = $workflowHostUri.TrimEnd("/")
+                }
                 $returnval = @{
-                    WorkflowHostUri = $workflowProxy.GetHostname($site).TrimEnd("/")
+                    WorkflowHostUri = $workflowHostUri
                     SPSiteUrl       = $params.SPSiteUrl
                     ScopeName       = $workflowProxy.GetWorkflowScopeName($site)
                     AllowOAuthHttp  = $params.AllowOAuthHttp
@@ -100,15 +106,21 @@ function Set-TargetResource
 
     ## Perform changes
     Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters) `
+        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
+        $eventSource = $args[1]
 
         $site = Get-SPSite $params.SPSiteUrl
 
         if ($null -eq $site)
         {
-            throw "Specified site collection could not be found."
+            $message = "Specified site collection could not be found."
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
 
         Write-Verbose -Message "Processing changes"

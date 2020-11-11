@@ -196,9 +196,10 @@ function Set-TargetResource
     if ($Ensure -eq "Present")
     {
         Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
             -ScriptBlock {
             $params = $args[0]
+            $eventSource = $args[1]
 
             $wa = Get-SPWebApplication -Identity $params.Name -ErrorAction SilentlyContinue
             if ($null -eq $wa)
@@ -228,15 +229,23 @@ function Set-TargetResource
                     {
                         if ($_.Exception.Message -like "*No matching accounts were found*")
                         {
-                            throw ("The specified managed account was not found. Please make " + `
+                            $message = ("The specified managed account was not found. Please make " + `
                                     "sure the managed account exists before continuing.")
-                            return
+                            Add-SPDscEvent -Message $message `
+                                -EntryType 'Error' `
+                                -EventID 100 `
+                                -Source $eventSource
+                            throw $message
                         }
                         else
                         {
-                            throw ("Error occurred. Web application was not created. Error " + `
+                            $message = ("Error occurred. Web application was not created. Error " + `
                                     "details: $($_.Exception.Message)")
-                            return
+                            Add-SPDscEvent -Message $message `
+                                -EntryType 'Error' `
+                                -EventID 100 `
+                                -Source $eventSource
+                            throw $message
                         }
                     }
                 }
@@ -393,23 +402,24 @@ function Test-TargetResource
     return $result
 }
 
-function Export-TargetResource {
+function Export-TargetResource
+{
     $content = ''
     $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
-    $module = Join-Path -Path $ParentModuleBase -ChildPath "\DSCResources\MSFT_SPWebApplication\MSFT_SPWebApplication.psm1" -Resolve    
+    $module = Join-Path -Path $ParentModuleBase -ChildPath "\DSCResources\MSFT_SPWebApplication\MSFT_SPWebApplication.psm1" -Resolve
 
     $spWebApplications = Get-SPWebApplication | Sort-Object -Property Name
 
 
     $i = 1;
     $total = $spWebApplications.Length
-    foreach($spWebApp in $spWebApplications)
+    foreach ($spWebApp in $spWebApplications)
     {
         try
         {
             Write-Host "Scanning SPWebApplication [$i/$total] {$webAppName}"
             $partialContent = "        SPWebApplication " + $spWebApp.Name.Replace(" ", "") + "`r`n        {`r`n"
-            
+
             $params = Get-DSCFakeParameters -ModulePath $module
             $params.Name = $spWebApp.name
 
@@ -419,13 +429,13 @@ function Export-TargetResource {
 
             $appPoolAccount = Get-Credentials $results.ApplicationPoolAccount
             $convertToVariable = $false
-            if($appPoolAccount)
+            if ($appPoolAccount)
             {
                 $convertToVariable = $true
                 $results.ApplicationPoolAccount = (Resolve-Credentials -UserName $results.ApplicationPoolAccount) + ".UserName"
             }
 
-            if($null -eq $results.Get_Item("AllowAnonymous"))
+            if ($null -eq $results.Get_Item("AllowAnonymous"))
             {
                 $results.Remove("AllowAnonymous")
             }
@@ -434,7 +444,7 @@ function Export-TargetResource {
             $results.DatabaseServer = "`$ConfigurationData.NonNodeData.DatabaseServer"
             $results["Path"] = $results["Path"].ToString()
             $currentDSCBlock = Get-DSCBlock -Params $results -ModulePath $PSScriptRoot
-            if($convertToVariable)
+            if ($convertToVariable)
             {
                 $currentDSCBlock = Convert-DSCStringParamToVariable -DSCBlock $currentDSCBlock -ParameterName "ApplicationPoolAccount"
             }
@@ -443,18 +453,18 @@ function Export-TargetResource {
             $partialContent += $currentDSCBlock
             $partialContent += "        }`r`n"
 
-            if($Global:ExtractionModeValue -ge 2)
+            if ($Global:ExtractionModeValue -ge 2)
             {
                 Write-Host "    -> Scanning SharePoint Designer Settings"
                 #Read-SPDesignerSettings -WebAppUrl $results.WebAppUrl.ToString() -Scope "WebApplication" -WebAppName $spWebApp.Name.Replace(" ", "")
             }
 
             <# SPWebApplication Feature Section #>
-            if(($Global:ExtractionModeValue -eq 3 -and $Quiet) -or $Global:ComponentsToExtract.Contains("SPFeature"))
+            if (($Global:ExtractionModeValue -eq 3 -and $Quiet) -or $Global:ComponentsToExtract.Contains("SPFeature"))
             {
-                $partialContent += Read-TargetResource -ResourceName SPFeature -ExportParams @{Scope = "WebApplication"; Url = $SpWebApp.Url; DependsOn="[SPWebApplication]$($spWebApp.Name.Replace(' ', ''))";}
+                $partialContent += Read-TargetResource -ResourceName SPFeature -ExportParams @{Scope = "WebApplication"; Url = $SpWebApp.Url; DependsOn = "[SPWebApplication]$($spWebApp.Name.Replace(' ', ''))"; }
             }
-            $partialContent += Read-TargetResource -ResourceName SPOutgoingEmailSettings -ExportParams @{WebAppUrl = $spWebApp.Url; DependsOn="[SPWebApplication]$($spWebApp.Name.Replace(' ', ''))";}
+            $partialContent += Read-TargetResource -ResourceName SPOutgoingEmailSettings -ExportParams @{WebAppUrl = $spWebApp.Url; DependsOn = "[SPWebApplication]$($spWebApp.Name.Replace(' ', ''))"; }
             $i++
         }
         catch

@@ -36,14 +36,24 @@ function Get-TargetResource
 
     if ($ProviderRealms.Count -gt 0 -and ($ProviderRealmsToInclude.Count -gt 0 -or $ProviderRealmsToExclude.Count -gt 0))
     {
-        throw ("Cannot use the ProviderRealms parameter together with the " + `
+        $message = ("Cannot use the ProviderRealms parameter together with the " + `
                 "ProviderRealmsToInclude or ProviderRealmsToExclude parameters")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     if ($ProviderRealms.Count -eq 0 -and $ProviderRealmsToInclude.Count -eq 0 -and $ProviderRealmsToExclude.Count -eq 0)
     {
-        throw ("At least one of the following parameters must be specified: " + `
+        $message = ("At least one of the following parameters must be specified: " + `
                 "ProviderRealms, ProviderRealmsToInclude, ProviderRealmsToExclude")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     $paramRealms = @{ }
@@ -165,16 +175,22 @@ function Set-TargetResource
 
         Write-Verbose -Message "Setting SPTrustedIdentityTokenIssuer provider realms"
         $null = Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
             -ScriptBlock {
             $params = $args[0]
+            $eventSource = $args[1]
 
             $trust = Get-SPTrustedIdentityTokenIssuer -Identity $params.IssuerName `
                 -ErrorAction SilentlyContinue
 
             if ($null -eq $trust)
             {
-                throw ("SPTrustedIdentityTokenIssuer '$($params.IssuerName)' not found")
+                $message = ("SPTrustedIdentityTokenIssuer '$($params.IssuerName)' not found")
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $eventSource
+                throw $message
             }
 
             $trust.ProviderRealms.Clear()
@@ -371,12 +387,22 @@ function Get-ProviderRealmsStatus()
     {
         if ($includeRealms.Count -gt 0 -or $excludeRealms.Count -gt 0)
         {
-            throw ("Parameters ProviderRealmsToInclude and/or ProviderRealmsToExclude can not be used together with Ensure='Absent' use ProviderRealms instead")
+            $message = ("Parameters ProviderRealmsToInclude and/or ProviderRealmsToExclude can not be used together with Ensure='Absent' use ProviderRealms instead")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
 
         if ($desiredRealms.Count -eq 0)
         {
-            throw ("Parameter ProviderRealms is empty or Null")
+            $message = ("Parameter ProviderRealms is empty or Null")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
 
         $eqBoth = $desiredRealms.Keys | Where-Object {

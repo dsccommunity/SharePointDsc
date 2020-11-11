@@ -83,15 +83,21 @@ function Get-TargetResource
     Write-Verbose -Message "Getting Managed Property Setting for '$Name'"
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters) `
+        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
+        $eventSource = $args[1]
 
         $ssa = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName
         if ($null -eq $ssa)
         {
-            throw ("The specified Search Service Application $($params.ServiceAppName) is " + `
+            $message = ("The specified Search Service Application $($params.ServiceAppName) is " + `
                     "invalid. Please make sure you specify the name of an existing service application.")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
         $managedProperty = Get-SPEnterpriseSearchMetadataManagedProperty -SearchApplication $ssa | `
             Where-Object { $_.Name -eq $params.Name }
@@ -230,19 +236,24 @@ function Set-TargetResource
 
     # Validate that the specified crawled properties are all valid and existing
     Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, `
-            $CurrentValues) `
+        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $CurrentValues) `
         -ScriptBlock {
         $params = $args[0]
-        $CurrentValues = $args[1]
+        $eventSource = $args[1]
+        $CurrentValues = $args[2]
 
         #region Pre-Validation
         # Ensure that if we specified that we don't specify any crawled property mapping if we selected to include
         # them all.
         if ($params.IncludeAllCrawledProperties -and $params.CrawledProperties.Length -gt 0)
         {
-            throw ("You cannot specify values for CrawledProperties if the property " + `
+            $message = ("You cannot specify values for CrawledProperties if the property " + `
                     "IncludeAllCrawledProperties is set to True.")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
 
         # Ensure that the specified crawled properties exist
@@ -252,8 +263,13 @@ function Set-TargetResource
                 -SearchApplication $params.ServiceAppName
             if (!$currentCrawlProperty)
             {
-                throw ("The specified crawled property $($mappedCrawlProperty) does not exist. " + `
+                $message = ("The specified crawled property $($mappedCrawlProperty) does not exist. " + `
                         "Please make sure you specify valid existing crawl properties.")
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $eventSource
+                throw $message
             }
         }
         #endregion
@@ -451,18 +467,18 @@ function Test-TargetResource
         -Source $($MyInvocation.MyCommand.Source) `
         -DesiredValues $PSBoundParameters `
         -ValuesToCheck @("Name",
-            "PropertyType",
-            "Ensure",
-            "HasMultipleValues",
-            "Retrievable",
-            "Searchable",
-            "Refinable",
-            "Searchable",
-            "NoWordBreaker",
-            "IncludeAllCrawledProperties",
-            "Aliases",
-            "Sortable",
-            "SafeForAnonymous")
+        "PropertyType",
+        "Ensure",
+        "HasMultipleValues",
+        "Retrievable",
+        "Searchable",
+        "Refinable",
+        "Searchable",
+        "NoWordBreaker",
+        "IncludeAllCrawledProperties",
+        "Aliases",
+        "Sortable",
+        "SafeForAnonymous")
 
     Write-Verbose -Message "Test-TargetResource returned $result"
 

@@ -112,9 +112,13 @@ function Set-TargetResource
 
     if ($Ensure -eq "Present" -and $null -eq $Account)
     {
-        throw ("You must specify the 'Account' property as a PSCredential to create a " + `
+        $message = ("You must specify the 'Account' property as a PSCredential to create a " + `
                 "managed account")
-        return
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     $currentValues = Get-TargetResource @PSBoundParameters
@@ -235,7 +239,7 @@ function Export-TargetResource
 
     $i = 1
     $total = $managedAccounts.Length
-    foreach($managedAccount in $managedAccounts)
+    foreach ($managedAccount in $managedAccounts)
     {
         try
         {
@@ -246,16 +250,16 @@ function Export-TargetResource
             $PartialContent += "        {`r`n"
             <# WA - 1.6.0.0 has a bug where the Get-TargetResource returns an array of all ManagedAccount (see Issue #533) #>
             $schedule = $null
-            if($null -ne $managedAccount.ChangeSchedule)
+            if ($null -ne $managedAccount.ChangeSchedule)
             {
                 $schedule = $managedAccount.ChangeSchedule.ToString()
             }
-            $results = @{AccountName = $managedAccount.UserName; EmailNotification = $managedAccount.DaysBeforeChangeToEmail; PreExpireDays = $managedAccount.DaysBeforeExpiryToChange;Schedule = $schedule;Ensure="Present";}
+            $results = @{AccountName = $managedAccount.UserName; EmailNotification = $managedAccount.DaysBeforeChangeToEmail; PreExpireDays = $managedAccount.DaysBeforeExpiryToChange; Schedule = $schedule; Ensure = "Present"; }
             $results["Account"] = (Resolve-Credentials -UserName $managedAccount.UserName)
             $results = Repair-Credentials -results $results
 
             $accountName = Get-Credentials -UserName $managedAccount.UserName
-            if(!$accountName)
+            if (!$accountName)
             {
                 Save-Credentials -UserName $managedAccount.UserName
             }
@@ -278,6 +282,5 @@ function Export-TargetResource
     }
     Return $Content
 }
-
 
 Export-ModuleMember -Function *-TargetResource

@@ -176,23 +176,43 @@ function Set-TargetResource
 
         if ($upgradeTimes.Count -ne 3)
         {
-            throw "Time window incorrectly formatted."
+            $message = "Time window incorrectly formatted."
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
         else
         {
             if ([datetime]::TryParse($upgradeTimes[0], [ref]$starttime) -ne $true)
             {
-                throw "Error converting start time"
+                $message = "Error converting start time"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
 
             if ([datetime]::TryParse($upgradeTimes[2], [ref]$endtime) -ne $true)
             {
-                throw "Error converting end time"
+                $message = "Error converting end time"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
 
             if ($starttime -gt $endtime)
             {
-                throw "Error: Start time cannot be larger than end time"
+                $message = "Error: Start time cannot be larger than end time"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
         }
 
@@ -239,6 +259,26 @@ function Set-TargetResource
         -ScriptBlock {
         $psconfigExe = $args[0]
 
+        Write-Verbose -Message "Starting 'Product Version Job' timer job"
+        $pvTimerJob = Get-SPTimerJob -Identity 'job-admin-product-version'
+        $lastRunTime = $pvTimerJob.LastRunTime
+
+        Start-SPTimerJob -Identity $pvTimerJob
+
+        $jobRunning = $true
+        $maxCount = 30
+        $count = 0
+        Write-Verbose -Message "Waiting for 'Product Version Job' timer job to complete"
+        while ($jobRunning -and $count -le $maxCount)
+        {
+            Start-Sleep -Seconds 10
+
+            $pvTimerJob = Get-SPTimerJob -Identity 'job-admin-product-version'
+            $jobRunning = $lastRunTime -eq $pvTimerJob.LastRunTime
+
+            $count++
+        }
+
         $stdOutTempFile = "$env:TEMP\$((New-Guid).Guid)"
         $psconfig = Start-Process -FilePath $psconfigExe `
             -ArgumentList "-cmd upgrade -inplace b2b -wait -cmd applicationcontent -install -cmd installfeatures -cmd secureresources -cmd services -install" `
@@ -267,9 +307,14 @@ function Set-TargetResource
         }
         Default
         {
-            throw ("SharePoint Post Setup Configuration Wizard failed, " + `
+            $message = ("SharePoint Post Setup Configuration Wizard failed, " + `
                     "exit code was $result. Error codes can be found at " + `
                     "https://aka.ms/installerrorcodes")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
     }
 }

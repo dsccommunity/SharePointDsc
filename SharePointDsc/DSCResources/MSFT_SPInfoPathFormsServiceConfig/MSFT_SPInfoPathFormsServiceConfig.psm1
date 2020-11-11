@@ -213,8 +213,13 @@ function Set-TargetResource
 
     if ($Ensure -eq "Absent")
     {
-        throw "This resource cannot undo InfoPath Forms Service Configuration changes. `
-        Please set Ensure to Present or omit the resource"
+        $message = ("This resource cannot undo InfoPath Forms Service Configuration changes. " + `
+                "Please set Ensure to Present or omit the resource")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     Invoke-SPDscCommand -Credential $InstallAccount `

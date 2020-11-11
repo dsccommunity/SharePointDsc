@@ -149,9 +149,10 @@ function Set-TargetResource
     if ($CurrentResults.Ensure -eq "Absent" -and $Ensure -eq "Present")
     {
         $null = Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
             -ScriptBlock {
             $params = $args[0]
+            $eventSource = $args[1]
 
             $serviceApp = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName
             $searchObjectLevel = [Microsoft.Office.Server.Search.Administration.SearchObjectLevel]::Ssa
@@ -159,7 +160,12 @@ function Set-TargetResource
 
             if ($null -eq $serviceApp)
             {
-                throw "Search Service App was not available."
+                $message = "Search Service App was not available."
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $eventSource
+                throw $message
             }
             if ($params.Action -eq "Authoratative")
             {
@@ -177,9 +183,10 @@ function Set-TargetResource
     if ($CurrentResults.Ensure -eq "Present" -and $Ensure -eq "Present")
     {
         $null = Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
             -ScriptBlock {
             $params = $args[0]
+            $eventSource = $args[1]
 
             $serviceApp = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName
             $searchObjectLevel = [Microsoft.Office.Server.Search.Administration.SearchObjectLevel]::Ssa
@@ -187,7 +194,12 @@ function Set-TargetResource
 
             if ($null -eq $serviceApp)
             {
-                throw "Search Service App was not available."
+                $message = "Search Service App was not available."
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $eventSource
+                throw $message
             }
 
             if ($params.Action -eq "Authoratative")
@@ -202,7 +214,7 @@ function Set-TargetResource
     if ($Ensure -eq "Absent")
     {
         $null = Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
             -ScriptBlock {
             $params = $args[0]
 
@@ -212,7 +224,12 @@ function Set-TargetResource
 
             if ($null -eq $serviceApp)
             {
-                throw "Search Service App was not available."
+                $message = "Search Service App was not available."
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $eventSource
+                throw $message
             }
             if ($params.Action -eq "Authoratative")
             {

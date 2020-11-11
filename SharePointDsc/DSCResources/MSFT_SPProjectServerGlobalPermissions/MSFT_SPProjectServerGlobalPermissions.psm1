@@ -39,20 +39,31 @@ function Get-TargetResource
 
     if ((Get-SPDscInstalledProductVersion).FileMajorPart -lt 16)
     {
-        throw [Exception] ("Support for Project Server in SharePointDsc is only valid for " + `
+        $message = ("Support for Project Server in SharePointDsc is only valid for " + `
                 "SharePoint 2016 and 2019.")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $PSScriptRoot) `
+    -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $PSScriptRoot) `
         -ScriptBlock {
         $params = $args[0]
-        $scriptRoot = $args[1]
+        $eventSource = $args[1]
+        $scriptRoot = $args[2]
 
         if ((Get-SPProjectPermissionMode -Url $params.Url) -ne "ProjectServer")
         {
-            throw [Exception] ("SPProjectServerGlobalPermissions is designed for Project Server " + `
+            $message = ("SPProjectServerGlobalPermissions is designed for Project Server " + `
                     "permissions mode only, and this site is set to SharePoint mode")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
 
         $modulePath = "..\..\Modules\SharePointDsc.ProjectServerConnector\SharePointDsc.ProjectServerConnector.psm1"

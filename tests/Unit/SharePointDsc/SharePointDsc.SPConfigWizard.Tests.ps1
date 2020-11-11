@@ -49,9 +49,17 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Mocks for all contexts
+                Mock -CommandName Start-Sleep -MockWith { }
+                Mock -CommandName Start-SPTimerJob -MockWith { }
+                Mock -CommandName Get-SPTimerJob -MockWith {
+                    return @{
+                        LastRunTime = Get-Date
+                    }
+                }
+
                 Mock -CommandName Remove-Item -MockWith { }
                 Mock -CommandName Get-Content -MockWith { return "log info" }
                 Mock -CommandName Get-SPDscServerPatchStatus -MockWith { return "UpgradeRequired" }

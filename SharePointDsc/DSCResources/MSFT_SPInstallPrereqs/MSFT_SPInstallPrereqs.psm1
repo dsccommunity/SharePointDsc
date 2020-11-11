@@ -204,7 +204,12 @@ function Get-TargetResource
     Write-Verbose -Message "Check if InstallerPath folder exists"
     if (-not(Test-Path -Path $InstallerPath))
     {
-        throw "PrerequisitesInstaller cannot be found: {$InstallerPath}"
+        $message = "PrerequisitesInstaller cannot be found: {$InstallerPath}"
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     Write-Verbose -Message "Checking file status of $InstallerPath"
@@ -246,8 +251,13 @@ function Get-TargetResource
         }
         if ($null -ne $zone)
         {
-            throw ("PrerequisitesInstaller is blocked! Please use 'Unblock-File -Path " + `
+            $message = ("PrerequisitesInstaller is blocked! Please use 'Unblock-File -Path " + `
                     "$InstallerPath' to unblock the file before continuing.")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
         Write-Verbose -Message "File not blocked, continuing."
     }
@@ -277,7 +287,12 @@ function Get-TargetResource
     {
         if ($osVersion.Major -ne 6)
         {
-            throw "SharePoint 2013 only supports Windows Server 2012 R2 and below"
+            $message = "SharePoint 2013 only supports Windows Server 2012 R2 and below"
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
 
         $WindowsFeatures = Get-WindowsFeature -Name $Script:SP2013Features
@@ -306,7 +321,12 @@ function Get-TargetResource
             }
             else
             {
-                throw "SharePoint 2016 only supports Windows Server 2019, 2016 or 2012 R2"
+                $message = "SharePoint 2016 only supports Windows Server 2019, 2016 or 2012 R2"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
         }
         # SharePoint 2019
@@ -327,7 +347,12 @@ function Get-TargetResource
             }
             else
             {
-                throw "SharePoint 2019 only supports Windows Server 2016 or Windows Server 2019"
+                $message = "SharePoint 2019 only supports Windows Server 2016 or Windows Server 2019"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
         }
     }
@@ -612,14 +637,24 @@ function Set-TargetResource
 
     if ($Ensure -eq "Absent")
     {
-        throw [Exception] ("SharePointDsc does not support uninstalling SharePoint or its " + `
+        $message = ("SharePointDsc does not support uninstalling SharePoint or its " + `
                 "prerequisites. Please remove this manually.")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     Write-Verbose -Message "Check if InstallerPath folder exists"
     if (-not(Test-Path -Path $InstallerPath))
     {
-        throw "PrerequisitesInstaller cannot be found: {$InstallerPath}"
+        $message = "PrerequisitesInstaller cannot be found: {$InstallerPath}"
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     Write-Verbose -Message "Checking file status of $InstallerPath"
@@ -661,8 +696,13 @@ function Set-TargetResource
         }
         if ($null -ne $zone)
         {
-            throw ("PrerequisitesInstaller is blocked! Please use 'Unblock-File -Path " + `
+            $message = ("PrerequisitesInstaller is blocked! Please use 'Unblock-File -Path " + `
                     "$InstallerPath' to unblock the file before continuing.")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
         Write-Verbose -Message "File not blocked, continuing."
     }
@@ -712,7 +752,12 @@ function Set-TargetResource
     {
         if ($osVersion.Major -ne 6)
         {
-            throw "SharePoint 2013 only supports Windows Server 2012 R2 and below"
+            $message = "SharePoint 2013 only supports Windows Server 2012 R2 and below"
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
 
         $BinaryDir = Split-Path -Path $InstallerPath
@@ -747,9 +792,14 @@ function Set-TargetResource
 
             if ($dotNet46Installed -eq $true)
             {
-                throw [Exception] ("A known issue prevents installation of SharePoint 2013 on " + `
+                $message = ("A known issue prevents installation of SharePoint 2013 on " + `
                         "servers that have .NET 4.6 already installed. See details " + `
                         "at https://support.microsoft.com/en-us/kb/3087184")
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
         }
 
@@ -785,7 +835,12 @@ function Set-TargetResource
             }
             else
             {
-                throw "SharePoint 2016 only supports Windows Server 2016 or 2012 R2"
+                $message = "SharePoint 2016 only supports Windows Server 2016 or 2012 R2"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
         }
         # SharePoint 2019
@@ -810,7 +865,12 @@ function Set-TargetResource
             }
             else
             {
-                throw "SharePoint 2019 only supports Windows Server 2016 or Windows Server 2019"
+                $message = "SharePoint 2019 only supports Windows Server 2016 or Windows Server 2019"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
         }
     }
@@ -832,7 +892,12 @@ function Set-TargetResource
                 }
                 if ($installResult.Success -ne $true)
                 {
-                    throw "Error installing $($feature.name)"
+                    $message = "Error installing $($feature.name)"
+                    Add-SPDscEvent -Message $message `
+                        -EntryType 'Error' `
+                        -EventID 100 `
+                        -Source $MyInvocation.MyCommand.Source
+                    throw $message
                 }
             }
         }
@@ -852,12 +917,22 @@ function Set-TargetResource
                         -and [string]::IsNullOrEmpty($PSBoundParameters.$_)) `
                     -or (-not $PSBoundParameters.ContainsKey($_)))
             {
-                throw "In offline mode for version $majorVersion parameter $_ is required"
+                $message = "In offline mode for version $majorVersion parameter $_ is required"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
             if ((Test-Path -Path $PSBoundParameters.$_) -eq $false)
             {
-                throw ("The $_ parameter has been passed but the file cannot be found at the " + `
+                $message = ("The $_ parameter has been passed but the file cannot be found at the " + `
                         "path supplied: `"$($PSBoundParameters.$_)`"")
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
         }
         $requiredParams | ForEach-Object -Process {
@@ -880,7 +955,12 @@ function Set-TargetResource
         }
         else
         {
-            throw "Cannot extract servername from UNC path. Check if it is in the correct format."
+            $message = "Cannot extract servername from UNC path. Check if it is in the correct format."
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
 
         Set-SPDscZoneMap -Server $serverName
@@ -905,11 +985,21 @@ function Set-TargetResource
         }
         1
         {
-            throw "Another instance of the prerequisite installer is already running"
+            $message = "Another instance of the prerequisite installer is already running"
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
         2
         {
-            throw "Invalid command line parameters passed to the prerequisite installer"
+            $message = "Invalid command line parameters passed to the prerequisite installer"
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
         1001
         {
@@ -925,8 +1015,13 @@ function Set-TargetResource
         }
         default
         {
-            throw ("The prerequisite installer ran with the following unknown " + `
+            $message = ("The prerequisite installer ran with the following unknown " + `
                     "exit code $($process.ExitCode)")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
     }
 
@@ -1059,8 +1154,13 @@ function Test-TargetResource
 
     if ($Ensure -eq "Absent")
     {
-        throw [Exception] ("SharePointDsc does not support uninstalling SharePoint or its " + `
+        $message = ("SharePointDsc does not support uninstalling SharePoint or its " + `
                 "prerequisites. Please remove this manually.")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
@@ -1169,8 +1269,13 @@ function Test-SPDscPrereqInstallStatus
             }
             Default
             {
-                throw ("Unable to search for a prereq with mode '$($itemToCheck.SearchType)'. " + `
+                $message = ("Unable to search for a prereq with mode '$($itemToCheck.SearchType)'. " + `
                         "please use either 'Equals', 'Like' or 'Match', or 'BundleUpgradeCode'")
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
         }
     }
@@ -1182,7 +1287,7 @@ function Export-TargetResource
     param(
         [Parameter()]
         [System.String]
-        $BinaryLocation = "\\<location>" 
+        $BinaryLocation = "\\<location>"
     )
     if ($DynamicCompilation)
     {
@@ -1204,7 +1309,7 @@ function Export-TargetResource
     $Content += "                OnlineMode = `$True;`r`n"
     $Content += "                Ensure = `"Present`";`r`n"
     $Content += "                IsSingleInstance = `"Yes`";`r`n"
-    $Content += "                PSDscRunAsCredential = `$Creds" + ($Global:spFarmAccount.Username.Split('\'))[1].Replace("-","_").Replace(".", "_") + ";`r`n"
+    $Content += "                PSDscRunAsCredential = `$Creds" + ($Global:spFarmAccount.Username.Split('\'))[1].Replace("-", "_").Replace(".", "_") + ";`r`n"
 
     $Content += "            }`r`n"
     $Content += "        }`r`n"

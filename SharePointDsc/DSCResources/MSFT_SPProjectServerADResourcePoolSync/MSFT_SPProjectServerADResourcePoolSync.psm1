@@ -35,8 +35,13 @@ function Get-TargetResource
 
     if ((Get-SPDscInstalledProductVersion).FileMajorPart -lt 16)
     {
-        throw [Exception] ("Support for Project Server in SharePointDsc is only valid for " + `
+        $message = ("Support for Project Server in SharePointDsc is only valid for " + `
                 "SharePoint 2016 and 2019.")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
@@ -86,7 +91,7 @@ function Get-TargetResource
             {
                 $adGroups = @()
                 $script:currentSettings.ADGroupGuids | ForEach-Object -Process {
-                    $groupName = Convert-SPDscADGroupIDToName -GroupID $_
+                    $groupName = Convert-SPDscADGroupIDToName -GroupId $_
                     $adGroups += $groupName
                 }
 
@@ -134,8 +139,13 @@ function Set-TargetResource
 
     if ((Get-SPDscInstalledProductVersion).FileMajorPart -lt 16)
     {
-        throw [Exception] ("Support for Project Server in SharePointDsc is only valid for " + `
+        $message = ("Support for Project Server in SharePointDsc is only valid for " + `
                 "SharePoint 2016 and 2019.")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     if ($Ensure -eq "Present")

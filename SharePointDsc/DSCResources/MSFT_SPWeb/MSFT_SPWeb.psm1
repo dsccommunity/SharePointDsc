@@ -70,15 +70,24 @@ function Get-TargetResource
 
         if ($web)
         {
-            $ensureResult = "Present"
-            $templateResult = "$($web.WebTemplate)#$($web.WebTemplateId)"
-            $parentTopNav = $web.Navigation.UseShared
+            return @{
+                Url                = $params.Url
+                Ensure             = "Present"
+                Description        = $web.Description
+                Name               = $web.Title
+                Language           = $web.Language
+                Template           = "$($web.WebTemplate)#$($web.WebTemplateId)"
+                UniquePermissions  = $web.HasUniquePerm
+                UseParentTopNav    = $web.Navigation.UseShared
+                RequestAccessEmail = $web.RequestAccessEmail
+            }
         }
         else
         {
-            $ensureResult = "Absent"
-            $templateResult = $null
-            $parentTopNav = $null
+            return @{
+                Url    = $params.Url
+                Ensure = "Absent"
+            }
         }
 
         return @{
@@ -346,7 +355,8 @@ function Test-TargetResource
     return $result
 }
 
-function Export-TargetResource{
+function Export-TargetResource
+{
     Param(
         $URL,
         $DependsOn
@@ -357,7 +367,7 @@ function Export-TargetResource{
     $SPWebs = Get-SPWeb -Limit All -Site $URL
     $j = 1
     $totalWebs = $webs.Length
-    Foreach($SPWeb in $SPWebs)
+    Foreach ($SPWeb in $SPWebs)
     {
         Write-Host "    -> Scanning Web [$j/$totalWebs] {$($SPWeb.URL)}"
         Try
@@ -366,13 +376,14 @@ function Export-TargetResource{
             $SPWebGuid = [System.Guid]::NewGuid().toString()
             $paramsWeb.Url = $SPWeb.URL
             $results = Get-TargetResource @paramsWeb
-            
+
             $results.Description = $results.Description.Replace("`"", "'").Replace("`r`n", ' `
             ')
             $PartialContent = "        SPWeb $($SPWebGuid)`r`n"
             $PartialContent += "        {`r`n"
             $results = Repair-Credentials -results $results
-            if ($DependsOn){ 
+            if ($DependsOn)
+            {
                 $results.add("DependsOn", $DependsOn)
             }
             $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
@@ -381,9 +392,9 @@ function Export-TargetResource{
             $PartialContent += "        }`r`n"
 
             <# SPWeb Feature Section #>
-            if(($Global:ExtractionModeValue -eq 3 -and $Quiet) -or $Global:ComponentsToExtract.Contains("SPFeature"))
+            if (($Global:ExtractionModeValue -eq 3 -and $Quiet) -or $Global:ComponentsToExtract.Contains("SPFeature"))
             {
-                $partialContent += Read-TargetResource -ResourceName SPFeature -ExportParam @{Scope = "Web"; Url = $SPWeb.URL; DependsOn="[SPWeb]$($SPWebGuid)";}
+                $partialContent += Read-TargetResource -ResourceName SPFeature -ExportParam @{Scope = "Web"; Url = $SPWeb.URL; DependsOn = "[SPWeb]$($SPWebGuid)"; }
             }
             $j++
         }

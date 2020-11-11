@@ -29,10 +29,11 @@ function Get-TargetResource
     Write-Verbose -Message "Getting the default site collection and keyword term store settings"
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
 
         $params = $args[0]
+        $eventSource = $args[1]
 
         if ($params.ServiceAppProxyGroup -eq 'default')
         {
@@ -46,14 +47,24 @@ function Get-TargetResource
 
         if ($null -eq $serviceAppProxyGroup)
         {
-            throw "Specified ServiceAppProxyGroup $($params.ServiceAppProxyGroup) does not exist."
+            $message = "Specified ServiceAppProxyGroup $($params.ServiceAppProxyGroup) does not exist."
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
 
         $serviceAppProxies = $serviceAppProxyGroup.Proxies
 
         if ($null -eq $serviceAppProxies)
         {
-            throw "There are no Service Application Proxies available in the proxy group"
+            $message = "There are no Service Application Proxies available in the proxy group"
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
 
         $serviceAppProxies = $serviceAppProxies | Where-Object -FilterScript {
@@ -62,7 +73,12 @@ function Get-TargetResource
 
         if ($null -eq $serviceAppProxies)
         {
-            throw "There are no Managed Metadata Service Application Proxies available in the proxy group"
+            $message = "There are no Managed Metadata Service Application Proxies available in the proxy group"
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
 
         $defaultSiteCollectionProxyIsSet = $false
@@ -133,10 +149,11 @@ function Set-TargetResource
     Write-Verbose -Message "Setting the default site collection and keyword term store settings"
 
     $null = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
 
         $params = $args[0]
+        $eventSource = $args[1]
 
         if ($params.ServiceAppProxyGroup -eq 'default')
         {
@@ -150,14 +167,24 @@ function Set-TargetResource
 
         if ($null -eq $serviceAppProxyGroup)
         {
-            throw "Specified ServiceAppProxyGroup $($params.ServiceAppProxyGroup) does not exist."
+            $message = "Specified ServiceAppProxyGroup $($params.ServiceAppProxyGroup) does not exist."
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
 
         $serviceAppProxies = $serviceAppProxyGroup.Proxies
 
         if ($null -eq $serviceAppProxies)
         {
-            throw "There are no Service Application Proxies available in the proxy group"
+            $message = "There are no Service Application Proxies available in the proxy group"
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
 
         $serviceAppProxies = $serviceAppProxies | Where-Object -FilterScript {
@@ -166,7 +193,12 @@ function Set-TargetResource
 
         if ($null -eq $serviceAppProxies)
         {
-            throw "There are no Managed Metadata Service Application Proxies available in the proxy group"
+            $message = "There are no Managed Metadata Service Application Proxies available in the proxy group"
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
 
         foreach ($serviceAppProxy in $serviceAppProxies)

@@ -42,15 +42,21 @@ function Get-TargetResource
     Write-Verbose -Message "Getting Metadata Category Setting for '$Name'"
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters) `
+        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
+        $eventSource = $args[1]
 
         $ssa = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName
         if ($null -eq $ssa)
         {
-            throw ("The specified Search Service Application $($params.ServiceAppName) is  `
-                   invalid. Please make sure you specify the name of an existing service application.")
+            $message = ("The specified Search Service Application $($params.ServiceAppName) is  `
+                    invalid. Please make sure you specify the name of an existing service application.")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
         $category = Get-SPEnterpriseSearchMetadataCategory -SearchApplication $ssa | `
             Where-Object { $_.Name -eq $params.Name }
@@ -120,15 +126,21 @@ function Set-TargetResource
 
     # Validate that the specified crawled properties are all valid and existing
     Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters) `
+        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
+        $eventSource = $args[1]
 
         $ssa = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName
         if ($null -eq $ssa)
         {
-            throw ("The specified Search Service Application $($params.ServiceAppName) is  `
-                   invalid. Please make sure you specify the name of an existing service application.")
+            $message = ("The specified Search Service Application $($params.ServiceAppName) is  `
+                    invalid. Please make sure you specify the name of an existing service application.")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
 
         # Set the specified properties on the Managed Property
@@ -141,9 +153,14 @@ function Set-TargetResource
             # If the category we are trying to remove is not empty, throw an error
             if ($category.CrawledPropertyCount -gt 0)
             {
-                throw "Cannot delete Metadata Category $($param.Name) because it contains " + `
-                    "Crawled Properties. Please remove all associated Crawled Properties " + `
-                    "before attempting to delete this category."
+                $message = ("Cannot delete Metadata Category $($param.Name) because it contains " + `
+                        "Crawled Properties. Please remove all associated Crawled Properties " + `
+                        "before attempting to delete this category.")
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $eventSource
+                throw $message
             }
             Remove-SPEnterpriseSearchMetadataCategory -Identity $params.Name `
                 -SearchApplication $params.ServiceAppName `
@@ -213,11 +230,11 @@ function Test-TargetResource
         -Source $($MyInvocation.MyCommand.Source) `
         -DesiredValues $PSBoundParameters `
         -ValuesToCheck @("Name",
-            "PropertyType",
-            "Ensure",
-            "AutoCreateNewManagedProperties",
-            "DiscoverNewProperties",
-            "MapToContents")
+        "PropertyType",
+        "Ensure",
+        "AutoCreateNewManagedProperties",
+        "DiscoverNewProperties",
+        "MapToContents")
 
     Write-Verbose -Message "Test-TargetResource returned $result"
 

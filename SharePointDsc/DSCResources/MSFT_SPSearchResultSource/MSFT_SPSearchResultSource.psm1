@@ -180,25 +180,37 @@ function Set-TargetResource
     {
         Write-Verbose -Message "Creating search result source $Name"
         Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
             -ScriptBlock {
             $params = $args[0]
+            $eventSource = $args[1]
+
             [void] [Reflection.Assembly]::LoadWithPartialName("Microsoft.Office.Server.Search")
 
             $serviceApp = Get-SPEnterpriseSearchServiceApplication `
                 -Identity $params.SearchServiceAppName
             if ($null -eq $serviceApp)
             {
-                throw ("Specified Search service application $($params.SearchServiceAppName)" + `
+                $message = ("Specified Search service application $($params.SearchServiceAppName)" + `
                         "does not exist.")
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $eventSource
+                throw $message
             }
 
             $fedManager = New-Object Microsoft.Office.Server.Search.Administration.Query.FederationManager($serviceApp)
             $providers = $fedManager.ListProviders()
             if ($providers.Keys -notcontains $params.ProviderType)
             {
-                throw ("Unknown ProviderType ($($params.ProviderType)) is used. Allowed " + `
+                $message = ("Unknown ProviderType ($($params.ProviderType)) is used. Allowed " + `
                         "values are: '" + ($providers.Keys -join "', '") + "'")
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $eventSource
+                throw $message
             }
 
             $searchOwner = $null
@@ -330,7 +342,7 @@ function Export-TargetResource
 {
     $content = ''
     $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
-    $module = Join-Path -Path $ParentModuleBase -ChildPath "\DSCResources\MSFT_SPSearchResultSource\MSFT_SPSearchResultSource.psm1" -Resolve 
+    $module = Join-Path -Path $ParentModuleBase -ChildPath "\DSCResources\MSFT_SPSearchResultSource\MSFT_SPSearchResultSource.psm1" -Resolve
     $params = Get-DSCFakeParameters -ModulePath $module
 
     $ssas = Get-SPServiceApplication | Where-Object -FilterScript{$_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"}
@@ -370,7 +382,7 @@ function Export-TargetResource
 
                             $providers = $fedman.ListProviders()
                             $provider = $providers.Values | Where-Object -FilterScript {
-                                $_.Id -eq $resultSource.ProviderId 
+                                $_.Id -eq $resultSource.ProviderId
                             }
 
                             if($null -eq $results.Get_Item("ConnectionUrl") -or $results.ConnectionUrl -eq "")
@@ -441,7 +453,7 @@ function Export-TargetResource
 
                                                     $providers = $fedman.ListProviders()
                                                     $provider = $providers.Values | Where-Object -FilterScript {
-                                                        $_.Id -eq $source.ProviderId 
+                                                        $_.Id -eq $source.ProviderId
                                                     }
 
                                                     if ($null -eq $results.Get_Item("ConnectionUrl"))

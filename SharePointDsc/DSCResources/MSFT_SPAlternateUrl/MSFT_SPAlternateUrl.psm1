@@ -113,9 +113,10 @@ function Set-TargetResource
     if ($Ensure -eq "Present")
     {
         Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
             -ScriptBlock {
             $params = $args[0]
+            $eventSource = $args[1]
 
             $webapp = Get-SPWebApplication -IncludeCentralAdministration | Where-Object -FilterScript {
                 $_.DisplayName -eq $params.WebAppName
@@ -123,7 +124,12 @@ function Set-TargetResource
 
             if ($null -eq $webapp)
             {
-                throw "Web application was not found. Please check WebAppName parameter!"
+                $message = "Web application was not found. Please check WebAppName parameter!"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $eventSource
+                throw $message
             }
 
             $urlAam = Get-SPAlternateURL -Identity $params.Url `
@@ -152,8 +158,13 @@ function Set-TargetResource
                 }
                 else
                 {
-                    throw ("Specified URL found on different WebApp/Zone: WebApp " + `
+                    $message = ("Specified URL found on different WebApp/Zone: WebApp " + `
                             "$($urlAam.PublicUrl) in zone $($urlAam.Zone)")
+                    Add-SPDscEvent -Message $message `
+                        -EntryType 'Error' `
+                        -EventID 100 `
+                        -Source $eventSource
+                    throw $message
                 }
             }
             else
@@ -195,8 +206,13 @@ function Set-TargetResource
                     }
                     else
                     {
-                        throw ("Specified URL ($($params.Url)) found on different WebApp/Zone: " + `
+                        $message = ("Specified URL ($($params.Url)) found on different WebApp/Zone: " + `
                                 "WebApp $($urlAam.PublicUrl) in zone $($urlAam.Zone)")
+                        Add-SPDscEvent -Message $message `
+                            -EntryType 'Error' `
+                            -EventID 100 `
+                            -Source $eventSource
+                        throw $message
                     }
                 }
                 else
@@ -210,8 +226,13 @@ function Set-TargetResource
                         }
                         else
                         {
-                            throw ("Specified URL found on different WebApp/Zone: WebApp " + `
+                            $message = ("Specified URL found on different WebApp/Zone: WebApp " + `
                                     "$($urlAam.PublicUrl) in zone $($urlAam.Zone)")
+                            Add-SPDscEvent -Message $message `
+                                -EntryType 'Error' `
+                                -EventID 100 `
+                                -Source $eventSource
+                            throw $message
                         }
                     }
                     else
@@ -312,11 +333,11 @@ function Export-TargetResource
     $params = Get-DSCFakeParameters -ModulePath $module
 
     $webApps = Get-SPWebApplication
-    foreach($webApp in $webApps)
+    foreach ($webApp in $webApps)
     {
         $alternateUrls = Get-SPAlternateUrl -WebApplication $webApp
 
-        foreach($alternateUrl in $alternateUrls)
+        foreach ($alternateUrl in $alternateUrls)
         {
             $PartialContent = "        SPAlternateUrl " + [System.Guid]::NewGuid().toString() + "`r`n"
             $PartialContent += "        {`r`n"

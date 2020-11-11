@@ -100,7 +100,7 @@ function Set-TargetResource
     $newName = (Get-SPDscServiceTypeName -DisplayName $Name)
     $invokeArgs = @{
         Credential = $InstallAccount
-        Arguments  = @($PSBoundParameters, $newName)
+        Arguments  = @($PSBoundParameters, $MyInvocation.MyCommand.Source, $newName)
     }
 
     if ($Ensure -eq "Present")
@@ -109,7 +109,8 @@ function Set-TargetResource
 
         Invoke-SPDscCommand @invokeArgs -ScriptBlock {
             $params = $args[0]
-            $newName = $args[1]
+            $eventSource = $args[1]
+            $newName = $args[2]
 
             $computerName = $env:COMPUTERNAME
             $si = Get-SPServiceInstance -Server $computerName -All | Where-Object -FilterScript {
@@ -131,7 +132,12 @@ function Set-TargetResource
 
             if ($null -eq $si)
             {
-                throw [Exception] "Unable to locate service instance '$($params.Name)'"
+                $message = "Unable to locate service instance '$($params.Name)'"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $eventSource
+                throw $message
             }
 
             Start-SPServiceInstance -Identity $si
@@ -147,8 +153,8 @@ function Set-TargetResource
             while (($count -lt $maxCount) -and ($serviceCheck.Status -ne "Online"))
             {
                 Write-Verbose -Message ("$([DateTime]::Now.ToShortTimeString()) - Waiting " + `
-                                        "for service instance to start. Current status: $($serviceCheck.Status) " + `
-                                        "(waited $count of $maxCount minutes)")
+                        "for service instance to start. Current status: $($serviceCheck.Status) " + `
+                        "(waited $count of $maxCount minutes)")
                 Start-Sleep -Seconds 60
                 $serviceCheck = Get-SPServiceInstance -Server $si.Server.Name -All | Where-Object -FilterScript {
                     $_.TypeName -eq $si.TypeName
@@ -163,7 +169,8 @@ function Set-TargetResource
 
         Invoke-SPDscCommand @invokeArgs -ScriptBlock {
             $params = $args[0]
-            $newName = $args[1]
+            $eventSource = $args[1]
+            $newName = $args[2]
 
             $si = Get-SPServiceInstance -Server $env:COMPUTERNAME -All | Where-Object -FilterScript {
                 $_.TypeName -eq $params.Name -or `
@@ -183,7 +190,12 @@ function Set-TargetResource
             }
             if ($null -eq $si)
             {
-                throw [Exception] "Unable to locate service instance '$($params.Name)'"
+                $message = "Unable to locate service instance '$($params.Name)'"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $eventSource
+                throw $message
             }
             Stop-SPServiceInstance -Identity $si
 
@@ -198,8 +210,8 @@ function Set-TargetResource
             while (($count -lt $maxCount) -and ($serviceCheck.Status -ne "Disabled"))
             {
                 Write-Verbose -Message ("$([DateTime]::Now.ToShortTimeString()) - Waiting " + `
-                                        "for service instance to stop. Current status: $($serviceCheck.Status) " + `
-                                        "(waited $count of $maxCount minutes)")
+                        "for service instance to stop. Current status: $($serviceCheck.Status) " + `
+                        "(waited $count of $maxCount minutes)")
                 Start-Sleep -Seconds 60
                 $serviceCheck = Get-SPServiceInstance -Server $si.Server.Name -All | Where-Object -FilterScript {
                     $_.TypeName -eq $si.TypeName

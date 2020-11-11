@@ -41,13 +41,23 @@ function Get-TargetResource
     Write-Verbose -Message "Check if Binary folder exists"
     if (-not(Test-Path -Path $BinaryDir))
     {
-        throw "Specified path cannot be found: {$BinaryDir}"
+        $message = "Specified path cannot be found: {$BinaryDir}"
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     $InstallerPath = Join-Path -Path $BinaryDir -ChildPath "setup.exe"
     if (-not(Test-Path -Path $InstallerPath))
     {
-        throw "Setup.exe cannot be found in {$BinaryDir}"
+        $message = "Setup.exe cannot be found in {$BinaryDir}"
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     Write-Verbose -Message "Checking file status of $InstallerPath"
@@ -89,8 +99,13 @@ function Get-TargetResource
         }
         if ($null -ne $zone)
         {
-            throw ("Setup file is blocked! Please use 'Unblock-File -Path $InstallerPath' " + `
+            $message = ("Setup file is blocked! Please use 'Unblock-File -Path $InstallerPath' " + `
                     "to unblock the file before continuing.")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
         Write-Verbose -Message "File not blocked, continuing."
     }
@@ -170,20 +185,35 @@ function Set-TargetResource
 
     if ($Ensure -eq "Absent")
     {
-        throw [Exception] ("SharePointDsc does not support uninstalling SharePoint or " + `
+        $message = ("SharePointDsc does not support uninstalling SharePoint or " + `
                 "its prerequisites. Please remove this manually.")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     Write-Verbose -Message "Check if Binary folder exists"
     if (-not(Test-Path -Path $BinaryDir))
     {
-        throw "Specified path cannot be found: {$BinaryDir}"
+        $message = "Specified path cannot be found: {$BinaryDir}"
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     $InstallerPath = Join-Path -Path $BinaryDir -ChildPath "setup.exe"
     if (-not(Test-Path -Path $InstallerPath))
     {
-        throw "Setup.exe cannot be found in {$BinaryDir}"
+        $message = "Setup.exe cannot be found in {$BinaryDir}"
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     $majorVersion = (Get-SPDscAssemblyVersion -PathToAssembly $InstallerPath)
@@ -220,10 +250,14 @@ function Set-TargetResource
 
             if ($dotNet46Installed -eq $true)
             {
-                throw [Exception] ("A known issue prevents installation of SharePoint 2013 on " + `
+                $message = ("A known issue prevents installation of SharePoint 2013 on " + `
                         "servers that have .NET 4.6 already installed. See details " + `
                         "at https://support.microsoft.com/en-us/kb/3087184")
-                return
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
         }
     }
@@ -267,8 +301,13 @@ function Set-TargetResource
         }
         if ($null -ne $zone)
         {
-            throw ("Setup file is blocked! Please use 'Unblock-File -Path $InstallerPath' " + `
+            $message = ("Setup file is blocked! Please use 'Unblock-File -Path $InstallerPath' " + `
                     "to unblock the file before continuing.")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
         Write-Verbose -Message "File not blocked, continuing."
     }
@@ -288,7 +327,12 @@ function Set-TargetResource
         }
         else
         {
-            throw "Cannot extract servername from UNC path. Check if it is in the correct format."
+            $message = "Cannot extract servername from UNC path. Check if it is in the correct format."
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
 
         Set-SPDscZoneMap -Server $serverName
@@ -378,17 +422,26 @@ function Set-TargetResource
             }
             else
             {
-                throw ("SharePoint installation has failed due to an issue with prerequisites " + `
+                $message = ("SharePoint installation has failed due to an issue with prerequisites " + `
                         "not being installed correctly. Please review the setup logs.")
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
         }
         Default
         {
-            throw "SharePoint install failed, exit code was $($setup.ExitCode)"
+            $message = "SharePoint install failed, exit code was $($setup.ExitCode)"
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
     }
 }
-
 
 function Test-TargetResource
 {
@@ -429,8 +482,13 @@ function Test-TargetResource
 
     if ($Ensure -eq "Absent")
     {
-        throw [Exception] ("SharePointDsc does not support uninstalling SharePoint or " + `
+        $message = ("SharePointDsc does not support uninstalling SharePoint or " + `
                 "its prerequisites. Please remove this manually.")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
@@ -478,10 +536,10 @@ function Export-TargetResource
     $Content += "                ProductKey = `$ConfigurationData.NonNodeData.SPProductKey;`r`n"
     $Content += "                Ensure = `"Present`";`r`n"
     $Content += "                IsSingleInstance = `"Yes`";`r`n"
-    $Content += "                PSDscRunAsCredential = `$Creds" + ($Global:spFarmAccount.Username.Split('\'))[1].Replace("-","_").Replace(".", "_") + ";`r`n"
+    $Content += "                PSDscRunAsCredential = `$Creds" + ($Global:spFarmAccount.Username.Split('\'))[1].Replace("-", "_").Replace(".", "_") + ";`r`n"
     $Content += "            }`r`n"
     $Content += "        }`r`n"
-    
+
     Return $Content
 }
 

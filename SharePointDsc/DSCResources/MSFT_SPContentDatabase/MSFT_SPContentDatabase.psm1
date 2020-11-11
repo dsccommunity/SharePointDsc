@@ -155,9 +155,10 @@ function Set-TargetResource
     Write-Verbose -Message "Setting content database configuration settings"
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
+        $eventSource = $args[1]
 
         # Use Get-SPDatabase instead of Get-SPContentDatabase because the Get-SPContentDatabase
         # does not return disabled databases.
@@ -175,7 +176,12 @@ function Set-TargetResource
 
             if ($null -eq $webapp)
             {
-                throw "Specified web application does not exist."
+                $message = "Specified web application does not exist."
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $eventSource
+                throw $message
             }
 
             # Check if database exists
@@ -183,9 +189,14 @@ function Set-TargetResource
             {
                 if ($params.ContainsKey('DatabaseServer') -and $params.DatabaseServer -ne $null -and $cdb.Server -ne $params.DatabaseServer)
                 {
-                    throw ("Specified database server does not match the actual database " + `
+                    $message = ("Specified database server does not match the actual database " + `
                             "server. This resource cannot move the database to a different " + `
                             "SQL instance.")
+                    Add-SPDscEvent -Message $message `
+                        -EntryType 'Error' `
+                        -EventID 100 `
+                        -Source $eventSource
+                    throw $message
                 }
 
                 # Check and change attached web application.
@@ -221,9 +232,14 @@ function Set-TargetResource
                     }
                     catch
                     {
-                        throw ("Error occurred while mounting content database. " + `
+                        $message = ("Error occurred while mounting content database. " + `
                                 "Content database is not mounted. " + `
                                 "Error details: $($_.Exception.Message)")
+                        Add-SPDscEvent -Message $message `
+                            -EntryType 'Error' `
+                            -EventID 100 `
+                            -Source $eventSource
+                        throw $message
                     }
 
                     if ($cdb.Status -eq "Online")
@@ -317,9 +333,14 @@ function Set-TargetResource
                 }
                 catch
                 {
-                    throw ("Error occurred while mounting content database. " + `
-                            "Content database is not mounted. " + `
+                    $message = ("Error occurred while mounting content database. " +
+                        "Content database is not mounted. " + `
                             "Error details: $($_.Exception.Message)")
+                    Add-SPDscEvent -Message $message `
+                        -EntryType 'Error' `
+                        -EventID 100 `
+                        -Source $eventSource
+                    throw $message
                 }
 
                 if ($cdb.Status -eq "Online")
@@ -443,14 +464,14 @@ function Export-TargetResource
 {
     $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
     $module = Join-Path -Path $ParentModuleBase -ChildPath "\DSCResources\MSFT_SPContentDatabase\MSFT_SPContentDatabase.psm1" -Resolve
-    
+
     $params = Get-DSCFakeParameters -ModulePath $module
     $spContentDBs = Get-SPContentDatabase
-    
+
     $Content = ''
     $i = 1
     $total = $spContentDBs.Length
-    foreach($spContentDB in $spContentDBs)
+    foreach ($spContentDB in $spContentDBs)
     {
         try
         {

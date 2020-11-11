@@ -75,17 +75,32 @@ function Get-TargetResource
     {
         if ($PSBoundParameters.ContainsKey("ManagedPath") -eq $true)
         {
-            throw "Parameter ManagedPath is only supported in SharePoint 2019"
+            $message = "Parameter ManagedPath is only supported in SharePoint 2019"
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
 
         if ($PSBoundParameters.ContainsKey("AlternateUrl") -eq $true)
         {
-            throw "Parameter AlternateUrl is only supported in SharePoint 2019"
+            $message = "Parameter AlternateUrl is only supported in SharePoint 2019"
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
 
         if ($PSBoundParameters.ContainsKey("UserExperienceVersion") -eq $true)
         {
-            throw "Parameter UserExperienceVersion is only supported in SharePoint 2019"
+            $message = "Parameter UserExperienceVersion is only supported in SharePoint 2019"
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
     }
     else
@@ -93,7 +108,12 @@ function Get-TargetResource
         if ($PSBoundParameters.ContainsKey("AlternateUrl") -eq $true -and
             $PSBoundParameters.ContainsKey("ManagedPath") -eq $true)
         {
-            throw "You cannot specify both AlternateUrl and ManagedPath. Please use just one of these."
+            $message = "You cannot specify both AlternateUrl and ManagedPath. Please use just one of these."
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
     }
 
@@ -241,17 +261,32 @@ function Set-TargetResource
     {
         if ($PSBoundParameters.ContainsKey("ManagedPath") -eq $true)
         {
-            throw "Parameter ManagedPath is only supported in SharePoint 2019"
+            $message = "Parameter ManagedPath is only supported in SharePoint 2019"
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
 
         if ($PSBoundParameters.ContainsKey("AlternateUrl") -eq $true)
         {
-            throw "Parameter AlternateUrl is only supported in SharePoint 2019"
+            $message = "Parameter AlternateUrl is only supported in SharePoint 2019"
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
 
         if ($PSBoundParameters.ContainsKey("UserExperienceVersion") -eq $true)
         {
-            throw "Parameter UserExperienceVersion is only supported in SharePoint 2019"
+            $message = "Parameter UserExperienceVersion is only supported in SharePoint 2019"
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
     }
     else
@@ -259,7 +294,12 @@ function Set-TargetResource
         if ($PSBoundParameters.ContainsKey("AlternateUrl") -eq $true -and `
                 $PSBoundParameters.ContainsKey("ManagedPath") -eq $true)
         {
-            throw "You cannot specify both AlternateUrl and ManagedPath. Please use just one of these."
+            $message = "You cannot specify both AlternateUrl and ManagedPath. Please use just one of these."
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
 
         if ($PSBoundParameters.ContainsKey("UserExperienceVersion") -eq $false)
@@ -269,22 +309,33 @@ function Set-TargetResource
     }
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
+        $eventSource = $args[1]
 
         if ($params.ContainsKey("AlternateUrl") -and `
                 $params.AlternateUrl.TrimEnd("/") -in (Get-SPWebApplication).Url.TrimEnd("/"))
         {
-            throw ("Specified AlternateUrl is unknown as web application URL. " + `
+            $message = ("Specified AlternateUrl is unknown as web application URL. " + `
                     "Please specify an existing URL")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
 
         $webApplication = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
 
         if ($null -eq $webApplication)
         {
-            throw "The specified web application could not be found."
+            $message = "The specified web application could not be found."
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
 
         $webApplicationNeedsUpdate = $false
@@ -295,7 +346,12 @@ function Set-TargetResource
             {
                 if ($ShowStartASiteMenuItem -eq $true)
                 {
-                    throw ("It is not allowed to set the ShowStartASiteMenuItem to true when self service site creation is disabled.")
+                    $message = ("It is not allowed to set the ShowStartASiteMenuItem to true when self service site creation is disabled.")
+                    Add-SPDscEvent -Message $message `
+                        -EntryType 'Error' `
+                        -EventID 100 `
+                        -Source $eventSource
+                    throw $message
                 }
             }
             else
@@ -503,7 +559,12 @@ function Test-TargetResource
         {
             if ($ShowStartASiteMenuItem -eq $true)
             {
-                throw ("It is not allowed to set the ShowStartASiteMenuItem to true when self service site creation is disabled.")
+                $message = ("It is not allowed to set the ShowStartASiteMenuItem to true when self service site creation is disabled.")
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
         }
         else

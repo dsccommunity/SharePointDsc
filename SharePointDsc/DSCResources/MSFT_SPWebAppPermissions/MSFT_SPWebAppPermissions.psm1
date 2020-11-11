@@ -282,16 +282,22 @@ function Set-TargetResource
     if ($AllPermissions)
     {
         $result = Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
             -ScriptBlock {
             $params = $args[0]
+            $eventSource = $args[1]
 
             $wa = Get-SPWebApplication -Identity $params.WebAppUrl `
                 -ErrorAction SilentlyContinue
 
             if ($null -eq $wa)
             {
-                throw "The specified web application could not be found."
+                $message = "The specified web application could not be found."
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $eventSource
+                throw $message
             }
 
             $wa.RightsMask = [Microsoft.SharePoint.SPBasePermissions]::FullMask
@@ -301,16 +307,22 @@ function Set-TargetResource
     else
     {
         $result = Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
             -ScriptBlock {
             $params = $args[0]
+            $eventSource = $args[1]
 
             $wa = Get-SPWebApplication -Identity $params.WebAppUrl `
                 -ErrorAction SilentlyContinue
 
             if ($null -eq $wa)
             {
-                throw "The specified web application could not be found."
+                $message = "The specified web application could not be found."
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $eventSource
+                throw $message
             }
 
             $newMask = [Microsoft.SharePoint.SPBasePermissions]::EmptyMask
@@ -638,8 +650,13 @@ function Test-SPDscInput()
         # AllPermissions parameter specified with and one of the other parameters
         if ($ListPermissions -or $SitePermissions -or $PersonalPermissions)
         {
-            throw ("Do not specify parameters ListPermissions, SitePermissions " + `
+            $message = ("Do not specify parameters ListPermissions, SitePermissions " + `
                     "or PersonalPermissions when specifying parameter AllPermissions")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
     }
     else
@@ -647,15 +664,25 @@ function Test-SPDscInput()
         # You have to specify all three parameters
         if (-not ($ListPermissions -and $SitePermissions -and $PersonalPermissions))
         {
-            throw ("One of the parameters ListPermissions, SitePermissions or " + `
+            $message = ("One of the parameters ListPermissions, SitePermissions or " + `
                     "PersonalPermissions is missing")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
     }
 
     #Checks
     if ($ListPermissions -contains "Approve Items" -and -not ($ListPermissions -contains "Edit Items"))
     {
-        throw "Edit Items is required when specifying Approve Items"
+        $message = "Edit Items is required when specifying Approve Items"
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     if (($ListPermissions -contains "Manage Lists" `
@@ -678,37 +705,62 @@ function Test-SPDscInput()
                 -or $PersonalPermissions -contains "Update Personal Web Parts") `
             -and -not ($ListPermissions -contains "View Items"))
     {
-        throw ("View Items is required when specifying Manage Lists, Override List Behaviors, " + `
+        $message = ("View Items is required when specifying Manage Lists, Override List Behaviors, " + `
                 "Add Items, Edit Items, Delete Items, Approve Items, Open Items, View " + `
                 "Versions, Delete Versions, Create Alerts, Manage Permissions, Manage Web Site, " + `
                 "Add and Customize Pages, Manage Alerts, Use Client Integration Features, " + `
                 "Manage Personal Views, Add/Remove Personal Web Parts or Update Personal Web Parts")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     if (($ListPermissions -contains "View Versions" `
                 -or $SitePermissions -contains "Manage Permissions") `
             -and -not ($ListPermissions -contains "Open Items"))
     {
-        throw "Open Items is required when specifying View Versions or Manage Permissions"
+        $message = "Open Items is required when specifying View Versions or Manage Permissions"
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     if (($ListPermissions -contains "Delete Versions" `
                 -or $SitePermissions -contains "Manage Permissions") `
             -and -not ($ListPermissions -contains "View Versions"))
     {
-        throw "View Versions is required when specifying Delete Versions or Manage Permissions"
+        $message = "View Versions is required when specifying Delete Versions or Manage Permissions"
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     if ($SitePermissions -contains "Manage Alerts" `
             -and -not ($ListPermissions -contains "Create Alerts"))
     {
-        throw "Create Alerts is required when specifying Manage Alerts"
+        $message = "Create Alerts is required when specifying Manage Alerts"
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     if ($SitePermissions -contains "Manage Web Site" `
             -and -not ($SitePermissions -contains "Add and Customize Pages"))
     {
-        throw "Add and Customize Pages is required when specifying Manage Web Site"
+        $message = "Add and Customize Pages is required when specifying Manage Web Site"
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     if (($SitePermissions -contains "Manage Permissions" `
@@ -717,8 +769,13 @@ function Test-SPDscInput()
                 -or $SitePermissions -contains "Enumerate Permissions") `
             -and -not ($SitePermissions -contains "Browse Directories"))
     {
-        throw ("Browse Directories is required when specifying Manage Permissions, Manage Web " + `
+        $message = ("Browse Directories is required when specifying Manage Permissions, Manage Web " + `
                 "Site, Add and Customize Pages or Enumerate Permissions")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     if (($ListPermissions -contains "Manage Lists" `
@@ -749,7 +806,7 @@ function Test-SPDscInput()
                 -or $PersonalPermissions -contains "Update Personal Web Parts") `
             -and -not ($SitePermissions -contains "View Pages"))
     {
-        throw ("View Pages is required when specifying Manage Lists, Override List Behaviors, " + `
+        $message = ("View Pages is required when specifying Manage Lists, Override List Behaviors, " + `
                 "Add Items, Edit Items, Delete Items, View Items, Approve Items, Open Items, " + `
                 "View Versions, Delete Versions, Create Alerts, Manage Permissions, View Web " + `
                 "Analytics Data, Create Subsites, Manage Web Site, Add and Customize Pages, " + `
@@ -757,14 +814,24 @@ function Test-SPDscInput()
                 "Directories, Use Self-Service Site Creation, Enumerate Permissions, Manage " + `
                 "Alerts, Manage Personal Views, Add/Remove Personal Web Parts or Update " + `
                 "Personal Web Parts")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     if (($SitePermissions -contains "Manage Permissions" `
                 -or $SitePermissions -contains "Manage Web Site") `
             -and -not ($SitePermissions -contains "Enumerate Permissions"))
     {
-        throw ("Enumerate Permissions is required when specifying Manage Permissions or " + `
+        $message = ("Enumerate Permissions is required when specifying Manage Permissions or " + `
                 "Manage Web Site")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     if (($SitePermissions -contains "Manage Permissions" `
@@ -776,15 +843,25 @@ function Test-SPDscInput()
                 -or $SitePermissions -contains "Edit Personal User Information") `
             -and -not ($SitePermissions -contains "Browse User Information"))
     {
-        throw ("Browse User Information is required when specifying Manage Permissions, " + `
+        $message = ("Browse User Information is required when specifying Manage Permissions, " + `
                 "Create Subsites, Manage Web Site, Create Groups, Use Self-Service Site " + `
                 "Creation, Enumerate Permissions or Edit Personal User Information")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     if ($SitePermissions -contains "Use Client Integration Features" `
             -and -not ($SitePermissions -contains "Use Remote Interfaces"))
     {
-        throw "Use Remote Interfaces is required when specifying Use Client Integration Features"
+        $message = "Use Remote Interfaces is required when specifying Use Client Integration Features"
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     if (($ListPermissions -contains "Manage Lists" `
@@ -821,13 +898,23 @@ function Test-SPDscInput()
                 -or $PersonalPermissions -contains "Update Personal Web Parts") `
             -and -not ($SitePermissions -contains "Open"))
     {
-        throw "Open is required when specifying any of the other permissions"
+        $message = "Open is required when specifying any of the other permissions"
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     if ($PersonalPermissions -contains "Add/Remove Personal Web Parts" `
             -and -not ($PersonalPermissions -contains "Update Personal Web Parts"))
     {
-        throw "Update Personal Web Parts is required when specifying Add/Remove Personal Web Parts"
+        $message = "Update Personal Web Parts is required when specifying Add/Remove Personal Web Parts"
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 }
 
@@ -840,7 +927,8 @@ function Export-TargetResource
     $webApps = Get-SPWebApplication
     foreach ($wa in $webApps)
     {
-        try {
+        try
+        {
             if ($null -ne $wa)
             {
                 $params.WebAppUrl = $wa.Url
@@ -857,7 +945,7 @@ function Export-TargetResource
                 }
 
                 <# Fix an issue with SP DSC (forward) 1.6.0.0 #>
-                if($results.WebAppUrl -eq "url")
+                if ($results.WebAppUrl -eq "url")
                 {
                     $results.WebAppUrl = $wa.Url
                 }
