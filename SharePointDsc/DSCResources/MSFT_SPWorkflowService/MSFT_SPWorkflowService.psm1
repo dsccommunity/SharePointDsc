@@ -1,3 +1,8 @@
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
+$script:resourceHelperModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'SharePointDsc.Util'
+Import-Module -Name (Join-Path -Path $script:resourceHelperModulePath -ChildPath 'SharePointDsc.Util.psm1')
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -27,7 +32,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting the current Workflow Service Configuration(s)"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
         -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
@@ -51,15 +56,8 @@ function Get-TargetResource
 
             if ($null -ne $workflowProxy)
             {
-                $workflowHostUri = $workflowProxy.GetHostname($site)
-
-                if ($null -ne $workflowHostUri)
-                {
-                    $workflowHostUri = $workflowHostUri.TrimEnd("/")
-                }
-
                 $returnval = @{
-                    WorkflowHostUri = $workflowHostUri
+                    WorkflowHostUri = $workflowProxy.GetHostname($site).TrimEnd("/")
                     SPSiteUrl       = $params.SPSiteUrl
                     ScopeName       = $workflowProxy.GetWorkflowScopeName($site)
                     AllowOAuthHttp  = $params.AllowOAuthHttp
@@ -101,22 +99,16 @@ function Set-TargetResource
     Write-Verbose -Message "Registering the Workflow Service"
 
     ## Perform changes
-    Invoke-SPDSCCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+    Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments @($PSBoundParameters) `
         -ScriptBlock {
         $params = $args[0]
-        $eventSource = $args[1]
 
         $site = Get-SPSite $params.SPSiteUrl
 
         if ($null -eq $site)
         {
-            $message = "Specified site collection could not be found."
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $eventSource
-            throw $message
+            throw "Specified site collection could not be found."
         }
 
         Write-Verbose -Message "Processing changes"

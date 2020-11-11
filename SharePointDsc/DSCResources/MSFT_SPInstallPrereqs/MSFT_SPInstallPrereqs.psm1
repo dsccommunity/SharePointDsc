@@ -1,3 +1,8 @@
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
+$script:resourceHelperModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'SharePointDsc.Util'
+Import-Module -Name (Join-Path -Path $script:resourceHelperModulePath -ChildPath 'SharePointDsc.Util.psm1')
+
 $Script:SP2013Features = @("Application-Server", "AS-NET-Framework",
     "AS-TCP-Port-Sharing", "AS-Web-Support", "AS-WAS-Support",
     "AS-HTTP-Activation", "AS-Named-Pipes", "AS-TCP-Activation", "Web-Server",
@@ -199,12 +204,7 @@ function Get-TargetResource
     Write-Verbose -Message "Check if InstallerPath folder exists"
     if (-not(Test-Path -Path $InstallerPath))
     {
-        $message = "PrerequisitesInstaller cannot be found: {$InstallerPath}"
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
+        throw "PrerequisitesInstaller cannot be found: {$InstallerPath}"
     }
 
     Write-Verbose -Message "Checking file status of $InstallerPath"
@@ -246,13 +246,8 @@ function Get-TargetResource
         }
         if ($null -ne $zone)
         {
-            $message = ("PrerequisitesInstaller is blocked! Please use 'Unblock-File -Path " + `
+            throw ("PrerequisitesInstaller is blocked! Please use 'Unblock-File -Path " + `
                     "$InstallerPath' to unblock the file before continuing.")
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $MyInvocation.MyCommand.Source
-            throw $message
         }
         Write-Verbose -Message "File not blocked, continuing."
     }
@@ -282,12 +277,7 @@ function Get-TargetResource
     {
         if ($osVersion.Major -ne 6)
         {
-            $message = "SharePoint 2013 only supports Windows Server 2012 R2 and below"
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $MyInvocation.MyCommand.Source
-            throw $message
+            throw "SharePoint 2013 only supports Windows Server 2012 R2 and below"
         }
 
         $WindowsFeatures = Get-WindowsFeature -Name $Script:SP2013Features
@@ -316,12 +306,7 @@ function Get-TargetResource
             }
             else
             {
-                $message = "SharePoint 2016 only supports Windows Server 2019, 2016 or 2012 R2"
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $MyInvocation.MyCommand.Source
-                throw $message
+                throw "SharePoint 2016 only supports Windows Server 2019, 2016 or 2012 R2"
             }
         }
         # SharePoint 2019
@@ -342,12 +327,7 @@ function Get-TargetResource
             }
             else
             {
-                $message = "SharePoint 2019 only supports Windows Server 2016 or Windows Server 2019"
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $MyInvocation.MyCommand.Source
-                throw $message
+                throw "SharePoint 2019 only supports Windows Server 2016 or Windows Server 2019"
             }
         }
     }
@@ -632,24 +612,14 @@ function Set-TargetResource
 
     if ($Ensure -eq "Absent")
     {
-        $message = ("SharePointDsc does not support uninstalling SharePoint or its " + `
+        throw [Exception] ("SharePointDsc does not support uninstalling SharePoint or its " + `
                 "prerequisites. Please remove this manually.")
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
     }
 
     Write-Verbose -Message "Check if InstallerPath folder exists"
     if (-not(Test-Path -Path $InstallerPath))
     {
-        $message = "PrerequisitesInstaller cannot be found: {$InstallerPath}"
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
+        throw "PrerequisitesInstaller cannot be found: {$InstallerPath}"
     }
 
     Write-Verbose -Message "Checking file status of $InstallerPath"
@@ -691,13 +661,8 @@ function Set-TargetResource
         }
         if ($null -ne $zone)
         {
-            $message = ("PrerequisitesInstaller is blocked! Please use 'Unblock-File -Path " + `
+            throw ("PrerequisitesInstaller is blocked! Please use 'Unblock-File -Path " + `
                     "$InstallerPath' to unblock the file before continuing.")
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $MyInvocation.MyCommand.Source
-            throw $message
         }
         Write-Verbose -Message "File not blocked, continuing."
     }
@@ -747,12 +712,7 @@ function Set-TargetResource
     {
         if ($osVersion.Major -ne 6)
         {
-            $message = "SharePoint 2013 only supports Windows Server 2012 R2 and below"
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $MyInvocation.MyCommand.Source
-            throw $message
+            throw "SharePoint 2013 only supports Windows Server 2012 R2 and below"
         }
 
         $BinaryDir = Split-Path -Path $InstallerPath
@@ -787,14 +747,9 @@ function Set-TargetResource
 
             if ($dotNet46Installed -eq $true)
             {
-                $message = ("A known issue prevents installation of SharePoint 2013 on " + `
+                throw [Exception] ("A known issue prevents installation of SharePoint 2013 on " + `
                         "servers that have .NET 4.6 already installed. See details " + `
                         "at https://support.microsoft.com/en-us/kb/3087184")
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $MyInvocation.MyCommand.Source
-                throw $message
             }
         }
 
@@ -830,12 +785,7 @@ function Set-TargetResource
             }
             else
             {
-                $message = "SharePoint 2016 only supports Windows Server 2016 or 2012 R2"
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $MyInvocation.MyCommand.Source
-                throw $message
+                throw "SharePoint 2016 only supports Windows Server 2016 or 2012 R2"
             }
         }
         # SharePoint 2019
@@ -860,12 +810,7 @@ function Set-TargetResource
             }
             else
             {
-                $message = "SharePoint 2019 only supports Windows Server 2016 or Windows Server 2019"
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $MyInvocation.MyCommand.Source
-                throw $message
+                throw "SharePoint 2019 only supports Windows Server 2016 or Windows Server 2019"
             }
         }
     }
@@ -887,12 +832,7 @@ function Set-TargetResource
                 }
                 if ($installResult.Success -ne $true)
                 {
-                    $message = "Error installing $($feature.name)"
-                    Add-SPDscEvent -Message $message `
-                        -EntryType 'Error' `
-                        -EventID 100 `
-                        -Source $MyInvocation.MyCommand.Source
-                    throw $message
+                    throw "Error installing $($feature.name)"
                 }
             }
         }
@@ -912,22 +852,12 @@ function Set-TargetResource
                         -and [string]::IsNullOrEmpty($PSBoundParameters.$_)) `
                     -or (-not $PSBoundParameters.ContainsKey($_)))
             {
-                $message = "In offline mode for version $majorVersion parameter $_ is required"
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $MyInvocation.MyCommand.Source
-                throw $message
+                throw "In offline mode for version $majorVersion parameter $_ is required"
             }
             if ((Test-Path -Path $PSBoundParameters.$_) -eq $false)
             {
-                $message = ("The $_ parameter has been passed but the file cannot be found at the " + `
+                throw ("The $_ parameter has been passed but the file cannot be found at the " + `
                         "path supplied: `"$($PSBoundParameters.$_)`"")
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $MyInvocation.MyCommand.Source
-                throw $message
             }
         }
         $requiredParams | ForEach-Object -Process {
@@ -950,12 +880,7 @@ function Set-TargetResource
         }
         else
         {
-            $message = "Cannot extract servername from UNC path. Check if it is in the correct format."
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $MyInvocation.MyCommand.Source
-            throw $message
+            throw "Cannot extract servername from UNC path. Check if it is in the correct format."
         }
 
         Set-SPDscZoneMap -Server $serverName
@@ -980,21 +905,11 @@ function Set-TargetResource
         }
         1
         {
-            $message = "Another instance of the prerequisite installer is already running"
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $MyInvocation.MyCommand.Source
-            throw $message
+            throw "Another instance of the prerequisite installer is already running"
         }
         2
         {
-            $message = "Invalid command line parameters passed to the prerequisite installer"
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $MyInvocation.MyCommand.Source
-            throw $message
+            throw "Invalid command line parameters passed to the prerequisite installer"
         }
         1001
         {
@@ -1010,13 +925,8 @@ function Set-TargetResource
         }
         default
         {
-            $message = ("The prerequisite installer ran with the following unknown " + `
+            throw ("The prerequisite installer ran with the following unknown " + `
                     "exit code $($process.ExitCode)")
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $MyInvocation.MyCommand.Source
-            throw $message
         }
     }
 
@@ -1149,13 +1059,8 @@ function Test-TargetResource
 
     if ($Ensure -eq "Absent")
     {
-        $message = ("SharePointDsc does not support uninstalling SharePoint or its " + `
+        throw [Exception] ("SharePointDsc does not support uninstalling SharePoint or its " + `
                 "prerequisites. Please remove this manually.")
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
@@ -1264,17 +1169,46 @@ function Test-SPDscPrereqInstallStatus
             }
             Default
             {
-                $message = ("Unable to search for a prereq with mode '$($itemToCheck.SearchType)'. " + `
+                throw ("Unable to search for a prereq with mode '$($itemToCheck.SearchType)'. " + `
                         "please use either 'Equals', 'Like' or 'Match', or 'BundleUpgradeCode'")
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $MyInvocation.MyCommand.Source
-                throw $message
             }
         }
     }
     return $itemsInstalled
+}
+
+function Export-TargetResource
+{
+    param(
+        [Parameter()]
+        [System.String]
+        $BinaryLocation = "\\<location>" 
+    )
+    if ($DynamicCompilation)
+    {
+        Add-ConfigurationDataEntry -Node "NonNodeData" -Key "FullInstallation" -Value "`$True" -Description "Specifies whether or not the DSC configuration script will install the SharePoint Prerequisites and Binaries;"
+    }
+    else
+    {
+        Add-ConfigurationDataEntry -Node "NonNodeData" -Key "FullInstallation" -Value "`$False" -Description "Specifies whether or not the DSC configuration script will install the SharePoint Prerequisites and Binaries;"
+    }
+    $Content = "        if(`$ConfigurationData.NonNodeData.FullInstallation)`r`n"
+    $Content += "        {`r`n"
+    $Content += "            SPInstallPrereqs PrerequisitesInstallation" + "`r`n            {`r`n"
+    if ([System.String]::IsNullOrEmpty($BinaryLocation))
+    {
+        $BinaryLocation = "\\<location>"
+    }
+    Add-ConfigurationDataEntry -Node "NonNodeData" -Key "SPPrereqsInstallerPath" -Value $BinaryLocation -Description "Location of the SharePoint Prerequisites Installer .exe (Local path or Network Share);"
+    $Content += "                InstallerPath = `$ConfigurationData.NonNodeData.SPPrereqsInstallerPath;`r`n"
+    $Content += "                OnlineMode = `$True;`r`n"
+    $Content += "                Ensure = `"Present`";`r`n"
+    $Content += "                IsSingleInstance = `"Yes`";`r`n"
+    $Content += "                PSDscRunAsCredential = `$Creds" + ($Global:spFarmAccount.Username.Split('\'))[1].Replace("-","_").Replace(".", "_") + ";`r`n"
+
+    $Content += "            }`r`n"
+    $Content += "        }`r`n"
+    return $Content
 }
 
 Export-ModuleMember -Function *-TargetResource

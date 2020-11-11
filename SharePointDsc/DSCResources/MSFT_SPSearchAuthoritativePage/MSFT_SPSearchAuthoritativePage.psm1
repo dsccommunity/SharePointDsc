@@ -1,3 +1,8 @@
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
+$script:resourceHelperModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'SharePointDsc.Util'
+Import-Module -Name (Join-Path -Path $script:resourceHelperModulePath -ChildPath 'SharePointDsc.Util.psm1')
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -144,10 +149,9 @@ function Set-TargetResource
     if ($CurrentResults.Ensure -eq "Absent" -and $Ensure -eq "Present")
     {
         $null = Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+            -Arguments $PSBoundParameters `
             -ScriptBlock {
             $params = $args[0]
-            $eventSource = $args[1]
 
             $serviceApp = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName
             $searchObjectLevel = [Microsoft.Office.Server.Search.Administration.SearchObjectLevel]::Ssa
@@ -155,12 +159,7 @@ function Set-TargetResource
 
             if ($null -eq $serviceApp)
             {
-                $message = "Search Service App was not available."
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $eventSource
-                throw $message
+                throw "Search Service App was not available."
             }
             if ($params.Action -eq "Authoratative")
             {
@@ -178,10 +177,9 @@ function Set-TargetResource
     if ($CurrentResults.Ensure -eq "Present" -and $Ensure -eq "Present")
     {
         $null = Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+            -Arguments $PSBoundParameters `
             -ScriptBlock {
             $params = $args[0]
-            $eventSource = $args[1]
 
             $serviceApp = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName
             $searchObjectLevel = [Microsoft.Office.Server.Search.Administration.SearchObjectLevel]::Ssa
@@ -189,12 +187,7 @@ function Set-TargetResource
 
             if ($null -eq $serviceApp)
             {
-                $message = "Search Service App was not available."
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $eventSource
-                throw $message
+                throw "Search Service App was not available."
             }
 
             if ($params.Action -eq "Authoratative")
@@ -209,10 +202,9 @@ function Set-TargetResource
     if ($Ensure -eq "Absent")
     {
         $null = Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+            -Arguments $PSBoundParameters `
             -ScriptBlock {
             $params = $args[0]
-            $eventSource = $args[1]
 
             $serviceApp = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName
             $searchObjectLevel = [Microsoft.Office.Server.Search.Administration.SearchObjectLevel]::Ssa
@@ -220,12 +212,7 @@ function Set-TargetResource
 
             if ($null -eq $serviceApp)
             {
-                $message = "Search Service App was not available."
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $eventSource
-                throw $message
+                throw "Search Service App was not available."
             }
             if ($params.Action -eq "Authoratative")
             {

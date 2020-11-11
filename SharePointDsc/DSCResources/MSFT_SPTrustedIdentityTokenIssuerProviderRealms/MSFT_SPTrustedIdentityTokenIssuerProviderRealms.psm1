@@ -1,3 +1,8 @@
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
+$script:resourceHelperModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'SharePointDsc.Util'
+Import-Module -Name (Join-Path -Path $script:resourceHelperModulePath -ChildPath 'SharePointDsc.Util.psm1')
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -31,24 +36,14 @@ function Get-TargetResource
 
     if ($ProviderRealms.Count -gt 0 -and ($ProviderRealmsToInclude.Count -gt 0 -or $ProviderRealmsToExclude.Count -gt 0))
     {
-        $message = ("Cannot use the ProviderRealms parameter together with the " + `
+        throw ("Cannot use the ProviderRealms parameter together with the " + `
                 "ProviderRealmsToInclude or ProviderRealmsToExclude parameters")
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
     }
 
     if ($ProviderRealms.Count -eq 0 -and $ProviderRealmsToInclude.Count -eq 0 -and $ProviderRealmsToExclude.Count -eq 0)
     {
-        $message = ("At least one of the following parameters must be specified: " + `
+        throw ("At least one of the following parameters must be specified: " + `
                 "ProviderRealms, ProviderRealmsToInclude, ProviderRealmsToExclude")
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
     }
 
     $paramRealms = @{ }
@@ -170,22 +165,16 @@ function Set-TargetResource
 
         Write-Verbose -Message "Setting SPTrustedIdentityTokenIssuer provider realms"
         $null = Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+            -Arguments $PSBoundParameters `
             -ScriptBlock {
             $params = $args[0]
-            $eventSource = $args[1]
 
             $trust = Get-SPTrustedIdentityTokenIssuer -Identity $params.IssuerName `
                 -ErrorAction SilentlyContinue
 
             if ($null -eq $trust)
             {
-                $message = ("SPTrustedIdentityTokenIssuer '$($params.IssuerName)' not found")
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $eventSource
-                throw $message
+                throw ("SPTrustedIdentityTokenIssuer '$($params.IssuerName)' not found")
             }
 
             $trust.ProviderRealms.Clear()
@@ -382,22 +371,12 @@ function Get-ProviderRealmsStatus()
     {
         if ($includeRealms.Count -gt 0 -or $excludeRealms.Count -gt 0)
         {
-            $message = ("Parameters ProviderRealmsToInclude and/or ProviderRealmsToExclude can not be used together with Ensure='Absent' use ProviderRealms instead")
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $MyInvocation.MyCommand.Source
-            throw $message
+            throw ("Parameters ProviderRealmsToInclude and/or ProviderRealmsToExclude can not be used together with Ensure='Absent' use ProviderRealms instead")
         }
 
         if ($desiredRealms.Count -eq 0)
         {
-            $message = ("Parameter ProviderRealms is empty or Null")
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $MyInvocation.MyCommand.Source
-            throw $message
+            throw ("Parameter ProviderRealms is empty or Null")
         }
 
         $eqBoth = $desiredRealms.Keys | Where-Object {

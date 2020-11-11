@@ -48,13 +48,18 @@
     # ProcessorArchitecture = ''
 
     # Modules that must be imported into the global environment prior to importing this module
-    # RequiredModules = @()
+     RequiredModules = @(
+         @{​ 
+            ModuleName = "ReverseDSC"
+            RequiredVersion = "2.0.0.7"
+        }​​​
+    ​)
 
     # Assemblies that must be loaded prior to importing this module
     # RequiredAssemblies = @()
 
     # Script files (.ps1) that are run in the caller's environment prior to importing this module.
-    # ScriptsToProcess = @()
+    ScriptsToProcess = @("Modules\SharePointDSC.Reverse\Import-SPPowerShellSnapIn.ps1")
 
     # Type files (.ps1xml) to be loaded when importing this module
     # TypesToProcess = @()
@@ -104,7 +109,8 @@
         'Test-SPDscParameterState',
         'Test-SPDscRunAsCredential',
         'Test-SPDscRunningAsFarmAccount',
-        'Test-SPDscUserIsLocalAdmin'
+        'Test-SPDscUserIsLocalAdmin',
+        'Start-SharePointDSCExtract'
     )
 
     # Cmdlets to export from this module

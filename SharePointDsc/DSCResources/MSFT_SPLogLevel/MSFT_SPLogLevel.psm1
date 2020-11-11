@@ -1,3 +1,8 @@
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
+$script:resourceHelperModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'SharePointDsc.Util'
+Import-Module -Name (Join-Path -Path $script:resourceHelperModulePath -ChildPath 'SharePointDsc.Util.psm1')
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -181,62 +186,36 @@ function Set-TargetResource
     {
         if ((($DesiredSetting.Area) | Measure-Object).Count -ne 1 -or ($DesiredSetting.Area).contains(",") )
         {
-            $message = "Exactly one log area, or the wildcard character '*' must be provided for each log item"
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $MyInvocation.MyCommand.Source
-            throw $message
+            throw "Exactly one log area, or the wildcard character '*' must be provided for each log item"
         }
 
         if ((($DesiredSetting.Name) | Measure-Object).Count -ne 1 -or ($DesiredSetting.Name).contains(",") )
         {
-            $message = "Exactly one log name, or the wildcard character '*' must be provided for each log item"
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $MyInvocation.MyCommand.Source
-            throw $message
+            throw "Exactly one log name, or the wildcard character '*' must be provided for each log item"
         }
 
         if ($null -eq $DesiredSetting.TraceLevel -and $null -eq $DesiredSetting.EventLevel)
         {
-            $message = "TraceLevel and / or EventLevel must be provided for each Area"
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $MyInvocation.MyCommand.Source
-            throw $message
+            throw "TraceLevel and / or EventLevel must be provided for each Area"
         }
 
         if ($null -ne $DesiredSetting.TraceLevel -and @("None", "Unexpected", "Monitorable", "High", "Medium", "Verbose", "VerboseEx", "Default") -notcontains $DesiredSetting.TraceLevel)
         {
-            $message = "TraceLevel $($DesiredSetting.TraceLevel) is not valid, must specify exactly one of None,Unexpected,Monitorable,High,Medium,Verbose,VerboseEx, or Default"
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $MyInvocation.MyCommand.Source
-            throw $message
+            throw "TraceLevel $($DesiredSetting.TraceLevel) is not valid, must specify exactly one of None,Unexpected,Monitorable,High,Medium,Verbose,VerboseEx, or Default"
         }
 
         if ($null -ne $DesiredSetting.EventLevel -and @("None", "ErrorCritical", "Error", "Warning", "Information", "Verbose", "Default") -notcontains $DesiredSetting.EventLevel)
         {
-            $message = "EventLevel $($DesiredSetting.EventLevel) is not valid, must specify exactly one of None,ErrorCritical,Error,Warning,Information,Verbose, or Default"
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $MyInvocation.MyCommand.Source
-            throw $message
+            throw "EventLevel $($DesiredSetting.EventLevel) is not valid, must specify exactly one of None,ErrorCritical,Error,Warning,Information,Verbose, or Default"
         }
     }
 
     Write-Verbose -Message "Setting SP Log Level settings for the provided areas"
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+        -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
-        $eventSource = $args[1]
 
         foreach ($DesiredSetting in $params.SPLogLevelSetting)
         {
@@ -247,12 +226,7 @@ function Set-TargetResource
             #Validate valid log area/name specified.
             if ($null -eq $AllSettings)
             {
-                $message = "Invalid SP Log Area/Name $($DesiredSetting.Area):$($DesiredSetting.Name)"
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $eventSource
-                throw $message
+                throw "Invalid SP Log Area/Name $($DesiredSetting.Area):$($DesiredSetting.Name)"
             }
 
             if ($null -ne $DesiredSetting.TraceLevel)
@@ -338,8 +312,8 @@ function Test-TargetResource
         if (($null -ne $DesiredSetting.TraceLevel -and $CurrentSetting.TraceLevel -ne $DesiredSetting.TraceLevel) -or ($null -ne $DesiredSetting.EventLevel -and $CurrentSetting.EventLevel -ne $DesiredSetting.EventLevel))
         {
             $mismatchedSettings += @{
-                Name            = $Name
-                DesiredSetting  = $DesiredSetting
+                Name = $Name
+                DesiredSetting = $DesiredSetting
                 $CurrentSetting = $CurrentSetting
             }
             Write-Verbose -Message "SP Log Level setting for $($DesiredSetting.Area):$($DesiredSetting.Name) is not in the desired state"

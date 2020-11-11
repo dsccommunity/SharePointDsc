@@ -1,3 +1,8 @@
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
+$script:resourceHelperModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'SharePointDsc.Util'
+Import-Module -Name (Join-Path -Path $script:resourceHelperModulePath -ChildPath 'SharePointDsc.Util.psm1')
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -136,14 +141,9 @@ function Set-TargetResource
             $ServiceAppProxies -and `
         (($ServiceAppProxiesToInclude) -or ($ServiceAppProxiesToExclude)))
     {
-        $message = ("Cannot use the ServiceAppProxies parameter together " + `
+        throw ("Cannot use the ServiceAppProxies parameter together " + `
                 "with the ServiceAppProxiesToInclude or " + `
                 "ServiceAppProxiesToExclude parameters")
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
     }
 
     if (($Ensure -eq "Present") -and `
@@ -151,21 +151,15 @@ function Set-TargetResource
             !$ServiceAppProxiesToInclude -and `
             !$ServiceAppProxiesToExclude)
     {
-        $message = ("At least one of the following parameters must be specified: " + `
+        throw ("At least one of the following parameters must be specified: " + `
                 "ServiceAppProxies, ServiceAppProxiesToInclude, " + `
                 "ServiceAppProxiesToExclude")
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
     }
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+        -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
-        $eventSource = $args[1]
 
         if ($params.Ensure -eq "Present")
         {
@@ -211,12 +205,7 @@ function Set-TargetResource
 
                                 if (!$ServiceProxy)
                                 {
-                                    $message = "Invalid Service Application Proxy $ServiceProxyName"
-                                    Add-SPDscEvent -Message $message `
-                                        -EntryType 'Error' `
-                                        -EventID 100 `
-                                        -Source $eventSource
-                                    throw $message
+                                    throw "Invalid Service Application Proxy $ServiceProxyName"
                                 }
 
                                 Write-Verbose -Message "Adding $ServiceProxyName to $($params.name) Proxy Group"
@@ -233,12 +222,7 @@ function Set-TargetResource
 
                                 if (!$ServiceProxy)
                                 {
-                                    $message = "Invalid Service Application Proxy $ServiceProxyName"
-                                    Add-SPDscEvent -Message $message `
-                                        -EntryType 'Error' `
-                                        -EventID 100 `
-                                        -Source $eventSource
-                                    throw $message
+                                    throw "Invalid Service Application Proxy $ServiceProxyName"
                                 }
 
                                 Write-Verbose -Message "Removing $ServiceProxyName from $($params.name) Proxy Group"
@@ -257,12 +241,7 @@ function Set-TargetResource
 
                         if (!$ServiceProxy)
                         {
-                            $message = "Invalid Service Application Proxy $ServiceProxyName"
-                            Add-SPDscEvent -Message $message `
-                                -EntryType 'Error' `
-                                -EventID 100 `
-                                -Source $eventSource
-                            throw $message
+                            throw "Invalid Service Application Proxy $ServiceProxyName"
                         }
 
                         Write-Verbose -Message "Adding $ServiceProxyName to $($params.name) Proxy Group"
@@ -296,12 +275,7 @@ function Set-TargetResource
 
                                 if (!$ServiceProxy)
                                 {
-                                    $message = "Invalid Service Application Proxy $ServiceProxyName"
-                                    Add-SPDscEvent -Message $message `
-                                        -EntryType 'Error' `
-                                        -EventID 100 `
-                                        -Source $eventSource
-                                    throw $message
+                                    throw "Invalid Service Application Proxy $ServiceProxyName"
                                 }
 
                                 Write-Verbose -Message "Adding $ServiceProxyName to $($params.name) Proxy Group"
@@ -322,12 +296,7 @@ function Set-TargetResource
 
                         if (!$ServiceProxy)
                         {
-                            $message = "Invalid Service Application Proxy $ServiceProxyName"
-                            Add-SPDscEvent -Message $message `
-                                -EntryType 'Error' `
-                                -EventID 100 `
-                                -Source $eventSource
-                            throw $message
+                            throw "Invalid Service Application Proxy $ServiceProxyName"
                         }
 
                         Write-Verbose "Adding $ServiceProxyName to $($params.name) Proxy Group"
@@ -346,12 +315,7 @@ function Set-TargetResource
 
                     if ($null -eq $Differences)
                     {
-                        $message = "Error comparing ServiceAppProxiesToExclude for Service Proxy Group $($params.name)"
-                        Add-SPDscEvent -Message $message `
-                            -EntryType 'Error' `
-                            -EventID 100 `
-                            -Source $eventSource
-                        throw $message
+                        throw "Error comparing ServiceAppProxiesToExclude for Service Proxy Group $($params.name)"
                     }
                     else
                     {
@@ -366,12 +330,7 @@ function Set-TargetResource
 
                                 if (!$ServiceProxy)
                                 {
-                                    $message = "Invalid Service Application Proxy $ServiceProxyName"
-                                    Add-SPDscEvent -Message $message `
-                                        -EntryType 'Error' `
-                                        -EventID 100 `
-                                        -Source $eventSource
-                                    throw $message
+                                    throw "Invalid Service Application Proxy $ServiceProxyName"
                                 }
 
                                 Write-Verbose -Message "Removing $ServiceProxyName to $($params.name) Proxy Group"

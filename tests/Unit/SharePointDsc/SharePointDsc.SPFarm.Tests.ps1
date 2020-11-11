@@ -316,57 +316,6 @@ try
                 }
             }
 
-            Context -Name "A config database exists, but is empty. This server should be connected to it and needs to populate the empty database" -Fixture {
-                BeforeAll {
-                    $testParams = @{
-                        IsSingleInstance         = "Yes"
-                        Ensure                   = "Present"
-                        FarmConfigDatabaseName   = "SP_Config"
-                        DatabaseServer           = "sql.contoso.com"
-                        FarmAccount              = $mockFarmAccount
-                        Passphrase               = $mockPassphrase
-                        AdminContentDatabaseName = "SP_AdminContent"
-                        RunCentralAdmin          = $true
-                    }
-
-                    Mock -CommandName "Get-SPDscRegistryKey" -MockWith { return $null }
-                    Mock -CommandName "Get-SPFarm" -MockWith { return $null }
-                    Mock -CommandName "Get-SPDscConfigDBStatus" -MockWith {
-                        return @{
-                            Locked           = $false
-                            ValidPermissions = $false
-                            DatabaseExists   = $true
-                            DatabaseEmpty    = $true
-                        }
-                    }
-                    Mock -CommandName "Get-SPDscSQLInstanceStatus" -MockWith {
-                        return @{
-                            MaxDOPCorrect = $true
-                        }
-                    }
-                    Mock -CommandName "Get-SPWebApplication" -MockWith {
-                        return @{
-                            IsAdministrationWebApplication = $true
-                            Url                            = "http://localhost:12345"
-                        }
-                    }
-                }
-
-                It "Should return absent from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
-                }
-
-                It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should -Be $false
-                }
-
-                It "Should create the config database in the set method" {
-                    Set-TargetResource @testParams
-                    Assert-MockCalled -CommandName "New-SPConfigurationDatabase"
-                    Assert-MockCalled -CommandName "New-SPCentralAdministration"
-                }
-            }
-
             Context -Name "A config database exists, and this server should be connected to it but isn't and this server won't run central admin" -Fixture {
                 BeforeAll {
                     $testParams = @{
@@ -481,7 +430,6 @@ try
                             Locked           = $false
                             ValidPermissions = $true
                             DatabaseExists   = $true
-                            DatabaseEmpty    = $false
                         }
                     }
                     Mock -CommandName "Get-SPDscSQLInstanceStatus" -MockWith {

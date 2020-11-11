@@ -1,3 +1,8 @@
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
+$script:resourceHelperModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'SharePointDsc.Util'
+Import-Module -Name (Join-Path -Path $script:resourceHelperModulePath -ChildPath 'SharePointDsc.Util.psm1')
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -363,5 +368,30 @@ function Test-TargetResource
 
     return $result
 }
+
+
+<## This function retrieves all settings related to Diagnostic Logging (ULS logs) on the SharePoint farm. #>
+function Export-TargetResource
+{
+    $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+	$module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPDiagnosticLoggingSettings\MSFT_SPDiagnosticLoggingSettings.psm1" -Resolve
+    $params = Get-DSCFakeParameters -ModulePath $module
+
+    $Content = "        SPDiagnosticLoggingSettings ApplyDiagnosticLogSettings`r`n"
+    $Content += "        {`r`n"
+    $results = Get-TargetResource @params
+    $results = Repair-Credentials -results $results
+
+    Add-ConfigurationDataEntry -Node "NonNodeData" -Key "LogPath" -Value $results.LogPath -Description "Path where the SharePoint ULS logs will be stored;"
+    $results.LogPath = "`$ConfigurationData.NonNodeData.LogPath"
+
+    $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+    $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "LogPath"
+    $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+    $Content += $currentBlock
+    $Content += "        }`r`n"
+	Return $Content
+}
+
 
 Export-ModuleMember -Function *-TargetResource

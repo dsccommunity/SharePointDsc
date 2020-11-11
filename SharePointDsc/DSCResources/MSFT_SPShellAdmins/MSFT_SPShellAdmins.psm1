@@ -1,3 +1,8 @@
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
+$script:resourceHelperModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'SharePointDsc.Util'
+Import-Module -Name (Join-Path -Path $script:resourceHelperModulePath -ChildPath 'SharePointDsc.Util.psm1')
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -146,7 +151,7 @@ function Get-TargetResource
 
         return @{
             IsSingleInstance = "Yes"
-            Members          = [System.Array]$shellAdmins.UserName
+            Members          = $shellAdmins.UserName
             MembersToInclude = $params.MembersToInclude
             MembersToExclude = $params.MembersToExclude
             Databases        = $cdbPermissions
@@ -200,13 +205,8 @@ function Set-TargetResource
 
     if ($Members -and (($MembersToInclude) -or ($MembersToExclude)))
     {
-        $message = ("Cannot use the Members parameter together with the " + `
+        throw ("Cannot use the Members parameter together with the " + `
                 "MembersToInclude or MembersToExclude parameters")
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
     }
 
     if ($Databases)
@@ -216,28 +216,18 @@ function Set-TargetResource
             if ($database.Members -and (($database.MembersToInclude) `
                         -or ($database.MembersToExclude)))
             {
-                $message = ("Databases: Cannot use the Members parameter " + `
+                throw ("Databases: Cannot use the Members parameter " + `
                         "together with the MembersToInclude or " + `
                         "MembersToExclude parameters")
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $MyInvocation.MyCommand.Source
-                throw $message
             }
 
             if (!$database.Members `
                     -and !$database.MembersToInclude `
                     -and !$database.MembersToExclude)
             {
-                $message = ("Databases: At least one of the following " + `
+                throw ("Databases: At least one of the following " + `
                         "parameters must be specified: Members, " + `
                         "MembersToInclude, MembersToExclude")
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $MyInvocation.MyCommand.Source
-                throw $message
             }
         }
     }
@@ -245,44 +235,28 @@ function Set-TargetResource
     {
         if (!$Members -and !$MembersToInclude -and !$MembersToExclude)
         {
-            $message = ("At least one of the following parameters must be " + `
+            throw ("At least one of the following parameters must be " + `
                     "specified: Members, MembersToInclude, MembersToExclude")
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $MyInvocation.MyCommand.Source
-            throw $message
         }
     }
 
     if ($Databases -and $AllDatabases)
     {
-        $message = ("Cannot use the Databases parameter together with the " + `
+        throw ("Cannot use the Databases parameter together with the " + `
                 "AllDatabases parameter")
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
     }
 
     if ($Databases -and $ExcludeDatabases)
     {
-        $message = ("Cannot use the Databases parameter together with the " + `
+        throw ("Cannot use the Databases parameter together with the " + `
                 "ExcludeDatabases parameter")
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
     }
 
     $null = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $PSScriptRoot) `
+        -Arguments @($PSBoundParameters, $PSScriptRoot) `
         -ScriptBlock {
         $params = $args[0]
-        $eventSource = $args[1]
-        $scriptRoot = $args[2]
+        $scriptRoot = $args[1]
 
         Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath "MSFT_SPShellAdmins.psm1")
 
@@ -292,13 +266,8 @@ function Set-TargetResource
         }
         catch
         {
-            $message = ("No local SharePoint farm was detected. Shell admin " + `
+            throw ("No local SharePoint farm was detected. Shell admin " + `
                     "settings will not be applied")
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $eventSource
-            throw $message
         }
 
         $shellAdmins = Get-SPShellAdmin
@@ -332,14 +301,10 @@ function Set-TargetResource
                             }
                             catch
                             {
-                                $message = ("Error while setting the Shell Admin. The Shell " + `
+                                throw ("Error while setting the Shell Admin. The Shell " + `
                                         "Admin permissions will not be applied. Error " + `
                                         "details: $($_.Exception.Message)")
-                                Add-SPDscEvent -Message $message `
-                                    -EntryType 'Error' `
-                                    -EventID 100 `
-                                    -Source $eventSource
-                                throw $message
+                                return
                             }
                         }
                         elseif ($difference.SideIndicator -eq "<=")
@@ -351,14 +316,10 @@ function Set-TargetResource
                             }
                             catch
                             {
-                                $message = ("Error while removing the Shell Admin. The Shell Admin " + `
+                                throw ("Error while removing the Shell Admin. The Shell Admin " + `
                                         "permissions will not be revoked. Error details: " + `
                                         "$($_.Exception.Message)")
-                                Add-SPDscEvent -Message $message `
-                                    -EntryType 'Error' `
-                                    -EventID 100 `
-                                    -Source $eventSource
-                                throw $message
+                                return
                             }
                         }
                     }
@@ -374,14 +335,10 @@ function Set-TargetResource
                     }
                     catch
                     {
-                        $message = ("Error while setting the Shell Admin. The Shell Admin " + `
+                        throw ("Error while setting the Shell Admin. The Shell Admin " + `
                                 "permissions will not be applied. Error details: " + `
                                 "$($_.Exception.Message)")
-                        Add-SPDscEvent -Message $message `
-                            -EntryType 'Error' `
-                            -EventID 100 `
-                            -Source $eventSource
-                        throw $message
+                        return
                     }
                 }
             }
@@ -402,14 +359,10 @@ function Set-TargetResource
                         }
                         catch
                         {
-                            $message = ("Error while setting the Shell Admin. The Shell Admin " + `
+                            throw ("Error while setting the Shell Admin. The Shell Admin " + `
                                     "permissions will not be applied. Error details: " + `
                                     "$($_.Exception.Message)")
-                            Add-SPDscEvent -Message $message `
-                                -EntryType 'Error' `
-                                -EventID 100 `
-                                -Source $eventSource
-                            throw $message
+                            return
                         }
                     }
                 }
@@ -424,13 +377,9 @@ function Set-TargetResource
                     }
                     catch
                     {
-                        $message = ("Error while setting the Shell Admin. The Shell Admin " + `
+                        throw ("Error while setting the Shell Admin. The Shell Admin " + `
                                 "permissions will not be applied. Error details: $($_.Exception.Message)")
-                        Add-SPDscEvent -Message $message `
-                            -EntryType 'Error' `
-                            -EventID 100 `
-                            -Source $eventSource
-                        throw $message
+                        return
                     }
                 }
             }
@@ -451,14 +400,10 @@ function Set-TargetResource
                         }
                         catch
                         {
-                            $message = ("Error while removing the Shell Admin. The Shell Admin " + `
+                            throw ("Error while removing the Shell Admin. The Shell Admin " + `
                                     "permissions will not be revoked. Error details: " + `
                                     "$($_.Exception.Message)")
-                            Add-SPDscEvent -Message $message `
-                                -EntryType 'Error' `
-                                -EventID 100 `
-                                -Source $eventSource
-                            throw $message
+                            return
                         }
                     }
                 }
@@ -501,14 +446,10 @@ function Set-TargetResource
                                     }
                                     catch
                                     {
-                                        $message = ("Error while setting the Shell Admin. The " + `
+                                        throw ("Error while setting the Shell Admin. The " + `
                                                 "Shell Admin permissions will not be applied. " + `
                                                 "Error details: $($_.Exception.Message)")
-                                        Add-SPDscEvent -Message $message `
-                                            -EntryType 'Error' `
-                                            -EventID 100 `
-                                            -Source $eventSource
-                                        throw $message
+                                        return
                                     }
                                 }
                                 elseif ($difference.SideIndicator -eq "=>")
@@ -522,14 +463,10 @@ function Set-TargetResource
                                     }
                                     catch
                                     {
-                                        $message = ("Error while removing the Shell Admin. The " + `
+                                        throw ("Error while removing the Shell Admin. The " + `
                                                 "Shell Admin permissions will not be revoked. " + `
                                                 "Error details: $($_.Exception.Message)")
-                                        Add-SPDscEvent -Message $message `
-                                            -EntryType 'Error' `
-                                            -EventID 100 `
-                                            -Source $eventSource
-                                        throw $message
+                                        return
                                     }
                                 }
                             }
@@ -544,14 +481,10 @@ function Set-TargetResource
                                 }
                                 catch
                                 {
-                                    $message = ("Error while setting the Shell Admin. The Shell " + `
+                                    throw ("Error while setting the Shell Admin. The Shell " + `
                                             "Admin permissions will not be applied. Error " + `
                                             "details: $($_.Exception.Message)")
-                                    Add-SPDscEvent -Message $message `
-                                        -EntryType 'Error' `
-                                        -EventID 100 `
-                                        -Source $eventSource
-                                    throw $message
+                                    return
                                 }
                             }
                         }
@@ -572,14 +505,10 @@ function Set-TargetResource
                                     }
                                     catch
                                     {
-                                        $message = ("Error while setting the Shell Admin. The " + `
+                                        throw ("Error while setting the Shell Admin. The " + `
                                                 "Shell Admin permissions will not be applied. " + `
                                                 "Error details: $($_.Exception.Message)")
-                                        Add-SPDscEvent -Message $message `
-                                            -EntryType 'Error' `
-                                            -EventID 100 `
-                                            -Source $eventSource
-                                        throw $message
+                                        return
                                     }
                                 }
                             }
@@ -594,14 +523,10 @@ function Set-TargetResource
                                 }
                                 catch
                                 {
-                                    $message = ("Error while setting the Shell Admin. The Shell " + `
+                                    throw ("Error while setting the Shell Admin. The Shell " + `
                                             "Admin permissions will not be applied. Error " + `
                                             "details: $($_.Exception.Message)")
-                                    Add-SPDscEvent -Message $message `
-                                        -EntryType 'Error' `
-                                        -EventID 100 `
-                                        -Source $eventSource
-                                    throw $message
+                                    return
                                 }
                             }
                         }
@@ -624,14 +549,10 @@ function Set-TargetResource
                                     }
                                     catch
                                     {
-                                        $message = ("Error while removing the Shell Admin. The " + `
+                                        throw ("Error while removing the Shell Admin. The " + `
                                                 "Shell Admin permissions will not be revoked. " + `
                                                 "Error details: $($_.Exception.Message)")
-                                        Add-SPDscEvent -Message $message `
-                                            -EntryType 'Error' `
-                                            -EventID 100 `
-                                            -Source $eventSource
-                                        throw $message
+                                        return
                                     }
                                 }
                             }
@@ -640,12 +561,7 @@ function Set-TargetResource
                 }
                 else
                 {
-                    $message = "Specified database does not exist: $($database.Name)"
-                    Add-SPDscEvent -Message $message `
-                        -EntryType 'Error' `
-                        -EventID 100 `
-                        -Source $eventSource
-                    throw $message
+                    throw "Specified database does not exist: $($database.Name)"
                 }
             }
         }
@@ -693,14 +609,10 @@ function Set-TargetResource
                                     }
                                     catch
                                     {
-                                        $message = ("Error while setting the Shell Admin. The " + `
+                                        throw ("Error while setting the Shell Admin. The " + `
                                                 "Shell Admin permissions will not be applied. " + `
                                                 "Error details: $($_.Exception.Message)")
-                                        Add-SPDscEvent -Message $message `
-                                            -EntryType 'Error' `
-                                            -EventID 100 `
-                                            -Source $eventSource
-                                        throw $message
+                                        return
                                     }
                                 }
                                 elseif ($difference.SideIndicator -eq "<=")
@@ -714,14 +626,10 @@ function Set-TargetResource
                                     }
                                     catch
                                     {
-                                        $message = ("Error while removing the Shell Admin. The " + `
+                                        throw ("Error while removing the Shell Admin. The " + `
                                                 "Shell Admin permissions will not be revoked. " + `
                                                 "Error details: $($_.Exception.Message)")
-                                        Add-SPDscEvent -Message $message `
-                                            -EntryType 'Error' `
-                                            -EventID 100 `
-                                            -Source $eventSource
-                                        throw $message
+                                        return
                                     }
                                 }
                             }
@@ -737,14 +645,10 @@ function Set-TargetResource
                             }
                             catch
                             {
-                                $message = ("Error while setting the Shell Admin. The Shell Admin " + `
+                                throw ("Error while setting the Shell Admin. The Shell Admin " + `
                                         "permissions will not be applied. Error details: " + `
                                         "$($_.Exception.Message)")
-                                Add-SPDscEvent -Message $message `
-                                    -EntryType 'Error' `
-                                    -EventID 100 `
-                                    -Source $eventSource
-                                throw $message
+                                return
                             }
                         }
                     }
@@ -764,14 +668,10 @@ function Set-TargetResource
                                 }
                                 catch
                                 {
-                                    $message = ("Error while setting the Shell Admin. The Shell " + `
+                                    throw ("Error while setting the Shell Admin. The Shell " + `
                                             "Admin permissions will not be applied. Error " + `
                                             "details: $($_.Exception.Message)")
-                                    Add-SPDscEvent -Message $message `
-                                        -EntryType 'Error' `
-                                        -EventID 100 `
-                                        -Source $eventSource
-                                    throw $message
+                                    return
                                 }
                             }
                         }
@@ -786,14 +686,10 @@ function Set-TargetResource
                             }
                             catch
                             {
-                                $message = ("Error while setting the Shell Admin. The Shell Admin " + `
+                                throw ("Error while setting the Shell Admin. The Shell Admin " + `
                                         "permissions will not be applied. Error details: " + `
                                         "$($_.Exception.Message)")
-                                Add-SPDscEvent -Message $message `
-                                    -EntryType 'Error' `
-                                    -EventID 100 `
-                                    -Source $eventSource
-                                throw $message
+                                return
                             }
                         }
 
@@ -816,14 +712,10 @@ function Set-TargetResource
                                 }
                                 catch
                                 {
-                                    $message = ("Error while removing the Shell Admin. The Shell " + `
+                                    throw ("Error while removing the Shell Admin. The Shell " + `
                                             "Admin permissions will not be revoked. Error " + `
                                             "details: $($_.Exception.Message)")
-                                    Add-SPDscEvent -Message $message `
-                                        -EntryType 'Error' `
-                                        -EventID 100 `
-                                        -Source $eventSource
-                                    throw $message
+                                    return
                                 }
                             }
                         }
@@ -1183,12 +1075,7 @@ function Test-TargetResource
             }
             else
             {
-                $message = "Specified database does not exist: $($database.Name)"
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $MyInvocation.MyCommand.Source
-                throw $message
+                throw "Specified database does not exist: $($database.Name)"
             }
         }
     }

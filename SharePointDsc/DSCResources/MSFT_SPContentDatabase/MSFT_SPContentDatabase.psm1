@@ -1,3 +1,8 @@
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
+$script:resourceHelperModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'SharePointDsc.Util'
+Import-Module -Name (Join-Path -Path $script:resourceHelperModulePath -ChildPath 'SharePointDsc.Util.psm1')
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -149,13 +154,10 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting content database configuration settings"
 
-    $PSBoundParameters.Ensure = $Ensure
-
     Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+        -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
-        $eventSource = $args[1]
 
         # Use Get-SPDatabase instead of Get-SPContentDatabase because the Get-SPContentDatabase
         # does not return disabled databases.
@@ -173,12 +175,7 @@ function Set-TargetResource
 
             if ($null -eq $webapp)
             {
-                $message = "Specified web application does not exist."
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $eventSource
-                throw $message
+                throw "Specified web application does not exist."
             }
 
             # Check if database exists
@@ -186,14 +183,9 @@ function Set-TargetResource
             {
                 if ($params.ContainsKey('DatabaseServer') -and $params.DatabaseServer -ne $null -and $cdb.Server -ne $params.DatabaseServer)
                 {
-                    $message = ("Specified database server does not match the actual database " + `
+                    throw ("Specified database server does not match the actual database " + `
                             "server. This resource cannot move the database to a different " + `
                             "SQL instance.")
-                    Add-SPDscEvent -Message $message `
-                        -EntryType 'Error' `
-                        -EventID 100 `
-                        -Source $eventSource
-                    throw $message
                 }
 
                 # Check and change attached web application.
@@ -229,14 +221,9 @@ function Set-TargetResource
                     }
                     catch
                     {
-                        $message = ("Error occurred while mounting content database. " + `
+                        throw ("Error occurred while mounting content database. " + `
                                 "Content database is not mounted. " + `
                                 "Error details: $($_.Exception.Message)")
-                        Add-SPDscEvent -Message $message `
-                            -EntryType 'Error' `
-                            -EventID 100 `
-                            -Source $eventSource
-                        throw $message
                     }
 
                     if ($cdb.Status -eq "Online")
@@ -330,14 +317,9 @@ function Set-TargetResource
                 }
                 catch
                 {
-                    $message = ("Error occurred while mounting content database. " + `
+                    throw ("Error occurred while mounting content database. " + `
                             "Content database is not mounted. " + `
                             "Error details: $($_.Exception.Message)")
-                    Add-SPDscEvent -Message $message `
-                        -EntryType 'Error' `
-                        -EventID 100 `
-                        -Source $eventSource
-                    throw $message
                 }
 
                 if ($cdb.Status -eq "Online")
@@ -455,6 +437,50 @@ function Test-TargetResource
     Write-Verbose -Message "Test-TargetResource returned $result"
 
     return $result
+}
+
+function Export-TargetResource
+{
+    $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath "\DSCResources\MSFT_SPContentDatabase\MSFT_SPContentDatabase.psm1" -Resolve
+    
+    $params = Get-DSCFakeParameters -ModulePath $module
+    $spContentDBs = Get-SPContentDatabase
+    
+    $Content = ''
+    $i = 1
+    $total = $spContentDBs.Length
+    foreach($spContentDB in $spContentDBs)
+    {
+        try
+        {
+            $dbName = $spContentDB.Name
+            Write-Host "Scanning Content Database [$i/$total] {$dbName}"
+            $PartialContent = "        SPContentDatabase " + $spContentDB.Name.Replace(" ", "") + "`r`n"
+            $PartialContent += "        {`r`n"
+            $params.Name = $dbName
+            $params.WebAppUrl = $spContentDB.WebApplication.Url
+            $results = Get-TargetResource @params
+            $results = Repair-Credentials -results $results
+
+            Add-ConfigurationDataEntry -Node "NonNodeData" -Key "DatabaseServer" -Value $results.DatabaseServer -Description "Name of the Database Server associated with the destination SharePoint Farm;"
+            $results.DatabaseServer = "`$ConfigurationData.NonNodeData.DatabaseServer"
+
+            $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+            $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "DatabaseServer"
+            $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+            $PartialContent += $currentBlock
+            $PartialContent += "        }`r`n"
+            $i++
+        }
+        catch
+        {
+            $Global:ErrorLog += "[Content Database]" + $spContentDB.Name + "`r`n"
+            $Global:ErrorLog += "$_`r`n`r`n"
+        }
+        $Content += $PartialContent
+    }
+    Return $Content
 }
 
 Export-ModuleMember -Function *-TargetResource

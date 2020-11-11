@@ -1,3 +1,8 @@
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
+$script:resourceHelperModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'SharePointDsc.Util'
+Import-Module -Name (Join-Path -Path $script:resourceHelperModulePath -ChildPath 'SharePointDsc.Util.psm1')
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -85,11 +90,8 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting service instance '$Name' to '$ManagedAccount'"
 
-    Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
-        -ScriptBlock {
+    Invoke-SPDscCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-        $eventSource = $args[1]
 
         if ($params.Name -eq "SharePoint Server Search")
         {
@@ -102,22 +104,12 @@ function Set-TargetResource
             }
             if ($null -eq $serviceInstance)
             {
-                $message = "Unable to locate service $($params.Name)"
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $eventSource
-                throw $message
+                throw [System.Exception] "Unable to locate service $($params.Name)"
             }
 
             if ($null -eq $serviceInstance.service.processidentity)
             {
-                $message = "Service $($params.name) does not support setting the process identity"
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $eventSource
-                throw $message
+                throw [System.Exception] "Service $($params.name) does not support setting the process identity"
             }
 
             $processIdentity = $serviceInstance.Service.ProcessIdentity
@@ -135,12 +127,7 @@ function Set-TargetResource
                 -ErrorAction SilentlyContinue
             if ($null -eq $managedAccount)
             {
-                $message = "Unable to locate Managed Account $($params.ManagedAccount)"
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $eventSource
-                throw $message
+                throw [System.Exception] "Unable to locate Managed Account $($params.ManagedAccount)"
             }
 
             $processIdentity.CurrentIdentityType = [Microsoft.SharePoint.Administration.IdentityType]::SpecificUser
@@ -183,7 +170,7 @@ function Test-TargetResource
     if ($result -eq $false)
     {
         $message = ("Specfied ManagedAccount {$($CurrentValues.ManagedAccount)} is not in the " + `
-                "desired state {$ManagedAccount}.")
+                    "desired state {$ManagedAccount}.")
         Write-Verbose -Message $message
         Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
     }

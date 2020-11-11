@@ -1,3 +1,8 @@
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
+$script:resourceHelperModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'SharePointDsc.Util'
+Import-Module -Name (Join-Path -Path $script:resourceHelperModulePath -ChildPath 'SharePointDsc.Util.psm1')
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -38,23 +43,13 @@ function Get-TargetResource
 
     if ($StorageMaxInMB -lt $StorageWarningInMB)
     {
-        $message = "StorageMaxInMB must be equal to or larger than StorageWarningInMB."
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
+        throw "StorageMaxInMB must be equal to or larger than StorageWarningInMB."
     }
 
     if ($MaximumUsagePointsSolutions -lt $WarningUsagePointsSolutions)
     {
-        $message = ("MaximumUsagePointsSolutions must be equal to or larger than " + `
+        throw ("MaximumUsagePointsSolutions must be equal to or larger than " + `
                 "WarningUsagePointsSolutions.")
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
     }
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
@@ -147,23 +142,13 @@ function Set-TargetResource
 
     if ($StorageMaxInMB -lt $StorageWarningInMB)
     {
-        $message = "StorageMaxInMB must be equal to or larger than StorageWarningInMB."
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
+        throw "StorageMaxInMB must be equal to or larger than StorageWarningInMB."
     }
 
     if ($MaximumUsagePointsSolutions -lt $WarningUsagePointsSolutions)
     {
-        $message = ("MaximumUsagePointsSolutions must be equal to or larger than " + `
+        throw ("MaximumUsagePointsSolutions must be equal to or larger than " + `
                 "WarningUsagePointsSolutions.")
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
     }
 
     switch ($Ensure)
@@ -172,10 +157,9 @@ function Set-TargetResource
         {
             Write-Verbose "Ensure is set to Present - Add or update template"
             Invoke-SPDscCommand -Credential $InstallAccount `
-                -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+                -Arguments $PSBoundParameters `
                 -ScriptBlock {
                 $params = $args[0]
-                $eventSource = $args[1]
 
                 try
                 {
@@ -183,13 +167,9 @@ function Set-TargetResource
                 }
                 catch
                 {
-                    $message = ("No local SharePoint farm was detected. Quota " + `
+                    throw ("No local SharePoint farm was detected. Quota " + `
                             "template settings will not be applied")
-                    Add-SPDscEvent -Message $message `
-                        -EntryType 'Error' `
-                        -EventID 100 `
-                        -Source $eventSource
-                    throw $message
+                    return
                 }
 
                 Write-Verbose -Message "Start update"
@@ -254,14 +234,9 @@ function Set-TargetResource
                     -or $MaximumUsagePointsSolutions `
                     -or $WarningUsagePointsSolutions)
             {
-                $message = ("Do not use StorageMaxInMB, StorageWarningInMB, " + `
+                throw ("Do not use StorageMaxInMB, StorageWarningInMB, " + `
                         "MaximumUsagePointsSolutions or WarningUsagePointsSolutions " + `
                         "when Ensure is specified as Absent")
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $MyInvocation.MyCommand.Source
-                throw $message
             }
 
             Invoke-SPDscCommand -Credential $InstallAccount `
@@ -332,23 +307,13 @@ function Test-TargetResource
 
     if ($StorageMaxInMB -lt $StorageWarningInMB)
     {
-        $message = "StorageMaxInMB must be equal to or larger than StorageWarningInMB."
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
+        throw "StorageMaxInMB must be equal to or larger than StorageWarningInMB."
     }
 
     if ($MaximumUsagePointsSolutions -lt $WarningUsagePointsSolutions)
     {
-        $message = ("MaximumUsagePointsSolutions must be equal to or larger than " + `
+        throw ("MaximumUsagePointsSolutions must be equal to or larger than " + `
                 "WarningUsagePointsSolutions.")
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
@@ -382,14 +347,9 @@ function Test-TargetResource
                     $MaximumUsagePointsSolutions -or `
                     $WarningUsagePointsSolutions)
             {
-                $message = ("Do not use StorageMaxInMB, StorageWarningInMB, " + `
+                throw ("Do not use StorageMaxInMB, StorageWarningInMB, " + `
                         "MaximumUsagePointsSolutions or WarningUsagePointsSolutions " + `
                         "when Ensure is specified as Absent")
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $MyInvocation.MyCommand.Source
-                throw $message
             }
 
             if ($CurrentValues.Ensure -eq "Present")
@@ -412,6 +372,51 @@ function Test-TargetResource
     Write-Verbose -Message "Test-TargetResource returned $result"
 
     return $result
+}
+
+Function Export-TargetResource
+{
+    $Global:DH_SPQUOTATEMPLATE = @{}
+    $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath "\DSCResources\MSFT_SPQuotaTemplate\MSFT_SPQuotaTemplate.psm1" -Resolve
+
+    $contentService = Get-SPDSCContentService
+
+    $params = Get-DSCFakeParameters -ModulePath $module
+
+    $Content = ''
+    $quotaGUID = ""
+    $i = 1
+    $total = $contentservice.QuotaTemplates.Count
+    foreach($quota in $contentservice.QuotaTemplates)
+    {
+        try
+        {
+            $quotaName = $quota.Name
+            Write-Host "Scanning Quota Template [$i/$total] {$quotaName}"
+            $quotaGUID = [System.Guid]::NewGuid().ToString()
+            $Global:DH_SPQUOTATEMPLATE.Add($quotaName, $quotaGUID)
+            
+            $PartialContent = "        SPQuotaTemplate " + $quotaGUID + "`r`n"
+            $PartialContent += "        {`r`n"
+            $params.Name = $quota.Name
+            $results = Get-TargetResource @params
+            $results = Repair-Credentials -results $results
+            $currentDSCBlock = Get-DSCBlock -Params $results -ModulePath $module
+            $currentDSCBlock = Convert-DSCStringParamToVariable -DSCBlock $currentDSCBlock -ParameterName "PsDscRunAsCredential"
+            $PartialContent += $currentDSCBlock
+            $PartialContent += "        }`r`n"
+            $i++
+        }
+        catch
+        {
+            $Global:ErrorLog += "[Quota Template]" + $quota.Name + "`r`n"
+            $Global:ErrorLog += "$_`r`n`r`n"
+            $_
+        }
+        $Content += $PartialContent
+    }
+    Return $content
 }
 
 Export-ModuleMember -Function *-TargetResource

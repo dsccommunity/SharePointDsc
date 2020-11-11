@@ -10,35 +10,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SharePointDsc
   - Added logging to the event log when the code throws an exception
 
-### Changed
-
-- SPFarm
-  - Switched from creating a Lock database to a Lock table in the TempDB.
-    This to allow the use of precreated databases.
-- SPSite
-  - Added more explanation to documentation on which parameters are checked
-- SPWeb
-  - Added more explanation to documentation on using this resource
-
-### Fixed
-
-- SPConfigWizard
-  - Fixes issue where a CU installation wasn't registered properly in the
-    config database. Added logic to run the Product Version timer job
-- SPSearchTopology
-  - Fixes issue where applying a topology failed when the search service
-    instance was disabled instead of offline
-- SPSecureStoreServiceApp
-  - Fixes issue where custom database name was no longer used since v4.3
-- SPShellAdmins
-  - Fixed issue with Get-DscConfiguration which threw an error when only one
-    item was returned by the Get method
-- SPWordAutomationServiceApp
-  - Fixed issue where provisioning the service app requires a second run to
-    update all specified parameters
-- SPWorkflowService
-  - Fixed issue configuring workflow service when no workflow service is currently configured.
-
 ## [4.3.0] - 2020-09-30
 
 ### Added

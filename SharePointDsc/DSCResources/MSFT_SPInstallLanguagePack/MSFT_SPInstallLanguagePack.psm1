@@ -1,3 +1,8 @@
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
+$script:resourceHelperModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'SharePointDsc.Util'
+Import-Module -Name (Join-Path -Path $script:resourceHelperModulePath -ChildPath 'SharePointDsc.Util.psm1')
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -32,24 +37,14 @@ function Get-TargetResource
     Write-Verbose -Message "Check if Binary folder exists"
     if (-not(Test-Path -Path $BinaryDir))
     {
-        $message = "Specified path cannot be found: {$BinaryDir}"
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
+        throw "Specified path cannot be found: {$BinaryDir}"
     }
 
     Write-Verbose -Message "Checking file status of setup.exe"
     $setupExe = Join-Path -Path $BinaryDir -ChildPath "setup.exe"
     if (-not(Test-Path -Path $setupExe))
     {
-        $message = "Setup.exe cannot be found in {$BinaryDir}"
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
+        throw "Setup.exe cannot be found in {$BinaryDir}"
     }
 
     Write-Verbose -Message "Checking file status of $setupExe"
@@ -91,13 +86,8 @@ function Get-TargetResource
         }
         if ($null -ne $zone)
         {
-            $message = ("Setup file is blocked! Please use 'Unblock-File -Path $setupExe' " + `
+            throw ("Setup file is blocked! Please use 'Unblock-File -Path $setupExe' " + `
                     "to unblock the file before continuing.")
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $MyInvocation.MyCommand.Source
-            throw $message
         }
         Write-Verbose -Message "File not blocked, continuing."
     }
@@ -107,12 +97,7 @@ function Get-TargetResource
 
     if ($osrvFolder.Count -ne 1)
     {
-        $message = "Unknown folder structure"
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
+        throw "Unknown folder structure"
     }
 
     $products = Get-SPDscRegProductsInfo
@@ -141,16 +126,6 @@ function Get-TargetResource
             {
                 $parsedENProduct = $parsedProduct[1] -split "/"
                 $languageEN = $parsedENProduct[0]
-
-                if ($languageEN -eq "Chinese (Simplified)")
-                {
-                    $languageEN = "Chinese (PRC)"
-                }
-
-                if ($languageEN -eq "Chinese (Traditional)")
-                {
-                    $languageEN = "Chinese (Taiwan)"
-                }
             }
             "Portuguese"
             {
@@ -180,12 +155,7 @@ function Get-TargetResource
     }
     else
     {
-        $message = "Update does not contain the language code in the correct format."
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
+        throw "Update does not contain the language code in the correct format."
     }
 
     try
@@ -195,23 +165,13 @@ function Get-TargetResource
     }
     catch
     {
-        $message = "Error while converting language information: $language"
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
+        throw "Error while converting language information: $language"
     }
 
     # try/catch is required for some versions of Windows, other version use the LCID value of 4096
     if ($cultureInfo.LCID -eq 4096)
     {
-        $message = "Error while converting language information: $language"
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
+        throw "Error while converting language information: $language"
     }
 
     Write-Verbose -Message "Extract English name of the language code"
@@ -223,11 +183,35 @@ function Get-TargetResource
         }
         "Chinese (Simplified, China)"
         {
-            $languageEnglish = "Chinese (PRC)"
+            # Language name of Chinese SP2013/2016 and SP2019 install package are different
+            $installedVersion = Get-SPDscInstalledProductVersion
+            if ($installedVersion.FileMajorPart -eq 16 -and `
+                    $installedVersion.ProductBuildPart.ToString().Length -gt 4)
+            {
+                # SP2019
+                $languageEnglish = "Chinese (Simplified)"
+            }
+            else
+            {
+                # SP2013/2016
+                $languageEnglish = "Chinese (PRC)"
+            }
         }
         "Chinese (Traditional, Taiwan)"
         {
-            $languageEnglish = "Chinese (Taiwan)"
+            # Language name of Chinese SP2013/2016 and SP2019 install package are different
+            $installedVersion = Get-SPDscInstalledProductVersion
+            if ($installedVersion.FileMajorPart -eq 16 -and `
+                    $installedVersion.ProductBuildPart.ToString().Length -gt 4)
+            {
+                # SP2019
+                $languageEnglish = "Chinese (Traditional)"
+            }
+            else
+            {
+                # SP2013/2016
+                $languageEnglish = "Chinese (Taiwan)"
+            }
         }
         "Portuguese (Brazil)"
         {
@@ -322,36 +306,22 @@ function Set-TargetResource
 
     if ($Ensure -eq "Absent")
     {
-        $message = ("SharePointDsc does not support uninstalling SharePoint " + `
+        throw [Exception] ("SharePointDsc does not support uninstalling SharePoint " + `
                 "Language Packs. Please remove this manually.")
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
+        return
     }
 
     Write-Verbose -Message "Check if Binary folder exists"
     if (-not(Test-Path -Path $BinaryDir))
     {
-        $message = "Specified path cannot be found: {$BinaryDir}"
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
+        throw "Specified path cannot be found: {$BinaryDir}"
     }
 
     Write-Verbose -Message "Checking file status of setup.exe"
     $setupExe = Join-Path -Path $BinaryDir -ChildPath "setup.exe"
     if (-not(Test-Path -Path $setupExe))
     {
-        $message = "Setup.exe cannot be found in {$BinaryDir}"
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
+        throw "Setup.exe cannot be found in {$BinaryDir}"
     }
 
     Write-Verbose -Message "Checking file status of $setupExe"
@@ -393,13 +363,8 @@ function Set-TargetResource
         }
         if ($null -ne $zone)
         {
-            $message = ("Setup file is blocked! Please use 'Unblock-File -Path $setupExe' " + `
+            throw ("Setup file is blocked! Please use 'Unblock-File -Path $setupExe' " + `
                     "to unblock the file before continuing.")
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $MyInvocation.MyCommand.Source
-            throw $message
         }
         Write-Verbose -Message "File not blocked, continuing."
     }
@@ -438,43 +403,23 @@ function Set-TargetResource
 
         if ($upgradeTimes.Count -ne 3)
         {
-            $message = "Time window incorrectly formatted."
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $MyInvocation.MyCommand.Source
-            throw $message
+            throw "Time window incorrectly formatted."
         }
         else
         {
             if ([datetime]::TryParse($upgradeTimes[0], [ref]$starttime) -ne $true)
             {
-                $message = "Error converting start time"
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $MyInvocation.MyCommand.Source
-                throw $message
+                throw "Error converting start time"
             }
 
             if ([datetime]::TryParse($upgradeTimes[2], [ref]$endtime) -ne $true)
             {
-                $message = "Error converting end time"
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $MyInvocation.MyCommand.Source
-                throw $message
+                throw "Error converting end time"
             }
 
             if ($starttime -gt $endtime)
             {
-                $message = "Error: Start time cannot be larger than end time"
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $MyInvocation.MyCommand.Source
-                throw $message
+                throw "Error: Start time cannot be larger than end time"
             }
         }
 
@@ -510,12 +455,7 @@ function Set-TargetResource
         }
         else
         {
-            $message = "Cannot extract servername from UNC path. Check if it is in the correct format."
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $MyInvocation.MyCommand.Source
-            throw $message
+            throw "Cannot extract servername from UNC path. Check if it is in the correct format."
         }
 
         Set-SPDscZoneMap -Server $serverName
@@ -579,12 +519,7 @@ function Set-TargetResource
         }
         Default
         {
-            $message = "SharePoint Language Pack install failed, exit code was $($setup.ExitCode)"
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $MyInvocation.MyCommand.Source
-            throw $message
+            throw "SharePoint Language Pack install failed, exit code was $($setup.ExitCode)"
         }
     }
 }
@@ -625,13 +560,9 @@ function Test-TargetResource
 
     if ($Ensure -eq "Absent")
     {
-        $message = ("SharePointDsc does not support uninstalling SharePoint " + `
+        throw [Exception] ("SharePointDsc does not support uninstalling SharePoint " + `
                 "Language Packs. Please remove this manually.")
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
+        return
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters

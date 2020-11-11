@@ -1,3 +1,8 @@
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
+$script:resourceHelperModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'SharePointDsc.Util'
+Import-Module -Name (Join-Path -Path $script:resourceHelperModulePath -ChildPath 'SharePointDsc.Util.psm1')
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -215,17 +220,12 @@ function Get-TargetResource
         $installedVersion = Get-SPDscInstalledProductVersion
         if ($installedVersion.FileMajorPart -eq 15)
         {
-            $message = ("The following parameters are only supported in SharePoint 2016 and above: " + `
+            throw ("The following parameters are only supported in SharePoint 2016 and above: " + `
                     "DFLTCMaxConnectionsToServer, DFLTCRequestTimeout, DFLTCChannelOpenTimeOut, " + `
                     "DSWUCMaxConnectionsToServer, DSWUCRequestTimeout, DSWUCChannelOpenTimeOut, " + `
                     "DUGCMaxConnectionsToServer, DUGCRequestTimeout, DUGCChannelOpenTimeOut, " + `
                     "DRTCMaxConnectionsToServer, DRTCRequestTimeout, DRTCChannelOpenTimeOut, " + `
                     "DHSCMaxConnectionsToServer, DHSCRequestTimeout and DHSCChannelOpenTimeOut")
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $MyInvocation.MyCommand.Source
-            throw $message
         }
     }
 
@@ -576,17 +576,12 @@ function Set-TargetResource
         $installedVersion = Get-SPDscInstalledProductVersion
         if ($installedVersion.FileMajorPart -eq 15)
         {
-            $message = ("The following parameters are only supported in SharePoint 2016 and above: " + `
+            throw ("The following parameters are only supported in SharePoint 2016 and above: " + `
                     "DFLTCMaxConnectionsToServer, DFLTCRequestTimeout, DFLTCChannelOpenTimeOut, " + `
                     "DSWUCMaxConnectionsToServer, DSWUCRequestTimeout, DSWUCChannelOpenTimeOut, " + `
                     "DUGCMaxConnectionsToServer, DUGCRequestTimeout, DUGCChannelOpenTimeOut, " + `
                     "DRTCMaxConnectionsToServer, DRTCRequestTimeout, DRTCChannelOpenTimeOut, " + `
                     "DHSCMaxConnectionsToServer, DHSCRequestTimeout and DHSCChannelOpenTimeOut")
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $MyInvocation.MyCommand.Source
-            throw $message
         }
     }
 

@@ -1,3 +1,8 @@
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
+$script:resourceHelperModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'SharePointDsc.Util'
+Import-Module -Name (Join-Path -Path $script:resourceHelperModulePath -ChildPath 'SharePointDsc.Util.psm1')
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -108,10 +113,9 @@ function Set-TargetResource
     if ($Ensure -eq "Present")
     {
         Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+            -Arguments $PSBoundParameters `
             -ScriptBlock {
             $params = $args[0]
-            $eventSource = $args[1]
 
             $webapp = Get-SPWebApplication -IncludeCentralAdministration | Where-Object -FilterScript {
                 $_.DisplayName -eq $params.WebAppName
@@ -119,12 +123,7 @@ function Set-TargetResource
 
             if ($null -eq $webapp)
             {
-                $message = "Web application was not found. Please check WebAppName parameter!"
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $eventSource
-                throw $message
+                throw "Web application was not found. Please check WebAppName parameter!"
             }
 
             $urlAam = Get-SPAlternateURL -Identity $params.Url `
@@ -153,13 +152,8 @@ function Set-TargetResource
                 }
                 else
                 {
-                    $message = ("Specified URL found on different WebApp/Zone: WebApp " + `
+                    throw ("Specified URL found on different WebApp/Zone: WebApp " + `
                             "$($urlAam.PublicUrl) in zone $($urlAam.Zone)")
-                    Add-SPDscEvent -Message $message `
-                        -EntryType 'Error' `
-                        -EventID 100 `
-                        -Source $eventSource
-                    throw $message
                 }
             }
             else
@@ -201,13 +195,8 @@ function Set-TargetResource
                     }
                     else
                     {
-                        $message = ("Specified URL ($($params.Url)) found on different WebApp/Zone: " + `
+                        throw ("Specified URL ($($params.Url)) found on different WebApp/Zone: " + `
                                 "WebApp $($urlAam.PublicUrl) in zone $($urlAam.Zone)")
-                        Add-SPDscEvent -Message $message `
-                            -EntryType 'Error' `
-                            -EventID 100 `
-                            -Source $eventSource
-                        throw $message
                     }
                 }
                 else
@@ -221,13 +210,8 @@ function Set-TargetResource
                         }
                         else
                         {
-                            $message = ("Specified URL found on different WebApp/Zone: WebApp " + `
+                            throw ("Specified URL found on different WebApp/Zone: WebApp " + `
                                     "$($urlAam.PublicUrl) in zone $($urlAam.Zone)")
-                            Add-SPDscEvent -Message $message `
-                                -EntryType 'Error' `
-                                -EventID 100 `
-                                -Source $eventSource
-                            throw $message
                         }
                     }
                     else
@@ -319,3 +303,36 @@ function Test-TargetResource
 
     return $result
 }
+
+function Export-TargetResource
+{
+    $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath "\DSCResources\MSFT_SPAlternateUrl\MSFT_SPAlternateUrl.psm1" -Resolve
+    $Content = ''
+    $params = Get-DSCFakeParameters -ModulePath $module
+
+    $webApps = Get-SPWebApplication
+    foreach($webApp in $webApps)
+    {
+        $alternateUrls = Get-SPAlternateUrl -WebApplication $webApp
+
+        foreach($alternateUrl in $alternateUrls)
+        {
+            $PartialContent = "        SPAlternateUrl " + [System.Guid]::NewGuid().toString() + "`r`n"
+            $PartialContent += "        {`r`n"
+            $params.WebAppName = $webApp.Name
+            $params.Zone = $alternateUrl.UrlZone
+            $params.Url = $alternateUrl.IncomingUrl
+            $results = Get-TargetResource @params
+            $results = Repair-Credentials -results $results
+            $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+            $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+            $PartialContent += $currentBlock
+            $PartialContent += "        }`r`n"
+            $Content += $PartialContent
+        }
+    }
+    Return $Content
+}
+
+Export-ModuleMember -Function *-TargetResource
