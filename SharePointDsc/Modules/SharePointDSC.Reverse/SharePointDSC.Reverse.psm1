@@ -860,7 +860,11 @@ function Read-OperatingSystemVersion
         $serverName = $spServer.Name
         try
         {
-            $osInfo = Get-CimInstance Win32_OperatingSystem  -ComputerName $serverName -ErrorAction SilentlyContinue | Select-Object @{Label = "OSName"; Expression = { $_.Name.Substring($_.Name.indexof("W"), $_.Name.indexof("|") - $_.Name.indexof("W")) } } , Version , OSArchitecture -ErrorAction SilentlyContinue
+            $ObjectParam = @{
+                Label      = "OSName"
+                Expression = { $_.Name.Substring($_.Name.indexof("W"), $_.Name.indexof("|") - $_.Name.indexof("W")) }
+            }
+            $osInfo = Get-CimInstance Win32_OperatingSystem  -ComputerName $serverName -ErrorAction SilentlyContinue | Select-Object $ObjectParam , Version , OSArchitecture -ErrorAction SilentlyContinue
             $Content += "    [" + $serverName + "]: " + $osInfo.OSName + "(" + $osInfo.OSArchitecture + ")    ----    " + $osInfo.Version + "`r`n"
         }
         catch
