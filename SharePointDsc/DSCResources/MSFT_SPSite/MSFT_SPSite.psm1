@@ -697,7 +697,7 @@ function Export-TargetResource
         $i++
         $Content += $partialContent
     }
-    Return $Content
+    return $Content
 }
 
 Export-ModuleMember -Function *-TargetResource

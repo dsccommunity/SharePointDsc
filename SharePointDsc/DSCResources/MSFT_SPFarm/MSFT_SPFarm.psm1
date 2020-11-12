@@ -1471,7 +1471,7 @@ function Export-TargetResource
     {
         $Content += Read-TargetResource -ResourceName SPFeature -ExportParam @{Scope = "Farm"; }
     }
-    Return $Content
+    return $Content
 }
 
 

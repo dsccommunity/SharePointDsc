@@ -225,16 +225,17 @@ function Test-TargetResource
     return $result
 }
 
-Function Export-TargetResource{
+Function Export-TargetResource
+{
     Param(
         $Scope,
         $URL,
         $DependsOn
     )
     $VerbosePreference = "SilentlyContinue"
-    $spMajorVersion = (Get-SPDSCInstalledProductVersion).FileMajorPart
+    $spMajorVersion = (Get-SPDscInstalledProductVersion).FileMajorPart
     $versionFilter = $spMajorVersion.ToString() + "*"
-    $Features = Get-SPFeature | Where-Object{$_.Scope -eq $Scope -and $_.Version -like $versionFilter}
+    $Features = Get-SPFeature | Where-Object { $_.Scope -eq $Scope -and $_.Version -like $versionFilter }
     $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
     $module = Join-Path -Path $ParentModuleBase -ChildPath "\DSCResources\MSFT_SPFeature\MSFT_SPFeature.psm1" -Resolve
     Import-Module $module -Scope Local
@@ -243,7 +244,7 @@ Function Export-TargetResource{
     $j = 1
     $totalFeat = $Features.Length
     $Content = ""
-    foreach($Feature in $Features)
+    foreach ($Feature in $Features)
     {
         try
         {
@@ -251,24 +252,26 @@ Function Export-TargetResource{
             Write-Host "    -> Scanning Feature [$j/$totalFeat] {$displayName}"
             $params.Name = $displayName
             $params.FeatureScope = $Scope
-            if ($URL){
+            if ($URL)
+            {
                 $params.Url = $Url
             }
             $results = Get-TargetResource @params
 
-            if($results.Get_Item("Ensure").ToLower() -eq "present")
+            if ($results.Get_Item("Ensure").ToLower() -eq "present")
             {
                 $partialContent = "        SPFeature " + [System.Guid]::NewGuid().ToString() + "`r`n"
                 $partialContent += "        {`r`n"
 
                 <# Manually add the InstallAccount param due to a bug in 1.6.0.0 that returns a param named InstalAccount (typo) instead.
                 https://github.com/PowerShell/SharePointDsc/issues/481 #>
-                if($results.ContainsKey("InstalAccount"))
+                if ($results.ContainsKey("InstalAccount"))
                 {
                     $results.Remove("InstalAccount")
                 }
                 $results = Repair-Credentials -results $results
-                if ($DependsOn){
+                if ($DependsOn)
+                {
                     $results.add("DependsOn", $DependsOn)
                 }
                 $currentDSCBlock = Get-DSCBlock -Params $results -ModulePath $module
@@ -286,7 +289,7 @@ Function Export-TargetResource{
             $Global:ErrorLog += "$_`r`n`r`n"
         }
     }
-    Return $Content
+    return $Content
 }
 
 Export-ModuleMember -Function *-TargetResource

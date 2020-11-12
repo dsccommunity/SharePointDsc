@@ -391,7 +391,7 @@ function Export-TargetResource
     $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
     $Content += $currentBlock
     $Content += "        }`r`n"
-    Return $Content
+    return $Content
 }
 
 

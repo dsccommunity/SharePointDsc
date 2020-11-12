@@ -346,29 +346,29 @@ function Export-TargetResource
     $module = Join-Path -Path $ParentModuleBase -ChildPath "\DSCResources\MSFT_SPSearchResultSource\MSFT_SPSearchResultSource.psm1" -Resolve
     $params = Get-DSCFakeParameters -ModulePath $module
 
-    $ssas = Get-SPServiceApplication | Where-Object -FilterScript{$_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"}
+    $ssas = Get-SPServiceApplication | Where-Object -FilterScript { $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication" }
 
     $i = 1
     $total = $ssas.Length
-    foreach($ssa in $ssas)
+    foreach ($ssa in $ssas)
     {
         try
         {
-            if($ssa)
+            if ($ssa)
             {
                 $serviceName = $ssa.DisplayName
                 Write-Host "Scanning Results Sources for Search Service Application [$i/$total] {$serviceName}"
                 $fedman = New-Object Microsoft.Office.Server.Search.Administration.Query.FederationManager($ssa)
                 $searchOwner = Get-SPEnterpriseSearchOwner -Level SSA
                 $filter = New-Object Microsoft.Office.Server.Search.Administration.SearchObjectFilter($searchOwner)
-                $resultSources = $fedman.ListSources($filter,$true)
+                $resultSources = $fedman.ListSources($filter, $true)
 
                 $j = 1
                 $totalRS = $resultSources.Count
-                foreach($resultSource in $resultSources)
+                foreach ($resultSource in $resultSources)
                 {
                     <# Filter out the hidden Local SharePoint Graph provider since it is not supported by SharePointDSC. #>
-                    if($resultSource.Name -ne "Local SharePoint Graph")
+                    if ($resultSource.Name -ne "Local SharePoint Graph")
                     {
                         try
                         {
@@ -386,15 +386,15 @@ function Export-TargetResource
                                 $_.Id -eq $resultSource.ProviderId
                             }
 
-                            if($null -eq $results.Get_Item("ConnectionUrl") -or $results.ConnectionUrl -eq "")
+                            if ($null -eq $results.Get_Item("ConnectionUrl") -or $results.ConnectionUrl -eq "")
                             {
                                 $results.Remove("ConnectionUrl")
                             }
-                            $results.Query = $resultSource.QueryTransform.QueryTemplate.Replace("`"","'")
+                            $results.Query = $resultSource.QueryTransform.QueryTemplate.Replace("`"", "'")
                             $results.ProviderType = $provider.Name
                             $results.Ensure = "Present"
                             $results.ScopeUrl = "Global"
-                            if($resultSource.ConnectionUrlTemplate)
+                            if ($resultSource.ConnectionUrlTemplate)
                             {
                                 $results.ConnectionUrl = $resultSource.ConnectionUrlTemplate
                             }
@@ -435,7 +435,7 @@ function Export-TargetResource
                                         $filter = New-Object Microsoft.Office.Server.Search.Administration.SearchObjectFilter($searchOwner)
                                         # Filtering Higher Sources from each Web as they will be exported with the Service App
                                         $filter.IncludeHigherLevel = $false
-                                        $sources = $fedman.ListSources($filter,$true)
+                                        $sources = $fedman.ListSources($filter, $true)
 
                                         foreach ($source in $sources)
                                         {
@@ -461,7 +461,7 @@ function Export-TargetResource
                                                     {
                                                         $results.Remove("ConnectionUrl")
                                                     }
-                                                    $results.Query = $source.QueryTransform.QueryTemplate.Replace("`"","'")
+                                                    $results.Query = $source.QueryTransform.QueryTemplate.Replace("`"", "'")
                                                     $results.ProviderType = $provider.Name
                                                     $results.Ensure = "Present"
                                                     if ($source.ConnectionUrlTemplate)

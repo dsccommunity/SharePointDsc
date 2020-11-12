@@ -520,7 +520,7 @@ function Export-TargetResource
     )
     $VerbosePreference = "SilentlyContinue"
     Add-ConfigurationDataEntry -Node "NonNodeData" -Key "FullInstallation" -Value "`$False" -Description "Specifies whether or not the DSC configuration script will install the SharePoint Prerequisites and Binaries;"
-    $Content = "        if(`$ConfigurationData.NonNodeData.FullInstallation)`r`n"
+    $Content = "        if (`$ConfigurationData.NonNodeData.FullInstallation)`r`n"
     $Content += "        {`r`n"
     $Content += "            SPInstall BinaryInstallation" + "`r`n            {`r`n"
 
@@ -542,7 +542,7 @@ function Export-TargetResource
     $Content += "            }`r`n"
     $Content += "        }`r`n"
 
-    Return $Content
+    return $Content
 }
 
 Export-ModuleMember -Function *-TargetResource

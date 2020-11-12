@@ -1298,7 +1298,7 @@ function Export-TargetResource
     {
         Add-ConfigurationDataEntry -Node "NonNodeData" -Key "FullInstallation" -Value "`$False" -Description "Specifies whether or not the DSC configuration script will install the SharePoint Prerequisites and Binaries;"
     }
-    $Content = "        if(`$ConfigurationData.NonNodeData.FullInstallation)`r`n"
+    $Content = "        if (`$ConfigurationData.NonNodeData.FullInstallation)`r`n"
     $Content += "        {`r`n"
     $Content += "            SPInstallPrereqs PrerequisitesInstallation" + "`r`n            {`r`n"
     if ([System.String]::IsNullOrEmpty($BinaryLocation))

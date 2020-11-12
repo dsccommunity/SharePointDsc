@@ -196,7 +196,7 @@ function Export-TargetResource
 
     $i = 1
     $total = $spServiceAppPools.Length
-    foreach($spServiceAppPool in $spServiceAppPools)
+    foreach ($spServiceAppPool in $spServiceAppPools)
     {
         try
         {
@@ -210,18 +210,18 @@ function Export-TargetResource
 
             $serviceAccount = Get-Credentials $results.ServiceAccount
             $convertToVariable = $false
-            if($serviceAccount)
+            if ($serviceAccount)
             {
                 $convertToVariable = $true
                 $results.ServiceAccount = (Resolve-Credentials -UserName $results.ServiceAccount) + ".UserName"
             }
 
-            if($null -eq $results.Get_Item("AllowAnonymous"))
+            if ($null -eq $results.Get_Item("AllowAnonymous"))
             {
                 $results.Remove("AllowAnonymous")
             }
             $currentDSCBlock = Get-DSCBlock -Params $results -ModulePath $module
-            if($convertToVariable)
+            if ($convertToVariable)
             {
                 $currentDSCBlock = Convert-DSCStringParamToVariable -DSCBlock $currentDSCBlock -ParameterName "ServiceAccount"
                 $currentDSCBlock = Convert-DSCStringParamToVariable -DSCBlock $currentDSCBlock -ParameterName "PsDscRunAsCredential"
@@ -238,7 +238,7 @@ function Export-TargetResource
         }
         $Content += $PartialContent
     }
-    Return $Content
+    return $Content
 }
 
 

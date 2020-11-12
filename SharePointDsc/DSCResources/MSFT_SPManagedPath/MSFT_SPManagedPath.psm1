@@ -224,28 +224,28 @@ function Export-TargetResource
     $spWebApps = Get-SPWebApplication
     $params = Get-DSCFakeParameters -ModulePath $module
 
-    foreach($spWebApp in $spWebApps)
+    foreach ($spWebApp in $spWebApps)
     {
         $spManagedPaths = Get-SPManagedPath -WebApplication $spWebApp.Url | Sort-Object -Property Name
 
         $i = 1
         $total = $spManagedPaths.Length
-        foreach($spManagedPath in $spManagedPaths)
+        foreach ($spManagedPath in $spManagedPaths)
         {
             try
             {
                 Write-Host "Scanning Web Application Managed Path [$i/$total] {"$spManagedPath.Name"}"
-                if($spManagedPath.Name.Length -gt 0 -and $spManagedPath.Name -ne "sites")
+                if ($spManagedPath.Name.Length -gt 0 -and $spManagedPath.Name -ne "sites")
                 {
                     $PartialContent = "        SPManagedPath " + [System.Guid]::NewGuid().toString() + "`r`n"
                     $PartialContent += "        {`r`n"
-                    if($null -ne $spManagedPath.Name)
+                    if ($null -ne $spManagedPath.Name)
                     {
                         $params.RelativeUrl = $spManagedPath.Name
                     }
                     $params.WebAppUrl = $spWebApp.Url
                     $params.HostHeader = $false;
-                    if($params.Contains("InstallAccount"))
+                    if ($params.Contains("InstallAccount"))
                     {
                         $params.Remove("InstallAccount")
                     }
@@ -271,21 +271,21 @@ function Export-TargetResource
     $spManagedPaths = Get-SPManagedPath -HostHeader | Sort-Object -Property Name
     $i = 0
     $total = $spManagedPaths.Length
-    foreach($spManagedPath in $spManagedPaths)
+    foreach ($spManagedPath in $spManagedPaths)
     {
         try
         {
             Write-Host "Scanning Host Header Managed Path [$i/$total] {"$spManagedPath.Name"}"
-            if($spManagedPath.Name.Length -gt 0 -and $spManagedPath.Name -ne "sites")
+            if ($spManagedPath.Name.Length -gt 0 -and $spManagedPath.Name -ne "sites")
             {
                 $PartialContent = "        SPManagedPath " + [System.Guid]::NewGuid().toString() + "`r`n"
                 $PartialContent += "        {`r`n"
 
-                if($null -ne $spManagedPath.Name)
+                if ($null -ne $spManagedPath.Name)
                 {
                     $params.RelativeUrl = $spManagedPath.Name
                 }
-                if($params.ContainsKey("Explicit"))
+                if ($params.ContainsKey("Explicit"))
                 {
                     $params.Explicit = ($spManagedPath.Type -eq "ExplicitInclusion")
                 }
@@ -311,7 +311,7 @@ function Export-TargetResource
         }
         $Content += $PartialContent
     }
-    Return $Content
+    return $Content
 }
 
 Export-ModuleMember -Function *-TargetResource
