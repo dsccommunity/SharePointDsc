@@ -57,9 +57,16 @@ and download the package. This will result in exit code 1620.
 
 The supported package can be downloaded as part of the [SQL Server 2016 Feature Pack](https://www.microsoft.com/en-us/download/details.aspx?id=56833).
 
-Make sure you install this package first or use the following
+Make sure you download and install this package first or use the following
 example:
 ```PowerShell
+xRemoteFile SQLNCli
+{
+    Uri             = "https://download.microsoft.com/download/B/1/7/B1783FE9-717B-4F78-A39A-A2E27E3D679D/ENU/x64/sqlncli.msi"
+    DestinationPath = "C:\Install\SharePoint\prerequisiteinstallerfiles\sqlncli.msi"
+    MatchSource     = $false
+}
+
 Package SQLNCli
 {
     Path        = "C:\Install\SharePoint\prerequisiteinstallerfiles\sqlncli.msi"
