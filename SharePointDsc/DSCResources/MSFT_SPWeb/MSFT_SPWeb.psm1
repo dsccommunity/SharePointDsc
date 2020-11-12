@@ -364,10 +364,10 @@ function Export-TargetResource
     $SPWebs = Get-SPWeb -Limit All -Site $URL
     $j = 1
     $totalWebs = $webs.Length
-    Foreach ($SPWeb in $SPWebs)
+    foreach ($SPWeb in $SPWebs)
     {
         Write-Host "    -> Scanning Web [$j/$totalWebs] {$($SPWeb.URL)}"
-        Try
+        try
         {
             $paramsWeb = Get-DSCFakeParameters -ModulePath $module
             $SPWebGuid = [System.Guid]::NewGuid().toString()
@@ -391,7 +391,13 @@ function Export-TargetResource
             <# SPWeb Feature Section #>
             if (($Global:ExtractionModeValue -eq 3 -and $Quiet) -or $Global:ComponentsToExtract.Contains("SPFeature"))
             {
-                $partialContent += Read-TargetResource -ResourceName SPFeature -ExportParam @{Scope = "Web"; Url = $SPWeb.URL; DependsOn = "[SPWeb]$($SPWebGuid)"; }
+                $Properties = @{
+                    Scope     = "Web"
+                    Url       = $SPWeb.URL
+                    DependsOn = "[SPWeb]$($SPWebGuid)"
+                }
+                $partialContent += Read-TargetResource -ResourceName 'SPFeature' `
+                    -ExportParam $Properties
             }
             $j++
         }

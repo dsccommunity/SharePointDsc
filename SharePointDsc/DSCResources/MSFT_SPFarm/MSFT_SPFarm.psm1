@@ -1354,12 +1354,13 @@ function Export-TargetResource
 {
     [CmdletBinding()]
     [OutputType([System.String])]
-    param (
-        [parameter()]
+    param
+    (
+        [Parameter()]
         [System.String]
         $ServerName,
 
-        [parameter()]
+        [Parameter()]
         [System.Boolean]
         $RunCentralAdmin
     )
@@ -1475,7 +1476,9 @@ function Export-TargetResource
     <# SPFarm Feature Section #>
     if (($Global:ExtractionModeValue -eq 3 -and $Quiet) -or $Global:ComponentsToExtract.Contains("SPFeature"))
     {
-        $Properties = @{Scope = "Farm" }
+        $Properties = @{
+            Scope = "Farm"
+        }
         $Content += Read-TargetResource -ResourceName 'SPFeature' -ExportParam $Properties
     }
     return $Content

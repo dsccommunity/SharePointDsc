@@ -229,7 +229,8 @@ function Export-TargetResource
 {
     [CmdletBinding()]
     [OutputType([System.String])]
-    param(
+    param
+    (
         [Parameter()]
         [System.String]
         $Scope,
