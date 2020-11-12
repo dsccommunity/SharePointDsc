@@ -57,7 +57,7 @@ and download the package. This will result in exit code 1620.
 
 The supported package can be downloaded as part of the [SQL Server 2016 Feature Pack](https://www.microsoft.com/en-us/download/details.aspx?id=56833).
 
-Make sure you download and install this package first or use the following
+Make sure you install this package first or use the following
 example:
 ```PowerShell
 Package SQLNCli
