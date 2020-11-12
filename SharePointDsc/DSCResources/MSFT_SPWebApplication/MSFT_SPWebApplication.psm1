@@ -463,9 +463,20 @@ function Export-TargetResource
             <# SPWebApplication Feature Section #>
             if (($Global:ExtractionModeValue -eq 3 -and $Quiet) -or $Global:ComponentsToExtract.Contains("SPFeature"))
             {
-                $partialContent += Read-TargetResource -ResourceName SPFeature -ExportParams @{Scope = "WebApplication"; Url = $SpWebApp.Url; DependsOn = "[SPWebApplication]$($spWebApp.Name.Replace(' ', ''))"; }
+                $properties = @{
+                    Scope     = "WebApplication"
+                    Url       = $SpWebApp.Url
+                    DependsOn = "[SPWebApplication]$($spWebApp.Name.Replace(' ', ''))"
+                }
+                $partialContent += Read-TargetResource -ResourceName 'SPFeature' `
+                    -ExportParams $properties
             }
-            $partialContent += Read-TargetResource -ResourceName SPOutgoingEmailSettings -ExportParams @{WebAppUrl = $spWebApp.Url; DependsOn = "[SPWebApplication]$($spWebApp.Name.Replace(' ', ''))"; }
+            $properties = @{
+                WebAppUrl = $spWebApp.Url
+                DependsOn = "[SPWebApplication]$($spWebApp.Name.Replace(' ', ''))"
+            }
+            $partialContent += Read-TargetResource -ResourceName 'SPOutgoingEmailSettings' `
+                -ExportParams $properties
             $i++
         }
         catch
@@ -477,7 +488,7 @@ function Export-TargetResource
 
         $content += $partialContent
     }
-    Return $content
+    return $content
 }
 
 Export-ModuleMember -Function *-TargetResource

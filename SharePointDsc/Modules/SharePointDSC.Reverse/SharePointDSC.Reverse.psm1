@@ -13,7 +13,8 @@ $Script:ExtractionModeValue = "2"
 $script:SkipSitesAndWebs = $SkipSitesAndWebs
 function Start-SharePointDSCExtract
 {
-    param(
+    param
+    (
         [Parameter()]
         [switch]
         $Quiet = $false,
@@ -312,10 +313,14 @@ function Get-SPReverseDSC
 function Read-TargetResource
 {
     [CmdletBinding()]
-    param (
-        [string]
+    param
+    (
+        [Parameter()]
+        [System.String]
         $ResourceName,
-        [HashTable]
+
+        [Parameter()]
+        [System.Collections.HashTable]
         $ExportParams
     )
     $ParentModueBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
@@ -326,7 +331,7 @@ function Read-TargetResource
     {
         $ModuleName = $ResourceModule.Name.Split('.')[0]
     }
-    Catch
+    catch
     {
         Write-Host "$($ResourceName) not found" -ForegroundColor Magenta
     }
@@ -342,12 +347,12 @@ function Read-TargetResource
             {
                 Write-Information "Exporting $($module.Name)"
                 $exportString = Export-TargetResource @ExportParams
-                Return $exportString
+                return $exportString
                 #[void]$sb.Append($exportString)
             }
         }
     }
-    Catch
+    catch
     {
         $_
         $Global:ErrorLog += "Read-TargetResource $($ResourceName)`r`n"
@@ -356,14 +361,35 @@ function Read-TargetResource
 }
 function Orchestrator
 {
-    param(
-        [switch]$Standalone,
-        [String]$OutputPath = $null,
-        [System.Management.Automation.PSCredential]$Credentials,
-        [System.Object[]]$ComponentsToExtract,
+    [CmdletBinding()]
+    param
+    (
+        [Parameter()]
+        [switch]
+        $Standalone,
+
+        [Parameter()]
+        [String]
+        $OutputPath = $null,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $Credentials,
+
+        [Parameter()]
+        [System.Object[]]
+        $ComponentsToExtract,
+
+        [Parameter()]
         [switch]$DynamicCompilation,
-        [String]$ProductKey,
-        [String]$BinaryLocation
+
+        [Parameter()]
+        [String]
+        $ProductKey,
+
+        [Parameter()]
+        [String]
+        $BinaryLocation
     )
 
     <#Skipped function for current time to disuss with Robert#>
@@ -739,7 +765,8 @@ function Orchestrator
 function Repair-Credentials
 {
     [CmdletBinding()]
-    param(
+    param
+    (
         [Parameter(Mandatory = $true)]
         [System.Collections.Hashtable]
         $results
@@ -869,8 +896,15 @@ function Read-SPProductVersions
     return $Content
 }
 
-function Get-SPWebPolicyPermissions($params)
+function Get-SPWebPolicyPermissions
 {
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [System.Collections.Hashtable]
+        $Params
+    )
     $permission = "            MSFT_SPWebPolicyPermissions`r`n            {`r`n"
     foreach ($key in $params.Keys)
     {
@@ -914,16 +948,27 @@ function Get-SPWebPolicyPermissions($params)
 
 function CheckDBForAliases()
 {
-    param(
-        [string]$DatabaseName
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [string]
+        $DatabaseName
     )
 
     $dbServer = Get-SPDatabase | Where-Object { $_.Name -eq $DatabaseName }
     return $dbServer.NormalizedDataSource
 }
 
-function Set-SPFarmAdministrators($members)
+function Set-SPFarmAdministrators
 {
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [System.String[]]
+        $Members
+    )
     $newMemberList = @()
     foreach ($member in $members)
     {
@@ -948,8 +993,15 @@ function Set-SPFarmAdministrators($members)
     return $newMemberList
 }
 
-function Get-SPWebAppHappyHour($params)
+function Get-SPWebAppHappyHour
 {
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [System.Collections.Hashtable]
+        $Params
+    )
     $happyHour = "MSFT_SPWebApplicationHappyHour{`r`n"
     foreach ($key in $params.Keys)
     {
@@ -967,8 +1019,15 @@ function Get-SPWebAppHappyHour($params)
     return $happyHour
 }
 
-function Get-SPServiceAppSecurityMembers($member)
+function Get-SPServiceAppSecurityMembers
 {
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [System.Management.Automation.PSCredential]
+        $Member
+    )
     try
     {
         [System.Guid]::Parse($member.UserName) | Out-Null
@@ -999,7 +1058,7 @@ function Get-SPServiceAppSecurityMembers($member)
     return $null
 }
 
-function Set-ObtainRequiredCredentials()
+function Set-ObtainRequiredCredentials
 {
     $credsContent = ""
 
@@ -1036,8 +1095,15 @@ function Set-Imports
     $Script:dscConfigContent += "`r`n"
 }
 
-function Get-SPCrawlSchedule($params)
+function Get-SPCrawlSchedule
 {
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [System.Collections.Hashtable]
+        $Params
+    )
     $currentSchedule = "MSFT_SPSearchCrawlSchedule{`r`n"
     foreach ($key in $params.Keys)
     {
@@ -1057,8 +1123,15 @@ function Get-SPCrawlSchedule($params)
 }
 
 #region GUI Related Functions
-function Select-ComponentsForMode($mode)
+function Select-ComponentsForMode
 {
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $Mode
+    )
     $components = $null
     if ($mode -eq 1)
     {
@@ -2041,13 +2114,20 @@ function DisplayGUI()
 
 function Invoke-SQL()
 {
-    param(
+    [CmdletBinding()]
+    param
+    (
         [Parameter(Mandatory = $true)]
-        [string]$Server,
+        [System.String]
+        $Server,
+
         [Parameter(Mandatory = $true)]
-        [string]$dbName,
+        [System.String]
+        $dbName,
+
         [Parameter(Mandatory = $true)]
-        [string]$sqlQuery
+        [System.String]
+        $sqlQuery
     )
 
     $ConnectString = "Data Source=${Server}; Integrated Security=SSPI; Initial Catalog=${dbName}"
@@ -2064,8 +2144,15 @@ function Invoke-SQL()
     $DataSet.Tables
 }
 
-function Set-TermStoreAdministratorsBlock($TermStoreAdminsLine)
+function Set-TermStoreAdministratorsBlock
 {
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [System.String[]]
+        $TermStoreAdminsLine
+    )
     $newArray = @()
     foreach ($admin in $TermStoreAdminsLine)
     {
@@ -2089,8 +2176,19 @@ function Set-TermStoreAdministratorsBlock($TermStoreAdminsLine)
     return $newArray
 }
 
-function Set-SPFarmAdministratorsBlock($DSCBlock, $ParameterName)
+function Set-SPFarmAdministratorsBlock
 {
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $DSCBlock,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $ParameterName
+    )
     $longestParamLength = 21 #PsDscRunAsCredential
     $missingSpaces = $longestParamLength - $ParameterName.Length
     $spaceContent = ""
@@ -2133,8 +2231,15 @@ function Set-SPFarmAdministratorsBlock($DSCBlock, $ParameterName)
     return $DSCBlock
 }
 
-function Set-TermStoreAdministrators($DSCBlock)
+function Set-TermStoreAdministrators
 {
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $DSCBlock
+    )
     $newLine = "TermStoreAdministrators = @("
 
     $startPosition = $DSCBlock.IndexOf("TermStoreAdministrators = @")
@@ -2175,8 +2280,15 @@ function Set-TermStoreAdministrators($DSCBlock)
     return $DSCBlock
 }
 
-function Save-SPFarmsolution($Path)
+function Save-SPFarmsolution
 {
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $Path
+    )
     Add-ConfigurationDataEntry -Node $env:COMPUTERNAME -Key "SPSolutionPath" -Value $Path -Description "Path where the custom solutions (.wsp) to be installed on the SharePoint Farm are located (local path or Network Share);"
     $solutions = Get-SPSolution
     $farm = Get-SPFarm
@@ -2196,8 +2308,15 @@ function Save-SPFarmsolution($Path)
     }
 }
 
-function New-RequiredUsersScript($Location)
+function New-RequiredUsersScript
 {
+    [CmdletBinding()]
+    param
+    (
+        [Parameter()]
+        [System.String]
+        $Location
+    )
     $content = "Import-Module ActiveDirectory`r`n"
     $content += "`$RequiredUsers = @("
 
