@@ -1002,6 +1002,16 @@ function Set-TargetResource
                     "installer from running. Scheduling a reboot.")
             $global:DSCMachineStatus = 1
         }
+        1620
+        {
+            $message = ("The prerequisite installer exited with error code 1620. Please check " + `
+                    "the Note in the Wiki for this resource: https://github.com/dsccommunity/SharePointDsc/wiki/SPInstallPrereqs")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
+        }
         3010
         {
             Write-Verbose -Message ("The prerequisite installer has run correctly and needs " + `

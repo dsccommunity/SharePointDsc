@@ -49,3 +49,31 @@ https://docs.microsoft.com/en-us/SharePoint/install/hardware-and-software-requir
 
 SharePoint 2019:
 https://docs.microsoft.com/en-us/sharepoint/install/hardware-and-software-requirements-2019#links-to-applicable-software
+
+NOTE:
+The SQL Server 2012 Native Client has been removed as download from the
+Microsoft site. Therefore the Prerequisites installer is unable to install
+and download the package. This will result in exit code 1620.
+
+The supported package can be downloaded as part of the [SQL Server 2016 Feature Pack](https://www.microsoft.com/en-us/download/details.aspx?id=56833).
+
+Make sure you download and install this package first or use the following
+example:
+```PowerShell
+xRemoteFile SQLNCli
+{
+    Uri             = "https://download.microsoft.com/download/B/1/7/B1783FE9-717B-4F78-A39A-A2E27E3D679D/ENU/x64/sqlncli.msi"
+    DestinationPath = "C:\Install\SharePoint\prerequisiteinstallerfiles\sqlncli.msi"
+    MatchSource     = $false
+    DependsOn       = "[File]SPLocalMediaEnsure"
+}
+
+Package SQLNCli
+{
+    Path        = "C:\Install\SharePoint\prerequisiteinstallerfiles\sqlncli.msi"
+    Name        = "Microsoft SQL Server 2012 Native Client "
+    ProductId   = "B9274744-8BAE-4874-8E59-2610919CD419"
+    Arguments   = "/qn /norestart IACCEPTSQLNCLILICENSETERMS=YES"
+    DependsOn   = "[xRemoteFile]SQLNCli"
+}
+```

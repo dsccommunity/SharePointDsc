@@ -219,6 +219,12 @@ try
                     Assert-MockCalled Start-Process
                 }
 
+                It "Should call the prerequisite installer from the set method and throw an error" {
+                    Mock -CommandName Start-Process { return @{ ExitCode = 1620 } }
+
+                    { Set-TargetResource @testParams } | Should -Throw "The prerequisite installer exited with error code 1620. Please check the Note in the Wiki for this resource: https://github.com/dsccommunity/SharePointDsc/wiki/SPInstallPrereqs"
+                }
+
                 It "Should call the prerequisite installer from the set method and a pending reboot is preventing it from running" {
                     Mock -CommandName Start-Process { return @{ ExitCode = 1001 } }
 

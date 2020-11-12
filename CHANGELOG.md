@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SPFarm
   - Switched from creating a Lock database to a Lock table in the TempDB.
     This to allow the use of precreated databases.
+- SPInstallPrereqs
+  - Updated readme to document that the SQL Server 2012 Native Client is
+    no longer automatically downloaded by the SP2016 Prereqs Installer
 - SPSite
   - Added more explanation to documentation on which parameters are checked
 - SPWeb
