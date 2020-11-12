@@ -1077,12 +1077,18 @@ function Test-TargetResource
 
 function Export-TargetResource
 {
+    [CmdletBinding()]
+    [OutputType([System.String])]
     param
     (
-        $searchSAName,
-        $dependsOn
-    )
+        [Parameter()]
+        [System.String]
+        $SearchSAName,
 
+        [Parameter()]
+        [System.String[]]
+        $DependsOn
+    )
     $VerbosePreference = "SilentlyContinue"
     $content = ''
     $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
@@ -1158,7 +1164,7 @@ function Export-TargetResource
                 $partialContent += "        }`r`n"
             }
         }
-        Catch
+        catch
         {
             $_
         }

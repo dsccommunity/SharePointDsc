@@ -509,7 +509,7 @@ function Test-TargetResource
 
 function Export-TargetResource
 {
-    param(
+    param (
         [Parameter()]
         [System.String]
         $ProductKey = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX",

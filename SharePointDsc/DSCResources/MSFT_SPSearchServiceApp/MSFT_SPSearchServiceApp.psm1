@@ -650,7 +650,11 @@ function Export-TargetResource
                 $partialContent += $currentBlock
                 $partialContent += "        }`r`n"
 
-                $partialContent += Read-TargetResource -ResourceName SPSearchContentSource -ExportParams @{searchSAName = $searchSAInstance.Name; DependsOn = "[SPSearchServiceApp]$($searchSAInstance.Name.Replace(' ', ''))" }
+                $properties = @{
+                    searchSAName = $searchSAInstance.Name
+                    DependsOn    = "[SPSearchServiceApp]$($searchSAInstance.Name.Replace(' ', ''))"
+                }
+                $partialContent += Read-TargetResource -ResourceName 'SPSearchContentSource' -ExportParams $properties
             }
             $i++
             $content += $partialContent
@@ -662,7 +666,7 @@ function Export-TargetResource
             $Global:ErrorLog += "$_`r`n`r`n"
         }
     }
-    Return $content
+    return $content
 }
 
 Export-ModuleMember -Function *-TargetResource

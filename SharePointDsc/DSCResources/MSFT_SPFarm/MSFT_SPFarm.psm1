@@ -1352,10 +1352,16 @@ function Test-TargetResource
 
 function Export-TargetResource
 {
-    $VerbosePreference = "SilentlyContinue"
-    param(
-        [string]$ServerName,
-        [bool]$RunCentralAdmin
+    [CmdletBinding()]
+    [OutputType([System.String])]
+    param (
+        [parameter()]
+        [System.String]
+        $ServerName,
+
+        [parameter()]
+        [System.Boolean]
+        $RunCentralAdmin
     )
     $spMajorVersion = (Get-SPDscInstalledProductVersion).FileMajorPart
     #$module = Resolve-Path ($Script:SPDSCPath + "\DSCResources\MSFT_SPFarm\MSFT_SPFarm.psm1")
@@ -1469,7 +1475,8 @@ function Export-TargetResource
     <# SPFarm Feature Section #>
     if (($Global:ExtractionModeValue -eq 3 -and $Quiet) -or $Global:ComponentsToExtract.Contains("SPFeature"))
     {
-        $Content += Read-TargetResource -ResourceName SPFeature -ExportParam @{Scope = "Farm"; }
+        $Properties = @{Scope = "Farm" }
+        $Content += Read-TargetResource -ResourceName 'SPFeature' -ExportParam $Properties
     }
     return $Content
 }

@@ -504,7 +504,7 @@ function Export-TargetResource
         }
         $Content += $partialContent
     }
-    Return $content
+    return $content
 }
 
 Export-ModuleMember -Function *-TargetResource

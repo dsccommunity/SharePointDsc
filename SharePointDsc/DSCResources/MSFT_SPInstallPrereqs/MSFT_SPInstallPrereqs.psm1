@@ -1284,7 +1284,8 @@ function Test-SPDscPrereqInstallStatus
 
 function Export-TargetResource
 {
-    param(
+    param
+    (
         [Parameter()]
         [System.String]
         $BinaryLocation = "\\<location>"

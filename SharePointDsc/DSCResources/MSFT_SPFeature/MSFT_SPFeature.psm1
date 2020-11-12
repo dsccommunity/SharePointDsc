@@ -225,11 +225,21 @@ function Test-TargetResource
     return $result
 }
 
-Function Export-TargetResource
+function Export-TargetResource
 {
-    Param(
+    [CmdletBinding()]
+    [OutputType([System.String])]
+    param(
+        [Parameter()]
+        [System.String]
         $Scope,
+
+        [Parameter()]
+        [System.String]
         $URL,
+
+        [Parameter()]
+        [System.String]
         $DependsOn
     )
     $VerbosePreference = "SilentlyContinue"

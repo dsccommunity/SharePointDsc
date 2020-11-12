@@ -419,7 +419,7 @@ function Test-TargetResource
     return $result
 }
 
-Function Export-TargetResource
+function Export-TargetResource
 {
     $VerbosePreference = "SilentlyContinue"
     $Global:DH_SPQUOTATEMPLATE = @{}
@@ -462,7 +462,7 @@ Function Export-TargetResource
         }
         $Content += $PartialContent
     }
-    Return $content
+    return $content
 }
 
 Export-ModuleMember -Function *-TargetResource

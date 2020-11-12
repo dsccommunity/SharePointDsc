@@ -665,25 +665,45 @@ function Export-TargetResource
                 $partialContent += "            DependsOn =  " + $dependsOnClause + "`r`n"
                 $partialContent += "        }`r`n"
 
-                $partialContent += Read-TargetResource -ResourceName SPSiteUrl -ExportParam @{URL = $SPSite.URL }
+                $properties = @{
+                    URL = $SPSite.URL
+                }
+                $partialContent += Read-TargetResource -ResourceName 'SPSiteUrl' `
+                    -ExportParam $properties
 
                 <# Nik20170112 - There are restrictions preventing this setting from being applied if the PsDscRunAsCredential parameter is not used.
                             Since this is only available in WMF 5, we check to see if the node farm we are extracting the configuration from is
                             running at least PowerShell v5 before reading the Site Collection level SPDesigner settings. #>
                 if ($PSVersionTable.PSVersion.Major -ge 5 -and $Global:ExtractionModeValue -ge 2)
                 {
-                    $partialContent += Read-TargetResource -Resource SPDesignerSettings -ExportParam @{URL = $SPSite.URL; Scope = "SiteCollection" }
+                    $properties = @{
+                        URL   = $SPSite.URL
+                        Scope = "SiteCollection"
+                    }
+                    $partialContent += Read-TargetResource -Resource 'SPDesignerSettings' `
+                        -ExportParam $properties
                 }
 
                 <# SPSite Feature Section #>
                 if (($Global:ExtractionModeValue -eq 3 -and $Quiet) -or $Global:ComponentsToExtract.Contains("SPFeature"))
                 {
-                    $partialContent += Read-TargetResource -ResourceName SPFeature -ExportParam @{Scope = "Site"; Url = $SpSite.Url; DependsOn = "[SPSite]$($siteGuid)"; }
+                    $properties = @{
+                        Scope     = "Site"
+                        Url       = $SpSite.Url
+                        DependsOn = "[SPSite]$($siteGuid)"
+                    }
+                    $partialContent += Read-TargetResource -ResourceName 'SPFeature' `
+                        -ExportParam $properties
                 }
 
                 if (($Global:ExtractionModeValue -eq 3 -and $Quiet) -or $Global:ComponentsToExtract.Contains("SPWeb"))
                 {
-                    $partialContent += Read-TargetResource -ResourceName SPWeb -ExportParam @{Url = $spSite.Url; DependsOn = "[SPSite]$($siteGuid)"; }
+                    $properties = @{
+                        Url       = $spSite.Url
+                        DependsOn = "[SPSite]$($siteGuid)"
+                    }
+                    $partialContent += Read-TargetResource -ResourceName 'SPWeb' `
+                        -ExportParam $properties
                 }
             }
             $i++

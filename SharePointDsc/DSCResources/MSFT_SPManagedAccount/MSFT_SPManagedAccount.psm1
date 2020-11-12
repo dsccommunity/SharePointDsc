@@ -255,8 +255,15 @@ function Export-TargetResource
             {
                 $schedule = $managedAccount.ChangeSchedule.ToString()
             }
-            $results = @{AccountName = $managedAccount.UserName; EmailNotification = $managedAccount.DaysBeforeChangeToEmail; PreExpireDays = $managedAccount.DaysBeforeExpiryToChange; Schedule = $schedule; Ensure = "Present"; }
-            $results["Account"] = (Resolve-Credentials -UserName $managedAccount.UserName)
+            $results = @{
+                AccountName       = $managedAccount.UserName
+                EmailNotification = $managedAccount.DaysBeforeChangeToEmail
+                PreExpireDays     = $managedAccount.DaysBeforeExpiryToChange
+                Schedule          = $schedule
+                Ensure            = "Present"
+                Account           = (Resolve-Credentials -UserName $managedAccount.UserName)
+            }
+
             $results = Repair-Credentials -results $results
 
             $accountName = Get-Credentials -UserName $managedAccount.UserName
