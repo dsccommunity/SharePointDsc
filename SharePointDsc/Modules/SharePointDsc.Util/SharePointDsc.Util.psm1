@@ -1345,33 +1345,46 @@ function Test-SPDscIsADUser
 {
     [OutputType([System.Boolean])]
     [CmdletBinding()]
-    param (
-        [Parameter()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
         [System.String]
         $IdentityName
     )
 
+    $DomainNetbiosName = ""
+
     if ($IdentityName -like "*\*")
     {
+        $DomainNetbiosName = $IdentityName.Split('\')[0]
         $IdentityName = $IdentityName.Substring($IdentityName.IndexOf('\') + 1)
     }
 
-    $searcher = New-Object -TypeName System.DirectoryServices.DirectorySearcher
-    $searcher.filter = "((samAccountName=$IdentityName))"
-    $searcher.SearchScope = "subtree"
-    $searcher.PropertiesToLoad.Add("objectClass") | Out-Null
-    $searcher.PropertiesToLoad.Add("objectCategory") | Out-Null
-    $searcher.PropertiesToLoad.Add("name") | Out-Null
-    $result = $searcher.FindOne()
+    $domainContext = New-Object System.DirectoryServices.ActiveDirectory.DirectoryContext("Domain", $DomainNetbiosName)
+    try
+    {
+        $domain = [System.DirectoryServices.ActiveDirectory.Domain]::GetDomain($domainContext)
+        $root = $domain.GetDirectoryEntry()
+
+        $searcher = [System.DirectoryServices.DirectorySearcher]::new()
+        $searcher.filter = "((samAccountName=$IdentityName))"
+        $searcher.SearchScope = "subtree"
+        $searcher.SearchRoot = $root
+
+        $searcher.PropertiesToLoad.Add("objectClass") | Out-Null
+        $searcher.PropertiesToLoad.Add("objectCategory") | Out-Null
+        $searcher.PropertiesToLoad.Add("name") | Out-Null
+        $result = $searcher.FindOne()
+    }
+    catch
+    {
+        return $false
+    }
 
     if ($null -eq $result)
     {
-        $message = "Unable to locate identity '$IdentityName' in the current domain."
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
+        Write-Host "Unable to locate identity '$IdentityName' in the current domain."
+        return $false
     }
 
     if ($result[0].Properties.objectclass -contains "user")

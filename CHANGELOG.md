@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - SharePointDsc
   - Added logging to the event log when the code throws an exception
+  - Added support for trusted domains to Test-SPDscIsADUser helper function
 
 ### Changed
 
