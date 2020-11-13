@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - SharePointDsc
   - Added logging to the event log when the code throws an exception
+  - Added support for trusted domains to Test-SPDscIsADUser helper function
+- SPInstall
+  - Added documentation about a SharePoint 2019 installer issue
 
 ### Changed
 
