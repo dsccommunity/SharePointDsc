@@ -245,6 +245,10 @@ function Convert-SPDscHashtableToString
         {
             $str = "$($pair.Key)=$(Convert-SPDscCIMInstanceToString -CIMInstance $pair.Value)"
         }
+        elseif ($pair.Value -is [System.Management.Automation.PSCredential])
+        {
+            $str = "$($pair.Key)=$($pair.Value.UserName)"
+        }
         else
         {
             $str = "$($pair.Key)=$($pair.Value)"
