@@ -12,12 +12,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - SharePointDsc
   - Added logging to the event log when the code throws an exception
+  - Added support for trusted domains to Test-SPDscIsADUser helper function
+- SPInstall
+  - Added documentation about a SharePoint 2019 installer issue
 
 ### Changed
 
+- SharePointDsc
+  - Updated Convert-SPDscHashtableToString to output the username when
+    parameter is a PSCredential
 - SPFarm
   - Switched from creating a Lock database to a Lock table in the TempDB.
     This to allow the use of precreated databases.
+  - Updated code to properly output used credential parameters to verbose
+    logging
 - SPSite
   - Added more explanation to documentation on which parameters are checked
 - SPWeb
@@ -40,7 +48,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Fixed issue where provisioning the service app requires a second run to
     update all specified parameters
 - SPWorkflowService
-  - Fixed issue configuring workflow service when no workflow service is currently configured.
+  - Fixed issue configuring workflow service when no workflow service is
+    currently configured
 
 ## [4.3.0] - 2020-09-30
 

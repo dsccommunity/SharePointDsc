@@ -985,6 +985,20 @@ function Set-TargetResource
                 {
                     try
                     {
+                        Write-Verbose -Message "Connecting to existing Config database"
+                        Write-Verbose -Message "executeArgs is:"
+                        foreach ($arg in $executeArgs.Keys)
+                        {
+                            if ($executeArgs.$arg -is [System.Management.Automation.PSCredential])
+                            {
+                                Write-Verbose -Message "$arg : $($executeArgs.$arg.UserName)"
+                            }
+                            else
+                            {
+                                Write-Verbose -Message "$arg : $($executeArgs.$arg)"
+                            }
+                        }
+
                         Connect-SPConfigurationDatabase @executeArgs | Out-Null
                         $connectedToFarm = $true
                     }
@@ -1034,7 +1048,14 @@ function Set-TargetResource
                     Write-Verbose -Message "executeArgs is:"
                     foreach ($arg in $executeArgs.Keys)
                     {
-                        Write-Verbose -Message "$arg $($executeArgs[$arg])"
+                        if ($executeArgs.$arg -is [System.Management.Automation.PSCredential])
+                        {
+                            Write-Verbose -Message "$arg : $($executeArgs.$arg.UserName)"
+                        }
+                        else
+                        {
+                            Write-Verbose -Message "$arg : $($executeArgs.$arg)"
+                        }
                     }
                     New-SPConfigurationDatabase @executeArgs
 
