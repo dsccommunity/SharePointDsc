@@ -177,6 +177,10 @@ function Get-TargetResource
 
         [Parameter()]
         [System.String]
+        $MSVCRT142,
+
+        [Parameter()]
+        [System.String]
         $KB3092423,
 
         [Parameter()]
@@ -190,6 +194,10 @@ function Get-TargetResource
         [Parameter()]
         [System.String]
         $DotNet472,
+
+        [Parameter()]
+        [System.String]
+        $DotNet48,
 
         [Parameter()]
         [ValidateSet("Present", "Absent")]
@@ -268,13 +276,18 @@ function Get-TargetResource
     }
     if ($majorVersion -eq 16)
     {
-        if ($buildVersion -lt 5000)
+        if ($buildVersion -lt 10000)
         {
             Write-Verbose -Message "Version: SharePoint 2016"
         }
-        elseif ($buildVersion -ge 5000)
+        elseif ($buildVersion -ge 10000 -and
+            $buildVersion -le 12999)
         {
             Write-Verbose -Message "Version: SharePoint 2019"
+        }
+        elseif ($buildVersion -ge 13000)
+        {
+            Write-Verbose -Message "Version: SharePoint [vNext]"
         }
     }
 
@@ -297,7 +310,7 @@ function Get-TargetResource
     }
     elseif ($majorVersion -eq 16)
     {
-        if ($buildVersion -lt 5000)
+        if ($buildVersion -lt 10000)
         {
             if ($osVersion.Major -eq 10)
             {
@@ -328,7 +341,8 @@ function Get-TargetResource
             }
         }
         # SharePoint 2019
-        elseif ($buildVersion -ge 5000)
+        elseif ($buildVersion -ge 10000 -and
+            $buildVersion -le 12999)
         {
             if ($osVersion.Major -eq 10)
             {
@@ -346,6 +360,36 @@ function Get-TargetResource
             else
             {
                 $message = "SharePoint 2019 only supports Windows Server 2016 or Windows Server 2019"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
+            }
+        }
+        # SharePoint [vNext]
+        elseif ($buildVersion -ge 13000)
+        {
+            if ($osVersion.Major -eq 10)
+            {
+                if ($osVersion.Build -ge 17763)
+                {
+                    Write-Verbose -Message "OS Version: Windows Server 2019"
+                    $WindowsFeatures = Get-WindowsFeature -Name $Script:SP2019Win19Features
+                }
+                else
+                {
+                    $message = "SharePoint [vNext] only supports Windows Server 2019"
+                    Add-SPDscEvent -Message $message `
+                        -EntryType 'Error' `
+                        -EventID 100 `
+                        -Source $MyInvocation.MyCommand.Source
+                    throw $message
+                }
+            }
+            else
+            {
+                $message = "SharePoint [vNext] only supports Windows Server 2019"
                 Add-SPDscEvent -Message $message `
                     -EntryType 'Error' `
                     -EventID 100 `
@@ -378,16 +422,6 @@ function Get-TargetResource
     # Common prereqs
     $prereqsToTest = @(
         [PSObject]@{
-            Name        = "AppFabric 1.1 for Windows Server"
-            SearchType  = "Equals"
-            SearchValue = "AppFabric 1.1 for Windows Server"
-        },
-        [PSObject]@{
-            Name        = "Microsoft CCR and DSS Runtime 2008 R3"
-            SearchType  = "Equals"
-            SearchValue = "Microsoft CCR and DSS Runtime 2008 R3"
-        },
-        [PSObject]@{
             Name        = "Microsoft Identity Extensions"
             SearchType  = "Equals"
             SearchValue = "Microsoft Identity Extensions"
@@ -414,6 +448,16 @@ function Get-TargetResource
                 SearchValue = "Active Directory Rights Management Services Client 2.*"
             },
             [PSObject]@{
+                Name        = "AppFabric 1.1 for Windows Server"
+                SearchType  = "Equals"
+                SearchValue = "AppFabric 1.1 for Windows Server"
+            },
+            [PSObject]@{
+                Name        = "Microsoft CCR and DSS Runtime 2008 R3"
+                SearchType  = "Equals"
+                SearchValue = "Microsoft CCR and DSS Runtime 2008 R3"
+            },
+            [PSObject]@{
                 Name        = "Microsoft SQL Server Native Client (2008 R2 or 2012)"
                 SearchType  = "Match"
                 SearchValue = "SQL Server (2008 R2|2012) Native Client"
@@ -429,7 +473,7 @@ function Get-TargetResource
     #SP2016/SP2019 prereqs
     if ($majorVersion -eq 16)
     {
-        if ($buildVersion -lt 5000)
+        if ($buildVersion -lt 10000)
         {
             #SP2016 prereqs
             $prereqsToTest += @(
@@ -437,6 +481,16 @@ function Get-TargetResource
                     Name        = "Active Directory Rights Management Services Client 2.1"
                     SearchType  = "Equals"
                     SearchValue = "Active Directory Rights Management Services Client 2.1"
+                },
+                [PSObject]@{
+                    Name        = "AppFabric 1.1 for Windows Server"
+                    SearchType  = "Equals"
+                    SearchValue = "AppFabric 1.1 for Windows Server"
+                },
+                [PSObject]@{
+                    Name        = "Microsoft CCR and DSS Runtime 2008 R3"
+                    SearchType  = "Equals"
+                    SearchValue = "Microsoft CCR and DSS Runtime 2008 R3"
                 },
                 [PSObject]@{
                     Name        = "Microsoft SQL Server 2012 Native Client"
@@ -466,7 +520,8 @@ function Get-TargetResource
                 }
             )
         }
-        elseif ($buildVersion -ge 5000)
+        elseif ($buildVersion -ge 10000 -and
+            $buildVersion -le 12999)
         {
             #SP2019 prereqs
             $prereqsToTest += @(
@@ -474,6 +529,16 @@ function Get-TargetResource
                     Name        = "Active Directory Rights Management Services Client 2.1"
                     SearchType  = "Equals"
                     SearchValue = "Active Directory Rights Management Services Client 2.1"
+                },
+                [PSObject]@{
+                    Name        = "AppFabric 1.1 for Windows Server"
+                    SearchType  = "Equals"
+                    SearchValue = "AppFabric 1.1 for Windows Server"
+                },
+                [PSObject]@{
+                    Name        = "Microsoft CCR and DSS Runtime 2008 R3"
+                    SearchType  = "Equals"
+                    SearchValue = "Microsoft CCR and DSS Runtime 2008 R3"
                 },
                 [PSObject]@{
                     Name        = "Microsoft SQL Server 2012 Native Client"
@@ -485,6 +550,18 @@ function Get-TargetResource
                     SearchType             = "BundleUpgradeCode"
                     SearchValue            = "{C146EF48-4D31-3C3D-A2C5-1E91AF8A0A9B}"
                     MinimumRequiredVersion = "14.13.26020.0"
+                }
+            )
+        }
+        elseif ($buildVersion -ge 13000)
+        {
+            #SP [vNext] prereqs
+            $prereqsToTest += @(
+                [PSObject]@{
+                    Name                   = "Microsoft Visual C++ 2015-2019 Redistributable (x64)"
+                    SearchType             = "BundleUpgradeCode"
+                    SearchValue            = "{C146EF48-4D31-3C3D-A2C5-1E91AF8A0A9B}"
+                    MinimumRequiredVersion = "14.27.29016.0"
                 }
             )
         }
@@ -611,6 +688,10 @@ function Set-TargetResource
 
         [Parameter()]
         [System.String]
+        $MSVCRT142,
+
+        [Parameter()]
+        [System.String]
         $KB3092423,
 
         [Parameter()]
@@ -624,6 +705,10 @@ function Set-TargetResource
         [Parameter()]
         [System.String]
         $DotNet472,
+
+        [Parameter()]
+        [System.String]
+        $DotNet48,
 
         [Parameter()]
         [ValidateSet("Present", "Absent")]
@@ -808,7 +893,7 @@ function Set-TargetResource
     }
     elseif ($majorVersion -eq 16)
     {
-        if ($buildVersion -lt 5000)
+        if ($buildVersion -lt 10000)
         {
             Write-Verbose -Message "Version: SharePoint 2016"
             $requiredParams = @("SQLNCli", "Sync", "AppFabric", "IDFX11", "MSIPCClient", "KB3092423",
@@ -842,7 +927,8 @@ function Set-TargetResource
             }
         }
         # SharePoint 2019
-        elseif ($buildVersion -ge 5000)
+        elseif ($buildVersion -ge 10000 -and
+            $buildVersion -le 12999)
         {
             Write-Verbose -Message "Version: SharePoint 2019"
             $requiredParams = @("SQLNCli", "Sync", "AppFabric", "IDFX11", "MSIPCClient", "KB3092423",
@@ -864,6 +950,39 @@ function Set-TargetResource
             else
             {
                 $message = "SharePoint 2019 only supports Windows Server 2016 or Windows Server 2019"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
+            }
+        }
+        # SharePoint [vNext]
+        elseif ($buildVersion -ge 13000)
+        {
+            Write-Verbose -Message "Version: SharePoint [vNext]"
+            $requiredParams = @("Sync", "IDFX11", "WCFDataServices56", "DotNet48", "MSVCRT142")
+
+            if ($osVersion.Major -eq 10)
+            {
+                if ($osVersion.Build -ge 17763)
+                {
+                    # Server 2019
+                    $WindowsFeatures = Get-WindowsFeature -Name $Script:SP2019Win19Features
+                }
+                else
+                {
+                    $message = "SharePoint [vNext] only supports Windows Server 2019"
+                    Add-SPDscEvent -Message $message `
+                        -EntryType 'Error' `
+                        -EventID 100 `
+                        -Source $MyInvocation.MyCommand.Source
+                    throw $message
+                }
+            }
+            else
+            {
+                $message = "SharePoint [vNext] only supports Windows Server 2019"
                 Add-SPDscEvent -Message $message `
                     -EntryType 'Error' `
                     -EventID 100 `
@@ -1126,6 +1245,10 @@ function Test-TargetResource
 
         [Parameter()]
         [System.String]
+        $MSVCRT142,
+
+        [Parameter()]
+        [System.String]
         $KB3092423,
 
         [Parameter()]
@@ -1139,6 +1262,10 @@ function Test-TargetResource
         [Parameter()]
         [System.String]
         $DotNet472,
+
+        [Parameter()]
+        [System.String]
+        $DotNet48,
 
         [Parameter()]
         [ValidateSet("Present", "Absent")]
