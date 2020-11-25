@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- SPAlternateUrl
+  - Fixed issue where trailing '/' cause Url not to be recognized.
 - SPFarm
   - Switched from creating a Lock database to a Lock table in the TempDB.
     This to allow the use of precreated databases.

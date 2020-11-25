@@ -168,6 +168,13 @@ function Set-TargetResource
                 $aamForUrl = $webAppAams | Where-Object -FilterScript {
                     $_.IncomingUrl -eq $params.Url
                 }
+                if ($null -eq $aamForUrl -and $params.Url.ToString().EndsWith('/'))
+                {
+                    $urlToFind = $params.Url.Remove($params.Url.Length - 1, 1)
+                    $aamForUrl = $webAppAams | Where-Object -FilterScript {
+                        $_.IncomingUrl -eq $urlToFind
+                    }
+                }
 
                 if ($null -eq $aamForUrl)
                 {
