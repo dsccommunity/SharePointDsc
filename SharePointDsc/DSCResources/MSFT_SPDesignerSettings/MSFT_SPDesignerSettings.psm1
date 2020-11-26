@@ -484,7 +484,8 @@ function Export-TargetResource
 {
     [CmdletBinding()]
     [OutputType([System.String])]
-    Param(
+    param
+    (
         [Parameter()]
         [System.String]
         $URL,
