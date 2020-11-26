@@ -1,8 +1,3 @@
-$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
-$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
-$script:resourceHelperModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'SharePointDsc.Util'
-Import-Module -Name (Join-Path -Path $script:resourceHelperModulePath -ChildPath 'SharePointDsc.Util.psm1')
-
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -188,7 +183,7 @@ function Test-TargetResource
     if ($result -eq $false)
     {
         $message = ("Specfied ManagedAccount {$($CurrentValues.ManagedAccount)} is not in the " + `
-                    "desired state {$ManagedAccount}.")
+                "desired state {$ManagedAccount}.")
         Write-Verbose -Message $message
         Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
     }

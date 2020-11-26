@@ -1,8 +1,3 @@
-$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
-$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
-$script:resourceHelperModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'SharePointDsc.Util'
-Import-Module -Name (Join-Path -Path $script:resourceHelperModulePath -ChildPath 'SharePointDsc.Util.psm1')
-
 $Script:SP2013Features = @("Application-Server", "AS-NET-Framework",
     "AS-TCP-Port-Sharing", "AS-Web-Support", "AS-WAS-Support",
     "AS-HTTP-Activation", "AS-Named-Pipes", "AS-TCP-Activation", "Web-Server",
