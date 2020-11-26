@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ReverseDSC
   - Native support to allow for configuration extraction
 
+### Fixed
+
+- SPWebAppPolicy
+  - Fixed a blocking issue introduced in version 4.4.0 when extracting cache
+    accounts
+
 ## [4.4.0] - 2020-11-14
 
 ### Added
@@ -20,6 +26,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- SPAlternateUrl
+  - Fixed issue where trailing '/' cause Url not to be recognized.
 - SharePointDsc
   - Updated Convert-SPDscHashtableToString to output the username when
     parameter is a PSCredential

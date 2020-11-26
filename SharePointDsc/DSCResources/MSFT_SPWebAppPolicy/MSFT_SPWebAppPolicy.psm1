@@ -299,7 +299,7 @@ function Set-TargetResource
         throw $message
     }
 
-    $cacheAccounts = Get-SPDscCacheAccountConfiguration -InputParameters $WebAppUrl
+    $cacheAccounts = Get-SPDscCacheAccountConfiguration -WebApplicationUrl $WebAppUrl
 
     if ($SetCacheAccountsPolicy)
     {
@@ -697,7 +697,7 @@ function Test-TargetResource
         return $false
     }
 
-    $cacheAccounts = Get-SPDscCacheAccountConfiguration -InputParameters $WebAppUrl
+    $cacheAccounts = Get-SPDscCacheAccountConfiguration -WebApplicationUrl $WebAppUrl
     if ($SetCacheAccountsPolicy)
     {
         if (($cacheAccounts.SuperUserAccount -eq "") -or `
@@ -949,18 +949,18 @@ function Get-SPDscCacheAccountConfiguration()
     [OutputType([System.Collections.Hashtable])]
     param (
         [Parameter()]
-        [Object[]]
-        $InputParameters
+        [string]
+        $WebApplicationUrl
     )
 
     $cacheAccounts = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($InputParameters, $MyInvocation.MyCommand.Source) `
+        -Arguments @($WebApplicationUrl, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         Write-Verbose -Message "Retrieving CacheAccounts"
-        $params = $args[0]
+        $webApplicationUrl = $args[0]
         $eventSource = $args[1]
 
-        $wa = Get-SPWebApplication -Identity $params -ErrorAction SilentlyContinue
+        $wa = Get-SPWebApplication -Identity $webApplicationUrl -ErrorAction SilentlyContinue
 
         if ($null -eq $wa)
         {
