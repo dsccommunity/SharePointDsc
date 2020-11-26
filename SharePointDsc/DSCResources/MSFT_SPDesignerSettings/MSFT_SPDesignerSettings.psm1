@@ -482,12 +482,26 @@ function Test-TargetResource
 <# Nik20170106 - Read the Designer Settings of either the Site Collection or the Web Application #>
 function Export-TargetResource
 {
-    $VerbosePreference = "SilentlyContinue"
+    [CmdletBinding()]
+    [OutputType([System.String])]
     Param(
+        [Parameter()]
+        [System.String]
         $URL,
+
+        [Parameter()]
+        [System.String()]
         $Scope,
+
+        [Parameter()]
+        [System.String]
         $WebAppName
     )
+    if (!(Get-PSSnapin Microsoft.SharePoint.Powershell -ErrorAction SilentlyContinue))
+    {
+        Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction 0
+    }
+    $VerbosePreference = "SilentlyContinue"
     $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
     $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPDesignerSettings\MSFT_SPDesignerSettings.psm1" -Resolve
     $Content = ''

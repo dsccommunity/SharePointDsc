@@ -1290,6 +1290,10 @@ function Export-TargetResource
         [System.String]
         $BinaryLocation = "\\<location>"
     )
+    if (!(Get-PSSnapin Microsoft.SharePoint.Powershell -ErrorAction SilentlyContinue))
+    {
+        Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction 0
+    }
     $VerbosePreference = "SilentlyContinue"
     if ($DynamicCompilation)
     {

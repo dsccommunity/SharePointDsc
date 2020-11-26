@@ -587,6 +587,10 @@ function Test-TargetResource
 
 function Export-TargetResource
 {
+    if (!(Get-PSSnapin Microsoft.SharePoint.Powershell -ErrorAction SilentlyContinue))
+    {
+        Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction 0
+    }
     $VerbosePreference = "SilentlyContinue"
     $searchSA = Get-SPServiceApplication | Where-Object { $_.GetType().Name -eq "SearchServiceApplication" }
 

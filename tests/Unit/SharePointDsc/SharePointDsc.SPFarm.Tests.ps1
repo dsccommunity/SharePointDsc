@@ -2764,7 +2764,8 @@ try
             }
         }
     }
-    finally
-    {
-        Invoke-TestCleanup
-    }
+}
+finally
+{
+    Invoke-TestCleanup
+}

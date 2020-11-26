@@ -243,6 +243,10 @@ function Export-TargetResource
         [System.String]
         $DependsOn
     )
+    if (!(Get-PSSnapin Microsoft.SharePoint.Powershell -ErrorAction SilentlyContinue))
+    {
+        Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction 0
+    }
     $VerbosePreference = "SilentlyContinue"
     $spMajorVersion = (Get-SPDscInstalledProductVersion).FileMajorPart
     $versionFilter = $spMajorVersion.ToString() + "*"

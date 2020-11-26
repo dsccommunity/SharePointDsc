@@ -1385,6 +1385,10 @@ function Export-TargetResource
         [System.Boolean]
         $RunCentralAdmin
     )
+    if (!(Get-PSSnapin Microsoft.SharePoint.Powershell -ErrorAction SilentlyContinue))
+    {
+        Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction 0
+    }
     $spMajorVersion = (Get-SPDscInstalledProductVersion).FileMajorPart
     #$module = Resolve-Path ($Script:SPDSCPath + "\DSCResources\MSFT_SPFarm\MSFT_SPFarm.psm1")
     #Import-Module $module
