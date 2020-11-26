@@ -166,7 +166,7 @@ function Set-TargetResource
             {
                 # WebApp has one or more AAMs, check for URL
                 $aamForUrl = $webAppAams | Where-Object -FilterScript {
-                    $_.IncomingUrl -eq $params.Url
+                    $_.IncomingUrl -eq $params.Url.TrimEnd('/')
                 }
 
                 if ($null -eq $aamForUrl)

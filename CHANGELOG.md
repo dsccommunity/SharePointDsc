@@ -23,6 +23,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- SPAlternateUrl
+  - Fixed issue where trailing '/' cause Url not to be recognized.
 - SharePointDsc
   - Updated Convert-SPDscHashtableToString to output the username when
     parameter is a PSCredential
