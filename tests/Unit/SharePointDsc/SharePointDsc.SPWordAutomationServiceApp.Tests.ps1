@@ -104,6 +104,7 @@ try
                         MaximumSyncConversionRequests   = 25
                         KeepAliveTimeout                = 30
                         MaximumConversionTime           = 300
+                        AddToDefault                    = $true
                     }
 
                     Mock -CommandName Get-SPServiceApplication -MockWith { return $null }

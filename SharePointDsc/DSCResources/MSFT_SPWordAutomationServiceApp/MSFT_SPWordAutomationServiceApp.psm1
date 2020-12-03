@@ -96,6 +96,10 @@ function Get-TargetResource
         $MaximumConversionTime,
 
         [Parameter()]
+        [System.Boolean]
+        $AddToDefault = $false,
+
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -313,6 +317,10 @@ function Set-TargetResource
         $MaximumConversionTime,
 
         [Parameter()]
+        [System.Boolean]
+        $AddToDefault = $false,
+
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -346,6 +354,7 @@ function Set-TargetResource
     }
 
     $PSBoundParameters.Ensure = $Ensure
+    $PSBoundParameters.AddToDefault = $AddToDefault
 
     if (($Ensure -eq "Present") -and -not ($ApplicationPool -and $DatabaseName))
     {
@@ -379,6 +388,7 @@ function Set-TargetResource
                 {
                     $cmdletparams.DatabaseName = $params.DatabaseName
                 }
+
                 if ($params.ContainsKey("DatabaseServer"))
                 {
                     $cmdletparams.DatabaseServer = $params.DatabaseServer
@@ -392,6 +402,11 @@ function Set-TargetResource
                 else
                 {
                     Write-Verbose -Message "`$useSQLAuthentication is false or not specified; using default Windows authentication."
+                }
+
+                if ($params.AddToDefault -eq $true)
+                {
+                    $cmdletparams.Default = $true
                 }
 
                 $null = New-SPWordConversionServiceApplication @cmdletparams
@@ -693,6 +708,10 @@ function Test-TargetResource
         [ValidateRange(60, 3600)]
         [System.UInt32]
         $MaximumConversionTime,
+
+        [Parameter()]
+        [System.Boolean]
+        $AddToDefault = $false,
 
         [Parameter()]
         [System.Management.Automation.PSCredential]
