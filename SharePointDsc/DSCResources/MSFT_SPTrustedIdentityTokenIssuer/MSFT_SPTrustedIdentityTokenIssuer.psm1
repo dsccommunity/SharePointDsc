@@ -342,7 +342,12 @@ function Set-TargetResource
 
                 if ($params.ProviderSignOutUri)
                 {
-                    $trust.ProviderSignOutUri = New-Object -TypeName System.Uri ($params.ProviderSignOutUri)
+                    $installedVersion = Get-SPDscInstalledProductVersion
+                    # This property does not exist in SharePoint 2013
+                    if ($installedVersion.FileMajorPart -ne 15)
+                    {
+                        $trust.ProviderSignOutUri = New-Object -TypeName System.Uri ($params.ProviderSignOutUri)
+                    }
                 }
                 $trust.Update()
             }
