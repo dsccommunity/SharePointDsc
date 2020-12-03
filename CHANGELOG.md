@@ -5,15 +5,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-- SPTrustedIdentityTokenIssuer
-  - Do not set property ProviderSignOutUri in SharePoint 2013 as it does
-  not exist
+### Changed
+
+- SPFarmAdministrators
+  - Update the event log messages so they are better formatted
 
 ### Fixed
 
+- SPTrustedIdentityTokenIssuer
+  - Do not set property ProviderSignOutUri in SharePoint 2013 as it does
+    not exist
 - SPWebAppPolicy
   - Fixed a blocking issue introduced in version 4.4.0 when extracting cache
     accounts
+
+### Removed
+
+- SharePointDsc
+  - Removed two old files from the previous CD/CI system
 
 ## [4.4.0] - 2020-11-14
 

@@ -344,8 +344,8 @@ function Test-TargetResource
         }
         else
         {
-            $message = ("Farm Administrators group does not match the specified Members" + `
-                    "Actual: $($CurrentValues.Members -join ", "). Desired: $($Members -join ", ")")
+            $message = ("Farm Administrators group does not match the specified Members`r`n" + `
+                    "<CurrentValue>$($CurrentValues.Members -join ", ")</CurrentValue><DesiredValue>$($Members -join ", ")</DesiredValue>")
             Write-Verbose -Message $message
             Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
 
@@ -362,8 +362,8 @@ function Test-TargetResource
         {
             if (-not($CurrentValues.Members -contains $member))
             {
-                $message = ("$member is not a Farm Administrator, but is included in MembersToInclude: " + `
-                        "$($MembersToInclude -join ", ")")
+                $message = ("$member is not a Farm Administrator, but is included in MembersToInclude:`r`n" + `
+                        "<DesiredValue>$($MembersToInclude -join ", ")</DesiredValue>")
                 Write-Verbose -Message $message
                 Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
 
@@ -383,8 +383,8 @@ function Test-TargetResource
         {
             if ($CurrentValues.Members -contains $member)
             {
-                $message = ("$member is a Farm Administrator, but is included in MembersToExclude: " + `
-                        "$($MembersToExclude -join ", ")")
+                $message = ("$member is a Farm Administrator, but is included in MembersToExclude:`r`n" + `
+                        "<DesiredValue>$($MembersToExclude -join ", ")</DesiredValue>")
                 Write-Verbose -Message $message
                 Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
 
