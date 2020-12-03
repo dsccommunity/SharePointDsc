@@ -335,7 +335,7 @@ function Set-TargetResource
         $eventSource = $args[1]
         $scriptRoot = $args[2]
 
-        Import-Module -Name (Join-Path $scriptRoot "MSFT_SPUserProfileSyncConnection.psm1")
+        Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath "MSFT_SPUserProfileSyncConnection.psm1")
 
         if ($params.ContainsKey("InstallAccount"))
         {
@@ -403,7 +403,7 @@ function Set-TargetResource
                     $namingContext.ContainersExcluded.Clear()
                     if ($params.ContainsKey("ExcludedOUs"))
                     {
-                        $params.IncludedOUs | ForEach-Object -Process {
+                        $params.ExcludedOUs | ForEach-Object -Process {
                             $namingContext.ContainersExcluded.Add($_)
                         }
                     }
@@ -503,7 +503,25 @@ function Set-TargetResource
                     }
                     16
                     {
-                        Write-Verbose -Message "Creating the new connection via cmdlet (SP2016)"
+                        Write-Verbose -Message "Creating the new connection via cmdlet (SP2016 or SP2019)"
+
+                        if ($null -ne $connection)
+                        {
+                            $BINDING_FLAGS = ([System.Reflection.BindingFlags]::NonPublic -bOr [System.Reflection.BindingFlags]::Instance)
+                            $adImportNamespace = [Microsoft.Office.Server.UserProfiles.ActiveDirectoryImportConnection]
+                            $METHOD_GET_USEDISABLEDFILTER = $adImportNamespace.GetMethod("get_UseDisabledFilter", $BINDING_FLAGS)
+                            $METHOD_GET_USESSL = $adImportNamespace.GetMethod("get_UseSSL", $BINDING_FLAGS)
+                            $useDisabledFilter = $METHOD_GET_USEDISABLEDFILTER.Invoke($connection, $null)
+                            $useSSL = $METHOD_GET_USESSL.Invoke($connection, $null)
+
+                            if (($params.ContainsKey("UseSSL") -and $useSSL -ne $params.UseSSL) -or `
+                                ($params.ContainsKey("UseDisabledFilter") -and $useDisabledFilter -ne $params.UseDisabledFilter))
+                            {
+                                Write-Verbose -Message "Parameters UseSSL or UseDisabledFilter are not in desired state. Recreating connection!"
+                                $connection.Delete()
+                            }
+                        }
+
                         Write-Verbose -Message "Adding IncludedOUs to the connection"
                         foreach ($ou in $params.IncludedOUs)
                         {
@@ -621,6 +639,7 @@ function Test-TargetResource
     $valuesToCheck = @("Forest",
         "UserProfileService",
         "UseSSL",
+        "UseDisabledFilter",
         "IncludedOUs",
         "Ensure")
 
