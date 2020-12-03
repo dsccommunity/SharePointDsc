@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - SPUserProfileSyncConnection
   - Added ability to update UseSSL and UseDisabledFilter parameters
+- SPWorkAutomationServiceApp
+  - Added ability to specify that the new service app should be added
+    to the default proxy group
 
 ### Changed
 

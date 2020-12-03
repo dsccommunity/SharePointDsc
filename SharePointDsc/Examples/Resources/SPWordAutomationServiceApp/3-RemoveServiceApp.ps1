@@ -39,21 +39,21 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
-    {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+Configuration Example
+{
+    param(
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
+    Import-DscResource -ModuleName SharePointDsc
 
-        node localhost {
-            SPWordAutomationServiceApp WordAutomation
-            {
-                Name = "Word Automation Service Application"
-                Ensure = "Absent"
-                PsDscRunAsCredential = $SetupAccount
-            }
+    node localhost {
+        SPWordAutomationServiceApp WordAutomation
+        {
+            Name                 = "Word Automation Service Application"
+            Ensure               = "Absent"
+            PsDscRunAsCredential = $SetupAccount
         }
     }
+}

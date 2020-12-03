@@ -15,3 +15,9 @@ PsDscRunAsCredential).
 
 The default value for the Ensure parameter is Present. When not specifying this
 parameter, the service application is provisioned.
+
+NOTE:
+If you don't specify the AddToDefault parameter, the new Word Automation
+service application won't be added to the default proxy group.
+Please use "AddToDefault = $true" to make sure it is added to the default
+proxy group.
