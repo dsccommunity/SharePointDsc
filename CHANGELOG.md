@@ -5,6 +5,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- SPUserProfileSyncConnection
+  - Added ability to update UseSSL and UseDisabledFilter parameters
+
 ### Changed
 
 - SPFarmAdministrators
