@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - SPUserProfileSyncConnection
   - Added ability to update UseSSL and UseDisabledFilter parameters
-- SPWorkAutomationServiceApp
+- SPWordAutomationServiceApp
   - Added ability to specify that the new service app should be added
     to the default proxy group
 
@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - SPFarmAdministrators
   - Update the event log messages so they are better formatted
+- SPQuotaTemplate
+  - Updated resource to prevent errors when specified limits are conflicting
+    configured values. E.g. new warning is high than the current max limit.
 
 ### Fixed
 

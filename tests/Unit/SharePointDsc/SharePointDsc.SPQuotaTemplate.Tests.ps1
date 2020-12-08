@@ -211,6 +211,142 @@ try
                 }
             }
 
+            Context -Name "The server is in a farm, StorageWarningInMB is higher than the already applied MaxLevel" -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        Name               = "Test"
+                        StorageWarningInMB = 512
+                        Ensure             = "Present"
+                    }
+
+                    Mock -CommandName Get-SPDscContentService -MockWith {
+                        $contentService = @{
+                            QuotaTemplates = @{
+                                Test = @{
+                                    StorageMaximumLevel  = 256 * 1MB
+                                    StorageWarningLevel  = 128 * 1MB
+                                    UserCodeMaximumLevel = 400
+                                    UserCodeWarningLevel = 200
+                                }
+                            }
+                        }
+
+                        $contentService = $contentService | Add-Member -MemberType ScriptMethod `
+                            -Name Update `
+                            -Value {
+                            $Global:SPDscQuotaTemplatesUpdated = $true
+                        } -PassThru
+                        return $contentService
+                    }
+                }
+
+                It "Should update the quota template settings" {
+                    { Set-TargetResource @testParams } | Should -Throw 'To be configured StorageWarningInMB ('
+                }
+            }
+
+            Context -Name "The server is in a farm, StorageMaxInMB is lower than the already applied WarningLevel" -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        Name           = "Test"
+                        StorageMaxInMB = 256
+                        Ensure         = "Present"
+                    }
+
+                    Mock -CommandName Get-SPDscContentService -MockWith {
+                        $contentService = @{
+                            QuotaTemplates = @{
+                                Test = @{
+                                    StorageMaximumLevel  = 512 * 1MB
+                                    StorageWarningLevel  = 384 * 1MB
+                                    UserCodeMaximumLevel = 400
+                                    UserCodeWarningLevel = 200
+                                }
+                            }
+                        }
+
+                        $contentService = $contentService | Add-Member -MemberType ScriptMethod `
+                            -Name Update `
+                            -Value {
+                            $Global:SPDscQuotaTemplatesUpdated = $true
+                        } -PassThru
+                        return $contentService
+                    }
+                }
+
+                It "Should update the quota template settings" {
+                    { Set-TargetResource @testParams } | Should -Throw 'To be configured StorageWarningInMB ('
+                }
+            }
+
+            Context -Name "The server is in a farm, WarningUsagePointsSolutions is higher than the already applied MaxLevel" -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        Name                        = "Test"
+                        WarningUsagePointsSolutions = 512
+                        Ensure                      = "Present"
+                    }
+
+                    Mock -CommandName Get-SPDscContentService -MockWith {
+                        $contentService = @{
+                            QuotaTemplates = @{
+                                Test = @{
+                                    StorageMaximumLevel  = 256 * 1MB
+                                    StorageWarningLevel  = 128 * 1MB
+                                    UserCodeMaximumLevel = 200
+                                    UserCodeWarningLevel = 100
+                                }
+                            }
+                        }
+
+                        $contentService = $contentService | Add-Member -MemberType ScriptMethod `
+                            -Name Update `
+                            -Value {
+                            $Global:SPDscQuotaTemplatesUpdated = $true
+                        } -PassThru
+                        return $contentService
+                    }
+                }
+
+                It "Should update the quota template settings" {
+                    { Set-TargetResource @testParams } | Should -Throw 'To be configured WarningUsagePointsSolutions ('
+                }
+            }
+
+            Context -Name "The server is in a farm, MaximumUsagePointsSolutions is lower than the already applied WarningLevel" -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        Name                        = "Test"
+                        MaximumUsagePointsSolutions = 256
+                        Ensure                      = "Present"
+                    }
+
+                    Mock -CommandName Get-SPDscContentService -MockWith {
+                        $contentService = @{
+                            QuotaTemplates = @{
+                                Test = @{
+                                    StorageMaximumLevel  = 512 * 1MB
+                                    StorageWarningLevel  = 384 * 1MB
+                                    UserCodeMaximumLevel = 800
+                                    UserCodeWarningLevel = 400
+                                }
+                            }
+                        }
+
+                        $contentService = $contentService | Add-Member -MemberType ScriptMethod `
+                            -Name Update `
+                            -Value {
+                            $Global:SPDscQuotaTemplatesUpdated = $true
+                        } -PassThru
+                        return $contentService
+                    }
+                }
+
+                It "Should update the quota template settings" {
+                    { Set-TargetResource @testParams } | Should -Throw 'To be configured WarningUsagePointsSolutions ('
+                }
+            }
+
             Context -Name "The server is in a farm and the incorrect settings have been applied to the template" -Fixture {
                 BeforeAll {
                     $testParams = @{
@@ -223,26 +359,22 @@ try
                     }
 
                     Mock -CommandName Get-SPDscContentService -MockWith {
-                        $quotaTemplates = @(@{
+                        $returnVal = @{
+                            QuotaTemplates = @{
                                 Test = @{
-                                    StorageMaximumLevel  = 512
-                                    StorageWarningLevel  = 256
+                                    StorageMaximumLevel  = 512 * 1MB
+                                    StorageWarningLevel  = 256 * 1MB
                                     UserCodeMaximumLevel = 400
                                     UserCodeWarningLevel = 200
                                 }
-                            })
-                        $quotaTemplatesCol = { $quotaTemplates }.Invoke()
-
-                        $contentService = @{
-                            QuotaTemplates = $quotaTemplatesCol
+                            }
                         }
-
-                        $contentService = $contentService | Add-Member -MemberType ScriptMethod `
+                        $returnVal = $returnVal | Add-Member -MemberType ScriptMethod `
                             -Name Update `
                             -Value {
                             $Global:SPDscQuotaTemplatesUpdated = $true
                         } -PassThru
-                        return $contentService
+                        return $returnVal
                     }
                 }
 

@@ -145,7 +145,9 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting Quota Template settings for quota $Name"
 
-    if ($StorageMaxInMB -lt $StorageWarningInMB)
+    if ($PSBoundParameters.ContainsKey("StorageMaxInMB") -eq $true -and `
+            $PSBoundParameters.ContainsKey("StorageWarningInMB") -eq $true -and `
+            $StorageMaxInMB -lt $StorageWarningInMB)
     {
         $message = "StorageMaxInMB must be equal to or larger than StorageWarningInMB."
         Add-SPDscEvent -Message $message `
@@ -155,7 +157,9 @@ function Set-TargetResource
         throw $message
     }
 
-    if ($MaximumUsagePointsSolutions -lt $WarningUsagePointsSolutions)
+    if ($PSBoundParameters.ContainsKey("MaximumUsagePointsSolutions") -eq $true -and `
+            $PSBoundParameters.ContainsKey("WarningUsagePointsSolutions") -eq $true -and `
+            $MaximumUsagePointsSolutions -lt $WarningUsagePointsSolutions)
     {
         $message = ("MaximumUsagePointsSolutions must be equal to or larger than " + `
                 "WarningUsagePointsSolutions.")
@@ -225,22 +229,136 @@ function Set-TargetResource
                 else
                 {
                     #Template exists, update settings
+                    $updatedTemplate = [Microsoft.SharePoint.Administration.SPQuotaTemplate]::new()
+                    $updatedTemplate.Name = $params.Name
+
                     if ($params.ContainsKey("StorageMaxInMB"))
                     {
-                        $template.StorageMaximumLevel = ($params.StorageMaxInMB * 1MB)
+                        Write-Verbose "StorageMaxInMB specified. Setting value to $($params.StorageMaxInMB)MB"
+                        $updatedTemplate.StorageMaximumLevel = $params.StorageMaxInMB * 1MB
                     }
+                    else
+                    {
+                        Write-Verbose "StorageMaxInMB not specified. Reusing level from existing template ($($template.StorageMaximumLevel / 1MB)MB)"
+                        $updatedTemplate.StorageMaximumLevel = $template.StorageMaximumLevel
+                    }
+
                     if ($params.ContainsKey("StorageWarningInMB"))
                     {
-                        $template.StorageWarningLevel = ($params.StorageWarningInMB * 1MB)
+                        Write-Verbose -Message "StorageWarningInMB specified. Setting value to $($params.StorageWarningInMB)MB"
+                        $newWarningLevel = $params.StorageWarningInMB * 1MB
+
+                        if ($newWarningLevel -gt $updatedTemplate.StorageMaximumLevel)
+                        {
+                            # Since the StorageMaxInMB and StorageWarningInMB parameter were checked at
+                            # the beginning of this function, hitting this code means the StorageMaxInMB was not
+                            # specfied. Therefore it not checked again here, but exception is immediately thrown.
+                            $message = ("To be configured StorageWarningInMB ($($params.StorageWarningInMB)MB) is " + `
+                                    "higher than the existing StorageMaxInMB ($($updatedTemplate.StorageMaximumLevel / 1MB)MB). " + `
+                                    "Make sure you add the StorageMaxInMB parameter!")
+                            Add-SPDscEvent -Message $message `
+                                -EntryType 'Error' `
+                                -EventID 100 `
+                                -Source $eventSource
+                            throw $message
+                        }
+                        else
+                        {
+                            Write-Verbose -Message "Setting StorageWarningInMB to $($params.StorageWarningInMB)MB"
+                            $updatedTemplate.StorageWarningLevel = $newWarningLevel
+                        }
+
                     }
+                    else
+                    {
+                        $newWarningLevel = $template.StorageWarningLevel
+                        Write-Verbose -Message "Reusing StorageWarningLevel from existing template: $($newWarningLevel / 1MB)MB"
+
+                        if ($newWarningLevel -gt $updatedTemplate.StorageMaximumLevel)
+                        {
+                            # Since the StorageMaxInMB and StorageWarningInMB parameter were checked at
+                            # the beginning of this function, hitting this code means the StorageWarningInMB was not
+                            # specfied. Therefore it not checked again here, but exception is immediately thrown.
+                            $message = ("To be configured StorageWarningInMB ($($newWarningLevel / 1MB)MB) is " + `
+                                    "higher than the existing StorageMaxInMB ($($updatedTemplate.StorageMaximumLevel / 1MB)MB). " + `
+                                    "Make sure you add the StorageWarningInMB parameter!")
+                            Add-SPDscEvent -Message $message `
+                                -EntryType 'Error' `
+                                -EventID 100 `
+                                -Source $eventSource
+                            throw $message
+                        }
+                        else
+                        {
+                            Write-Verbose -Message "Setting StorageWarningLevel to $($newWarningLevel / 1MB)MB"
+                            $updatedTemplate.StorageWarningLevel = $newWarningLevel
+                        }
+                    }
+
                     if ($params.ContainsKey("MaximumUsagePointsSolutions"))
                     {
-                        $template.UserCodeMaximumLevel = $params.MaximumUsagePointsSolutions
+                        Write-Verbose "MaximumUsagePointsSolutions specified. Setting value to $($params.MaximumUsagePointsSolutions)"
+                        $updatedTemplate.UserCodeMaximumLevel = $params.MaximumUsagePointsSolutions
                     }
+                    else
+                    {
+                        Write-Verbose "MaximumUsagePointsSolutions not specified. Reusing level from existing template ($($template.UserCodeMaximumLevel))"
+                        $updatedTemplate.UserCodeMaximumLevel = $template.UserCodeMaximumLevel
+                    }
+
                     if ($params.ContainsKey("WarningUsagePointsSolutions"))
                     {
-                        $template.UserCodeWarningLevel = $params.WarningUsagePointsSolutions
+                        Write-Verbose -Message "WarningUsagePointsSolutions specified. Setting value to $($params.WarningUsagePointsSolutions)"
+                        $newWarningLevel = $params.WarningUsagePointsSolutions
+
+                        if ($newWarningLevel -gt $updatedTemplate.UserCodeMaximumLevel)
+                        {
+                            # Since the MaximumUsagePointsSolutions and WarningUsagePointsSolutions parameter were checked at
+                            # the beginning of this function, hitting this code means the MaximumUsagePointsSolutions was not
+                            # specfied. Therefore it not checked again here, but exception is immediately thrown.
+                            $message = ("To be configured WarningUsagePointsSolutions ($($params.WarningUsagePointsSolutions)) is " + `
+                                    "higher than the existing MaximumUsagePointsSolutions ($($updatedTemplate.UserCodeMaximumLevel)). " + `
+                                    "Make sure you add the MaximumUsagePointsSolutions parameter!")
+                            Add-SPDscEvent -Message $message `
+                                -EntryType 'Error' `
+                                -EventID 100 `
+                                -Source $eventSource
+                            throw $message
+                        }
+                        else
+                        {
+                            Write-Verbose -Message "Setting WarningUsagePointsSolutions to $($params.WarningUsagePointsSolutions)"
+                            $updatedTemplate.UserCodeWarningLevel = $newWarningLevel
+                        }
+
                     }
+                    else
+                    {
+                        $newWarningLevel = $template.UserCodeWarningLevel
+                        Write-Verbose -Message "Reusing UserCodeWarningLevel from existing template: $($newWarningLevel)"
+
+                        if ($newWarningLevel -gt $updatedTemplate.UserCodeMaximumLevel)
+                        {
+                            # Since the MaximumUsagePointsSolutions and WarningUsagePointsSolutions parameter were checked at
+                            # the beginning of this function, hitting this code means the WarningUsagePointsSolutions was not
+                            # specfied. Therefore it not checked again here, but exception is immediately thrown.
+                            $message = ("To be configured WarningUsagePointsSolutions ($($newWarningLevel)) is " + `
+                                    "higher than the existing MaximumUsagePointsSolutions ($($updatedTemplate.UserCodeMaximumLevel)). " + `
+                                    "Make sure you add the WarningUsagePointsSolutions parameter!")
+                            Add-SPDscEvent -Message $message `
+                                -EntryType 'Error' `
+                                -EventID 100 `
+                                -Source $eventSource
+                            throw $message
+                        }
+                        else
+                        {
+                            Write-Verbose -Message "Setting WarningUsagePointsSolutions to $($newWarningLevel)"
+                            $updatedTemplate.UserCodeWarningLevel = $newWarningLevel
+                        }
+                    }
+
+                    $admService.QuotaTemplates[$params.Name] = $updatedTemplate
                     $admService.Update()
                 }
             }
@@ -265,9 +383,10 @@ function Set-TargetResource
             }
 
             Invoke-SPDscCommand -Credential $InstallAccount `
-                -Arguments $PSBoundParameters `
+                -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
                 -ScriptBlock {
                 $params = $args[0]
+                $eventSource = $args[1]
 
                 try
                 {
@@ -275,9 +394,13 @@ function Set-TargetResource
                 }
                 catch
                 {
-                    Write-Verbose -Message ("No local SharePoint farm was detected. Quota " + `
+                    $message = ("No local SharePoint farm was detected. Quota " + `
                             "template settings will not be applied")
-                    return
+                    Add-SPDscEvent -Message $message `
+                        -EntryType 'Error' `
+                        -EventID 100 `
+                        -Source $eventSource
+                    throw $message
                 }
 
                 Write-Verbose -Message "Start update"
