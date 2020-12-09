@@ -31,7 +31,7 @@ stages:
               runtime: 'core'
               configFilePath: 'GitVersion.yml'
 
-              - task: PowerShell@2
+          - task: PowerShell@2
             name: package
             displayName: 'Build & Package Module'
             inputs:
@@ -73,7 +73,7 @@ stages:
               artifactName: $(buildArtifactName)
               targetPath: '$(Build.SourcesDirectory)/$(buildArtifactName)'
 
-              - task: PowerShell@2
+          - task: PowerShell@2
             name: test
             displayName: 'Run HQRM Test'
             inputs:
@@ -81,7 +81,7 @@ stages:
               arguments: '-Tasks hqrmtest'
               pwsh: false
 
-              - task: PublishTestResults@2
+          - task: PublishTestResults@2
             displayName: 'Publish Test Results'
             condition: succeededOrFailed()
             inputs:
@@ -136,6 +136,7 @@ stages:
               buildType: 'current'
               artifactName: $(buildArtifactName)
               targetPath: '$(Build.SourcesDirectory)/$(buildArtifactName)'
+
           - task: PowerShell@2
             name: test
             displayName: 'Run Unit Test for SP2016'
