@@ -34,7 +34,7 @@ BuildWorkflow:
     - Build_Module_ModuleBuilder
     - Build_NestedModules_ModuleBuilder
     - Create_changelog_release_output
-    - Generate_Conceptual_Help
+    #- Generate_Conceptual_Help
     - Generate_Wiki_Content
 
   pack:
@@ -124,7 +124,7 @@ GitHubConfig:
 DscResource.DocGenerator:
   Generate_Conceptual_Help:
     MarkdownCodeRegularExpression:
-      - '\(.+?)\' # Match inline code-block
+      - '\(.+?\)' # Match inline code-block
       - '\\(\\)' # Match escaped backslash
       - '\[[^\[]+\]\((.+?)\)' # Match markdown URL
       - '_(.+?)_' # Match Italic (underscore)
