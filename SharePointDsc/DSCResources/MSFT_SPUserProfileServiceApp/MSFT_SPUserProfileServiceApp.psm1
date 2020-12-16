@@ -16,7 +16,7 @@ function Get-TargetResource
         [System.String]
         $ApplicationPool,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $false)]
         [System.String]
         $MySiteHostLocation,
 
@@ -84,6 +84,15 @@ function Get-TargetResource
     )
 
     Write-Verbose -Message "Getting user profile service application $Name"
+
+    # If SiteNamingConflictResolution parameters is defined then also MySiteHostLocation need to be defined.
+    # This is because MySiteHostLocation is a mandatory parameter in the ParameterSet of New-SPProfileServiceApplication when SiteNamingConflictResolution is defined
+    if (($PSBoundParameters.ContainsKey("SiteNamingConflictResolution") -eq $true -and $PSBoundParameters.ContainsKey("MySiteHostLocation") -eq $false))
+    {
+        $message = "MySiteHostLocation missing. Please specify MySiteHostLocation when specifying SiteNamingConflictResolution"
+
+        Write-Verbose -Message $message
+    }
 
     $farmAccount = Invoke-SPDscCommand -Credential $InstallAccount `
         -Arguments $PSBoundParameters `
@@ -271,7 +280,7 @@ function Set-TargetResource
         [System.String]
         $ApplicationPool,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $false)]
         [System.String]
         $MySiteHostLocation,
 
@@ -340,8 +349,23 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting user profile service application $Name"
 
+
     if ($Ensure -eq "Present")
     {
+        # If SiteNamingConflictResolution parameters is defined then also MySiteHostLocation need to be defined.
+        # This is because MySiteHostLocation is a mandatory parameter in the ParameterSet of New-SPProfileServiceApplication when SiteNamingConflictResolution is defined
+        if (($PSBoundParameters.ContainsKey("SiteNamingConflictResolution") -eq $true -and $PSBoundParameters.ContainsKey("MySiteHostLocation") -eq $false))
+        {
+            $message = "MySiteHostLocation missing. Please specify MySiteHostLocation when specifying SiteNamingConflictResolution"
+
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+
+            throw $message
+        }
+
         $PSBoundParameters.UpdateProxyGroup = $UpdateProxyGroup
 
         $farmAccount = Invoke-SPDscCommand -Credential $InstallAccount `
@@ -651,7 +675,7 @@ function Test-TargetResource
         [System.String]
         $ApplicationPool,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $false)]
         [System.String]
         $MySiteHostLocation,
 
@@ -747,6 +771,7 @@ function Test-TargetResource
                 -ValuesToCheck @("Name",
                 "EnableNetBIOS",
                 "NoILMUsed",
+                "MySiteHostLocation",
                 "SiteNamingConflictResolution",
                 "Ensure")
         }
