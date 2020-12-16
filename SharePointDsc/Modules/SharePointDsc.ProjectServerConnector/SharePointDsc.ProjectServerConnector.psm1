@@ -215,62 +215,76 @@ function New-SPDscProjectServerWebService
     [System.Reflection.Assembly]::LoadWithPartialName("System.ServiceModel") | Out-Null
     $psDllPath = Join-Path -Path $PSScriptRoot -ChildPath "ProjectServerServices.dll"
 
-    $filehash = "44CC60C2227011D08F36A7954C317195C0A44F3D52D51B0F54009AA03EF97E1B2F80A162D76F177E70D1756E42484DF367FACB25920C2C93FB8DFB8A8F5F08A5"
-    if ($filehash -ne (Get-FileHash -Path $psDllPath -Algorithm SHA512).Hash)
+    if (Test-Path -Path $psDllPath)
     {
-        $message = ("The hash for ProjectServerServices.dll isn't the expected value. Please make " + `
-                "sure the correct file exists on the file system.")
+        $filehash = "44CC60C2227011D08F36A7954C317195C0A44F3D52D51B0F54009AA03EF97E1B2F80A162D76F177E70D1756E42484DF367FACB25920C2C93FB8DFB8A8F5F08A5"
+        $currentHash = (Get-FileHash -Path $psDllPath -Algorithm SHA512).Hash
+        if ($filehash -ne $currentHash)
+        {
+            $message = ("The hash for ProjectServerServices.dll isn't the expected value. Please make " + `
+                    "sure the correct file exists on the file system. Expected Hash: $filehash. " + `
+                    "Current Hash: $currentHash. Path: $psDllPath")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
+        }
+        $bytes = [System.IO.File]::ReadAllBytes($psDllPath)
+        [System.Reflection.Assembly]::Load($bytes) | Out-Null
+
+        $maxSize = 500000000
+        $svcRouter = "_vti_bin/PSI/ProjectServer.svc"
+        $pwaUri = New-Object -TypeName "System.Uri" -ArgumentList $pwaUrl
+
+        if ($pwaUri.Scheme -eq [System.Uri]::UriSchemeHttps)
+        {
+            $binding = New-Object -TypeName "System.ServiceModel.BasicHttpBinding" `
+                -ArgumentList ([System.ServiceModel.BasicHttpSecurityMode]::Transport)
+        }
+        else
+        {
+            $binding = New-Object -TypeName "System.ServiceModel.BasicHttpBinding" `
+                -ArgumentList ([System.ServiceModel.BasicHttpSecurityMode]::TransportCredentialOnly)
+        }
+        $binding.Name = "basicHttpConf"
+        $binding.SendTimeout = [System.TimeSpan]::MaxValue
+        $binding.MaxReceivedMessageSize = $maxSize
+        $binding.ReaderQuotas.MaxNameTableCharCount = $maxSize
+        $binding.MessageEncoding = [System.ServiceModel.WSMessageEncoding]::Text
+
+        if ($UseKerberos.IsPresent -eq $false)
+        {
+            $binding.Security.Transport.ClientCredentialType = [System.ServiceModel.HttpClientCredentialType]::Ntlm
+        }
+        else
+        {
+            $binding.Security.Transport.ClientCredentialType = [System.ServiceModel.HttpClientCredentialType]::Windows
+        }
+
+        if ($pwaUrl.EndsWith('/') -eq $false)
+        {
+            $pwaUrl = $pwaUrl + "/"
+        }
+        $address = New-Object -TypeName "System.ServiceModel.EndpointAddress" `
+            -ArgumentList ($pwaUrl + $svcRouter)
+
+        $webService = New-Object -TypeName "Svc$($EndpointName).$($EndpointName)Client" `
+            -ArgumentList @($binding, $address)
+
+        $webService.ChannelFactory.Credentials.Windows.AllowedImpersonationLevel = [System.Security.Principal.TokenImpersonationLevel]::Impersonation
+
+        return $webService
+    }
+    else
+    {
+        $message = "The ProjectServerServices.dll does not exist. Expected file: $psDllPath"
         Add-SPDscEvent -Message $message `
             -EntryType 'Error' `
             -EventID 100 `
             -Source $MyInvocation.MyCommand.Source
         throw $message
     }
-    $bytes = [System.IO.File]::ReadAllBytes($psDllPath)
-    [System.Reflection.Assembly]::Load($bytes) | Out-Null
-
-    $maxSize = 500000000
-    $svcRouter = "_vti_bin/PSI/ProjectServer.svc"
-    $pwaUri = New-Object -TypeName "System.Uri" -ArgumentList $pwaUrl
-
-    if ($pwaUri.Scheme -eq [System.Uri]::UriSchemeHttps)
-    {
-        $binding = New-Object -TypeName "System.ServiceModel.BasicHttpBinding" `
-            -ArgumentList ([System.ServiceModel.BasicHttpSecurityMode]::Transport)
-    }
-    else
-    {
-        $binding = New-Object -TypeName "System.ServiceModel.BasicHttpBinding" `
-            -ArgumentList ([System.ServiceModel.BasicHttpSecurityMode]::TransportCredentialOnly)
-    }
-    $binding.Name = "basicHttpConf"
-    $binding.SendTimeout = [System.TimeSpan]::MaxValue
-    $binding.MaxReceivedMessageSize = $maxSize
-    $binding.ReaderQuotas.MaxNameTableCharCount = $maxSize
-    $binding.MessageEncoding = [System.ServiceModel.WSMessageEncoding]::Text
-
-    if ($UseKerberos.IsPresent -eq $false)
-    {
-        $binding.Security.Transport.ClientCredentialType = [System.ServiceModel.HttpClientCredentialType]::Ntlm
-    }
-    else
-    {
-        $binding.Security.Transport.ClientCredentialType = [System.ServiceModel.HttpClientCredentialType]::Windows
-    }
-
-    if ($pwaUrl.EndsWith('/') -eq $false)
-    {
-        $pwaUrl = $pwaUrl + "/"
-    }
-    $address = New-Object -TypeName "System.ServiceModel.EndpointAddress" `
-        -ArgumentList ($pwaUrl + $svcRouter)
-
-    $webService = New-Object -TypeName "Svc$($EndpointName).$($EndpointName)Client" `
-        -ArgumentList @($binding, $address)
-
-    $webService.ChannelFactory.Credentials.Windows.AllowedImpersonationLevel = [System.Security.Principal.TokenImpersonationLevel]::Impersonation
-
-    return $webService
 }
 
 function Use-SPDscProjectServerWebService
