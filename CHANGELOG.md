@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - SharePointDsc
   - Updated pipeline build scripts
+- SPProjectServerConnector
+  - Updated logic to check to required DLL file
 - SPFarmAdministrators
   - Update the event log messages so they are better formatted
 - SPQuotaTemplate
