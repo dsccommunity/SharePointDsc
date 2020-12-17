@@ -41,13 +41,6 @@ stages:
             env:
               ModuleVersion: $(gitVersion.NuGetVersionV2)
 
-          - task: PublishBuildArtifacts@1
-            displayName: 'Publish Build Artifact'
-            inputs:
-              PathtoPublish: 'output/'
-              ArtifactName: 'outputBuild'
-              publishLocation: 'Container'
-
           - task: PublishPipelineArtifact@1
             displayName: 'Publish Pipeline Artifact'
             inputs:
