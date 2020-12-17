@@ -16,7 +16,7 @@ function Get-TargetResource
         [System.String]
         $ApplicationPool,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $MySiteHostLocation,
 
@@ -280,7 +280,7 @@ function Set-TargetResource
         [System.String]
         $ApplicationPool,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $MySiteHostLocation,
 
@@ -675,7 +675,7 @@ function Test-TargetResource
         [System.String]
         $ApplicationPool,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $MySiteHostLocation,
 

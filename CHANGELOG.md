@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Do not set property ProviderSignOutUri in SharePoint 2013 as it does
   not exist
 - SPUserProfileServiceApp
-  - Changed MySiteHostLocation parameter mandatory=$false
+  - Changed MySiteHostLocation to not be mandatory
   - Added validation to Set function for testing if SiteNamingConflictResolution parameter
     is defined then also MySiteHostLocation parameters has to be because it is a mandatory
     parameter in the parameter set of New-SPProfileServiceApplication when
