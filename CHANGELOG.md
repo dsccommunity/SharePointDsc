@@ -7,12 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- SPTrustedIdentityTokenIssuer
+  - Do not set property ProviderSignOutUri in SharePoint 2013 as it does
+  not exist
 - SPUserProfileServiceApp
   - Changed MySiteHostLocation parameter mandatory=$false
-  - Added validation to Set function for testing if SiteNamingConflictResolution parameter is defined then
-    also MySiteHostLocation parameters has to be because it is a mandatory parameter in the parameter set of New-SPProfileServiceApplication when SiteNamingConflictResolution is used
+  - Added validation to Set function for testing if SiteNamingConflictResolution parameter
+    is defined then also MySiteHostLocation parameters has to be because it is a mandatory
+    parameter in the parameter set of New-SPProfileServiceApplication when
+    SiteNamingConflictResolution is used.
   - Added "MySiteHostLocation" to Test-SPDscParameterState function in Test-TargetResource
-
 
 ### Fixed
 
@@ -32,6 +36,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- SPAlternateUrl
+  - Fixed issue where trailing '/' cause Url not to be recognized.
 - SharePointDsc
   - Updated Convert-SPDscHashtableToString to output the username when
     parameter is a PSCredential
