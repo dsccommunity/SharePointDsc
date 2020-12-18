@@ -33,7 +33,7 @@ function Invoke-TestSetup
 
     $script:testEnvironment = Initialize-TestEnvironment `
         -DSCModuleName $script:DSCModuleName `
-        -DSCResourceName $script:DSCResourceFullName `
+        -DscResourceName $script:DSCResourceFullName `
         -ResourceType 'Mof' `
         -TestType 'Unit'
 }
@@ -50,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
                 $getTypeFullName = "Microsoft.Office.Server.Administration.UserProfileApplication"
@@ -73,6 +73,17 @@ try
                                 public class UserProfileManager {
                                     public UserProfileManager(System.Object a)
                                     {
+                                    }
+
+                                    public string MySiteHostUrl
+                                    {
+                                        get
+                                        {
+                                            return "https://my.contoso.com";
+                                        }
+                                        set
+                                        {
+                                        }
                                     }
 
                                     public string PersonalSiteFormat

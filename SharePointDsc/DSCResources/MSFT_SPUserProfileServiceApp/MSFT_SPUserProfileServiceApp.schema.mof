@@ -4,7 +4,7 @@ class MSFT_SPUserProfileServiceApp : OMI_BaseResource
     [Key, Description("The name of the user profile service")] string Name;
     [Write, Description("The proxy name, if not specified will be /Name of service app/ Proxy")] string ProxyName;
     [Required, Description("The name of the application pool to run the service app in")] string ApplicationPool;
-    [Required, Description("The URL of the my site host collection")] string MySiteHostLocation;
+    [Write, Description("The URL of the my site host collection")] string MySiteHostLocation;
     [Write, Description("The Managed Path of the my site sites")] string MySiteManagedPath;
     [Write, Description("The name of the profile database")] string ProfileDBName;
     [Write, Description("The name of the server to host the profile database")] string ProfileDBServer;
