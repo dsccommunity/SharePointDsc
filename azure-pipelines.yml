@@ -192,7 +192,7 @@ stages:
             displayName: 'Publish CodeCoverage Artifact'
             inputs:
               targetPath: '$(buildFolderName)/$(testResultFolderName)/'
-              artifactName: $(testArtifactName)
+              artifactName: 'CodeCoverage_2019'
               parallel: true
 
       - job: Code_Coverage
