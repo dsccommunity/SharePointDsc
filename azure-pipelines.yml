@@ -224,21 +224,21 @@ stages:
             inputs:
               buildType: 'current'
               artifactName: 'CodeCoverage_2013'
-              targetPath: '$(Build.SourcesDirectory)/$(testResultFolderName)/$(testArtifactName)'
+              targetPath: '$(Build.SourcesDirectory)/output/CodeCov2013'
 
           - task: DownloadPipelineArtifact@2
             displayName: 'Download Test Artifact'
             inputs:
               buildType: 'current'
               artifactName: 'CodeCoverage_2016'
-              targetPath: '$(Build.SourcesDirectory)/$(testResultFolderName)/$(testArtifactName)'
+              targetPath: '$(Build.SourcesDirectory)/output/CodeCov2016'
 
           - task: DownloadPipelineArtifact@2
             displayName: 'Download Test Artifact'
             inputs:
               buildType: 'current'
               artifactName: 'CodeCoverage_2019'
-              targetPath: '$(Build.SourcesDirectory)/$(testResultFolderName)/$(testArtifactName)'
+              targetPath: '$(Build.SourcesDirectory)/output/CodeCov2019'
 
           - task: PowerShell@2
             name: merge
@@ -253,11 +253,11 @@ stages:
             condition: succeededOrFailed()
             inputs:
               codeCoverageTool: 'JaCoCo'
-              summaryFileLocation: '$(buildFolderName)/$(testResultFolderName)/CodeCov_Merged.xml'
+              summaryFileLocation: '$(Build.SourcesDirectory)/output/CodeCov_Merged.xml'
               pathToSources: '$(Build.SourcesDirectory)/$(buildFolderName)/$(dscBuildVariable.RepositoryName)'
 
           - script: |
-              bash <(curl -s https://codecov.io/bash) -f "./$(buildFolderName)/$(testResultFolderName)/JaCoCo_coverage.xml" -F unit
+              bash <(curl -s https://codecov.io/bash) -f "./$(buildFolderName)/CodeCov_Merged.xml" -F unit
             displayName: 'Upload to Codecov.io'
             condition: succeededOrFailed()
 
