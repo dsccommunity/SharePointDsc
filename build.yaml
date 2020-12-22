@@ -76,7 +76,7 @@ Pester:
     - tests/Unit/SharePointDsc
   Tag:
   CodeCoverageThreshold: 75 # Set to 0 to bypass
-  CodeCoverageOutputFile: JaCoCo_coverage.xml
+  CodeCoverageOutputFile: CodeCoverage.xml
   CodeCoverageOutputFileEncoding: ascii
   # CodeCoverageMergedOutputFile: JaCoCo_Merged.xml
 
