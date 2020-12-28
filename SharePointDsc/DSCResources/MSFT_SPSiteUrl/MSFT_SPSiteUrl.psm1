@@ -402,4 +402,48 @@ function Test-TargetResource
     return $true
 }
 
+function Export-TargetResource
+{
+    [CmdletBinding()]
+    [OutputType([System.String])]
+    param
+    (
+        [Parameter()]
+        [System.String]
+        $URL,
+
+        [Parameter()]
+        [System.String[]]
+        $DependsOn
+    )
+    if (!(Get-PSSnapin Microsoft.SharePoint.Powershell -ErrorAction SilentlyContinue))
+    {
+        Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction 0
+    }
+    $VerbosePreference = "SilentlyContinue"
+    $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPSiteURL\MSFT_SPSiteURL.psm1" -Resolve
+    $Content = ''
+    $params = Get-DSCFakeParameters -ModulePath $module
+    $params.Url = $URL
+    $results = Get-TargetResource @params
+    if ($null -ne $results.Intranet -or $null -ne $results.Internet -or $null -ne $results.Custom -or $null -ne $results.Extranet)
+    {
+        $blockGUID = New-Guid
+        $PartialContent = "        SPSiteUrl " + $blockGUID.ToString() + "`r`n"
+        $PartialContent += "        {`r`n"
+        $results = Repair-Credentials -results $results
+        if ($DependsOn)
+        {
+            $results.add("DependsOn", $DependsOn)
+        }
+        $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+        $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+        $PartialContent += $currentBlock
+        $PartialContent += "        }`r`n"
+        $Content += $PartialContent
+    }
+    return $Content
+}
+
 Export-ModuleMember -Function *-TargetResource

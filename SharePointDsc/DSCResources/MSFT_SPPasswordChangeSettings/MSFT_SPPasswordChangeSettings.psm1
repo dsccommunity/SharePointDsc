@@ -180,4 +180,33 @@ function Test-TargetResource
     return $result
 }
 
+function Export-TargetResource
+{
+    if (!(Get-PSSnapin Microsoft.SharePoint.Powershell -ErrorAction SilentlyContinue))
+    {
+        Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction 0
+    }
+    $VerbosePreference = "SilentlyContinue"
+    $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPPasswordChangeSettings\MSFT_SPPasswordChangeSettings.psm1" -Resolve
+    $Content = ''
+    $params = Get-DSCFakeParameters -ModulePath $module
+    $farm = Get-SPFarm
+
+    if ($null -ne $farm.PasswordChangeEmailAddress)
+    {
+        $params.MailAddress = $farm.PasswordChangeEmailAddress
+        $results = Get-TargetResource @params
+        $PartialContent = "        SPPasswordChangeSettings " + [System.Guid]::NewGuid().ToString() + "`r`n"
+        $PartialContent += "        {`r`n"
+        $results = Repair-Credentials -results $results
+        $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+        $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+        $PartialContent += $currentBlock
+        $PartialContent += "        }`r`n"
+        $Content += $PartialContent
+    }
+    return $Content
+}
+
 Export-ModuleMember -Function *-TargetResource

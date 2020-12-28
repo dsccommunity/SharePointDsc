@@ -421,4 +421,57 @@ function Test-TargetResource
     return $result
 }
 
+function Export-TargetResource
+{
+    if (!(Get-PSSnapin Microsoft.SharePoint.Powershell -ErrorAction SilentlyContinue))
+    {
+        Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction 0
+    }
+    $VerbosePreference = "SilentlyContinue"
+    $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPBlobCacheSettings\MSFT_SPBlobCacheSettings.psm1" -Resolve
+    $Content = ''
+    $params = Get-DSCFakeParameters -ModulePath $module
+
+    $webApps = Get-SPWebApplication
+    foreach ($webApp in $webApps)
+    {
+        try
+        {
+            $alternateUrls = $webApp.AlternateUrl
+
+            $zones = @("Default")
+            if ($alternateUrls.Length -ge 1)
+            {
+                $zones = $alternateUrls | Select-Object Zone
+            }
+            foreach ($zone in $zones)
+            {
+                $PartialContent = "        SPBlobCacheSettings " + [System.Guid]::NewGuid().ToString() + "`r`n"
+                $PartialContent += "        {`r`n"
+                $params.WebAppUrl = $webApp.Url
+                $params.Zone = $zone
+                $results = Get-TargetResource @params
+                $results = Repair-Credentials -results $results
+
+                Add-ConfigurationDataEntry -Node "NonNodeData" -Key "BlobCacheLocation" -Value $results.Location -Description "Path where the Blob Cache objects will be stored on the servers;"
+                $results.Location = "`$ConfigurationData.NonNodeData.BlobCacheLocation"
+
+                $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+                $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+                $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "Location"
+                $PartialContent += $currentBlock
+                $PartialContent += "        }`r`n"
+                $Content += $PartialContent
+            }
+        }
+        catch
+        {
+            $Global:ErrorLog += "[Blob Cache Settings]" + $webApp.Url + "`r`n"
+            $Global:ErrorLog += "$_`r`n`r`n"
+        }
+    }
+    return $Content
+}
+
 Export-ModuleMember -Function *-TargetResource

@@ -267,4 +267,51 @@ function Test-TargetResource
     return $result
 }
 
+function Export-TargetResource
+{
+    if (!(Get-PSSnapin Microsoft.SharePoint.Powershell -ErrorAction SilentlyContinue))
+    {
+        Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction 0
+    }
+    $VerbosePreference = "SilentlyContinue"
+    $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPWebAppThrottlingSettings\MSFT_SPWebAppThrottlingSettings.psm1" -Resolve
+    $Content = ''
+    $params = Get-DSCFakeParameters -ModulePath $module
+
+    $webApps = Get-SPWebApplication
+    foreach ($wa in $webApps)
+    {
+        try
+        {
+            if ($null -ne $wa)
+            {
+                $params.WebAppUrl = $wa.Url
+                $PartialContent = "        SPWebAppThrottlingSettings " + [System.Guid]::NewGuid().toString() + "`r`n"
+                $PartialContent += "        {`r`n"
+                $results = Get-TargetResource @params
+
+                if ($results.Contains("InstallAccount"))
+                {
+                    $results.Remove("InstallAccount")
+                }
+                $results.HappyHour = Get-SPWebAppHappyHour -params $results.HappyHour
+                $results = Repair-Credentials -results $results
+                $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+                $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+                $PartialContent += $currentBlock
+                $PartialContent += "        }`r`n"
+                $Content += $PartialContent
+            }
+        }
+        catch
+        {
+            $_
+            $Global:ErrorLog += "[Web Application Throttling Settings]" + $wa.Url + "`r`n"
+            $Global:ErrorLog += "$_`r`n`r`n"
+        }
+    }
+    return $Content
+}
+
 Export-ModuleMember -Function *-TargetResource

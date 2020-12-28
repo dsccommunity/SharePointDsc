@@ -183,4 +183,51 @@ function Test-TargetResource()
     return $result
 }
 
+function Export-TargetResource
+{
+    if (!(Get-PSSnapin Microsoft.SharePoint.Powershell -ErrorAction SilentlyContinue))
+    {
+        Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction 0
+    }
+    $VerbosePreference = "SilentlyContinue"
+    $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPFarmPropertyBag\MSFT_SPFarmPropertyBag.psm1" -Resolve
+    $Content = ''
+    $params = Get-DSCFakeParameters -ModulePath $module
+    $farm = Get-SPFarm
+    foreach ($key in $farm.Properties.Keys)
+    {
+        $params.Key = $key
+        $PartialContent = "        SPFarmPropertyBag " + [System.Guid]::NewGuid().ToString() + "`r`n"
+        $PartialContent += "        {`r`n"
+        $results = Get-TargetResource @params
+
+        $results = Repair-Credentials -results $results
+        $currentBlock = ""
+        if ($results.Key -eq "SystemAccountName")
+        {
+            $accountName = Get-Credentials -UserName $results.Value
+            if ($accountName)
+            {
+                $results.Value = (Resolve-Credentials -UserName $results.Value) + ".UserName"
+            }
+
+            $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+            if ($accountName)
+            {
+                $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "Value"
+            }
+        }
+        else
+        {
+            $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+        }
+        $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+        $PartialContent += $currentBlock
+        $PartialContent += "        }`r`n"
+        $Content += $PartialContent
+    }
+    return $Content
+}
+
 Export-ModuleMember -Function *-TargetResource

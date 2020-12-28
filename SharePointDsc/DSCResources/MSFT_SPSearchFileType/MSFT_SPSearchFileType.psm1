@@ -368,4 +368,66 @@ function Test-TargetResource
     return $result
 }
 
+function Export-TargetResource
+{
+    if (!(Get-PSSnapin Microsoft.SharePoint.Powershell -ErrorAction SilentlyContinue))
+    {
+        Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction 0
+    }
+    $VerbosePreference = "SilentlyContinue"
+    $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPSearchFileType\MSFT_SPSearchFileType.psm1" -Resolve
+    $Content = ''
+    $params = Get-DSCFakeParameters -ModulePath $module
+
+    $ssas = Get-SPServiceApplication | Where-Object -FilterScript { $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication" }
+    $i = 1
+    $total = $ssas.Length
+
+    foreach ($ssa in $ssas)
+    {
+        try
+        {
+            if ($null -ne $ssa)
+            {
+                $serviceName = $ssa.DisplayName
+                Write-Host "Scanning Search File Type for Search Application [$i/$total] {$serviceName}"
+                $fileFormats = Get-SPEnterpriseSearchFileFormat -SearchApplication $ssa
+
+                $j = 1
+                $totalFT = $fileFormats.Length
+                foreach ($fileFormat in $fileFormats)
+                {
+                    $fileType = $fileFormat.Identity
+                    Write-Host "    -> Scanning File Type [$j/$totalFT] {$fileType}"
+
+                    $PartialContent = "        SPSearchFileType " + [System.Guid]::NewGuid().ToString() + "`r`n"
+                    $PartialContent += "        {`r`n"
+                    $params.ServiceAppName = $serviceName
+                    $params.FileType = $fileType
+
+                    $results = Get-TargetResource @params
+
+                    $results = Repair-Credentials -results $results
+
+                    $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+                    $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+                    $PartialContent += $currentBlock
+                    $PartialContent += "        }`r`n"
+                    $Content += $PartialContent
+
+                    $j++
+                }
+            }
+            $i++
+        }
+        catch
+        {
+            $Global:ErrorLog += "[Search File Type]" + $ssa.DisplayName + "`r`n"
+            $Global:ErrorLog += "$_`r`n`r`n"
+        }
+    }
+    return $Content
+}
+
 Export-ModuleMember -Function *-TargetResource

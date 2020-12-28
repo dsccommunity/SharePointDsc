@@ -913,4 +913,57 @@ function Test-SPDscInput()
     }
 }
 
+function Export-TargetResource
+{
+    if (!(Get-PSSnapin Microsoft.SharePoint.Powershell -ErrorAction SilentlyContinue))
+    {
+        Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction 0
+    }
+    $VerbosePreference = "SilentlyContinue"
+    $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath "\DSCResources\MSFT_SPWebAppPermissions\MSFT_SPWebAppPermissions.psm1" -Resolve
+    $params = Get-DSCFakeParameters -ModulePath $module
+    $Content = ''
+    $webApps = Get-SPWebApplication
+    foreach ($wa in $webApps)
+    {
+        try
+        {
+            if ($null -ne $wa)
+            {
+                $params.WebAppUrl = $wa.Url
+                $params.Remove("ListPermissions")
+                $params.Remove("SitePermissions")
+                $params.Remove("PersonalPermissions")
+                $PartialContent = "        SPWebAppPermissions " + [System.Guid]::NewGuid().toString() + "`r`n"
+                $PartialContent += "        {`r`n"
+                $results = Get-TargetResource @params
+
+                if ($results.Contains("InstallAccount"))
+                {
+                    $results.Remove("InstallAccount")
+                }
+
+                <# Fix an issue with SP DSC (forward) 1.6.0.0 #>
+                if ($results.WebAppUrl -eq "url")
+                {
+                    $results.WebAppUrl = $wa.Url
+                }
+                $results = Repair-Credentials -results $results
+                $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+                $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+                $PartialContent += $currentBlock
+                $PartialContent += "        }`r`n"
+            }
+        }
+        catch
+        {
+            $Global:ErrorLog += "[Web Application Permissions]" + $wa.Url + "`r`n"
+            $Global:ErrorLog += "$_`r`n`r`n"
+        }
+        $Content += $PartialContent
+    }
+    return $Content
+}
+
 Export-ModuleMember -Function *-TargetResource

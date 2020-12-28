@@ -253,4 +253,56 @@ function Test-TargetResource
     return $result
 }
 
+function Export-TargetResource
+{
+    if (!(Get-PSSnapin Microsoft.SharePoint.Powershell -ErrorAction SilentlyContinue))
+    {
+        Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction 0
+    }
+    $VerbosePreference = "SilentlyContinue"
+    $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPUserProfileSection\MSFT_SPUserProfileSection.psm1" -Resolve
+    $Content = ''
+    $params = Get-DSCFakeParameters -ModulePath $module
+    $caURL = (Get-SpWebApplication -IncludeCentralAdministration | Where-Object -FilterScript { $_.IsAdministrationWebApplication -eq $true }).Url
+    $context = Get-SPServiceContext -Site $caURL
+    try
+    {
+        $userProfileConfigManager = New-Object -TypeName "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" `
+            -ArgumentList $context
+        $properties = $userProfileConfigManager.GetPropertiesWithSection()
+        $sections = $properties | Where-Object { $_.IsSection -eq $true }
+
+        $userProfileServiceApp = Get-SPServiceApplication | Where-Object { $_.GetType().Name -eq "UserProfileApplication" }
+
+        foreach ($section in $sections)
+        {
+            try
+            {
+                $params.Name = $section.Name
+                $params.UserProfileService = $userProfileServiceApp[0].DisplayName
+                $PartialContent = "        SPUserProfileSection " + [System.Guid]::NewGuid().ToString() + "`r`n"
+                $PartialContent += "        {`r`n"
+                $results = Get-TargetResource @params
+
+                $results = Repair-Credentials -results $results
+                $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+                $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+                $PartialContent += $currentBlock
+                $PartialContent += "        }`r`n"
+                $Content += $PartialContent
+            }
+            catch
+            {
+                $Global:ErrorLog += "[User Profile Section]" + $section.Name + "`r`n"
+                $Global:ErrorLog += "$_`r`n`r`n"
+            }
+        }
+    }
+    catch
+    {
+    }
+    return $Content
+}
+
 Export-ModuleMember -Function *-TargetResource

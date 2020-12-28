@@ -37,10 +37,10 @@ function Get-TargetResource
         $currentTopology = $ssa.ActiveTopology
 
         $searchComponent = Get-SPEnterpriseSearchComponent -SearchTopology $currentTopology | `
-            Where-Object -FilterScript {
-            ($_.GetType().Name -eq "IndexComponent") `
-                -and ($_.IndexPartitionOrdinal -eq $params.Index)
-        }
+                Where-Object -FilterScript {
+                ($_.GetType().Name -eq "IndexComponent") `
+                    -and ($_.IndexPartitionOrdinal -eq $params.Index)
+            }
 
         $IndexComponents = $searchComponent.ServerName
         $rootDirectory = $searchComponent.RootDirectory
@@ -273,6 +273,88 @@ function Test-TargetResource
     Write-Verbose -Message "Test-TargetResource returned $result"
 
     return $result
+}
+
+function Export-TargetResource
+{
+    if (!(Get-PSSnapin Microsoft.SharePoint.Powershell -ErrorAction SilentlyContinue))
+    {
+        Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction 0
+    }
+    $VerbosePreference = "SilentlyContinue"
+    $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPSearchIndexPartition\MSFT_SPSearchIndexPartition.psm1" -Resolve
+    $Content = ''
+    $params = Get-DSCFakeParameters -ModulePath $module
+
+    $ssas = Get-SPServiceApplication | Where-Object -FilterScript { $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication" }
+
+    $i = 1
+    $total = $ssas.Length
+    foreach ($ssa in $ssas)
+    {
+        try
+        {
+            if ($null -ne $ssa)
+            {
+                $serviceName = $ssa.DisplayName
+                Write-Host "Scanning Index Partitions for Search Service Application [$i/$total] {$serviceName}"
+
+                $ssa = Get-SPEnterpriseSearchServiceApplication -Identity $ssa
+                $currentTopology = $ssa.ActiveTopology
+                $indexComponents = Get-SPEnterpriseSearchComponent -SearchTopology $currentTopology | `
+                        Where-Object -FilterScript { $_.GetType().Name -eq "IndexComponent" }
+
+                [System.Collections.ArrayList]$indexesAlreadyScanned = @()
+                $j = 1
+                $totalIndex = $indexComponents.Length
+                foreach ($indexComponent in $indexComponents)
+                {
+                    try
+                    {
+                        if (!$indexesAlreadyScanned.Contains($indexComponent.IndexPartitionOrdinal))
+                        {
+                            $icServerName = $indexComponent.ServerName
+                            Write-Host "    -> Index Component [$j/$totalIndex] {$icServerName}"
+
+                            $indexesAlreadyScanned += $indexComponent.IndexPartitionOrdinal
+                            $PartialContent = "        SPSearchIndexPartition " + [System.Guid]::NewGuid().ToString() + "`r`n"
+                            $PartialContent += "        {`r`n"
+                            $params.ServiceAppName = $serviceName
+                            $params.Index = $indexComponent.IndexPartitionOrdinal
+                            $params.Servers = $indexComponent.ServerName
+                            $params.RootDirectory = $indexComponent.RootDirectory
+                            $results = Get-TargetResource @params
+
+                            Add-ConfigurationDataEntry -Node "NonNodeData" -Key "SearchIndexPartitionServers" -Value $results.Servers -Description "List of Servers that will host the Search Index Partitions;"
+                            $results.Servers = "`$ConfigurationData.NonNodeData.SearchIndexPartitionServers"
+
+                            $results = Repair-Credentials -results $results
+
+                            $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+                            $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+                            $PartialContent += $currentBlock
+                            $PartialContent += "        }`r`n"
+                            $Content += $PartialContent
+                            $j++
+                        }
+                    }
+                    catch
+                    {
+                        $Global:ErrorLog += "[Index Component]" + $indexComponent.ServerName + "`r`n"
+                        $Global:ErrorLog += "$_`r`n`r`n"
+                    }
+                }
+            }
+            $i++
+        }
+        catch
+        {
+            $Global:ErrorLog += "[Search Index Partition]" + $ssa.DisplayName + "`r`n"
+            $Global:ErrorLog += "$_`r`n`r`n"
+        }
+    }
+    return $Content
 }
 
 Export-ModuleMember -Function *-TargetResource

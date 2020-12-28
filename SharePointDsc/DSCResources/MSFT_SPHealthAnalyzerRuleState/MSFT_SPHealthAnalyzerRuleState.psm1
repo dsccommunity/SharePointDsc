@@ -299,4 +299,60 @@ function Test-TargetResource
     return $result
 }
 
+function Export-TargetResource
+{
+    if (!(Get-PSSnapin Microsoft.SharePoint.Powershell -ErrorAction SilentlyContinue))
+    {
+        Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction 0
+    }
+    $VerbosePreference = "SilentlyContinue"
+    $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPHealthAnalyzerRuleState\MSFT_SPHealthAnalyzerRuleState.psm1" -Resolve
+    $caWebapp = Get-SPWebApplication -IncludeCentralAdministration `
+    | Where-Object -FilterScript { $_.IsAdministrationWebApplication }
+    $caWeb = Get-SPWeb($caWebapp.Url)
+    $healthRulesList = $caWeb.Lists | Where-Object -FilterScript { $_.BaseTemplate -eq "HealthRules" }
+
+    $Content = ''
+    $params = Get-DSCFakeParameters -ModulePath $module
+
+    foreach ($healthRule in $healthRulesList.Items)
+    {
+        try
+        {
+            $params.Name = $healthRule.Title
+            $results = Get-TargetResource @params
+
+            if ($null -ne $results.Schedule)
+            {
+                $PartialContent = "        SPHealthAnalyzerRuleState " + [System.Guid]::NewGuid().ToString() + "`r`n"
+                $PartialContent += "        {`r`n"
+
+                if ($results.Get_Item("Schedule") -eq "On Demand")
+                {
+                    $results.Schedule = "OnDemandOnly"
+                }
+
+                $results = Repair-Credentials -results $results
+                $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+                $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+                $PartialContent += $currentBlock
+                $PartialContent += "        }`r`n"
+                $Content += $PartialContent
+            }
+            else
+            {
+                $ruleName = $healthRule.Title
+                Write-Warning "Could not extract information for rule {$ruleName}. There may be some missing service applications."
+            }
+        }
+        catch
+        {
+            $Global:ErrorLog += "[Health Analyzer Rule]" + $healthRule.Title + "`r`n"
+            $Global:ErrorLog += "$_`r`n`r`n"
+        }
+    }
+    return $Content
+}
+
 Export-ModuleMember -Function *-TargetResource

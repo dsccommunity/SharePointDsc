@@ -580,4 +580,92 @@ function Test-TargetResource
     return $result
 }
 
+function Export-TargetResource
+{
+    if (!(Get-PSSnapin Microsoft.SharePoint.Powershell -ErrorAction SilentlyContinue))
+    {
+        Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction 0
+    }
+    $VerbosePreference = "SilentlyContinue"
+    $searchSA = Get-SPServiceApplication | Where-Object { $_.GetType().Name -eq "SearchServiceApplication" }
+
+    $i = 1
+    $total = $searchSA.Length
+    $content = ''
+    $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath "\DSCResources\MSFT_SPSearchServiceApp\MSFT_SPSearchServiceApp.psm1" -Resolve
+
+    foreach ($searchSAInstance in $searchSA)
+    {
+        try
+        {
+            if ($null -ne $searchSAInstance)
+            {
+                $serviceName = $searchSAInstance.Name
+                Write-Host "Scanning Search Service Application [$i/$total] {$serviceName}"
+                $params = Get-DSCFakeParameters -ModulePath $module
+
+                $partialContent = "        SPSearchServiceApp " + $searchSAInstance.Name.Replace(" ", "") + "`r`n"
+                $partialContent += "        {`r`n"
+                $params.Name = $serviceName
+                $params.ApplicationPool = $searchSAInstance.ApplicationPool.Name
+                $results = Get-TargetResource @params
+                if ($results.Get_Item("CloudIndex") -eq $false)
+                {
+                    $results.Remove("CloudIndex")
+                }
+
+                if ($results.Contains("InstallAccount"))
+                {
+                    $results.Remove("InstallAccount")
+                }
+
+                if ($null -eq $results.WindowsServiceAccount)
+                {
+                    $results.Remove("WindowsServiceAccount")
+                }
+
+                if ($null -eq $results.SearchCenterUrl)
+                {
+                    $results.Remove("SearchCenterUrl")
+                }
+
+                Save-Credentials -UserName $results["DefaultContentAccessAccount"].Username
+                $Results["DefaultContentAccessAccount"] = Resolve-Credentials -UserName $results["DefaultContentAccessAccount"].Username
+
+                <# Nik20170111 - Fix a bug in 1.5.0.0 where DatabaseName and DatabaseServer is not properly returned #>
+                $results["DatabaseName"] = $searchSAInstance.SearchAdminDatabase.Name
+                $results["DatabaseServer"] = $searchSAInstance.SearchAdminDatabase.Server.Name
+
+                $results = Repair-Credentials -results $results
+
+                Add-ConfigurationDataEntry -Node "NonNodeData" -Key "DatabaseServer" -Value $results.DatabaseServer -Description "Name of the Database Server associated with the destination SharePoint Farm;"
+                $results.DatabaseServer = "`$ConfigurationData.NonNodeData.DatabaseServer"
+
+                $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+                $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "DefaultContentAccessAccount"
+                $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "DatabaseServer"
+                $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+                $partialContent += $currentBlock
+                $partialContent += "        }`r`n"
+
+                $properties = @{
+                    searchSAName = $searchSAInstance.Name
+                    DependsOn    = "[SPSearchServiceApp]$($searchSAInstance.Name.Replace(' ', ''))"
+                }
+                $partialContent += Read-TargetResource -ResourceName 'SPSearchContentSource' -ExportParams $properties
+            }
+            $i++
+            $content += $partialContent
+        }
+        catch
+        {
+            $_
+            $Global:ErrorLog += "[Search Service Application]" + $searchSAInstance.Name + "`r`n"
+            $Global:ErrorLog += "$_`r`n`r`n"
+        }
+    }
+    return $content
+}
+
 Export-ModuleMember -Function *-TargetResource

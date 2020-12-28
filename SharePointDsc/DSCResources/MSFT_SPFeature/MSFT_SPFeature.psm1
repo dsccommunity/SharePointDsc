@@ -220,4 +220,86 @@ function Test-TargetResource
     return $result
 }
 
+function Export-TargetResource
+{
+    [CmdletBinding()]
+    [OutputType([System.String])]
+    param
+    (
+        [Parameter()]
+        [System.String]
+        $Scope,
+
+        [Parameter()]
+        [System.String]
+        $URL,
+
+        [Parameter()]
+        [System.String]
+        $DependsOn
+    )
+    if (!(Get-PSSnapin Microsoft.SharePoint.Powershell -ErrorAction SilentlyContinue))
+    {
+        Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction 0
+    }
+    $VerbosePreference = "SilentlyContinue"
+    $spMajorVersion = (Get-SPDscInstalledProductVersion).FileMajorPart
+    $versionFilter = $spMajorVersion.ToString() + "*"
+    $Features = Get-SPFeature | Where-Object { $_.Scope -eq $Scope -and $_.Version -like $versionFilter }
+    $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath "\DSCResources\MSFT_SPFeature\MSFT_SPFeature.psm1" -Resolve
+    Import-Module $module -Scope Local
+    $params = Get-DSCFakeParameters -ModulePath $module
+
+    $j = 1
+    $totalFeat = $Features.Length
+    $Content = ""
+    foreach ($Feature in $Features)
+    {
+        try
+        {
+            $displayName = $Feature.DisplayName
+            Write-Host "    -> Scanning Feature [$j/$totalFeat] {$displayName}"
+            $params.Name = $displayName
+            $params.FeatureScope = $Scope
+            if ($URL)
+            {
+                $params.Url = $Url
+            }
+            $results = Get-TargetResource @params
+
+            if ($results.Get_Item("Ensure").ToLower() -eq "present")
+            {
+                $partialContent = "        SPFeature " + [System.Guid]::NewGuid().ToString() + "`r`n"
+                $partialContent += "        {`r`n"
+
+                <# Manually add the InstallAccount param due to a bug in 1.6.0.0 that returns a param named InstalAccount (typo) instead.
+                https://github.com/PowerShell/SharePointDsc/issues/481 #>
+                if ($results.ContainsKey("InstalAccount"))
+                {
+                    $results.Remove("InstalAccount")
+                }
+                $results = Repair-Credentials -results $results
+                if ($DependsOn)
+                {
+                    $results.add("DependsOn", $DependsOn)
+                }
+                $currentDSCBlock = Get-DSCBlock -Params $results -ModulePath $module
+                $currentDSCBlock = Convert-DSCStringParamToVariable -DSCBlock $currentDSCBlock -ParameterName "PsDscRunAsCredential"
+                $partialContent += $currentDSCBlock
+                $partialContent += "        }`r`n"
+            }
+            $Content += $partialContent
+            $j++
+        }
+        catch
+        {
+            $_
+            $Global:ErrorLog += "[Web Application Feature]" + $Feature.DisplayName + "`r`n"
+            $Global:ErrorLog += "$_`r`n`r`n"
+        }
+    }
+    return $Content
+}
+
 Export-ModuleMember -Function *-TargetResource

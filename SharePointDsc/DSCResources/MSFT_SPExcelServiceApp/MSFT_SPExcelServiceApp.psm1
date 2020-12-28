@@ -355,12 +355,12 @@ function Set-TargetResource
 
             # Remove parameters that do not belong on the set method
             @("InstallAccount", "Ensure", "TrustedFileLocations", "Name", "ApplicationPool") |
-            ForEach-Object -Process {
-                if ($params.ContainsKey($_) -eq $true)
-                {
-                    $params.Remove($_) | Out-Null
+                ForEach-Object -Process {
+                    if ($params.ContainsKey($_) -eq $true)
+                    {
+                        $params.Remove($_) | Out-Null
+                    }
                 }
-            }
 
             Set-SPExcelServiceApplication @params
         }
@@ -701,6 +701,65 @@ function Test-TargetResource
         Write-Verbose -Message "Test-TargetResource returned $mainCheck"
         return $mainCheck
     }
+}
+
+function Export-TargetResource
+{
+    if (!(Get-PSSnapin Microsoft.SharePoint.Powershell -ErrorAction SilentlyContinue))
+    {
+        Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction 0
+    }
+    $VerbosePreference = "SilentlyContinue"
+    $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPExcelServiceApp\MSFT_SPExcelServiceApp.psm1" -Resolve
+    $Content = ''
+    $params = Get-DSCFakeParameters -ModulePath $module
+
+    $excelSSAs = Get-SPServiceApplication | Where-Object { $_.TypeName -eq "Excel Services Application Web Service Application" }
+
+    foreach ($excelSSA in $excelSSAs)
+    {
+        try
+        {
+            if ($null -ne $excelSSA)
+            {
+                $PartialContent = "        SPExcelServiceApp " + [System.Guid]::NewGuid().ToString() + "`r`n"
+                $PartialContent += "        {`r`n"
+                $params.Name = $excelSSA.DisplayName
+                $results = Get-TargetResource @params
+                $privateK = $results.Get_Item("PrivateBytesMax")
+                $unusedMax = $results.Get_Item("UnusedObjectAgeMax")
+
+                <# Nik20170106 - Temporary fix while waiting to hear back from Brian F. on how to properly pass these params. #>
+                if ($results.ContainsKey("TrustedFileLocations"))
+                {
+                    $results.Remove("TrustedFileLocations")
+                }
+
+                if ($results.ContainsKey("PrivateBytesMax") -and $privateK -eq "-1")
+                {
+                    $results.Remove("PrivateBytesMax")
+                }
+
+                if ($results.ContainsKey("UnusedObjectAgeMax") -and $unusedMax -eq "-1")
+                {
+                    $results.Remove("UnusedObjectAgeMax")
+                }
+                $results = Repair-Credentials -results $results
+                $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+                $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+                $PartialContent += $currentBlock
+                $PartialContent += "        }`r`n"
+                $Content += $PartialContent
+            }
+        }
+        catch
+        {
+            $Global:ErrorLog += "[Excel Service Application]" + $excelSSA.DisplayName + "`r`n"
+            $Global:ErrorLog += "$_`r`n`r`n"
+        }
+    }
+    return $Content
 }
 
 Export-ModuleMember -Function *-TargetResource

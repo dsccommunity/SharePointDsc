@@ -1070,4 +1070,108 @@ function Test-TargetResource
     return $result
 }
 
+function Export-TargetResource
+{
+    [CmdletBinding()]
+    [OutputType([System.String])]
+    param
+    (
+        [Parameter()]
+        [System.String]
+        $SearchSAName,
+
+        [Parameter()]
+        [System.String[]]
+        $DependsOn
+    )
+    if (!(Get-PSSnapin Microsoft.SharePoint.Powershell -ErrorAction SilentlyContinue))
+    {
+        Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction 0
+    }
+    $VerbosePreference = "SilentlyContinue"
+    $content = ''
+    $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath "\DSCResources\MSFT_SPSearchContentSource\MSFT_SPSearchContentSource.psm1" -Resolve
+
+    $params = Get-DSCFakeParameters -ModulePath $module
+
+    $contentSources = Get-SPEnterpriseSearchCrawlContentSource -SearchApplication $searchSAName
+
+    $j = 1
+    $totalCS = $contentSources.Length
+    foreach ($contentSource in $contentSources)
+    {
+        try
+        {
+            $csName = $contentSource.Name
+            Write-Host "    -> Scanning Content Source [$j/$totalCS] {$csName}"
+
+            $sscsGuid = [System.Guid]::NewGuid().toString()
+
+            $params.Name = $csName
+            $params.ServiceAppName = $searchSAName
+
+            if (!$source.Type -eq "CustomRepository")
+            {
+                $results = Get-TargetResource @params
+                $partialContent = "        SPSearchContentSource " + $contentSource.Name.Replace(" ", "") + $sscsGuid + "`r`n"
+                $partialContent += "        {`r`n"
+
+                $searchScheduleModulePath = Join-Path -Path $ParentModuleBase -ChildPath "\Modules\SharePointDsc.Search\SPSearchContentSource.Schedules.psm1"
+                Import-Module -Name $searchScheduleModulePath
+                # TODO: Figure out way to properly pass CimInstance objects and then add the schedules back;
+                if ($contentSource.IncrementalCrawlSchedule)
+                {
+                    $incremental = Get-SPDSCSearchCrawlSchedule -Schedule $contentSource.IncrementalCrawlSchedule
+                    $results.IncrementalSchedule = Get-SPCrawlSchedule $incremental
+                }
+                else
+                {
+                    $results.Remove("IncrementalSchedule")
+                }
+
+                if ($contentSource.FullCrawlSchedule)
+                {
+                    $full = Get-SPDSCSearchCrawlSchedule -Schedule $contentSource.FullCrawlSchedule
+                    $results.FullSchedule = Get-SPCrawlSchedule $full
+                }
+                else
+                {
+                    $results.Remove("FullSchedule")
+                }
+
+                if ($dependsOn)
+                {
+                    $results.add("DependsOn", $dependsOn)
+                }
+
+                $results = Repair-Credentials -results $results
+
+                $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+                $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+                if ($contentSource.IncrementalCrawlSchedule)
+                {
+                    $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "IncrementalSchedule"
+                }
+
+                if ($contentSource.FullCrawlSchedule)
+                {
+                    $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "FullSchedule"
+                }
+
+                $partialContent += $currentBlock.replace('`', '"')
+                $partialContent += "        }`r`n"
+            }
+        }
+        catch
+        {
+            $_
+        }
+        $Content += $partialContent
+        $j++
+    }
+    return $content
+    #endregion
+}
+
 Export-ModuleMember -Function *-TargetResource

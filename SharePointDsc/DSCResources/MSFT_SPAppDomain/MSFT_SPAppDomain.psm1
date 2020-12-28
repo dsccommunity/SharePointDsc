@@ -100,4 +100,32 @@ function Test-TargetResource
     return $result
 }
 
+function Export-TargetResource
+{
+    if (!(Get-PSSnapin Microsoft.SharePoint.Powershell -ErrorAction SilentlyContinue))
+    {
+        Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction 0
+    }
+    $VerbosePreference = "SilentlyContinue"
+    $serviceApp = Get-SPServiceApplication | Where-Object { $_.GetType().Name -eq "AppManagementServiceApplication" }
+    $appDomain = Get-SPAppDomain
+    if ($serviceApp.Length -ge 1 -and $appDomain.Length -ge 1)
+    {
+        $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+        $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPAppDomain\MSFT_SPAppDomain.psm1" -Resolve
+        $Content = ''
+        $params = Get-DSCFakeParameters -ModulePath $module
+        $PartialContent = "        SPAppDomain " + [System.Guid]::NewGuid().ToString() + "`r`n"
+        $PartialContent += "        {`r`n"
+        $results = Get-TargetResource @params
+        $results = Repair-Credentials -results $results
+        $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+        $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+        $PartialContent += $currentBlock
+        $PartialContent += "        }`r`n"
+        $Content += $PartialContent
+    }
+    return $Content
+}
+
 Export-ModuleMember -Function *-TargetResource

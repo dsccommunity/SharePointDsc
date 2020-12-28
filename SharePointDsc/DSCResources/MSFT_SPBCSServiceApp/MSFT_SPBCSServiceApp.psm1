@@ -314,4 +314,79 @@ function Test-TargetResource
     return $result
 }
 
+function Export-TargetResource
+{
+    [CmdletBinding()]
+    [OutputType([System.String])]
+    param (
+        [Parameter()]
+        [System.String]
+        $ModulePath,
+
+        [Parameter()]
+        [System.Collections.Hashtable]
+        $Params
+    )
+    if (!(Get-PSSnapin Microsoft.SharePoint.Powershell -ErrorAction SilentlyContinue))
+    {
+        Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction 0
+    }
+    $VerbosePreference = "SilentlyContinue"
+    if ($null -ne $modulePath)
+    {
+        $module = Resolve-Path $modulePath
+    }
+    else
+    {
+        $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+        $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPBCSServiceApp\MSFT_SPBCSServiceApp.psm1" -Resolve
+        $Content = ''
+    }
+
+    if ($null -eq $params)
+    {
+        $params = Get-DSCFakeParameters -ModulePath $module
+    }
+
+    $bcsa = Get-SPServiceApplication | Where-Object { $_.GetType().Name -eq "BdcServiceApplication" }
+
+    foreach ($bcsaInstance in $bcsa)
+    {
+        try
+        {
+            if ($null -ne $bcsaInstance)
+            {
+                $PartialContent = "        SPBCSServiceApp " + $bcsaInstance.Name.Replace(" ", "") + "`r`n"
+                $PartialContent += "        {`r`n"
+                $params.Name = $bcsaInstance.DisplayName
+                $results = Get-TargetResource @params
+
+                <# WA - Issue with 1.6.0.0 where DB Aliases not returned in Get-TargetResource #>
+                $results["DatabaseServer"] = CheckDBForAliases -DatabaseName $results["DatabaseName"]
+
+                if ($results.Contains("InstallAccount"))
+                {
+                    $results.Remove("InstallAccount")
+                }
+                $results = Repair-Credentials -results $results
+
+                Add-ConfigurationDataEntry -Node "NonNodeData" -Key "DatabaseServer" -Value $results.DatabaseServer -Description "Name of the Database Server associated with the destination SharePoint Farm;"
+                $results.DatabaseServer = "`$ConfigurationData.NonNodeData.DatabaseServer"
+                $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+                $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "DatabaseServer"
+                $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+                $PartialContent += $currentBlock
+                $PartialContent += "        }`r`n"
+                $Content += $PartialContent
+            }
+        }
+        catch
+        {
+            $Global:ErrorLog += "[Business Connectivity Service Application]" + $bcsaInstance.DisplayName + "`r`n"
+            $Global:ErrorLog += "$_`r`n`r`n"
+        }
+    }
+    return $Content
+}
+
 Export-ModuleMember -Function *-TargetResource

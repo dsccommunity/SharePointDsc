@@ -1277,4 +1277,44 @@ function Test-SPDscPrereqInstallStatus
     return $itemsInstalled
 }
 
+function Export-TargetResource
+{
+    param
+    (
+        [Parameter()]
+        [System.String]
+        $BinaryLocation = "\\<location>"
+    )
+    if (!(Get-PSSnapin Microsoft.SharePoint.Powershell -ErrorAction SilentlyContinue))
+    {
+        Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction 0
+    }
+    $VerbosePreference = "SilentlyContinue"
+    if ($DynamicCompilation)
+    {
+        Add-ConfigurationDataEntry -Node "NonNodeData" -Key "FullInstallation" -Value "`$True" -Description "Specifies whether or not the DSC configuration script will install the SharePoint Prerequisites and Binaries;"
+    }
+    else
+    {
+        Add-ConfigurationDataEntry -Node "NonNodeData" -Key "FullInstallation" -Value "`$False" -Description "Specifies whether or not the DSC configuration script will install the SharePoint Prerequisites and Binaries;"
+    }
+    $Content = "        if (`$ConfigurationData.NonNodeData.FullInstallation)`r`n"
+    $Content += "        {`r`n"
+    $Content += "            SPInstallPrereqs PrerequisitesInstallation" + "`r`n            {`r`n"
+    if ([System.String]::IsNullOrEmpty($BinaryLocation))
+    {
+        $BinaryLocation = "\\<location>"
+    }
+    Add-ConfigurationDataEntry -Node "NonNodeData" -Key "SPPrereqsInstallerPath" -Value $BinaryLocation -Description "Location of the SharePoint Prerequisites Installer .exe (Local path or Network Share);"
+    $Content += "                InstallerPath = `$ConfigurationData.NonNodeData.SPPrereqsInstallerPath;`r`n"
+    $Content += "                OnlineMode = `$True;`r`n"
+    $Content += "                Ensure = `"Present`";`r`n"
+    $Content += "                IsSingleInstance = `"Yes`";`r`n"
+    $Content += "                PSDscRunAsCredential = `$Creds" + ($Global:spFarmAccount.Username.Split('\'))[1].Replace("-", "_").Replace(".", "_") + ";`r`n"
+
+    $Content += "            }`r`n"
+    $Content += "        }`r`n"
+    return $Content
+}
+
 Export-ModuleMember -Function *-TargetResource

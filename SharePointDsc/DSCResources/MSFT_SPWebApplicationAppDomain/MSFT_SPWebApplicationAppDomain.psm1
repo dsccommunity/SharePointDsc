@@ -178,4 +178,63 @@ function Test-TargetResource
     return $result
 }
 
+function Export-TargetResource
+{
+    if (!(Get-PSSnapin Microsoft.SharePoint.Powershell -ErrorAction SilentlyContinue))
+    {
+        Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction 0
+    }
+    $VerbosePreference = "SilentlyContinue"
+    $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPWebApplicationAppDomain\MSFT_SPWebApplicationAppDomain.psm1" -Resolve
+    $Content = ''
+    $params = Get-DSCFakeParameters -ModulePath $module
+    $webApps = Get-SPWebApplication
+    $i = 1
+    $countWebApp = $webApps.Length
+    foreach ($webApp in $webApps)
+    {
+        try
+        {
+            Write-Host "Scanning App Domains for Web Application [$i/$countWebApp] {$($webApp.Url)}"
+            $webApplicationAppDomains = Get-SPWebApplicationAppDomain -WebApplication $webApp.Url
+            $count = $webApplicationAppDomains.Length
+            $j = 1
+            foreach ($appDomain in $webApplicationAppDomains)
+            {
+                try
+                {
+                    Write-Host "    -> Scanning App Domain [$j/$count] {$($appDomain.AppDomain)}"
+                    $params.WebAppUrl = $webApp.Url
+                    $PartialContent = "        SPWebApplicationAppDomain " + [System.Guid]::NewGuid().ToString() + "`r`n"
+                    $PartialContent += "        {`r`n"
+                    $results = Get-TargetResource @params
+
+                    $results = Repair-Credentials -results $results
+
+                    $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+                    $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+                    $PartialContent += $currentBlock
+                    $PartialContent += "        }`r`n"
+                    $Content += $PartialContent
+
+                }
+                catch
+                {
+                    $_
+                    $Global:ErrorLog += "[WebApplicationAppDomain] Couldn't obtain information from App Domain {$($appDomain.AppDomain)} for Web Application {$($webApp.Url)}`r`n"
+                }
+                $j++
+            }
+        }
+        catch
+        {
+            $_
+            $Global:ErrorLog += "[SPWebApplicationAppDomain] Couldn't properly retrieve all App Domain from Web Application {$($webApp.Url)}`r`n"
+        }
+        $i++
+    }
+    return $Content
+}
+
 Export-ModuleMember -Function *-TargetResource

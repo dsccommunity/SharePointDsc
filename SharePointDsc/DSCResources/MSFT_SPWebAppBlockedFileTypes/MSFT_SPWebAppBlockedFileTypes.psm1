@@ -155,4 +155,44 @@ function Test-TargetResource
     return $result
 }
 
+function Export-TargetResource
+{
+    if (!(Get-PSSnapin Microsoft.SharePoint.Powershell -ErrorAction SilentlyContinue))
+    {
+        Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction 0
+    }
+    $VerbosePreference = "SilentlyContinue"
+    $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPWebAppBlockedFileTypes\MSFT_SPWebAppBlockedFileTypes.psm1" -Resolve
+    $Content = ''
+    $params = Get-DSCFakeParameters -ModulePath $module
+    $webApps = Get-SPWebApplication
+    $i = 1
+    $total = $webApps.Length
+    foreach ($webApp in $webApps)
+    {
+        try
+        {
+            Write-Host "Scanning Web App Blocked File Types [$i/$total] {$($webApp.Url)}"
+            $params.WebAppUrl = $webApp.Url
+            $PartialContent = "        SPWebAppBlockedFileTypes " + [System.Guid]::NewGuid().ToString() + "`r`n"
+            $PartialContent += "        {`r`n"
+            $results = Get-TargetResource @params
+
+            $results = Repair-Credentials -results $results
+            $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+            $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+            $PartialContent += $currentBlock
+            $PartialContent += "        }`r`n"
+            $Content += $PartialContent
+        }
+        catch
+        {
+            $Global:ErrorLog += "[SPWebAppBlockedFileTypes] Couldn't properly retrieve all Blocked File Types from Web Application {$($webApp.Url)}`r`n"
+        }
+        $i++
+    }
+    return $Content
+}
+
 Export-ModuleMember -Function *-TargetResource

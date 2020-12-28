@@ -638,4 +638,68 @@ function Test-TargetResource
     return $result
 }
 
+function Export-TargetResource
+{
+    if (!(Get-PSSnapin Microsoft.SharePoint.Powershell -ErrorAction SilentlyContinue))
+    {
+        Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction 0
+    }
+    $VerbosePreference = "SilentlyContinue"
+    $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPSearchCrawlRule\MSFT_SPSearchCrawlRule.psm1" -Resolve
+    $Content = ''
+    $params = Get-DSCFakeParameters -ModulePath $module
+
+    $ssas = Get-SPServiceApplication | Where-Object -FilterScript { $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication" }
+    $i = 1
+    $total = $ssas.Length
+    foreach ($ssa in $ssas)
+    {
+        try
+        {
+            if ($null -ne $ssa)
+            {
+                $serviceName = $ssa.DisplayName
+                Write-Host "Scanning Crawl Rules for Search Service Application [$i/$total] {$serviceName}"
+
+                $crawlRules = Get-SPEnterpriseSearchCrawlRule -SearchApplication $ssa
+
+                $j = 1
+                $totalCR = $crawlRules.Length
+                foreach ($crawlRule in $crawlRules)
+                {
+                    $crPath = $crawlRule.Path
+                    Write-Host "    -> Scanning Crawl Rule [$j/$totalCR] {$crPath}"
+
+                    $PartialContent = "        SPSearchCrawlRule " + [System.Guid]::NewGuid().ToString() + "`r`n"
+                    $PartialContent += "        {`r`n"
+                    $params.ServiceAppName = $serviceName
+                    $params.Path = $crPath
+                    $params.Remove("CertificateName")
+                    $results = Get-TargetResource @params
+
+                    if ($results.RuleType -eq "ExclusionRule" -and $results.AuthenticationType)
+                    {
+                        $results.Remove("AuthenticationType")
+                    }
+                    $results = Repair-Credentials -results $results
+                    $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+                    $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+                    $PartialContent += $currentBlock
+                    $PartialContent += "        }`r`n"
+                    $Content += $PartialContent
+                    $j++
+                }
+            }
+            $i++
+        }
+        catch
+        {
+            $Global:ErrorLog += "[Search Crawl Rule]" + $ssa.DisplayName + "`r`n"
+            $Global:ErrorLog += "$_`r`n`r`n"
+        }
+    }
+    return $Content
+}
+
 Export-ModuleMember -Function *-TargetResource

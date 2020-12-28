@@ -251,4 +251,77 @@ function Test-TargetResource
     return $result
 }
 
+function Export-TargetResource
+{
+    [CmdletBinding()]
+    [OutputType([System.String])]
+    param
+    (
+        [Parameter()]
+        [System.String]
+        $ModulePath,
+
+        [Parameter()]
+        [System.Collections.Hashtable]
+        $Params
+    )
+    if (!(Get-PSSnapin Microsoft.SharePoint.Powershell -ErrorAction SilentlyContinue))
+    {
+        Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction 0
+    }
+    $VerbosePreference = "SilentlyContinue"
+    if ($null -ne $modulePath)
+    {
+        $module = Resolve-Path $modulePath
+    }
+    else
+    {
+        $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+        $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPStateServiceApp\MSFT_SPStateServiceApp.psm1" -Resolve
+        $Content = ''
+    }
+
+    if ($null -eq $params)
+    {
+        $params = Get-DSCFakeParameters -ModulePath $module
+    }
+
+    $stateApplications = Get-SPStateServiceApplication
+
+    $i = 1
+    $total = $stateApplications.Length
+    foreach ($stateApp in $stateApplications)
+    {
+        try
+        {
+            if ($null -ne $stateApp)
+            {
+                $serviceName = $stateApp.DisplayName
+                Write-Host "Scanning State Service Application [$i/$total] {$serviceName}"
+
+                $params.Name = $serviceName
+                $PartialContent = "        SPStateServiceApp " + $serviceName.Replace(" ", "") + "`r`n"
+                $PartialContent += "        {`r`n"
+                $results = Get-TargetResource @params
+                $results.DatabaseServer = "`$ConfigurationData.NonNodeData.DatabaseServer"
+
+                $results = Repair-Credentials -results $results
+                $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+                $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+                $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "DatabaseServer"
+                $PartialContent += $currentBlock
+                $PartialContent += "        }`r`n"
+                $Content += $PartialContent
+            }
+            $i++
+        }
+        catch
+        {
+            $Global:ErrorLog += "[State service Application]" + $stateApp.DisplayName + "`r`n"
+            $Global:ErrorLog += "$_`r`n`r`n"
+        }
+    }
+    return $Content
+}
+
 Export-ModuleMember -Function *-TargetResource

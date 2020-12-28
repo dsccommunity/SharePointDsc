@@ -537,4 +537,54 @@ function Test-TargetResource
     return $result
 }
 
+function Export-TargetResource
+{
+    if (!(Get-PSSnapin Microsoft.SharePoint.Powershell -ErrorAction SilentlyContinue))
+    {
+        Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction 0
+    }
+    $VerbosePreference = "SilentlyContinue"
+    $Global:DH_SPQUOTATEMPLATE = @{}
+    $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath "\DSCResources\MSFT_SPQuotaTemplate\MSFT_SPQuotaTemplate.psm1" -Resolve
+
+    $contentService = Get-SPDscContentService
+
+    $params = Get-DSCFakeParameters -ModulePath $module
+
+    $Content = ''
+    $quotaGUID = ""
+    $i = 1
+    $total = $contentservice.QuotaTemplates.Count
+    foreach ($quota in $contentservice.QuotaTemplates)
+    {
+        try
+        {
+            $quotaName = $quota.Name
+            Write-Host "Scanning Quota Template [$i/$total] {$quotaName}"
+            $quotaGUID = [System.Guid]::NewGuid().ToString()
+            $Global:DH_SPQUOTATEMPLATE.Add($quotaName, $quotaGUID)
+
+            $PartialContent = "        SPQuotaTemplate " + $quotaGUID + "`r`n"
+            $PartialContent += "        {`r`n"
+            $params.Name = $quota.Name
+            $results = Get-TargetResource @params
+            $results = Repair-Credentials -results $results
+            $currentDSCBlock = Get-DSCBlock -Params $results -ModulePath $module
+            $currentDSCBlock = Convert-DSCStringParamToVariable -DSCBlock $currentDSCBlock -ParameterName "PsDscRunAsCredential"
+            $PartialContent += $currentDSCBlock
+            $PartialContent += "        }`r`n"
+            $i++
+        }
+        catch
+        {
+            $Global:ErrorLog += "[Quota Template]" + $quota.Name + "`r`n"
+            $Global:ErrorLog += "$_`r`n`r`n"
+            $_
+        }
+        $Content += $PartialContent
+    }
+    return $content
+}
+
 Export-ModuleMember -Function *-TargetResource

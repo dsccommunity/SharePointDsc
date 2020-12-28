@@ -210,4 +210,107 @@ function Test-TargetResource
     return $result
 }
 
+function Export-TargetResource
+{
+    if (!(Get-PSSnapin Microsoft.SharePoint.Powershell -ErrorAction SilentlyContinue))
+    {
+        Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction 0
+    }
+    $VerbosePreference = "SilentlyContinue"
+    $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath "\DSCResources\MSFT_SPManagedPath\MSFT_SPManagedPath.psm1" -Resolve
+    $Content = ''
+    $spWebApps = Get-SPWebApplication
+    $params = Get-DSCFakeParameters -ModulePath $module
+
+    foreach ($spWebApp in $spWebApps)
+    {
+        $spManagedPaths = Get-SPManagedPath -WebApplication $spWebApp.Url | Sort-Object -Property Name
+
+        $i = 1
+        $total = $spManagedPaths.Length
+        foreach ($spManagedPath in $spManagedPaths)
+        {
+            try
+            {
+                Write-Host "Scanning Web Application Managed Path [$i/$total] {"$spManagedPath.Name"}"
+                if ($spManagedPath.Name.Length -gt 0 -and $spManagedPath.Name -ne "sites")
+                {
+                    $PartialContent = "        SPManagedPath " + [System.Guid]::NewGuid().toString() + "`r`n"
+                    $PartialContent += "        {`r`n"
+                    if ($null -ne $spManagedPath.Name)
+                    {
+                        $params.RelativeUrl = $spManagedPath.Name
+                    }
+                    $params.WebAppUrl = $spWebApp.Url
+                    $params.HostHeader = $false;
+                    if ($params.Contains("InstallAccount"))
+                    {
+                        $params.Remove("InstallAccount")
+                    }
+                    $results = Get-TargetResource @params
+
+                    $results = Repair-Credentials -results $results
+
+                    $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+                    $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+                    $PartialContent += $currentBlock
+                    $PartialContent += "        }`r`n"
+                }
+                $i++
+            }
+            catch
+            {
+                $Global:ErrorLog += "[Web Application Managed Path]" + $spManagedPath.Name + "`r`n"
+                $Global:ErrorLog += "$_`r`n`r`n"
+            }
+            $Content += $PartialContent
+        }
+    }
+    $spManagedPaths = Get-SPManagedPath -HostHeader | Sort-Object -Property Name
+    $i = 0
+    $total = $spManagedPaths.Length
+    foreach ($spManagedPath in $spManagedPaths)
+    {
+        try
+        {
+            Write-Host "Scanning Host Header Managed Path [$i/$total] {"$spManagedPath.Name"}"
+            if ($spManagedPath.Name.Length -gt 0 -and $spManagedPath.Name -ne "sites")
+            {
+                $PartialContent = "        SPManagedPath " + [System.Guid]::NewGuid().toString() + "`r`n"
+                $PartialContent += "        {`r`n"
+
+                if ($null -ne $spManagedPath.Name)
+                {
+                    $params.RelativeUrl = $spManagedPath.Name
+                }
+                if ($params.ContainsKey("Explicit"))
+                {
+                    $params.Explicit = ($spManagedPath.Type -eq "ExplicitInclusion")
+                }
+                else
+                {
+                    $params.Add("Explicit", ($spManagedPath.Type -eq "ExplicitInclusion"))
+                }
+                $params.WebAppUrl = "*"
+                $params.HostHeader = $true;
+                $results = Get-TargetResource @params
+                $results = Repair-Credentials -results $results
+                $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+                $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+                $PartialContent += $currentBlock
+                $PartialContent += "        }`r`n"
+            }
+            $i++
+        }
+        catch
+        {
+            $Global:ErrorLog += "[Host Header Managed Path]" + $spManagedPath.Name + "`r`n"
+            $Global:ErrorLog += "$_`r`n`r`n"
+        }
+        $Content += $PartialContent
+    }
+    return $Content
+}
+
 Export-ModuleMember -Function *-TargetResource

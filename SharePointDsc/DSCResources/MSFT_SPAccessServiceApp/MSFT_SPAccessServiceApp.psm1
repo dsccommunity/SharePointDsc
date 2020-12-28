@@ -183,9 +183,9 @@ function Test-TargetResource
     if ($CurrentValues.DatabaseServer -ne $DatabaseServer)
     {
         $message = "Specified database server does not match the actual database " + `
-                   "server. This resource cannot move the database to a different " + `
-                   "SQL instance. Actual: $($CurrentValues.DatabaseServer), " + `
-                   "Desired: $DatabaseServer"
+            "server. This resource cannot move the database to a different " + `
+            "SQL instance. Actual: $($CurrentValues.DatabaseServer), " + `
+            "Desired: $DatabaseServer"
         Write-Verbose -Message $message
         Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
         $result = $false
@@ -201,6 +201,57 @@ function Test-TargetResource
     Write-Verbose -Message "Test-TargetResource returned $result"
 
     return $result
+}
+
+function Export-TargetResource
+{
+    if (!(Get-PSSnapin Microsoft.SharePoint.Powershell -ErrorAction SilentlyContinue))
+    {
+        Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction 0
+    }
+    $VerbosePreference = "SilentlyContinue"
+    $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPAccessServiceApp\MSFT_SPAccessServiceApp.psm1" -Resolve
+    $Content = ''
+    $params = Get-DSCFakeParameters -ModulePath $module
+    $serviceApps = Get-SPServiceApplication
+    $serviceApps = $serviceApps | Where-Object -FilterScript { [string]$_.GetType().FullName -eq "Microsoft.Office.Access.Services.MossHost.AccessServicesWebServiceApplication" }
+
+    $i = 1
+    $total = $serviceApps.Length
+    foreach ($spAccessService in $serviceApps)
+    {
+        try
+        {
+            $serviceName = $spAccessService.Name
+            Write-Host "Scanning Access Service Application [$i/$total] {$serviceName}"
+
+            $params.Name = $serviceName
+            $params.DatabaseServer = "`$ConfigurationData.NonNodeData.DatabaseServer"
+            $results = Get-TargetResource @params
+
+            $results = Repair-Credentials -results $results
+
+            Add-ConfigurationDataEntry -Node "NonNodeData" -Key "DatabaseServer" -Value $results.DatabaseServer -Description "Name of the Database Server associated with the destination SharePoint Farm;"
+            $results.DatabaseServer = "`$ConfigurationData.NonNodeData.DatabaseServer"
+            $PartialContent = "        SPAccessServiceApp " + $serviceName.Replace(" ", "") + "`r`n"
+            $PartialContent += "        {`r`n"
+            $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+            $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "DatabaseServer"
+            $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+            $PartialContent += $currentBlock
+            $PartialContent += "        }`r`n"
+            $Content += $PartialContent
+            $i++
+        }
+        catch
+        {
+            $_
+            $Global:ErrorLog += "[Access Service Application]" + $spAccessService.Name + "`r`n"
+            $Global:ErrorLog += "$_`r`n`r`n"
+        }
+    }
+    return $Content
 }
 
 Export-ModuleMember -Function *-TargetResource

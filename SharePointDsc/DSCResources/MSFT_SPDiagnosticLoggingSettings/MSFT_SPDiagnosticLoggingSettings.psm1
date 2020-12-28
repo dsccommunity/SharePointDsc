@@ -251,10 +251,10 @@ function Set-TargetResource
         {
             $params.Remove("InstallAccount") | Out-Null
         }
-        $params = $params | Rename-SPDscParamValue -oldName "LogPath" `
-            -newName "LogLocation" `
-        | Rename-SPDscParamValue -oldName "LogSpaceInGB" `
-            -newName "LogDiskSpaceUsageGB"
+        $params = $params | Rename-SPDscParamValue -OldName "LogPath" `
+            -NewName "LogLocation" `
+        | Rename-SPDscParamValue -OldName "LogSpaceInGB" `
+            -NewName "LogDiskSpaceUsageGB"
 
         Set-SPDiagnosticConfig @params
     }
@@ -362,6 +362,34 @@ function Test-TargetResource
     Write-Verbose -Message "Test-TargetResource returned $result"
 
     return $result
+}
+
+<## This function retrieves all settings related to Diagnostic Logging (ULS logs) on the SharePoint farm. #>
+function Export-TargetResource
+{
+    if (!(Get-PSSnapin Microsoft.SharePoint.Powershell -ErrorAction SilentlyContinue))
+    {
+        Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction 0
+    }
+    $VerbosePreference = "SilentlyContinue"
+    $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPDiagnosticLoggingSettings\MSFT_SPDiagnosticLoggingSettings.psm1" -Resolve
+    $params = Get-DSCFakeParameters -ModulePath $module
+
+    $Content = "        SPDiagnosticLoggingSettings ApplyDiagnosticLogSettings`r`n"
+    $Content += "        {`r`n"
+    $results = Get-TargetResource @params
+    $results = Repair-Credentials -results $results
+
+    Add-ConfigurationDataEntry -Node "NonNodeData" -Key "LogPath" -Value $results.LogPath -Description "Path where the SharePoint ULS logs will be stored;"
+    $results.LogPath = "`$ConfigurationData.NonNodeData.LogPath"
+
+    $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+    $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "LogPath"
+    $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+    $Content += $currentBlock
+    $Content += "        }`r`n"
+    return $Content
 }
 
 Export-ModuleMember -Function *-TargetResource

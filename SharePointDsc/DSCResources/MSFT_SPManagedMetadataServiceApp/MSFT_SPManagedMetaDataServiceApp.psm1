@@ -855,4 +855,70 @@ function Test-TargetResource
     return $result
 }
 
+function Export-TargetResource
+{
+    if (!(Get-PSSnapin Microsoft.SharePoint.Powershell -ErrorAction SilentlyContinue))
+    {
+        Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction 0
+    }
+    $VerbosePreference = "SilentlyContinue"
+    $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPManagedMetadataServiceApp\MSFT_SPManagedMetadataServiceApp.psm1" -Resolve
+    $Content = ''
+    $params = Get-DSCFakeParameters -ModulePath $module
+
+    $mms = Get-SPServiceApplication | Where-Object { $_.GetType().Name -eq "MetadataWebServiceApplication" }
+    if (Get-Command "Get-SPMetadataServiceApplication" -ErrorAction SilentlyContinue)
+    {
+        $i = 1
+        $total = $mms.Length
+        foreach ($mmsInstance in $mms)
+        {
+            try
+            {
+                if ($null -ne $mmsInstance)
+                {
+                    $serviceName = $mmsInstance.Name
+                    Write-Host "Scanning Managed Metadata Service [$i/$total] {$serviceName}"
+
+                    $params.Name = $serviceName
+                    $PartialContent = "        SPManagedMetaDataServiceApp " + $serviceName.Replace(" ", "") + "`r`n"
+                    $PartialContent += "        {`r`n"
+                    $results = Get-TargetResource @params
+
+                    <# WA - Issue with 1.6.0.0 where DB Aliases not returned in Get-TargetResource #>
+                    $results["DatabaseServer"] = CheckDBForAliases -DatabaseName $results["DatabaseName"]
+                    $results = Repair-Credentials -results $results
+
+                    if (!$results.Languages)
+                    {
+                        $results.Remove("Languages")
+                    }
+
+                    $results.TermStoreAdministrators = Set-TermStoreAdministratorsBlock $results.TermStoreAdministrators
+
+                    Add-ConfigurationDataEntry -Node "NonNodeData" -Key "DatabaseServer" -Value $results.DatabaseServer -Description "Name of the Database Server associated with the destination SharePoint Farm;"
+                    $results.DatabaseServer = "`$ConfigurationData.NonNodeData.DatabaseServer"
+
+                    $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+                    $currentBlock = Set-TermStoreAdministrators $currentBlock
+                    $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "DatabaseServer"
+                    $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+                    $PartialContent += $currentBlock
+                    $PartialContent += "        }`r`n"
+                    $Content += $PartialContent
+                }
+                $i++
+            }
+            catch
+            {
+                $_
+                $Global:ErrorLog += "[Managed Metadata Service Application]" + $mmsInstance.DisplayName + "`r`n"
+                $Global:ErrorLog += "$_`r`n`r`n"
+            }
+        }
+    }
+    return $Content
+}
+
 Export-ModuleMember -Function *-TargetResource

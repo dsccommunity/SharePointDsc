@@ -719,4 +719,118 @@ function Test-TargetResource
     return $result
 }
 
+function Export-TargetResource
+{
+    if (!(Get-PSSnapin Microsoft.SharePoint.Powershell -ErrorAction SilentlyContinue))
+    {
+        Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction 0
+    }
+    $VerbosePreference = "SilentlyContinue"
+    $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPServiceAppSecurity\MSFT_SPServiceAppSecurity.psm1" -Resolve
+    $Content = ''
+    $params = Get-DSCFakeParameters -ModulePath $module
+    $serviceApplications = Get-SPServiceApplication | Where-Object { $_.GetType().Name -ne "SPUsageApplication" -and $_.GetType().Name -ne "StateServiceApplication" }
+
+    foreach ($serviceApp in $serviceApplications)
+    {
+        try
+        {
+            $params.ServiceAppName = $serviceApp.Name
+            $params.SecurityType = "SharingPermissions"
+
+            $property = @{
+                Handle = 0
+            }
+
+            $fake = New-CimInstance -ClassName Win32_Process -Property $property -Key Handle -ClientOnly
+            $params.Members = $fake
+            $params.Remove("MembersToInclude")
+            $params.Remove("MembersToExclude")
+            $results = Get-TargetResource @params
+
+            $results = Repair-Credentials -results $results
+            $results.Remove("MembersToInclude")
+            $results.Remove("MembersToExclude")
+
+            if ($results.Members.Count -gt 0)
+            {
+                $stringMember = ""
+                $foundOne = $false
+                foreach ($member in $results.Members)
+                {
+                    $stringMember = Get-SPServiceAppSecurityMembers $member
+                    if ($null -ne $stringMember)
+                    {
+                        if (!$foundOne)
+                        {
+                            $PartialContent += "        `$members = @();`r`n"
+                            $foundOne = $true
+                        }
+                        $PartialContent += "        `$members += " + $stringMember + ";`r`n"
+                    }
+                }
+
+                if ($foundOne)
+                {
+                    $PartialContent = "        SPServiceAppSecurity " + [System.Guid]::NewGuid().ToString() + "`r`n"
+                    $PartialContent += "        {`r`n"
+                    $results.Members = "`$members"
+                    $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+                    $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+                    $PartialContent += $currentBlock
+                    $PartialContent += "        }`r`n"
+                    $Content += $PartialContent
+                }
+            }
+
+            $params.SecurityType = "Administrators"
+
+            $results = Get-TargetResource @params
+
+            $results = Repair-Credentials -results $results
+            $results.Remove("MembersToInclude")
+            $results.Remove("MembersToExclude")
+            $stringMember = ""
+
+            if ($results.Members.Count -gt 0)
+            {
+                $foundOne = $false
+                foreach ($member in $results.Members)
+                {
+                    $stringMember = Get-SPServiceAppSecurityMembers $member
+                    if ($null -ne $stringMember)
+                    {
+                        if (!$foundOne)
+                        {
+                            $PartialContent += "        `$members = @();`r`n"
+                            $foundOne = $true
+                        }
+                        $PartialContent += "        `$members += " + $stringMember + ";`r`n"
+                    }
+                }
+
+                if ($foundOne)
+                {
+                    $PartialContent = "        SPServiceAppSecurity " + [System.Guid]::NewGuid().ToString() + "`r`n"
+                    $PartialContent += "        {`r`n"
+                    $results.Members = "`$members"
+                    $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+                    $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+                    $PartialContent += $currentBlock
+                    $PartialContent += "        }`r`n"
+                    $Content += $PartialContent
+                }
+            }
+        }
+        catch
+        {
+            $_
+            $Global:ErrorLog += "[Service Application Permissions]" + $serviceApp.Name + "`r`n"
+            $Global:ErrorLog += "$_`r`n`r`n"
+        }
+    }
+    return $Content
+}
+
 Export-ModuleMember -Function *-TargetResource

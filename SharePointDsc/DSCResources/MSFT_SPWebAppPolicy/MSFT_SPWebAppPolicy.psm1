@@ -1018,4 +1018,76 @@ function Get-SPDscCacheAccountConfiguration()
     return $cacheAccounts
 }
 
+function Export-TargetResource
+{
+    if (!(Get-PSSnapin Microsoft.SharePoint.Powershell -ErrorAction SilentlyContinue))
+    {
+        Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction 0
+    }
+    $VerbosePreference = "SilentlyContinue"
+    $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPWebAppPolicy\MSFT_SPWebAppPolicy.psm1" -Resolve
+    $Content = ''
+
+    $webApps = Get-SPWebApplication
+
+    $i = 1
+    $total = $webApps.Length
+    foreach ($webApp in $webApps)
+    {
+        $params = Get-DSCFakeParameters -ModulePath $module
+        $webAppUrl = $webApp.Url
+        Write-Host "Scanning Web App Policies [$i/$total] {$webAppUrl}"
+
+        $params.WebAppUrl = $webAppUrl
+        $PartialContent = "        SPWebAppPolicy " + [System.Guid]::NewGuid().toString() + "`r`n"
+        $PartialContent += "        {`r`n"
+
+        $property = @{
+            Handle = 0
+        }
+        $fake = New-CimInstance -ClassName Win32_Process -Property $property -Key Handle -ClientOnly
+
+        if (!$params.Contains("Members"))
+        {
+            $params.Add("Members", $fake);
+        }
+        $results = Get-TargetResource @params
+
+        if ($null -ne $results.Members)
+        {
+            $newMembers = @()
+            foreach ($member in $results.Members)
+            {
+                if ($member.UserName.Contains("\"))
+                {
+                    $resultPermission = Get-SPWebPolicyPermissions -params $member
+                    $newMembers += $resultPermission
+                }
+            }
+            $results.Members = $newMembers
+        }
+
+        if ($null -eq $results.MembersToExclude)
+        {
+            $results.Remove("MembersToExclude")
+        }
+
+        if ($null -eq $results.MembersToInclude)
+        {
+            $results.Remove("MembersToInclude")
+        }
+
+        $results = Repair-Credentials -results $results
+        $DSCBlock = Get-DSCBlock -Params $results -ModulePath $module
+        $DSCBlock = Convert-DSCStringParamToVariable -DSCBlock $DSCBlock -ParameterName "Members" -IsCIMArray $true
+        $DSCBlock = Convert-DSCStringParamToVariable -DSCBlock $DSCBlock -ParameterName "PsDscRunAsCredential"
+        $PartialContent += $DSCBlock
+        $PartialContent += "        }`r`n"
+        $Content += $PartialContent
+        $i++
+    }
+    return $Content
+}
+
 Export-ModuleMember -Function *-TargetResource

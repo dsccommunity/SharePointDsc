@@ -680,4 +680,75 @@ function Get-SPDscADSIObject
     return [ADSI]($LdapPath)
 }
 
+function Export-TargetResource
+{
+    if (!(Get-PSSnapin Microsoft.SharePoint.Powershell -ErrorAction SilentlyContinue))
+    {
+        Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction 0
+    }
+    $VerbosePreference = "SilentlyContinue"
+    $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPUserProfileSyncConnection\MSFT_SPUserProfileSyncConnection.psm1" -Resolve
+    $Content = ''
+    $params = Get-DSCFakeParameters -ModulePath $module
+    $userProfileServiceApps = Get-SPServiceApplication | Where-Object { $_.GetType().Name -eq "UserProfileApplication" }
+    $caURL = (Get-SpWebApplication -IncludeCentralAdministration |
+            Where-Object -FilterScript { $_.IsAdministrationWebApplication -eq $true }).Url
+    $context = Get-SPServiceContext -Site $caURL
+    try
+    {
+        $userProfileConfigManager = New-Object -TypeName "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" `
+            -ArgumentList $context
+        if ($null -ne $userProfileConfigManager.ConnectionManager)
+        {
+            $connections = $userProfileConfigManager.ConnectionManager
+            foreach ($conn in $connections)
+            {
+                try
+                {
+                    $params.Name = $conn.DisplayName
+                    $params.ConnectionCredentials = $Global:spFarmAccount
+                    $params.UserProfileService = $userProfileServiceApps[0].Name
+                    $results = Get-TargetResource @params
+                    if ($null -ne $results)
+                    {
+                        if ($results.ConnectionType -eq "ActiveDirectoryImport")
+                        {
+                            $results.ConnectionType = "ActiveDirectory"
+                        }
+                        $PartialContent = "        SPUserProfileSyncConnection " + [System.Guid]::NewGuid().ToString() + "`r`n"
+                        $PartialContent += "        {`r`n"
+                        $results = Repair-Credentials -results $results
+                        if ($results.Contains("Ensure"))
+                        {
+                            $results.Remove("Ensure")
+                        }
+                        if (!$results.UseDisabledFilter)
+                        {
+                            $results.Remove("UseDisabledFilter")
+                        }
+                        $results.ConnectionCredentials = "`$Credsinstallaccount"
+                        $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+                        $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "ConnectionCredentials"
+                        $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+                        $PartialContent += $currentBlock
+                        $PartialContent += "        }`r`n"
+                        $Content += $PartialContent
+                    }
+                }
+                catch
+                {
+                    $Global:ErrorLog += "[User Profile Sync Connection]" + $conn.DisplayName + "`r`n"
+                    $Global:ErrorLog += "$_`r`n`r`n"
+                }
+            }
+        }
+    }
+    catch
+    {
+        Write-Verbose $_
+    }
+    return $Content
+}
+
 Export-ModuleMember -Function *-TargetResource, Get-SPDscADSIObject

@@ -393,4 +393,54 @@ function Test-TargetResource
     return $result
 }
 
+function Export-TargetResource
+{
+    if (!(Get-PSSnapin Microsoft.SharePoint.Powershell -ErrorAction SilentlyContinue))
+    {
+        Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction 0
+    }
+    $VerbosePreference = "SilentlyContinue"
+    $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPWebAppGeneralSettings\MSFT_SPWebAppGeneralSettings.psm1" -Resolve
+    $Content = ''
+    $params = Get-DSCFakeParameters -ModulePath $module
+    $webApps = Get-SPWebApplication
+    $i = 1
+    $total = $webApps.Length
+    foreach ($webApp in $webApps)
+    {
+        try
+        {
+            Write-Host "Scanning Web App General Settings [$i/$total] {$($webApp.Url)}"
+            $params.WebAppUrl = $webApp.Url
+            $PartialContent = "        SPWebAppGeneralSettings " + [System.Guid]::NewGuid().ToString() + "`r`n"
+            $PartialContent += "        {`r`n"
+
+            $results = Get-TargetResource @params
+
+            if ($results.DefaultQuotaTemplate -eq "No Quota" -or $results.DefaultQuotaTemplate -eq "")
+            {
+                $results.Remove("DefaultQuotaTemplate")
+            }
+
+            $results = Repair-Credentials -results $results
+            if ($results.TimeZone -eq -1 -or $null -eq $results.TimeZone)
+            {
+                $results.Remove("TimeZone")
+            }
+            $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+            $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+            $PartialContent += $currentBlock
+            $PartialContent += "        }`r`n"
+            $Content += $PartialContent
+        }
+        catch
+        {
+            $Global:ErrorLog += "[SPWebApplicationGeneralSettings] Couldn't properly retrieve all General Settings from Web Application {$($webApp.Url)}`r`n"
+        }
+        $i++
+    }
+    return $Content
+}
+
 Export-ModuleMember -Function *-TargetResource

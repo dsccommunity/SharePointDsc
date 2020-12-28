@@ -516,4 +516,119 @@ function Test-SPDscUserProfileDBReadOnly()
     return $databaseReadOnly
 }
 
+<## This function retrieves all Services in the SharePoint farm. It does not care if the service is enabled or not. It lists them all, and simply sets the "Ensure" attribute of those that are disabled to "Absent". #>
+function Export-TargetResource
+{
+    [CmdletBinding()]
+    [OutputType([System.String])]
+    param
+    (
+        [Parameter()]
+        [System.String[]]
+        $Servers
+    )
+    if (!(Get-PSSnapin Microsoft.SharePoint.Powershell -ErrorAction SilentlyContinue))
+    {
+        Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction 0
+    }
+    $VerbosePreference = "SilentlyContinue"
+    $servicesMasterList = @()
+    foreach ($Server in $Servers)
+    {
+        Write-Host "Scanning SPServiceInstance on {$Server}"
+        $serviceInstancesOnCurrentServer = Get-SPServiceInstance -Server $Server | Sort-Object -Property TypeName
+        $serviceStatuses = @()
+        $ensureValue = "Present"
+
+        $i = 1
+        $total = $serviceInstancesOnCurrentServer.Length
+        foreach ($serviceInstance in $serviceInstancesOnCurrentServer)
+        {
+            try
+            {
+                $serviceTypeName = $serviceInstance.GetType().Name
+                Write-Host "    -> Scanning instance [$i/$total] {$serviceTypeName}"
+
+                if ($serviceInstance.Status -eq "Online")
+                {
+                    $ensureValue = "Present"
+                }
+                else
+                {
+                    $ensureValue = "Absent"
+                }
+
+                $currentService = @{
+                    Name   = $serviceInstance.TypeName
+                    Ensure = $ensureValue
+                }
+
+                if ($serviceTypeName -ne "SPDistributedCacheServiceInstance" -and $serviceTypeName -ne "ProfileSynchronizationServiceInstance")
+                {
+                    $serviceStatuses += $currentService
+                }
+                if ($ensureValue -eq "Present" -and !$servicesMasterList.Contains($serviceTypeName))
+                {
+                    $servicesMasterList += $serviceTypeName
+                    if ($serviceTypeName -eq "ProfileSynchronizationServiceInstance")
+                    {
+                        $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+                        $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPUserProfileSyncService\MSFT_SPUserProfileSyncService.psm1" -Resolve
+                        $Content = ''
+                        $params = Get-DSCFakeParameters -ModulePath $module
+                        $params.Ensure = $ensureValue
+                        $params.FarmAccount = $Global:spFarmAccount
+                        if ($null -eq $params.InstallAccount)
+                        {
+                            $params.Remove("InstallAccount")
+                        }
+                        $results = Get-TargetResource @params
+                        if ($ensureValue -eq "Present")
+                        {
+                            $PartialContent = "        SPUserProfileSyncService " + $serviceTypeName.Replace(" ", "") + "Instance`r`n"
+                            $PartialContent += "        {`r`n"
+
+                            if ($results.Contains("InstallAccount"))
+                            {
+                                $results.Remove("InstallAccount")
+                            }
+                            if (!$results.Contains("FarmAccount"))
+                            {
+                                $results.Add("FarmAccount", $Global:spFarmAccount)
+                            }
+                            $results = Repair-Credentials -results $results
+                            $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+                            $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+                            $PartialContent += $currentBlock
+                            $PartialContent += "        }`r`n"
+                            $Content += $PartialContent
+                        }
+                    }
+                }
+                $i++
+            }
+            catch
+            {
+                $_
+                $Global:ErrorLog += "[Service Instance]" + $serviceInstance.TypeName + "`r`n"
+                $Global:ErrorLog += "$_`r`n`r`n"
+            }
+        }
+
+        if ($DynamicCompilation)
+        {
+            Add-ConfigurationDataEntry -Node  $env:ComputerName -Key "ServiceInstances" -Value $serviceStatuses
+        }
+        elseif ($StandAlone)
+        {
+            Add-ConfigurationDataEntry -Node $env:ComputerName -Key "ServiceInstances" -Value $serviceStatuses
+        }
+        elseif ($servicesStatuses.Length -gt 0)
+        {
+            Add-ConfigurationDataEntry -Node $Server -Key "ServiceInstances" -Value $serviceStatuses
+        }
+    }
+    return $Content
+}
+
 Export-ModuleMember -Function *-TargetResource

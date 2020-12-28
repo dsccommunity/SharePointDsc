@@ -218,4 +218,36 @@ function Test-TargetResource
     return $result
 }
 
+function Export-TargetResource
+{
+    if (!(Get-PSSnapin Microsoft.SharePoint.Powershell -ErrorAction SilentlyContinue))
+    {
+        Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction 0
+    }
+    $VerbosePreference = "SilentlyContinue"
+    $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPSessionStateService\MSFT_SPSessionStateService.psm1" -Resolve
+    $Content = ''
+    $params = Get-DSCFakeParameters -ModulePath $module
+    $svc = Get-SPSessionStateService
+    if ("" -ne $svc.CatalogName)
+    {
+        $params.DatabaseName = $svc.CatalogName
+        $results = Get-TargetResource @params
+        $PartialContent = "        SPSessionStateService " + [System.Guid]::NewGuid().ToString() + "`r`n"
+        $PartialContent += "        {`r`n"
+        $results = Repair-Credentials -results $results
+
+        <# WA - Bug in the Get-TargetResource in SPDSC 1.7.0.0 not returning the proper set of values #>
+        $results.DatabaseName = $svc.CatalogName
+        $results.DatabaseServer = $svc.ServerName
+        $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+        $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+        $PartialContent += $currentBlock
+        $PartialContent += "        }`r`n"
+        $Content += $PartialContent
+    }
+    return $Content
+}
+
 Export-ModuleMember -Function *-TargetResource

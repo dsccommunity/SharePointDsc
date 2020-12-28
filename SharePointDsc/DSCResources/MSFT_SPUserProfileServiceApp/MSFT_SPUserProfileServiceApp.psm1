@@ -349,7 +349,6 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting user profile service application $Name"
 
-
     if ($Ensure -eq "Present")
     {
         # If SiteNamingConflictResolution parameters is defined then also MySiteHostLocation need to be defined.
@@ -787,6 +786,127 @@ function Test-TargetResource
     Write-Verbose -Message "Test-TargetResource returned $result"
 
     return $result
+}
+
+function Export-TargetResource
+{
+    [CmdletBinding()]
+    [OutputType([System.String])]
+    param
+    (
+        [Parameter()]
+        [System.String]
+        $ModulePath,
+
+        [Parameter()]
+        [System.Collections.Hashtable]
+        $Params
+    )
+    if (!(Get-PSSnapin Microsoft.SharePoint.Powershell -ErrorAction SilentlyContinue))
+    {
+        Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction 0
+    }
+    $VerbosePreference = "SilentlyContinue"
+    if ($null -ne $modulePath)
+    {
+        $module = Resolve-Path $modulePath
+    }
+    else
+    {
+        $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+        $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPUserProfileServiceApp\MSFT_SPUserProfileServiceApp.psm1" -Resolve
+        $Content = ''
+    }
+
+    if ($null -eq $params)
+    {
+        $params = Get-DSCFakeParameters -ModulePath $module
+    }
+
+    $ups = Get-SPServiceApplication | Where-Object { $_.GetType().Name -eq "UserProfileApplication" }
+
+    $sites = Get-SPSite -Limit All
+    if ($sites.Length -gt 0)
+    {
+        $context = Get-SPServiceContext $sites[0]
+        try
+        {
+            New-Object Microsoft.Office.Server.UserProfiles.UserProfileManager($context) | Out-Null
+        }
+        catch
+        {
+            if ($null -ne $ups)
+            {
+                Write-Host "`r`nW103"  -BackgroundColor Yellow -ForegroundColor Black -NoNewline
+                Write-Host "   - Farm Account does not have Full Control on the User Profile Service Application."
+            }
+        }
+
+        if ($null -ne $ups)
+        {
+            $i = 1
+            $total = $ups.Length
+            foreach ($upsInstance in $ups)
+            {
+                try
+                {
+                    $serviceName = $upsInstance.DisplayName
+                    Write-Host "Scanning User Profile Service Application [$i/$total] {$serviceName}"
+
+                    $params.Name = $serviceName
+                    $currentBlock = "        SPUserProfileServiceApp " + [System.Guid]::NewGuid().toString() + "`r`n"
+                    $currentBlock += "        {`r`n"
+
+                    if ($null -eq $params.InstallAccount)
+                    {
+                        $params.Remove("InstallAccount")
+                    }
+
+                    $results = Get-TargetResource @params
+                    if ($results.Contains("MySiteHostLocation") -and $results.Get_Item("MySiteHostLocation") -eq "*")
+                    {
+                        $results.Remove("MySiteHostLocation")
+                    }
+
+                    if ($results.Contains("InstallAccount"))
+                    {
+                        $results.Remove("InstallAccount")
+                    }
+                    $results = Repair-Credentials -results $results
+
+                    Add-ConfigurationDataEntry -Node "NonNodeData" -Key "SyncDBServer" -Value $results.SyncDBServer -Description "Name of the User Profile Service Sync Database Server;"
+                    $results.SyncDBServer = "`$ConfigurationData.NonNodeData.SyncDBServer"
+
+                    Add-ConfigurationDataEntry -Node "NonNodeData" -Key "ProfileDBServer" -Value $results.ProfileDBServer -Description "Name of the User Profile Service Profile Database Server;"
+                    $results.ProfileDBServer = "`$ConfigurationData.NonNodeData.ProfileDBServer"
+
+                    Add-ConfigurationDataEntry -Node "NonNodeData" -Key "SocialDBServer" -Value $results.SocialDBServer -Description "Name of the User Profile Social Database Server;"
+                    $results.SocialDBServer = "`$ConfigurationData.NonNodeData.SocialDBServer"
+
+                    if ($results.PSDSCRunAsCredential)
+                    {
+                        $results.PSDSCRunAsCredential = "`$Credsinstallaccount"
+                    }
+                    $currentBlock += Get-DSCBlock -Params $results -ModulePath $module
+                    $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "SyncDBServer"
+                    $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "ProfileDBServer"
+                    $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "SocialDBServer"
+                    $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+                    $PartialContent += $currentBlock
+                    $PartialContent += "        }`r`n"
+                    $Content += $PartialContent
+                    $i++
+                }
+                catch
+                {
+                    $_
+                    $Global:ErrorLog += "[User Profile Service Application]" + $upsInstance.DisplayName + "`r`n"
+                    $Global:ErrorLog += "$_`r`n`r`n"
+                }
+            }
+        }
+    }
+    return $Content
 }
 
 Export-ModuleMember -Function *-TargetResource

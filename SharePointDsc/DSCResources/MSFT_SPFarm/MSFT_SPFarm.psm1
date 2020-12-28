@@ -239,9 +239,9 @@ function Get-TargetResource
             }
 
             $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration |
-            Where-Object -FilterScript {
-                $_.IsAdministrationWebApplication -eq $true
-            }
+                Where-Object -FilterScript {
+                    $_.IsAdministrationWebApplication -eq $true
+                }
 
             $centralAdminProvisioned = $false
             $ca = Get-SPServiceInstance -Server $env:ComputerName
@@ -1366,6 +1366,144 @@ function Test-TargetResource
     Write-Verbose -Message "Test-TargetResource returned $result"
 
     return $result
+}
+
+function Export-TargetResource
+{
+    [CmdletBinding()]
+    [OutputType([System.String])]
+    param
+    (
+        [Parameter()]
+        [System.String]
+        $ServerName,
+
+        [Parameter()]
+        [System.Boolean]
+        $RunCentralAdmin
+    )
+    if (!(Get-PSSnapin Microsoft.SharePoint.Powershell -ErrorAction SilentlyContinue))
+    {
+        Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction 0
+    }
+    $spMajorVersion = (Get-SPDscInstalledProductVersion).FileMajorPart
+    #$module = Resolve-Path ($Script:SPDSCPath + "\DSCResources\MSFT_SPFarm\MSFT_SPFarm.psm1")
+    #Import-Module $module
+    $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath "\DSCResources\MSFT_SPFarm\MSFT_SPFarm.psm1" -Resolve
+
+    $Content = "        SPFarm " + [System.Guid]::NewGuid().ToString() + "`r`n        {`r`n"
+    $params = Get-DSCFakeParameters -ModulePath $module
+    $params.CentralAdministrationPort = 443
+
+    <# If not SP2016 or above, remove the server role param. #>
+    if ($spMajorVersion -lt 16)
+    {
+        $params.Remove("ServerRole")
+    }
+
+    <# if not 2019 or above, remove the ApplicationCredentialKey param#>
+    if ($spMajorVersion -lt 19)
+    {
+        $params.Remove("ApplicationCredentialKey")
+    }
+
+    <# Can't have both the InstallAccount and PsDscRunAsCredential variables present. Remove InstallAccount if both are there. #>
+    if ($params.Contains("InstallAccount"))
+    {
+        $params.Remove("InstallAccount")
+    }
+
+    $spCentralAdmin = Get-SPWebApplication -IncludeCentralAdministration | Where-Object { $_.DisplayName -like '*Central Administration*' }
+    <# WA - Bug in 1.6.0.0 Get-TargetResource does not return the current Authentication Method; #>
+    $caAuthMethod = "NTLM"
+    if (!$spCentralAdmin.IisSettings[0].DisableKerberos)
+    {
+        $caAuthMethod = "Kerberos"
+    }
+    $params.CentralAdministrationAuth = $caAuthMethod
+    $params.CentralAdministrationPort = $spCentralAdmin.IisSettings[0].ServerBindings.Port
+    $params.FarmAccount = $Global:spFarmAccount
+    $params.Passphrase = $Global:spFarmAccount
+    $results = Get-TargetResource @params
+
+    <# Remove the default generated PassPhrase and ensure the resulting Configuration Script will prompt user for it. #>
+    $results.Remove("Passphrase");
+
+    <# WA - Bug in 1.6.0.0 Get-TargetResource not returning name if aliases are used #>
+    $configDB = Get-SPDatabase | Where-Object { $_.GetType().Name -eq "SPConfigurationDatabase" }
+    $results.DatabaseServer = "`$ConfigurationData.NonNodeData.DatabaseServer"
+
+    if ($null -ne $results.CentralAdministrationUrl -and $results.CentralAdministrationUrl.ToLower() -like 'http://*')
+    {
+        $results.Remove("CentralAdministrationUrl") | Out-Null
+    }
+    if ($null -eq (Get-ConfigurationDataEntry -Node "NonNodeData" -Key "DatabaseServer"))
+    {
+        if ($DynamicCompilation)
+        {
+            Add-ConfigurationDataEntry -Node "NonNodeData" -Key "DatabaseServer" -Value 'localhost' -Description "Name of the Database Server associated with the destination SharePoint Farm;"
+        }
+        else
+        {
+            Add-ConfigurationDataEntry -Node "NonNodeData" -Key "DatabaseServer" -Value $configDB.NormalizedDataSource -Description "Name of the Database Server associated with the destination SharePoint Farm;"
+        }
+    }
+
+    if ($null -eq (Get-ConfigurationDataEntry -Node "NonNodeData" -Key "PassPhrase"))
+    {
+        Add-ConfigurationDataEntry -Node "NonNodeData" -Key "PassPhrase" -Value "pass@word1" -Description "SharePoint Farm's PassPhrase;"
+    }
+
+    $Content += "            Passphrase = New-Object System.Management.Automation.PSCredential ('Passphrase', (ConvertTo-SecureString -String `$ConfigurationData.NonNodeData.PassPhrase -AsPlainText -Force));`r`n"
+
+    if (!$results.ContainsKey("RunCentralAdmin"))
+    {
+        $results.Add("RunCentralAdmin", $RunCentralAdmin)
+    }
+
+    if ($StandAlone)
+    {
+        $results.RunCentralAdmin = $true
+    }
+
+    if ($spMajorVersion -ge 16)
+    {
+        if (!$results.Contains("ServerRole"))
+        {
+            $results.Add("ServerRole", "`$Node.ServerRole")
+        }
+        else
+        {
+            $results["ServerRole"] = "`$Node.ServerRole"
+        }
+    }
+    else
+    {
+        $results.Remove("ServerRole")
+    }
+    $results = Repair-Credentials -results $results
+    $results.FarmAccount = Resolve-Credentials -UserName $results.FarmAccount
+    $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+    $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "DatabaseServer"
+    $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+    $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "FarmAccount"
+    if ($spMajorVersion -ge 16)
+    {
+        $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "ServerRole"
+    }
+    $Content += $currentBlock
+    $Content += "        }`r`n"
+
+    <# SPFarm Feature Section #>
+    if (($Global:ExtractionModeValue -eq 3 -and $Quiet) -or $Global:ComponentsToExtract.Contains("SPFeature"))
+    {
+        $Properties = @{
+            Scope = "Farm"
+        }
+        $Content += Read-TargetResource -ResourceName 'SPFeature' -ExportParam $Properties
+    }
+    return $Content
 }
 
 Export-ModuleMember -Function *-TargetResource

@@ -583,4 +583,76 @@ function Test-TargetResource
     return $result
 }
 
+function Export-TargetResource
+{
+    if (!(Get-PSSnapin Microsoft.SharePoint.Powershell -ErrorAction SilentlyContinue))
+    {
+        Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction 0
+    }
+    $VerbosePreference = "SilentlyContinue"
+    $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPSearchTopology\MSFT_SPSearchTopology.psm1" -Resolve
+    $Content = ''
+    $params = Get-DSCFakeParameters -ModulePath $module
+
+    $ssas = Get-SPServiceApplication | Where-Object -FilterScript { $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication" }
+
+    $i = 1
+    $total = $ssas.Length
+    foreach ($ssa in $ssas)
+    {
+        try
+        {
+            if ($null -ne $ssa)
+            {
+                $serviceName = $ssa.DisplayName
+                Write-Host "Scanning Search Topology for Service Application [$i/$total] {$serviceName}"
+                $PartialContent = "        SPSearchTopology " + [System.Guid]::NewGuid().ToString() + "`r`n"
+                $PartialContent += "        {`r`n"
+                $params.ServiceAppName = $serviceName
+                $results = Get-TargetResource @params
+
+                Add-ConfigurationDataEntry -Node "NonNodeData" -Key "SearchContentProcessingServers" -Value $results.ContentProcessing -Description "List of servers that will act as Search Content Processors;"
+                $results.ContentProcessing = "`$ConfigurationData.NonNodeData.SearchContentProcessingServers"
+
+                Add-ConfigurationDataEntry -Node "NonNodeData" -Key "SearchAnalyticsProcessingServers" -Value $results.AnalyticsProcessing -Description "List of servers that will act as Search Analytics Processors;"
+                $results.AnalyticsProcessing = "`$ConfigurationData.NonNodeData.SearchAnalyticsProcessingServers"
+
+                Add-ConfigurationDataEntry -Node "NonNodeData" -Key "SearchIndexPartitionServers" -Value $results.IndexPartition -Description "List of servers that will host the Search Index Partitions;"
+                $results.IndexPartition = "`$ConfigurationData.NonNodeData.SearchIndexPartitionServers"
+
+                Add-ConfigurationDataEntry -Node "NonNodeData" -Key "SearchCrawlerServers" -Value $results.Crawler -Description "List of servers that will act as Search Crawlers;"
+                $results.Crawler = "`$ConfigurationData.NonNodeData.SearchCrawlerServers"
+
+                Add-ConfigurationDataEntry -Node "NonNodeData" -Key "SearchAdminServers" -Value $results.Admin -Description "List of servers that will host the Search Admin Components;"
+                $results.Admin = "`$ConfigurationData.NonNodeData.SearchAdminServers"
+
+                Add-ConfigurationDataEntry -Node "NonNodeData" -Key "QueryProcessingServers" -Value $results.QueryProcessing -Description "List of servers that will host the Search Query Components;"
+                $results.QueryProcessing = "`$ConfigurationData.NonNodeData.QueryProcessingServers"
+
+                if ($results.FirstPartitionDirectory.Length -gt 1)
+                {
+                    $results.FirstPartitionDirectory = $results.FirstPartitionDirectory
+                }
+
+                $results = Repair-Credentials -results $results
+
+                $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+                $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+                $PartialContent += $currentBlock
+                $PartialContent += "        }`r`n"
+                $Content += $PartialContent
+                $i++
+            }
+        }
+        catch
+        {
+            $_
+            $Global:ErrorLog += "[Search Topology]" + $ssa.DisplayName + "`r`n"
+            $Global:ErrorLog += "$_`r`n`r`n"
+        }
+    }
+    return $Content
+}
+
 Export-ModuleMember -Function *-TargetResource
