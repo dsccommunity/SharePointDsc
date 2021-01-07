@@ -1,4 +1,5 @@
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param
 (
     [Parameter()]
@@ -49,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
 
@@ -188,6 +189,49 @@ try
 
                 It "Should return false from the test method" {
                     Test-TargetResource @testParams | Should -Be $true
+                }
+            }
+
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Mock -CommandName Write-Host -MockWith { }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            Name           = "SharePoint Service Applications"
+                            ServiceAccount = "Demo\ServiceAccount"
+                            Ensure         = "Present"
+                        }
+                    }
+
+                    Mock -CommandName Get-SPServiceApplicationPool -MockWith {
+                        $spServiceAppPool = [PSCustomObject]@{
+                            DisplayName = "SharePoint Service Applications"
+                            Name        = "SharePoint Service Applications"
+                        }
+                        return $spServiceAppPool
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
+
+                    $result = @'
+        SPServiceAppPool SharePointServiceApplications
+        {
+            Ensure               = "Present";
+            Name                 = "SharePoint Service Applications";
+            PsDscRunAsCredential = "$Credsspfarm";
+            ServiceAccount       = "Demo\ServiceAccount";
+        }
+
+'@
+                }
+
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource | Should -Be $result
                 }
             }
         }

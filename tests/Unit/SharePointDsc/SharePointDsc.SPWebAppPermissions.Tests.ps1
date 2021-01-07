@@ -1,4 +1,5 @@
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param
 (
     [Parameter()]
@@ -49,11 +50,12 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
                 try
-                { [Microsoft.SharePoint.SPBasePermissions]
+                {
+                    [Microsoft.SharePoint.SPBasePermissions]
                 }
                 catch
                 {
@@ -1060,6 +1062,51 @@ try
 
                 It "Should return false from the test method" {
                     Test-TargetResource @testParams | Should -Be $true
+                }
+            }
+
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Mock -CommandName Write-Host -MockWith { }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            WebAppUrl           = "https://intranet.sharepoint.contoso.com"
+                            ListPermissions     = "Manage Lists", "Override List Behaviors", "Add Items", "Edit Items", "Delete Items", "View Items", "Approve Items", "Open Items", "View Versions", "Delete Versions", "Create Alerts", "View Application Pages"
+                            SitePermissions     = "Manage Permissions", "View Web Analytics Data", "Create Subsites", "Manage Web Site", "Add and Customize Pages", "Apply Themes and Borders", "Apply Style Sheets", "Create Groups", "Browse Directories", "Use Self-Service Site Creation", "View Pages", "Enumerate Permissions", "Browse User Information", "Manage Alerts", "Use Remote Interfaces", "Use Client Integration Features", "Open", "Edit Personal User Information"
+                            PersonalPermissions = "Manage Personal Views", "Add/Remove Personal Web Parts", "Update Personal Web Parts"
+                        }
+                    }
+
+                    Mock -CommandName Get-SPWebApplication -MockWith {
+                        $spWebApp = [PSCustomObject]@{
+                            Name = "SharePoint Sites"
+                            Url  = "https://intranet.sharepoint.contoso.com"
+                        }
+                        return $spWebApp
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
+
+                    $result = @'
+        SPWebAppPermissions [0-9A-Fa-f]{8}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{12}
+        {
+            ListPermissions      = \@\("Manage Lists","Override List Behaviors","Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages"\);
+            PersonalPermissions  = \@\("Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts"\);
+            PsDscRunAsCredential = \$Credsspfarm;
+            SitePermissions      = \@\("Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permissions","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"\);
+            WebAppUrl            = "https://intranet.sharepoint.contoso.com";
+        }
+
+'@
+                }
+
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource | Should -Match $result
                 }
             }
         }

@@ -577,7 +577,6 @@ function Export-TargetResource
                         $Content = ''
                         $params = Get-DSCFakeParameters -ModulePath $module
                         $params.Ensure = $ensureValue
-                        $params.FarmAccount = $Global:spFarmAccount
                         if ($null -eq $params.InstallAccount)
                         {
                             $params.Remove("InstallAccount")
@@ -591,10 +590,6 @@ function Export-TargetResource
                             if ($results.Contains("InstallAccount"))
                             {
                                 $results.Remove("InstallAccount")
-                            }
-                            if (!$results.Contains("FarmAccount"))
-                            {
-                                $results.Add("FarmAccount", $Global:spFarmAccount)
                             }
                             $results = Repair-Credentials -results $results
                             $currentBlock = Get-DSCBlock -Params $results -ModulePath $module

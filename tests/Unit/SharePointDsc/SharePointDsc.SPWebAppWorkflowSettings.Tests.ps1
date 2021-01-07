@@ -1,4 +1,5 @@
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param
 (
     [Parameter()]
@@ -49,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
 
@@ -160,9 +161,9 @@ try
                             ExternalWorkflowParticipantsEnabled            = $false
                         }
                         $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value { } -PassThru |
-                        Add-Member -MemberType ScriptMethod -Name UpdateWorkflowConfigurationSettings -Value {
-                            $Global:SPDscWebApplicationUpdateWorkflowCalled = $true
-                        } -PassThru
+                            Add-Member -MemberType ScriptMethod -Name UpdateWorkflowConfigurationSettings -Value {
+                                $Global:SPDscWebApplicationUpdateWorkflowCalled = $true
+                            } -PassThru
                         return @($webApp)
                     }
                 }
@@ -179,6 +180,51 @@ try
                 It "Should update the workflow settings" {
                     Set-TargetResource @testParams
                     $Global:SPDscWebApplicationUpdateWorkflowCalled | Should -Be $true
+                }
+            }
+
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Mock -CommandName Write-Host -MockWith { }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            WebAppUrl                                     = "Shttp://example.contoso.local"
+                            ExternalWorkflowParticipantsEnabled           = $false
+                            EmailToNoPermissionWorkflowParticipantsEnable = $false
+                            UserDefinedWorkflowsEnabled                   = $true
+                        }
+                    }
+
+                    Mock -CommandName Get-SPWebApplication -MockWith {
+                        $spWebApp = [PSCustomObject]@{
+                            Name = "SharePoint Sites"
+                            Url  = "https://intranet.sharepoint.contoso.com"
+                        }
+                        return $spWebApp
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
+
+                    $result = @'
+        SPWebAppWorkflowSettings [0-9A-Fa-f]{8}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{12}
+        {
+            EmailToNoPermissionWorkflowParticipantsEnable = \$False;
+            ExternalWorkflowParticipantsEnabled           = \$False;
+            PsDscRunAsCredential                          = \$Credsspfarm;
+            UserDefinedWorkflowsEnabled                   = \$True;
+            WebAppUrl                                     = "Shttp://example.contoso.local";
+        }
+
+'@
+                }
+
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource | Should -Match $result
                 }
             }
         }

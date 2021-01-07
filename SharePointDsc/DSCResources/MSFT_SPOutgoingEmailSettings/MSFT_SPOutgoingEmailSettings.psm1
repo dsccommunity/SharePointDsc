@@ -333,6 +333,8 @@ function Export-TargetResource
         $params.Remove("SMTPPort")
     }
 
+    $Content = ''
+
     $results = Get-TargetResource @params
     if ($null -eq $results["SMTPPort"])
     {

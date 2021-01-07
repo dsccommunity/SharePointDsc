@@ -238,9 +238,6 @@ function Export-TargetResource
         $PartialContent += "        {`r`n"
         $results = Repair-Credentials -results $results
 
-        <# WA - Bug in the Get-TargetResource in SPDSC 1.7.0.0 not returning the proper set of values #>
-        $results.DatabaseName = $svc.CatalogName
-        $results.DatabaseServer = $svc.ServerName
         $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
         $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
         $PartialContent += $currentBlock

@@ -528,10 +528,10 @@ function Export-TargetResource
             $tokenName = $tip.Name
             Write-Host "Scanning Trusted Identity Token Issuer [$i/$total] {$tokenName}"
 
+            $PartialContent = ''
+
             $params.Name = $tokenName
             $params.Description = $tip.Description
-            $PartialContent = "        SPTrustedIdentityTokenIssuer " + [System.Guid]::NewGuid().toString() + "`r`n"
-            $PartialContent += "        {`r`n"
 
             $property = @{
                 Handle = 0
@@ -544,11 +544,29 @@ function Export-TargetResource
             }
             $results = Get-TargetResource @params
 
+            $foundOne = $false
             foreach ($ctm in $results.ClaimsMappings)
             {
-                $ctmResult = Get-SPClaimTypeMapping -params $ctm
-                $results.ClaimsMappings = $ctmResult
+                $ctmResult = Get-SPDscClaimTypeMapping -params $ctm
+                if ($null -ne $ctmResult)
+                {
+                    if (!$foundOne)
+                    {
+                        $PartialContent += "        `$members = @();`r`n"
+                        $foundOne = $true
+                    }
+                    $PartialContent += "        `$members += " + $ctmResult + ";`r`n"
+                }
             }
+
+            if ($foundOne)
+            {
+                $results.ClaimsMappings = "`$members"
+            }
+
+            $PartialContent += "        SPTrustedIdentityTokenIssuer " + [System.Guid]::NewGuid().toString() + "`r`n"
+            $PartialContent += "        {`r`n"
+
             if ($null -ne $results.Get_Item("SigningCertificateThumbprint") -and $results.Contains("SigningCertificateFilePath"))
             {
                 $results.Remove("SigningCertificateFilePath")

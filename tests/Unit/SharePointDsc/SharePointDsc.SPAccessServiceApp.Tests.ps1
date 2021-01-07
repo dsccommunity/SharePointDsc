@@ -1,4 +1,5 @@
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param
 (
     [Parameter()]
@@ -49,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
                 $getTypeFullName = "Microsoft.Office.Access.Services.MossHost.AccessServicesWebServiceApplication"
@@ -120,7 +121,7 @@ try
                         $spServiceApp = [PSCustomObject]@{
                             DisplayName = $testParams.Name
                         }
-                        $spServiceApp | Add-Member -MemberType ScriptMethod `
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
                             -Name GetType `
                             -Value {
                             return @{
@@ -151,7 +152,7 @@ try
                             DatabaseServer  = $testParams.DatabaseServer
                             ApplicationPool = @{ Name = $testParams.ApplicationPool }
                         }
-                        $spServiceApp | Add-Member -MemberType ScriptMethod `
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
                             -Name GetType `
                             -Value {
                             return @{
@@ -190,10 +191,10 @@ try
                         $spServiceApp = [PSCustomObject]@{
                             TypeName        = "Access Services Web Service Application"
                             DisplayName     = $testParams.Name
-                            DatabaseServer  = $testParams.DatabaseName
+                            DatabaseServer  = $testParams.DatabaseServer
                             ApplicationPool = @{ Name = $testParams.ApplicationPool }
                         }
-                        $spServiceApp | Add-Member -MemberType ScriptMethod `
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
                             -Name GetType `
                             -Value {
                             return @{
@@ -245,6 +246,61 @@ try
 
                 It "Should return true when the Test method is called" {
                     Test-TargetResource @testParams | Should -Be $true
+                }
+            }
+
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Mock -CommandName Write-Host -MockWith { }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            Name            = "Access Services Service Application"
+                            DatabaseServer  = "SQL01"
+                            ApplicationPool = "Service App Pool"
+                            Ensure          = "Present"
+                        }
+                    }
+
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        $spServiceApp = [PSCustomObject]@{
+                            TypeName        = "Access Services Web Service Application"
+                            DisplayName     = "Access Services Service Application"
+                            Name            = "Access Services Service Application"
+                            DatabaseServer  = "SQL01"
+                            ApplicationPool = "Service App Pool"
+                        }
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                            -Name GetType `
+                            -Value {
+                            return @{
+                                FullName = $getTypeFullName
+                            }
+                        } -PassThru -Force
+                        return $spServiceApp
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
+
+                    $result = @'
+        SPAccessServiceApp AccessServicesServiceApplication
+        {
+            ApplicationPool      = "Service App Pool";
+            DatabaseServer       = $ConfigurationData.NonNodeData.DatabaseServer;
+            Ensure               = "Present";
+            Name                 = "Access Services Service Application";
+            PsDscRunAsCredential = $Credsspfarm;
+        }
+
+'@
+                }
+
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource | Should -Be $result
                 }
             }
         }

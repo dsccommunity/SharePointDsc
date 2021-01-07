@@ -438,12 +438,12 @@ function Export-TargetResource
     {
         try
         {
-            $alternateUrls = $webApp.AlternateUrl
+            $alternateUrls = $webApp.AlternateUrls
 
             $zones = @("Default")
             if ($alternateUrls.Length -ge 1)
             {
-                $zones = $alternateUrls | Select-Object Zone
+                $zones = $alternateUrls | Select-Object -ExpandProperty 'Zone'
             }
             foreach ($zone in $zones)
             {

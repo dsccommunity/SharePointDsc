@@ -1,4 +1,5 @@
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param
 (
     [Parameter()]
@@ -49,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
                 $getTypeFullName = "Microsoft.Office.Word.Server.Service.WordServiceApplication"
@@ -573,6 +574,88 @@ try
 
                 It "Should throw an exception in the set method" {
                     { Set-TargetResource @testParams } | Should -Throw "An Application Pool and Database Name are required to configure the Word Automation Service Application"
+                }
+            }
+
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Mock -CommandName Write-Host -MockWith { }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            Name                            = "Word Automation Service Application"
+                            Ensure                          = "Present"
+                            ApplicationPool                 = "SharePoint Web Services"
+                            DatabaseName                    = "WordAutomation_DB"
+                            DatabaseServer                  = "SQLServer"
+                            SupportedFileFormats            = "docx", "doc", "mht", "rtf", "xml"
+                            DisableEmbeddedFonts            = $false
+                            MaximumMemoryUsage              = 100
+                            RecycleThreshold                = 100
+                            DisableBinaryFileScan           = $false
+                            ConversionProcesses             = 8
+                            JobConversionFrequency          = 15
+                            NumberOfConversionsPerProcess   = 12
+                            TimeBeforeConversionIsMonitored = 5
+                            MaximumConversionAttempts       = 2
+                            MaximumSyncConversionRequests   = 25
+                            KeepAliveTimeout                = 30
+                            MaximumConversionTime           = 300
+                            AddToDefault                    = $true
+                        }
+                    }
+
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        $spServiceApp = [PSCustomObject]@{
+                            DisplayName = "Word Automation Service Application"
+                            Name        = "Word Automation Service Application"
+                        }
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                            -Name GetType `
+                            -Value {
+                            return @{
+                                Name = "WordServiceApplication"
+                            }
+                        } -PassThru -Force
+                        return $spServiceApp
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
+
+                    $result = @'
+        SPWordAutomationServiceApp WordAutomationServiceApplication
+        {
+            AddToDefault                    = $True;
+            ApplicationPool                 = "SharePoint Web Services";
+            ConversionProcesses             = 8;
+            DatabaseName                    = "WordAutomation_DB";
+            DatabaseServer                  = $ConfigurationData.NonNodeData.DatabaseServer;
+            DisableBinaryFileScan           = $False;
+            DisableEmbeddedFonts            = $False;
+            Ensure                          = "Present";
+            JobConversionFrequency          = 15;
+            KeepAliveTimeout                = 30;
+            MaximumConversionAttempts       = 2;
+            MaximumConversionTime           = 300;
+            MaximumMemoryUsage              = 100;
+            MaximumSyncConversionRequests   = 25;
+            Name                            = "Word Automation Service Application";
+            NumberOfConversionsPerProcess   = 12;
+            PsDscRunAsCredential            = $Credsspfarm;
+            RecycleThreshold                = 100;
+            SupportedFileFormats            = @("docx","doc","mht","rtf","xml");
+            TimeBeforeConversionIsMonitored = 5;
+        }
+
+'@
+                }
+
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource | Should -Be $result
                 }
             }
         }

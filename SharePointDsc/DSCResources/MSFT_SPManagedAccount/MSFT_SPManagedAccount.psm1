@@ -237,6 +237,8 @@ function Export-TargetResource
     $module = Join-Path -Path $ParentModuleBase -ChildPath "\DSCResources\MSFT_SPManagedAccount\MSFT_SPManagedAccount.psm1" -Resolve
     $managedAccounts = Get-SPManagedAccount
 
+    $Content = ''
+
     $i = 1
     $total = $managedAccounts.Length
     foreach ($managedAccount in $managedAccounts)

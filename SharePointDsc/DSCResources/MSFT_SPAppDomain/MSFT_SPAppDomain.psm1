@@ -107,7 +107,7 @@ function Export-TargetResource
         Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction 0
     }
     $VerbosePreference = "SilentlyContinue"
-    $serviceApp = Get-SPServiceApplication | Where-Object { $_.GetType().Name -eq "AppManagementServiceApplication" }
+    [System.Array]$serviceApp = Get-SPServiceApplication | Where-Object { $_.GetType().Name -eq "AppManagementServiceApplication" }
     $appDomain = Get-SPAppDomain
     if ($serviceApp.Length -ge 1 -and $appDomain.Length -ge 1)
     {

@@ -472,8 +472,8 @@ function Export-TargetResource
         $results = Repair-Credentials -results $results
 
         $results.Members = Set-SPFarmAdministrators $results.Members
-        $results.MembersToInclude = Set-SPFarmAdministrators $results.MembersToInclude
-        $results.MembersToExclude = Set-SPFarmAdministrators $results.MembersToExclude
+        $results.Remove("MembersToInclude")
+        $results.Remove("MembersToExclude")
 
         $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
         $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"

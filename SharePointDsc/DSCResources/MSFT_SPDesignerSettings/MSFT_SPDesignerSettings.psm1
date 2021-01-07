@@ -485,7 +485,7 @@ function Export-TargetResource
         $URL,
 
         [Parameter()]
-        [System.String()]
+        [System.String]
         $Scope,
 
         [Parameter()]

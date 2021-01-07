@@ -1,4 +1,5 @@
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param
 (
     [Parameter()]
@@ -49,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
                 try
@@ -143,51 +144,51 @@ try
 
                     Mock -CommandName Get-SPWebApplication -MockWith {
                         $policiesObject = New-Object -TypeName "Object" |
-                        Add-Member -MemberType ScriptMethod `
-                            -Name Add `
-                            -Value {
-                            return New-Object -TypeName "Object" |
-                            Add-Member -MemberType NoteProperty `
-                                -Name PolicyRoleBindings `
-                                -Value (
-                                New-Object -TypeName "Object" |
-                                Add-Member -MemberType ScriptMethod `
-                                    -Name Add `
-                                    -Value { } `
-                                    -PassThru
-                            ) -PassThru
-                        } -PassThru |
-                        Add-Member -MemberType ScriptMethod `
-                            -Name Remove `
-                            -Value { } `
-                            -PassThru
+                            Add-Member -MemberType ScriptMethod `
+                                -Name Add `
+                                -Value {
+                                return New-Object -TypeName "Object" |
+                                    Add-Member -MemberType NoteProperty `
+                                        -Name PolicyRoleBindings `
+                                        -Value (
+                                        New-Object -TypeName "Object" |
+                                            Add-Member -MemberType ScriptMethod `
+                                                -Name Add `
+                                                -Value { } `
+                                                -PassThru
+                                        ) -PassThru
+                                    } -PassThru |
+                                        Add-Member -MemberType ScriptMethod `
+                                            -Name Remove `
+                                            -Value { } `
+                                            -PassThru
 
                         return New-Object -TypeName "Object" |
-                        Add-Member -MemberType NoteProperty `
-                            -Name Properties `
-                            -Value @{ } `
-                            -PassThru |
-                        Add-Member -MemberType NoteProperty `
-                            -Name Policies `
-                            -Value $policiesObject `
-                            -PassThru |
-                        Add-Member -MemberType NoteProperty `
-                            -Name PolicyRoles `
-                            -Value (
-                            New-Object -TypeName "Object" |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name GetSpecialRole `
-                                -Value { return @{ } } `
-                                -PassThru
-                        ) -PassThru |
-                        Add-Member -MemberType ScriptMethod `
-                            -Name Update `
-                            -Value { } `
-                            -PassThru |
-                        Add-Member -MemberType NoteProperty `
-                            -Name UseClaimsAuthentication `
-                            -Value $true `
-                            -PassThru
+                            Add-Member -MemberType NoteProperty `
+                                -Name Properties `
+                                -Value @{ } `
+                                -PassThru |
+                                Add-Member -MemberType NoteProperty `
+                                    -Name Policies `
+                                    -Value $policiesObject `
+                                    -PassThru |
+                                    Add-Member -MemberType NoteProperty `
+                                        -Name PolicyRoles `
+                                        -Value (
+                                        New-Object -TypeName "Object" |
+                                            Add-Member -MemberType ScriptMethod `
+                                                -Name GetSpecialRole `
+                                                -Value { return @{ } } `
+                                                -PassThru
+                                        ) -PassThru |
+                                            Add-Member -MemberType ScriptMethod `
+                                                -Name Update `
+                                                -Value { } `
+                                                -PassThru |
+                                                Add-Member -MemberType NoteProperty `
+                                                    -Name UseClaimsAuthentication `
+                                                    -Value $true `
+                                                    -PassThru
                     }
                 }
 
@@ -216,51 +217,51 @@ try
 
                     Mock -CommandName Get-SPWebApplication -MockWith {
                         $policiesObject = New-Object -TypeName "Object" |
-                        Add-Member -MemberType ScriptMethod `
-                            -Name Add `
-                            -Value {
-                            return New-Object -TypeName "Object" |
-                            Add-Member -MemberType NoteProperty `
-                                -Name PolicyRoleBindings `
-                                -Value (
-                                New-Object -TypeName "Object" |
-                                Add-Member -MemberType ScriptMethod `
-                                    -Name Add `
-                                    -Value { } `
-                                    -PassThru
-                            ) -PassThru
-                        } -PassThru |
-                        Add-Member -MemberType ScriptMethod `
-                            -Name Remove `
-                            -Value { } `
-                            -PassThru
+                            Add-Member -MemberType ScriptMethod `
+                                -Name Add `
+                                -Value {
+                                return New-Object -TypeName "Object" |
+                                    Add-Member -MemberType NoteProperty `
+                                        -Name PolicyRoleBindings `
+                                        -Value (
+                                        New-Object -TypeName "Object" |
+                                            Add-Member -MemberType ScriptMethod `
+                                                -Name Add `
+                                                -Value { } `
+                                                -PassThru
+                                        ) -PassThru
+                                    } -PassThru |
+                                        Add-Member -MemberType ScriptMethod `
+                                            -Name Remove `
+                                            -Value { } `
+                                            -PassThru
 
                         return New-Object -TypeName "Object" |
-                        Add-Member -MemberType NoteProperty `
-                            -Name Properties `
-                            -Value @{ } `
-                            -PassThru |
-                        Add-Member -MemberType NoteProperty `
-                            -Name Policies `
-                            -Value $policiesObject `
-                            -PassThru |
-                        Add-Member -MemberType NoteProperty `
-                            -Name PolicyRoles `
-                            -Value (
-                            New-Object -TypeName "Object" |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name GetSpecialRole `
-                                -Value { return @{ } } `
-                                -PassThru
-                        ) -PassThru |
-                        Add-Member -MemberType ScriptMethod `
-                            -Name Update `
-                            -Value { } `
-                            -PassThru |
-                        Add-Member -MemberType NoteProperty `
-                            -Name UseClaimsAuthentication `
-                            -Value $false `
-                            -PassThru
+                            Add-Member -MemberType NoteProperty `
+                                -Name Properties `
+                                -Value @{ } `
+                                -PassThru |
+                                Add-Member -MemberType NoteProperty `
+                                    -Name Policies `
+                                    -Value $policiesObject `
+                                    -PassThru |
+                                    Add-Member -MemberType NoteProperty `
+                                        -Name PolicyRoles `
+                                        -Value (
+                                        New-Object -TypeName "Object" |
+                                            Add-Member -MemberType ScriptMethod `
+                                                -Name GetSpecialRole `
+                                                -Value { return @{ } } `
+                                                -PassThru
+                                        ) -PassThru |
+                                            Add-Member -MemberType ScriptMethod `
+                                                -Name Update `
+                                                -Value { } `
+                                                -PassThru |
+                                                Add-Member -MemberType NoteProperty `
+                                                    -Name UseClaimsAuthentication `
+                                                    -Value $false `
+                                                    -PassThru
                     }
                 }
 
@@ -290,46 +291,46 @@ try
 
                     Mock -CommandName Get-SPWebApplication -MockWith {
                         return New-Object -TypeName "Object" |
-                        Add-Member -MemberType NoteProperty `
-                            -Name Properties `
-                            -Value @{
-                            portalsuperuseraccount   = $testParams.SuperUserAlias
-                            portalsuperreaderaccount = $testParams.SuperReaderAlias
-                        } -PassThru |
-                        Add-Member -MemberType NoteProperty `
-                            -Name Policies `
-                            -Value @(
-                            @{
-                                UserName = $testParams.SuperUserAlias
-                            },
-                            @{
-                                UserName = $testParams.SuperReaderAlias
-                            },
-                            @{
-                                UserName = "i:0#.w|$($testParams.SuperUserAlias)"
-                            },
-                            @{
-                                UserName = "i:0#.w|$($testParams.SuperReaderAlias)"
-                            }
-                        ) -PassThru |
-                        Add-Member -MemberType NoteProperty `
-                            -Name PolicyRoles `
-                            -Value (
-                            New-Object -TypeName "Object" |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name GetSpecialRole `
-                                -Value {
-                                return @{ }
-                            } -PassThru
-                        ) -PassThru |
-                        Add-Member -MemberType ScriptMethod `
-                            -Name Update `
-                            -Value { } `
-                            -PassThru |
-                        Add-Member -MemberType NoteProperty `
-                            -Name UseClaimsAuthentication `
-                            -Value $false `
-                            -PassThru
+                            Add-Member -MemberType NoteProperty `
+                                -Name Properties `
+                                -Value @{
+                                portalsuperuseraccount   = $testParams.SuperUserAlias
+                                portalsuperreaderaccount = $testParams.SuperReaderAlias
+                            } -PassThru |
+                                Add-Member -MemberType NoteProperty `
+                                    -Name Policies `
+                                    -Value @(
+                                    @{
+                                        UserName = $testParams.SuperUserAlias
+                                    },
+                                    @{
+                                        UserName = $testParams.SuperReaderAlias
+                                    },
+                                    @{
+                                        UserName = "i:0#.w|$($testParams.SuperUserAlias)"
+                                    },
+                                    @{
+                                        UserName = "i:0#.w|$($testParams.SuperReaderAlias)"
+                                    }
+                                ) -PassThru |
+                                    Add-Member -MemberType NoteProperty `
+                                        -Name PolicyRoles `
+                                        -Value (
+                                        New-Object -TypeName "Object" |
+                                            Add-Member -MemberType ScriptMethod `
+                                                -Name GetSpecialRole `
+                                                -Value {
+                                                return @{ }
+                                            } -PassThru
+                                        ) -PassThru |
+                                            Add-Member -MemberType ScriptMethod `
+                                                -Name Update `
+                                                -Value { } `
+                                                -PassThru |
+                                                Add-Member -MemberType NoteProperty `
+                                                    -Name UseClaimsAuthentication `
+                                                    -Value $false `
+                                                    -PassThru
                     }
                 }
 
@@ -354,46 +355,46 @@ try
 
                     Mock -CommandName Get-SPWebApplication -MockWith {
                         return New-Object -TypeName "Object" |
-                        Add-Member -MemberType NoteProperty `
-                            -Name Properties `
-                            -Value @{
-                            portalsuperuseraccount   = $testParams.SuperUserAlias
-                            portalsuperreaderaccount = $testParams.SuperReaderAlias
-                        } -PassThru |
-                        Add-Member -MemberType NoteProperty `
-                            -Name Policies `
-                            -Value @(
-                            @{
-                                UserName = $testParams.SuperUserAlias
-                            },
-                            @{
-                                UserName = $testParams.SuperReaderAlias
-                            },
-                            @{
-                                UserName = "i:0#.w|$($testParams.SuperUserAlias)"
-                            },
-                            @{
-                                UserName = "i:0#.w|$($testParams.SuperReaderAlias)"
-                            }
-                        ) -PassThru |
-                        Add-Member -MemberType NoteProperty `
-                            -Name PolicyRoles `
-                            -Value (
-                            New-Object -TypeName "Object" |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name GetSpecialRole `
-                                -Value {
-                                return @{ }
-                            } -PassThru
-                        ) -PassThru |
-                        Add-Member -MemberType ScriptMethod `
-                            -Name Update `
-                            -Value { } `
-                            -PassThru |
-                        Add-Member -MemberType NoteProperty `
-                            -Name UseClaimsAuthentication `
-                            -Value $false `
-                            -PassThru
+                            Add-Member -MemberType NoteProperty `
+                                -Name Properties `
+                                -Value @{
+                                portalsuperuseraccount   = $testParams.SuperUserAlias
+                                portalsuperreaderaccount = $testParams.SuperReaderAlias
+                            } -PassThru |
+                                Add-Member -MemberType NoteProperty `
+                                    -Name Policies `
+                                    -Value @(
+                                    @{
+                                        UserName = $testParams.SuperUserAlias
+                                    },
+                                    @{
+                                        UserName = $testParams.SuperReaderAlias
+                                    },
+                                    @{
+                                        UserName = "i:0#.w|$($testParams.SuperUserAlias)"
+                                    },
+                                    @{
+                                        UserName = "i:0#.w|$($testParams.SuperReaderAlias)"
+                                    }
+                                ) -PassThru |
+                                    Add-Member -MemberType NoteProperty `
+                                        -Name PolicyRoles `
+                                        -Value (
+                                        New-Object -TypeName "Object" |
+                                            Add-Member -MemberType ScriptMethod `
+                                                -Name GetSpecialRole `
+                                                -Value {
+                                                return @{ }
+                                            } -PassThru
+                                        ) -PassThru |
+                                            Add-Member -MemberType ScriptMethod `
+                                                -Name Update `
+                                                -Value { } `
+                                                -PassThru |
+                                                Add-Member -MemberType NoteProperty `
+                                                    -Name UseClaimsAuthentication `
+                                                    -Value $false `
+                                                    -PassThru
                     }
                 }
 
@@ -418,51 +419,51 @@ try
 
                     Mock -CommandName Get-SPWebApplication -MockWith {
                         return New-Object -TypeName "Object" |
-                        Add-Member -MemberType NoteProperty -Name Properties @{
-                            portalsuperuseraccount   = $testParams.SuperUserAlias
-                            portalsuperreaderaccount = "WRONG\AccountName"
-                        } -PassThru |
-                        Add-Member -MemberType NoteProperty `
-                            -Name Policies `
-                            -Value (
-                            New-Object -TypeName "Object" |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name Add `
-                                -Value {
-                                return New-Object -TypeName "Object" |
+                            Add-Member -MemberType NoteProperty -Name Properties @{
+                                portalsuperuseraccount   = $testParams.SuperUserAlias
+                                portalsuperreaderaccount = "WRONG\AccountName"
+                            } -PassThru |
                                 Add-Member -MemberType NoteProperty `
-                                    -Name PolicyRoleBindings `
+                                    -Name Policies `
                                     -Value (
                                     New-Object -TypeName "Object" |
-                                    Add-Member -MemberType ScriptMethod `
-                                        -Name Add `
-                                        -Value { } `
-                                        -PassThru
-                                ) -PassThru
-                            } -PassThru |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name Remove `
-                                -Value { } `
-                                -PassThru
-                        ) -PassThru |
-                        Add-Member -MemberType NoteProperty `
-                            -Name PolicyRoles `
-                            -Value (
-                            New-Object -TypeName "Object" |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name GetSpecialRole `
-                                -Value {
-                                return @{ }
-                            } -PassThru
-                        ) -PassThru |
-                        Add-Member -MemberType ScriptMethod `
-                            -Name Update `
-                            -Value { } `
-                            -PassThru |
-                        Add-Member -MemberType NoteProperty `
-                            -Name UseClaimsAuthentication `
-                            -Value $true `
-                            -PassThru
+                                        Add-Member -MemberType ScriptMethod `
+                                            -Name Add `
+                                            -Value {
+                                            return New-Object -TypeName "Object" |
+                                                Add-Member -MemberType NoteProperty `
+                                                    -Name PolicyRoleBindings `
+                                                    -Value (
+                                                    New-Object -TypeName "Object" |
+                                                        Add-Member -MemberType ScriptMethod `
+                                                            -Name Add `
+                                                            -Value { } `
+                                                            -PassThru
+                                                    ) -PassThru
+                                                } -PassThru |
+                                                    Add-Member -MemberType ScriptMethod `
+                                                        -Name Remove `
+                                                        -Value { } `
+                                                        -PassThru
+                                                ) -PassThru |
+                                                    Add-Member -MemberType NoteProperty `
+                                                        -Name PolicyRoles `
+                                                        -Value (
+                                                        New-Object -TypeName "Object" |
+                                                            Add-Member -MemberType ScriptMethod `
+                                                                -Name GetSpecialRole `
+                                                                -Value {
+                                                                return @{ }
+                                                            } -PassThru
+                                                        ) -PassThru |
+                                                            Add-Member -MemberType ScriptMethod `
+                                                                -Name Update `
+                                                                -Value { } `
+                                                                -PassThru |
+                                                                Add-Member -MemberType NoteProperty `
+                                                                    -Name UseClaimsAuthentication `
+                                                                    -Value $true `
+                                                                    -PassThru
                     }
                 }
 
@@ -485,49 +486,49 @@ try
 
                     Mock -CommandName Get-SPWebApplication -MockWith {
                         return New-Object -TypeName "Object" |
-                        Add-Member -MemberType NoteProperty -Name Properties @{
-                            portalsuperuseraccount   = "WRONG\AccountName"
-                            portalsuperreaderaccount = $testParams.SuperReaderAlias
-                        } -PassThru |
-                        Add-Member -MemberType NoteProperty -Name Policies -Value (
-                            New-Object -TypeName "Object" |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name Add `
-                                -Value {
-                                return New-Object -TypeName "Object" |
-                                Add-Member -MemberType NoteProperty `
-                                    -Name PolicyRoleBindings `
-                                    -Value (
-                                    New-Object -TypeName "Object" |
-                                    Add-Member -MemberType ScriptMethod `
-                                        -Name Add `
-                                        -Value { } `
-                                        -PassThru
-                                ) -PassThru
+                            Add-Member -MemberType NoteProperty -Name Properties @{
+                                portalsuperuseraccount   = "WRONG\AccountName"
+                                portalsuperreaderaccount = $testParams.SuperReaderAlias
                             } -PassThru |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name Remove `
-                                -Value { } `
-                                -PassThru
-                        ) -PassThru |
-                        Add-Member -MemberType NoteProperty `
-                            -Name PolicyRoles `
-                            -Value (
-                            New-Object -TypeName "Object" |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name GetSpecialRole `
-                                -Value {
-                                return @{ }
-                            } -PassThru
-                        ) -PassThru |
-                        Add-Member -MemberType ScriptMethod `
-                            -Name Update `
-                            -Value { } `
-                            -PassThru |
-                        Add-Member -MemberType NoteProperty `
-                            -Name UseClaimsAuthentication `
-                            -Value $true `
-                            -PassThru
+                                Add-Member -MemberType NoteProperty -Name Policies -Value (
+                                    New-Object -TypeName "Object" |
+                                        Add-Member -MemberType ScriptMethod `
+                                            -Name Add `
+                                            -Value {
+                                            return New-Object -TypeName "Object" |
+                                                Add-Member -MemberType NoteProperty `
+                                                    -Name PolicyRoleBindings `
+                                                    -Value (
+                                                    New-Object -TypeName "Object" |
+                                                        Add-Member -MemberType ScriptMethod `
+                                                            -Name Add `
+                                                            -Value { } `
+                                                            -PassThru
+                                                    ) -PassThru
+                                                } -PassThru |
+                                                    Add-Member -MemberType ScriptMethod `
+                                                        -Name Remove `
+                                                        -Value { } `
+                                                        -PassThru
+                                                ) -PassThru |
+                                                    Add-Member -MemberType NoteProperty `
+                                                        -Name PolicyRoles `
+                                                        -Value (
+                                                        New-Object -TypeName "Object" |
+                                                            Add-Member -MemberType ScriptMethod `
+                                                                -Name GetSpecialRole `
+                                                                -Value {
+                                                                return @{ }
+                                                            } -PassThru
+                                                        ) -PassThru |
+                                                            Add-Member -MemberType ScriptMethod `
+                                                                -Name Update `
+                                                                -Value { } `
+                                                                -PassThru |
+                                                                Add-Member -MemberType NoteProperty `
+                                                                    -Name UseClaimsAuthentication `
+                                                                    -Value $true `
+                                                                    -PassThru
                     }
                 }
 
@@ -537,6 +538,51 @@ try
 
                 It "Should set the correct accounts to the web app again" {
                     Set-TargetResource @testParams
+                }
+            }
+
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Mock -CommandName Write-Host -MockWith { }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            WebAppUrl        = "https://sharepoint.contoso.com"
+                            SuperUserAlias   = "domain\account"
+                            SuperReaderAlias = "domain\account"
+                            SetWebAppPolicy  = $false
+                        }
+                    }
+
+                    Mock -CommandName Get-SPWebApplication -MockWith {
+                        $spWebApp = [PSCustomObject]@{
+                            Url         = "https://sharepoint.contoso.com"
+                            DisplayName = "SharePoint Web Application"
+                        }
+                        return $spWebApp
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
+
+                    $result = @'
+        SPCacheAccounts SharePointWebApplicationCacheAccounts
+        {
+            PsDscRunAsCredential = $Credsspfarm;
+            SetWebAppPolicy      = $False;
+            SuperReaderAlias     = "domain\account";
+            SuperUserAlias       = "domain\account";
+            WebAppUrl            = "https://sharepoint.contoso.com";
+        }
+
+'@
+                }
+
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource | Should -Be $result
                 }
             }
         }

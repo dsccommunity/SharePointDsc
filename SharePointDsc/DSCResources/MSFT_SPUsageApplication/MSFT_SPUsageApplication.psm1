@@ -359,8 +359,6 @@ function Export-TargetResource
         $params.Ensure = "Present"
         $results = Get-TargetResource @params
 
-        #Save-Credentials -UserName $results["DatabaseCredentials"].Username
-        #$Results["DatabaseCredentials"] = Resolve-Credentials -Username $results["DatabaseCredentials"].Username
         $results.Remove("DatabaseCredentials")
 
         $failOverFound = $false
@@ -385,7 +383,6 @@ function Export-TargetResource
         $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
         $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "UsageLogLocation"
         $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "DatabaseServer"
-        #$currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "DatabaseCredentials"
 
         if ($failOverFound)
         {

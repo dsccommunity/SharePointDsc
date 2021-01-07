@@ -295,9 +295,10 @@ function Export-TargetResource
                 {
                     $results.Remove("InstallAccount")
                 }
-                $results.HappyHour = Get-SPWebAppHappyHour -params $results.HappyHour
+                $results.HappyHour = Get-SPDscWebAppHappyHour -params $results.HappyHour
                 $results = Repair-Credentials -results $results
                 $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+                $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "HappyHour"
                 $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
                 $PartialContent += $currentBlock
                 $PartialContent += "        }`r`n"

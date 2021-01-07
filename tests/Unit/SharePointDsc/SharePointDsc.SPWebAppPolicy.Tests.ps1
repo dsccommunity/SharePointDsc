@@ -1,4 +1,5 @@
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param
 (
     [Parameter()]
@@ -49,11 +50,12 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
                 try
-                { [Microsoft.SharePoint.Administration.SPPolicyRoleType]
+                {
+                    [Microsoft.SharePoint.Administration.SPPolicyRoleType]
                 }
                 catch
                 {
@@ -298,7 +300,7 @@ try
                             Url                     = $testParams.WebAppUrl
                             UseClaimsAuthentication = $true
                             PolicyRoles             = New-Object -TypeName "Object" |
-                            Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{ } } -PassThru
+                                Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{ } } -PassThru
                             Policies                = $policies
                             Properties              = @{
                                 portalsuperuseraccount   = "contoso\sp_psu"
@@ -375,7 +377,7 @@ try
                             Url                     = $testParams.WebAppUrl
                             UseClaimsAuthentication = $true
                             PolicyRoles             = New-Object -TypeName "Object" |
-                            Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{ } } -PassThru
+                                Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{ } } -PassThru
                             Policies                = $policies
                             Properties              = @{
                                 portalsuperuseraccount   = "contoso\sp_psu"
@@ -452,7 +454,7 @@ try
                             Url                     = $testParams.WebAppUrl
                             UseClaimsAuthentication = $true
                             PolicyRoles             = New-Object -TypeName "Object" |
-                            Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{ } } -PassThru
+                                Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{ } } -PassThru
                             Policies                = $policies
                             Properties              = @{
                             }
@@ -525,7 +527,7 @@ try
                             Url                     = $testParams.WebAppUrl
                             UseClaimsAuthentication = $true
                             PolicyRoles             = New-Object -TypeName "Object" |
-                            Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{ } } -PassThru
+                                Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{ } } -PassThru
                             Policies                = $policies
                             Properties              = @{
                             }
@@ -617,7 +619,7 @@ try
                             Url                     = $testParams.WebAppUrl
                             UseClaimsAuthentication = $true
                             PolicyRoles             = New-Object -TypeName "Object" |
-                            Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{ } } -PassThru
+                                Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{ } } -PassThru
                             Policies                = $policies
                             Properties              = @{
                                 portalsuperuseraccount   = "i:0#.w|contoso\sp_psu"
@@ -708,7 +710,7 @@ try
                             Url                     = $testParams.WebAppUrl
                             UseClaimsAuthentication = $true
                             PolicyRoles             = New-Object -TypeName "Object" |
-                            Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{ } } -PassThru
+                                Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{ } } -PassThru
                             Policies                = $policies
                             Properties              = @{
                                 portalsuperuseraccount   = "contoso\sp_psu"
@@ -798,7 +800,7 @@ try
                             Url                     = $testParams.WebAppUrl
                             UseClaimsAuthentication = $true
                             PolicyRoles             = New-Object -TypeName "Object" |
-                            Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{ } } -PassThru
+                                Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{ } } -PassThru
                             Policies                = $policies
                             Properties              = @{
                                 portalsuperuseraccount   = "contoso\sp_psu"
@@ -884,7 +886,7 @@ try
                             Url                     = $testParams.WebAppUrl
                             UseClaimsAuthentication = $true
                             PolicyRoles             = New-Object -TypeName "Object" |
-                            Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{ } } -PassThru
+                                Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{ } } -PassThru
                             Policies                = $policies
                             Properties              = @{ }
                         }
@@ -951,7 +953,7 @@ try
                             Url                     = $testParams.WebAppUrl
                             UseClaimsAuthentication = $true
                             PolicyRoles             = New-Object -TypeName "Object" |
-                            Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{ } } -PassThru
+                                Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{ } } -PassThru
                             Policies                = $policies
                             Properties              = @{ }
                         }
@@ -1028,7 +1030,7 @@ try
                             Url                     = $testParams.WebAppUrl
                             UseClaimsAuthentication = $true
                             PolicyRoles             = New-Object -TypeName "Object" |
-                            Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{ } } -PassThru
+                                Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{ } } -PassThru
                             Policies                = $policies
                             Properties              = @{ }
                         }
@@ -1092,7 +1094,7 @@ try
                             Url                     = $testParams.WebAppUrl
                             UseClaimsAuthentication = $true
                             PolicyRoles             = New-Object -TypeName "Object" |
-                            Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{ } } -PassThru
+                                Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{ } } -PassThru
                             Policies                = $policies
                             Properties              = @{ }
                         }
@@ -1147,14 +1149,14 @@ try
                             Url                     = $testParams.WebAppUrl
                             UseClaimsAuthentication = $true
                             PolicyRoles             = New-Object -TypeName "Object" |
-                            Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{ } } -PassThru
+                                Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{ } } -PassThru
                             Policies                = $policies
                             Properties              = @{ }
                         }
                         $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
                             $Global:SPDscWebApplicationUpdateCalled = $true
                         } -PassThru |
-                        Add-Member -MemberType NoteProperty Properties @{ } -PassThru
+                            Add-Member -MemberType NoteProperty Properties @{ } -PassThru
                         return @($webApp)
                     }
                 }
@@ -1222,7 +1224,7 @@ try
                             Url                     = $testParams.WebAppUrl
                             UseClaimsAuthentication = $true
                             PolicyRoles             = New-Object -TypeName "Object" |
-                            Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{ } } -PassThru
+                                Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{ } } -PassThru
                             Policies                = $policies
                             Properties              = @{ }
                         }
@@ -1296,7 +1298,7 @@ try
                             Url                     = $testParams.WebAppUrl
                             UseClaimsAuthentication = $true
                             PolicyRoles             = New-Object -TypeName "Object" |
-                            Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{ } } -PassThru
+                                Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{ } } -PassThru
                             Policies                = $policies
                             Properties              = @{ }
                         }
@@ -1370,7 +1372,7 @@ try
                             Url                     = $testParams.WebAppUrl
                             UseClaimsAuthentication = $true
                             PolicyRoles             = New-Object -TypeName "Object" |
-                            Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{ } } -PassThru
+                                Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{ } } -PassThru
                             Policies                = $policies
                             Properties              = @{ }
                         }
@@ -1444,7 +1446,7 @@ try
                             Url                     = $testParams.WebAppUrl
                             UseClaimsAuthentication = $true
                             PolicyRoles             = New-Object -TypeName "Object" |
-                            Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{ } } -PassThru
+                                Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{ } } -PassThru
                             Policies                = $policies
                             Properties              = @{ }
                         }
@@ -1503,7 +1505,7 @@ try
                             Url                     = $testParams.WebAppUrl
                             UseClaimsAuthentication = $true
                             PolicyRoles             = New-Object -TypeName "Object" |
-                            Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{ } } -PassThru
+                                Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{ } } -PassThru
                             Policies                = $policies
                             Properties              = @{ }
                         }
@@ -1553,7 +1555,7 @@ try
                             Url                     = $testParams.WebAppUrl
                             UseClaimsAuthentication = $true
                             PolicyRoles             = New-Object -TypeName "Object" |
-                            Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{ } } -PassThru
+                                Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{ } } -PassThru
                             Policies                = $policies
                             Properties              = @{ }
                         }
@@ -1602,7 +1604,7 @@ try
                             Url                     = $testParams.WebAppUrl
                             UseClaimsAuthentication = $true
                             PolicyRoles             = New-Object -TypeName "Object" |
-                            Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{ } } -PassThru
+                                Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{ } } -PassThru
                             Policies                = $policies
                             Properties              = @{ }
                         }
@@ -1649,7 +1651,7 @@ try
                             Url                     = $testParams.WebAppUrl
                             UseClaimsAuthentication = $true
                             PolicyRoles             = New-Object -TypeName "Object" |
-                            Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{ } } -PassThru
+                                Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{ } } -PassThru
                             Policies                = $policies
                             Properties              = @{ }
                         }
@@ -1699,7 +1701,7 @@ try
                             Url                     = $testParams.WebAppUrl
                             UseClaimsAuthentication = $true
                             PolicyRoles             = New-Object -TypeName "Object" |
-                            Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{ } } -PassThru
+                                Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{ } } -PassThru
                             Policies                = $policies
                             Properties              = @{ }
                         }
@@ -1716,6 +1718,70 @@ try
 
                 It "Should return false from the test method" {
                     Test-TargetResource @testParams | Should -Be $true
+                }
+            }
+
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Mock -CommandName Write-Host -MockWith { }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            WebAppUrl              = "http://sharepoint.contoso.com"
+                            Members                = @(
+                                @{
+                                    Username           = "contoso\user1"
+                                    PermissionLevel    = "Full Control"
+                                    ActAsSystemAccount = $true
+                                }
+                                @{
+                                    Username        = "contoso\Group 1"
+                                    PermissionLevel = "Full Read"
+                                    IdentityType    = "Claims"
+                                }
+                            )
+                            SetCacheAccountsPolicy = $false
+                        }
+                    }
+
+                    Mock -CommandName Get-SPWebApplication -MockWith {
+                        $spWebApp = [PSCustomObject]@{
+                            Name = "SharePoint Sites"
+                            Url  = "https://intranet.sharepoint.contoso.com"
+                        }
+                        return $spWebApp
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
+
+                    $result = @'
+        SPWebAppPolicy [0-9A-Fa-f]{8}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{12}
+        {
+            Members                = \@\(
+                MSFT_SPWebPolicyPermissions {
+                    Username = 'contoso\\user1'
+                    PermissionLevel = 'Full Control'
+                    ActAsSystemAccount = \$True
+                },
+                MSFT_SPWebPolicyPermissions {
+                    Username = 'contoso\\Group 1'
+                    PermissionLevel = 'Full Read'
+                    IdentityType = 'Claims'
+                }\);
+            PsDscRunAsCredential   = \$Credsspfarm;
+            SetCacheAccountsPolicy = \$False;
+            WebAppUrl              = "http://sharepoint.contoso.com";
+        }
+
+'@
+                }
+
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource | Should -Match $result
                 }
             }
         }

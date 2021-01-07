@@ -1,4 +1,5 @@
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param
 (
     [Parameter()]
@@ -49,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
                 $getTypeFullName = "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
@@ -62,16 +63,16 @@ try
                 Mock -CommandName Get-SPServiceApplication -MockWith {
                     return @(
                         New-Object -TypeName "Object" |
-                        Add-Member -MemberType ScriptMethod `
-                            -Name GetType `
-                            -Value {
-                            New-Object -TypeName "Object" |
-                            Add-Member -MemberType NoteProperty `
-                                -Name FullName `
-                                -Value $getTypeFullName `
-                                -PassThru
-                        } `
-                            -PassThru -Force)
+                            Add-Member -MemberType ScriptMethod `
+                                -Name GetType `
+                                -Value {
+                                New-Object -TypeName "Object" |
+                                    Add-Member -MemberType NoteProperty `
+                                        -Name FullName `
+                                        -Value $getTypeFullName `
+                                        -PassThru
+                                } `
+                                    -PassThru -Force)
                 }
 
                 function Add-SPDscEvent
@@ -354,7 +355,8 @@ try
                         Ensure                  = "Present"
                     }
 
-                    Mock -CommandName Get-SPEnterpriseSearchCrawlRule -MockWith { return @{
+                    Mock -CommandName Get-SPEnterpriseSearchCrawlRule -MockWith {
+                        return @{
                             Path               = "http://www.contoso.com"
                             Type               = "InclusionRule"
                             SuppressIndexing   = $false
@@ -377,6 +379,70 @@ try
                     Set-TargetResource @testParams
 
                     Assert-MockCalled Set-SPEnterpriseSearchCrawlRule
+                }
+            }
+
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Mock -CommandName Write-Host -MockWith { }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            Path                    = "https://intranet.sharepoint.contoso.com"
+                            ServiceAppName          = "Search Service Application"
+                            Ensure                  = "Present"
+                            RuleType                = "InclusionRule"
+                            CrawlConfigurationRules = "FollowLinksNoPageCrawl", "CrawlComplexUrls", "CrawlAsHTTP"
+                            AuthenticationType      = "DefaultRuleAccess"
+                        }
+                    }
+
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        $spServiceApp = [PSCustomObject]@{
+                            DisplayName = "Search Service Application"
+                            Name        = "Search Service Application"
+                        }
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                            -Name GetType `
+                            -Value {
+                            return @{
+                                FullName = "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
+                            }
+                        } -PassThru -Force
+                        return $spServiceApp
+                    }
+
+                    Mock -CommandName Get-SPEnterpriseSearchCrawlRule -MockWith {
+                        return @(
+                            @{
+                                Path = "https://intranet.sharepoint.contoso.com"
+                            }
+                        )
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
+
+                    $result = @'
+        SPSearchCrawlRule [0-9A-Fa-f]{8}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{12}
+        {
+            AuthenticationType      = "DefaultRuleAccess";
+            CrawlConfigurationRules = \@\("FollowLinksNoPageCrawl","CrawlComplexUrls","CrawlAsHTTP"\);
+            Ensure                  = "Present";
+            Path                    = "https://intranet.sharepoint.contoso.com";
+            PsDscRunAsCredential    = \$Credsspfarm;
+            RuleType                = "InclusionRule";
+            ServiceAppName          = "Search Service Application";
+        }
+
+'@
+                }
+
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource | Should -Match $result
                 }
             }
         }

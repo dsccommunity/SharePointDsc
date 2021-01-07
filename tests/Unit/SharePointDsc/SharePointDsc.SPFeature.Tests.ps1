@@ -1,4 +1,5 @@
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param(
     [Parameter()]
     [string]
@@ -48,7 +49,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Mocks for all contexts
                 Mock -CommandName Enable-SPFeature -MockWith { }
@@ -250,6 +251,57 @@ try
                     Set-TargetResource @testParams
                     Assert-MockCalled Disable-SPFeature
                     Assert-MockCalled Enable-SPFeature
+                }
+            }
+
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Mock -CommandName Write-Host -MockWith { }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            Name         = "Feature 1"
+                            FeatureScope = "Farm"
+                            Url          = "http://ca.contoso.com"
+                            Version      = "1.0.0.0"
+                            Ensure       = "Present"
+                        }
+                    }
+
+                    $spMajorVersion = (Get-SPDscInstalledProductVersion).FileMajorPart
+
+                    Mock -CommandName Get-SPFeature -MockWith {
+                        $spFeature = [PSCustomObject]@{
+                            DisplayName = "Feature 1"
+                            Scope       = "Farm"
+                            Version     = $spMajorVersion.ToString()
+                        }
+                        return $spFeature
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
+
+                    $result = @'
+        SPFeature [0-9A-Fa-f]{8}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{12}
+        {
+            DependsOn            = "\[SPFarm\]FarmConfig";
+            Ensure               = "Present";
+            FeatureScope         = "Farm";
+            Name                 = "Feature 1";
+            PsDscRunAsCredential = \$Credsspfarm;
+            Url                  = "http://ca.contoso.com";
+            Version              = "1.0.0.0";
+        }
+
+'@
+                }
+
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource -Scope 'Farm' -DependsOn "[SPFarm]FarmConfig" | Should -Match $result
                 }
             }
         }

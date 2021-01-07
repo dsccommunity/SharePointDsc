@@ -86,7 +86,7 @@ function Get-TargetResource
 
         $source = Get-SPEnterpriseSearchCrawlContentSource -SearchApplication $params.ServiceAppName `
             -ErrorAction SilentlyContinue | `
-            Where-Object { $_.Name -eq $params.Name }
+                Where-Object { $_.Name -eq $params.Name }
         if ($null -eq $source)
         {
             return @{
@@ -460,7 +460,7 @@ function Set-TargetResource
 
             $source = Get-SPEnterpriseSearchCrawlContentSource -SearchApplication $params.ServiceAppName `
                 -ErrorAction SilentlyContinue | `
-                Where-Object { $_.Name -eq $params.Name }
+                    Where-Object { $_.Name -eq $params.Name }
 
             if ($null -eq $source)
             {
@@ -546,18 +546,18 @@ function Set-TargetResource
                         "stopping current crawls to allow settings to be updated")
 
                 $source = Get-SPEnterpriseSearchCrawlContentSource -SearchApplication $params.ServiceAppName | `
-                    Where-Object { $_.Name -eq $params.Name }
+                        Where-Object { $_.Name -eq $params.Name }
 
                 $source.StopCrawl()
                 $loopCount = 0
 
                 $sourceToWait = Get-SPEnterpriseSearchCrawlContentSource -SearchApplication $params.ServiceAppName | `
-                    Where-Object { $_.Name -eq $params.Name }
+                        Where-Object { $_.Name -eq $params.Name }
 
                 while ($sourceToWait.CrawlStatus -ne "Idle" -and $loopCount -lt 15)
                 {
                     $sourceToWait = Get-SPEnterpriseSearchCrawlContentSource -SearchApplication $params.ServiceAppName | `
-                        Where-Object { $_.Name -eq $params.Name }
+                            Where-Object { $_.Name -eq $params.Name }
 
                     Write-Verbose -Message ("$([DateTime]::Now.ToShortTimeString()) - Waiting " + `
                             "for content source '$($params.Name)' to be idle " + `
@@ -1111,7 +1111,9 @@ function Export-TargetResource
             $params.Name = $csName
             $params.ServiceAppName = $searchSAName
 
-            if (!$source.Type -eq "CustomRepository")
+            $partialContent = ""
+
+            if ($contentSource.Type -ne "CustomRepository")
             {
                 $results = Get-TargetResource @params
                 $partialContent = "        SPSearchContentSource " + $contentSource.Name.Replace(" ", "") + $sscsGuid + "`r`n"

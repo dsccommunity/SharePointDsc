@@ -324,9 +324,9 @@ function Set-TargetResource
                 {
                     Write-Verbose -Message "Setting SearchCenterUrl to $($params.SearchCenterUrl)"
                     $serviceApp = Get-SPServiceApplication -Name $params.Name | `
-                        Where-Object -FilterScript {
-                        $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
-                    }
+                            Where-Object -FilterScript {
+                            $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
+                        }
                     $serviceApp.SearchCenterUrl = $params.SearchCenterUrl
                     $serviceApp.Update()
                 }
@@ -335,9 +335,9 @@ function Set-TargetResource
                 {
                     Write-Verbose -Message "Setting AlertsEnabled to $($params.AlertsEnabled)"
                     $serviceApp = Get-SPServiceApplication -Name $params.Name | `
-                        Where-Object -FilterScript {
-                        $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
-                    }
+                            Where-Object -FilterScript {
+                            $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
+                        }
                     $serviceApp.AlertsEnabled = $params.AlertsEnabled
                     $serviceApp.Update()
                 }
@@ -356,9 +356,9 @@ function Set-TargetResource
             $result = $args[1]
 
             $serviceApp = Get-SPServiceApplication -Name $params.Name | `
-                Where-Object -FilterScript {
-                $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
-            }
+                    Where-Object -FilterScript {
+                    $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
+                }
 
             if ($null -eq $params.ProxyName)
             {
@@ -420,9 +420,9 @@ function Set-TargetResource
             {
                 Write-Verbose -Message "Updating SearchCenterUrl to $($params.SearchCenterUrl)"
                 $serviceApp = Get-SPServiceApplication -Name $params.Name | `
-                    Where-Object -FilterScript {
-                    $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
-                }
+                        Where-Object -FilterScript {
+                        $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
+                    }
                 $serviceApp.SearchCenterUrl = $params.SearchCenterUrl
                 $serviceApp.Update()
             }
@@ -432,9 +432,9 @@ function Set-TargetResource
             {
                 Write-Verbose -Message "Updating AlertsEnabled to $($params.AlertsEnabled)"
                 $serviceApp = Get-SPServiceApplication -Name $params.Name | `
-                    Where-Object -FilterScript {
-                    $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
-                }
+                        Where-Object -FilterScript {
+                        $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
+                    }
                 $serviceApp.AlertsEnabled = $params.AlertsEnabled
                 $serviceApp.Update()
             }
@@ -620,22 +620,13 @@ function Export-TargetResource
                     $results.Remove("InstallAccount")
                 }
 
-                if ($null -eq $results.WindowsServiceAccount)
-                {
-                    $results.Remove("WindowsServiceAccount")
-                }
-
                 if ($null -eq $results.SearchCenterUrl)
                 {
                     $results.Remove("SearchCenterUrl")
                 }
 
                 Save-Credentials -UserName $results["DefaultContentAccessAccount"].Username
-                $Results["DefaultContentAccessAccount"] = Resolve-Credentials -UserName $results["DefaultContentAccessAccount"].Username
-
-                <# Nik20170111 - Fix a bug in 1.5.0.0 where DatabaseName and DatabaseServer is not properly returned #>
-                $results["DatabaseName"] = $searchSAInstance.SearchAdminDatabase.Name
-                $results["DatabaseServer"] = $searchSAInstance.SearchAdminDatabase.Server.Name
+                $results["DefaultContentAccessAccount"] = Resolve-Credentials -UserName $results["DefaultContentAccessAccount"].Username
 
                 $results = Repair-Credentials -results $results
 

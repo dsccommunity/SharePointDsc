@@ -1,4 +1,5 @@
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param
 (
     [Parameter()]
@@ -49,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 $mockSiteId = [Guid]::NewGuid()
 
@@ -263,6 +264,68 @@ try
                     ("This resource must be run as the farm account (not a setup account). " + `
                             "Please ensure either the PsDscRunAsCredential or InstallAccount " + `
                             "credentials are set to the farm account and run this resource again")
+                }
+            }
+
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Mock -CommandName Write-Host -MockWith { }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            SiteUrl = "http://sharepoint.contoso.com/sites/appcatalog"
+                        }
+                    }
+
+                    Mock -CommandName Get-SPWebApplication -MockWith {
+                        $features = @( @{ } ) | Add-Member -MemberType ScriptMethod `
+                            -Name "Item" `
+                            -Value {
+                            return @{
+                                ID         = [guid]::NewGuid()
+                                Properties = @{
+                                    "__AppCatSiteId" = @{Value = 'd358a282-1178-4d8e-906f-1fae1603231a' }
+                                }
+                            }
+                        } `
+                            -PassThru `
+                            -Force
+
+                        return @{
+                            DisplayName = "SharePoint Web Application"
+                            Name        = "SharePoint Web Application"
+                            Features    = $features
+                            Sites       = @(
+                                @{
+                                    Id  = 'd358a282-1178-4d8e-906f-1fae1603231a'
+                                    Url = 'http://sharepoint.contoso.com/sites/appcatalog'
+                                },
+                                @{
+                                    Id  = 'abcda282-1178-4d8e-906f-1fae16031234'
+                                    Url = 'http://sharepoint.contoso.com/sites/appcatalog'
+                                }
+                            )
+                        }
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
+
+                    $result = @'
+        SPAppCatalog [0-9A-Fa-f]{8}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{12}
+        {
+            PsDscRunAsCredential = \$Credsspfarm;
+            SiteUrl              = "http://sharepoint.contoso.com/sites/appcatalog";
+        }
+
+'@
+                }
+
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource | Should -Match $result
                 }
             }
         }

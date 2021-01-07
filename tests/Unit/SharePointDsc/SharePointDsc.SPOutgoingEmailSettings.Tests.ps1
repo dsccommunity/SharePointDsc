@@ -1,4 +1,5 @@
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param
 (
     [Parameter()]
@@ -49,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 function Add-SPDscEvent
                 {
@@ -356,6 +357,49 @@ try
                         Set-TargetResource @testParams
                         $Global:SPDscUpdateMailSettingsCalled | Should -Be $true
                     }
+                }
+            }
+
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Mock -CommandName Write-Host -MockWith { }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            WebAppUrl      = "http://sharepoint1:2013"
+                            SMTPServer     = "smtp.contoso.com"
+                            FromAddress    = "sharepoint@contoso.com"
+                            ReplyToAddress = "noreply@contoso.com"
+                            CharacterSet   = "65001"
+                            UseTLS         = $false
+                            SMTPPort       = 25
+                        }
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
+
+                    $result = @'
+        SPOutgoingEmailSettings [0-9A-Fa-f]{8}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{12}
+        {
+            CharacterSet         = "65001";
+            FromAddress          = "sharepoint\@contoso.com";
+            PsDscRunAsCredential = \$Credsspfarm;
+            ReplyToAddress       = "noreply\@contoso.com";
+            SMTPPort             = 25;
+            SMTPServer           = "smtp.contoso.com";
+            UseTLS               = \$False;
+            WebAppUrl            = "http://sharepoint1:2013";
+        }
+
+'@
+                }
+
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource -WebAppUrl "http://sharepoint1:2013" | Should -Match $result
                 }
             }
         }

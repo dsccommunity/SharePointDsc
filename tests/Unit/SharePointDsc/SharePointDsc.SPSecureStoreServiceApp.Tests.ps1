@@ -158,7 +158,9 @@ try
 
                 It "Should create a new service application in the set method" {
                     Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
-                        return @{ Name = "$($testParams.Name) Proxy" }
+                        return @{
+                            Name = "$($testParams.Name) Proxy"
+                        }
                     }
 
                     Set-TargetResource @testParams
@@ -237,8 +239,9 @@ try
                                         Add-Member -MemberType ScriptMethod `
                                             -Name GetValue `
                                             -Value {
-                                            param($x)
-                                            return (@{
+                                            param ($x)
+                                            return (
+                                                @{
                                                     FullName             = $getTypeFullName
                                                     Name                 = "Database"
                                                     NormalizedDataSource = "DBServer"
@@ -248,7 +251,8 @@ try
                                                     FailoverServer       = @{
                                                         Name = "DBServer_Failover"
                                                     }
-                                                })
+                                                }
+                                            )
                                         } -PassThru
                                     ),
                                     (New-Object -TypeName "Object" |
@@ -317,7 +321,8 @@ try
                                             -Name GetValue `
                                             -Value {
                                             param($x)
-                                            return (@{
+                                            return (
+                                                @{
                                                     FullName             = $getTypeFullName
                                                     Name                 = "Database"
                                                     NormalizedDataSource = "DBServer"
@@ -327,7 +332,8 @@ try
                                                     FailoverServer       = @{
                                                         Name = "DBServer_Failover"
                                                     }
-                                                })
+                                                }
+                                            )
                                         } -PassThru
                                     ),
                                     (New-Object -TypeName "Object" |
@@ -448,7 +454,8 @@ try
                                             -Name GetValue `
                                             -Value {
                                             param($x)
-                                            return (@{
+                                            return (
+                                                @{
                                                     FullName             = $getTypeFullName
                                                     Name                 = "Database"
                                                     NormalizedDataSource = "DBServer"
@@ -458,7 +465,8 @@ try
                                                     FailoverServer       = @{
                                                         Name = "DBServer_Failover"
                                                     }
-                                                })
+                                                }
+                                            )
                                         } -PassThru
                                     ),
                                     (New-Object -TypeName "Object" |
@@ -533,7 +541,8 @@ try
                                             -Name GetValue `
                                             -Value {
                                             param($x)
-                                            return (@{
+                                            return (
+                                                @{
                                                     FullName             = $getTypeFullName
                                                     Name                 = "Wrong Database"
                                                     NormalizedDataSource = "DBServer"
@@ -543,7 +552,8 @@ try
                                                     FailoverServer       = @{
                                                         Name = "DBServer_Failover"
                                                     }
-                                                })
+                                                }
+                                            )
                                         } -PassThru
                                     ),
                                     (New-Object -TypeName "Object" |
@@ -621,7 +631,8 @@ try
                                             -Name GetValue `
                                             -Value {
                                             param($x)
-                                            return (@{
+                                            return (
+                                                @{
                                                     FullName             = $getTypeFullName
                                                     Name                 = "SecureStoreDB"
                                                     NormalizedDataSource = "Wrong DBServer"
@@ -631,7 +642,8 @@ try
                                                     FailoverServer       = @{
                                                         Name = "DBServer_Failover"
                                                     }
-                                                })
+                                                }
+                                            )
                                         } -PassThru
                                     ),
                                     (New-Object -TypeName "Object" |
@@ -691,6 +703,66 @@ try
 
                 It "Should return false from the test method" {
                     Test-TargetResource @testParams | Should -Be $true
+                }
+            }
+
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Mock -CommandName Write-Host -MockWith { }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            Name            = "Secure Store Service Application"
+                            ProxyName       = "Secure Store Service Application Proxy"
+                            DatabaseName    = "SP_SecureStore"
+                            DatabaseServer  = "SQL01"
+                            ApplicationPool = "Service App Pool"
+                            AuditingEnabled = $true
+                            AuditlogMaxSize = 30
+                            Ensure          = "Present"
+                        }
+                    }
+
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        $spServiceApp = [PSCustomObject]@{
+                            DisplayName     = "Secure Store Service Application"
+                            Name            = "Secure Store Service Application"
+                        }
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                            -Name GetType `
+                            -Value {
+                            return @{
+                                Name = "SecureStoreServiceApplication"
+                            }
+                        } -PassThru -Force
+                        return $spServiceApp
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
+
+                    $result = @'
+        SPSecureStoreServiceApp SecureStoreServiceApplication
+        {
+            ApplicationPool      = "Service App Pool";
+            AuditingEnabled      = $True;
+            AuditlogMaxSize      = 30;
+            DatabaseName         = "SP_SecureStore";
+            DatabaseServer       = $ConfigurationData.NonNodeData.DatabaseServer;
+            Ensure               = "Present";
+            Name                 = "Secure Store Service Application";
+            ProxyName            = "Secure Store Service Application Proxy";
+            PsDscRunAsCredential = $Credsspfarm;
+        }
+
+'@
+                }
+
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource | Should -Be $result
                 }
             }
         }

@@ -50,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
                 $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
@@ -213,6 +213,53 @@ try
 
                 It "Should return false from the test method" {
                     Test-TargetResource @testParams | Should -Be $true
+                }
+            }
+
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Mock -CommandName Write-Host -MockWith { }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            Name           = "State Service Application"
+                            ProxyName      = "State Service Application Proxy"
+                            DatabaseName   = "SP_State"
+                            DatabaseServer = "SQL01"
+                            Ensure         = "Present"
+                        }
+                    }
+
+                    Mock -CommandName Get-SPStateServiceApplication -MockWith {
+                        $spServiceApp = [PSCustomObject]@{
+                            DisplayName = "State Service Application"
+                            Name        = "State Service Application"
+                        }
+                        return $spServiceApp
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
+
+                    $result = @'
+        SPStateServiceApp StateServiceApplication
+        {
+            DatabaseName         = "SP_State";
+            DatabaseServer       = $ConfigurationData.NonNodeData.DatabaseServer;
+            Ensure               = "Present";
+            Name                 = "State Service Application";
+            ProxyName            = "State Service Application Proxy";
+            PsDscRunAsCredential = $Credsspfarm;
+        }
+
+'@
+                }
+
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource | Should -Be $result
                 }
             }
         }

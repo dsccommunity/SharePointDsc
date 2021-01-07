@@ -1,4 +1,5 @@
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param
 (
     [Parameter()]
@@ -49,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
 
@@ -226,7 +227,8 @@ try
                                     Port       = 80
                                 }
                                 AllowAnonymous = $false
-                            })
+                            }
+                        )
 
                         return (
                             @{
@@ -631,6 +633,75 @@ try
 
                 It "Should return true from the test method" {
                     Test-TargetResource @testParams | Should -Be $true
+                }
+            }
+
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Mock -CommandName Write-Host -MockWith { }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            WebAppUrl      = "http://example.contoso.local"
+                            Name           = "Contoso Intranet Zone"
+                            AllowAnonymous = $false
+                            Url            = "http://intranet.contoso.local"
+                            Zone           = "Intranet"
+                            HostHeader     = "intranet.contoso.local"
+                            Path           = "c:\inetpub\wwwroot\wss\VirtualDirectories\intranet"
+                            UseSSL         = $false
+                            Port           = 80
+                            Ensure         = "Present"
+                        }
+                    }
+
+                    Mock -CommandName Get-SPWebApplication -MockWith {
+                        $IISSettings = @{
+                            Intranet = @{
+                                SecureBindings = @{ }
+                                ServerBindings = @{
+                                    HostHeader = "intranet.contoso.local"
+                                    Port       = 80
+                                }
+                            }
+                        }
+
+                        return @(
+                            @{
+                                DisplayName = "Company SharePoint"
+                                URL         = "http://example.contoso.local"
+                                IISSettings = $IISSettings
+                            }
+                        )
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
+
+                    $result = @'
+        SPWebApplicationExtension [0-9A-Fa-f]{8}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{12}
+        {
+            AllowAnonymous       = \$False;
+            Ensure               = "Present";
+            HostHeader           = "intranet.contoso.local";
+            Name                 = "Contoso Intranet Zone";
+            Path                 = "c:\\inetpub\\wwwroot\\wss\\VirtualDirectories\\intranet";
+            Port                 = 80;
+            PsDscRunAsCredential = \$Credsspfarm;
+            Url                  = "http://intranet.contoso.local";
+            UseSSL               = \$False;
+            WebAppUrl            = "http://example.contoso.local";
+            Zone                 = "Intranet";
+        }
+
+'@
+                }
+
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource | Should -Match $result
                 }
             }
         }

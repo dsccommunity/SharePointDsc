@@ -30,7 +30,6 @@ function Get-TargetResource
             return  @{
                 WebAppUrl            = $null
                 ServiceAppProxyGroup = $null
-                InstallAccount       = $InstallAccount
             }
         }
 
@@ -46,7 +45,6 @@ function Get-TargetResource
         return @{
             WebAppUrl            = $params.WebAppUrl
             ServiceAppProxyGroup = $ServiceAppProxyGroup
-            InstallAccount       = $InstallAccount
         }
     }
 

@@ -50,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
                 $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
@@ -276,6 +276,59 @@ try
 
                 It "Should return true from the test method" {
                     Test-TargetResource @testParams | Should -Be $true
+                }
+            }
+
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Mock -CommandName Write-Host -MockWith { }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            AccountName       = $mockCredential.UserName
+                            EmailNotification = 10
+                            PreExpireDays     = 5
+                            Schedule          = "monthly between 7 02:00:00 and 7 03:00:00"
+                            Account           = $mockCredential
+                            Ensure            = "Present"
+                        }
+                    }
+
+                    Mock -CommandName Get-SPManagedAccount -MockWith {
+                        $spManagedAccounts = @(
+                            [PSCustomObject]@{
+                                UserName                 = $mockCredential.UserName
+                                ChangeSchedule           = "monthly between 7 02:00:00 and 7 03:00:00"
+                                DaysBeforeExpiryToChange = 5
+                                DaysBeforeChangeToEmail  = 10
+                            }
+                        )
+                        return $spManagedAccounts
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
+
+                    $result = @'
+        SPManagedAccount [0-9A-Fa-f]{8}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{12}
+        {
+            Account              = \$Credsusername;
+            AccountName          = \$Credsusername.UserName;
+            EmailNotification    = 10;
+            Ensure               = "Present";
+            PreExpireDays        = 5;
+            PsDscRunAsCredential = \$Credsspfarm;
+            Schedule             = "monthly between 7 02:00:00 and 7 03:00:00";
+        }
+
+'@
+                }
+
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource | Should -Match $result
                 }
             }
         }

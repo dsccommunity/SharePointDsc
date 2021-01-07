@@ -1,4 +1,5 @@
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param
 (
     [Parameter()]
@@ -49,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
                 $mockPassword = ConvertTo-SecureString -String 'password' -AsPlainText -Force
@@ -2760,6 +2761,100 @@ try
 
                 It "Should return true from the test method" {
                     Test-TargetResource @testParams | Should -Be $true
+                }
+            }
+
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Mock -CommandName Write-Host -MockWith { }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            IsSingleInstance          = "Yes"
+                            FarmConfigDatabaseName    = "SP_Config"
+                            DatabaseServer            = "SQL01"
+                            FarmAccount               = "domain\spfarm"
+                            Passphrase                = $null
+                            AdminContentDatabaseName  = "SP_AdminContent"
+                            RunCentralAdmin           = $true
+                            CentralAdministrationUrl  = "http://ca.contoso.com"
+                            CentralAdministrationPort = 80
+                            CentralAdministrationAuth = "NTLM"
+                            DeveloperDashboard        = "On"
+                            ApplicationCredentialKey  = $null
+                            Ensure                    = "Present"
+                            ServerRole                = "WebFrontEnd"
+                        }
+                    }
+
+                    Mock -CommandName Get-SPWebApplication -MockWith {
+                        $spWebApp = [PSCustomObject]@{
+                            DisplayName = "SharePoint Central Administration v4"
+                            IisSettings = @(
+                                @{
+                                    DisableKerberos = $true
+                                    ServerBindings  = @{
+                                        Port = 80
+                                    }
+                                }
+                            )
+                        }
+                        return $spWebApp
+                    }
+
+                    Mock -CommandName Get-SPDatabase -MockWith {
+                        $spServiceApp = [PSCustomObject]@{
+                            NormalizedDataSource = "SQL01"
+                        }
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                            -Name GetType `
+                            -Value {
+                            return @{
+                                Name = "SPConfigurationDatabase"
+                            }
+                        } -PassThru -Force
+                        return $spServiceApp
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'StandAlone' -ErrorAction SilentlyContinue))
+                    {
+                        $StandAlone = $true
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'ExtractionModeValue' -ErrorAction SilentlyContinue))
+                    {
+                        $Global:ExtractionModeValue = 2
+                        $Global:ComponentsToExtract = @('SPFarm')
+                    }
+
+                    $result = @'
+        SPFarm [0-9A-Fa-f]{8}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{12}
+        {
+            Passphrase = New-Object System.Management.Automation.PSCredential \('Passphrase', \(ConvertTo-SecureString -String \$ConfigurationData.NonNodeData.PassPhrase -AsPlainText -Force\)\);
+            AdminContentDatabaseName  = "SP_AdminContent";
+            CentralAdministrationAuth = "NTLM";
+            CentralAdministrationPort = 80;
+            DatabaseServer            = \$ConfigurationData.NonNodeData.DatabaseServer;
+            DeveloperDashboard        = "On";
+            Ensure                    = "Present";
+            FarmAccount               = \$Credsspfarm;
+            FarmConfigDatabaseName    = "SP_Config";
+            IsSingleInstance          = "Yes";
+            PsDscRunAsCredential      = \$Credsspfarm;
+            RunCentralAdmin           = \$True;
+        }
+
+'@
+                }
+
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource | Should -Match $result
                 }
             }
         }

@@ -1,4 +1,5 @@
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param
 (
     [Parameter()]
@@ -49,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 $testParams = @{
                     Name               = "PersonalInformation"
@@ -59,7 +60,8 @@ try
                 }
 
                 try
-                { [Microsoft.Office.Server.UserProfiles]
+                {
+                    [Microsoft.Office.Server.UserProfiles]
                 }
                 catch
                 {
@@ -143,9 +145,12 @@ try
                         } | Add-Member -MemberType ScriptMethod GetPropertiesWithSection {
                             $Global:UpsConfigManagerGetPropertiesWithSectionCalled = $true;
 
-                            $result = (@{ } | Add-Member -MemberType ScriptMethod Create {
+                            $result = (
+                                @{
+                                    IsSection = $true
+                                    Name      = 'DemoSection'
+                                } | Add-Member -MemberType ScriptMethod Create {
                                     param ($section)
-
 
                                     $result = @{Name = ""
                                         DisplayName  = ""
@@ -173,7 +178,6 @@ try
                                     $Global:UpsConfigManagerRemoveSectionByNameCalled = $true;
                                     return ($coreProperties);
                                 } -PassThru
-
                             )
                             return $result
 
@@ -321,6 +325,63 @@ try
                     Assert-MockCalled Set-SPDscObjectPropertyIfValuePresent
                     $Global:SPUPSubTypeCreateCalled | Should -Be $false
                     $Global:UpsConfigManagerSetDisplayOrderBySectionNameCalled | Should -Be $true
+                }
+            }
+
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Mock -CommandName Write-Host -MockWith { }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            Name               = "PersonalInformationSection"
+                            UserProfileService = "User Profile Service Application"
+                            DisplayName        = "Personal Information"
+                            DisplayOrder       = 5000
+                            Ensure             = "Present"
+                        }
+                    }
+
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        $spServiceApp = [PSCustomObject]@{
+                            TypeName    = "User Profile Service Application"
+                            DisplayName = "User Profile Service Application"
+                            Name        = "User Profile Service Application"
+                        }
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                            -Name GetType `
+                            -Value {
+                            return @{
+                                Name = 'UserProfileApplication'
+                            }
+                        } -PassThru -Force
+                        return $spServiceApp
+                    }
+
+                    Mock -CommandName Get-SPServiceContext -MockWith { return "" }
+
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
+
+                    $result = @'
+        SPUserProfileSection [0-9A-Fa-f]{8}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{12}
+        {
+            DisplayName          = "Personal Information";
+            DisplayOrder         = 5000;
+            Ensure               = "Present";
+            Name                 = "PersonalInformationSection";
+            PsDscRunAsCredential = \$Credsspfarm;
+            UserProfileService   = "User Profile Service Application";
+        }
+
+'@
+                }
+
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource | Should -Match $result
                 }
             }
         }

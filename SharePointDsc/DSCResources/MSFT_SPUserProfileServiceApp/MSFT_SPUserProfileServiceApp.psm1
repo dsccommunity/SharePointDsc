@@ -807,7 +807,7 @@ function Export-TargetResource
         Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction 0
     }
     $VerbosePreference = "SilentlyContinue"
-    if ($null -ne $modulePath)
+    if ([System.String]::IsNullOrEmpty($modulePath) -eq $false)
     {
         $module = Resolve-Path $modulePath
     }
@@ -850,11 +850,13 @@ function Export-TargetResource
             {
                 try
                 {
+                    $PartialContent = ''
+
                     $serviceName = $upsInstance.DisplayName
                     Write-Host "Scanning User Profile Service Application [$i/$total] {$serviceName}"
 
                     $params.Name = $serviceName
-                    $currentBlock = "        SPUserProfileServiceApp " + [System.Guid]::NewGuid().toString() + "`r`n"
+                    $currentBlock = "        SPUserProfileServiceApp " + ($serviceName -replace " ", "") + "`r`n"
                     $currentBlock += "        {`r`n"
 
                     if ($null -eq $params.InstallAccount)

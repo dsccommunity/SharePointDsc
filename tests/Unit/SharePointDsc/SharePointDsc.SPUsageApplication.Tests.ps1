@@ -50,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
                 $getTypeFullName = "Microsoft.SharePoint.Administration.SPUsageApplication"
@@ -74,16 +74,16 @@ try
                 Mock -CommandName Remove-SPServiceApplication -MockWith { }
                 Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
                     return (New-Object -TypeName "Object" |
-                        Add-Member -MemberType ScriptMethod `
-                            -Name Provision `
-                            -Value { } `
-                            -PassThru |
-                        Add-Member -NotePropertyName Status `
-                            -NotePropertyValue "Online" `
-                            -PassThru |
-                        Add-Member -NotePropertyName TypeName `
-                            -NotePropertyValue "Usage and Health Data Collection Proxy" `
-                            -PassThru)
+                            Add-Member -MemberType ScriptMethod `
+                                -Name Provision `
+                                -Value { } `
+                                -PassThru |
+                                Add-Member -NotePropertyName Status `
+                                    -NotePropertyValue "Online" `
+                                    -PassThru |
+                                    Add-Member -NotePropertyName TypeName `
+                                        -NotePropertyValue "Usage and Health Data Collection Proxy" `
+                                        -PassThru)
                 }
             }
 
@@ -382,17 +382,17 @@ try
 
                     Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
                         $proxy = (New-Object -TypeName "Object" |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name Provision `
-                                -Value {
-                                $Global:SPDscUSageAppProxyStarted = $true
-                            } -PassThru |
-                            Add-Member -NotePropertyName Status `
-                                -NotePropertyValue "Disabled" `
-                                -PassThru |
-                            Add-Member -NotePropertyName TypeName `
-                                -NotePropertyValue "Usage and Health Data Collection Proxy" `
-                                -PassThru)
+                                Add-Member -MemberType ScriptMethod `
+                                    -Name Provision `
+                                    -Value {
+                                    $Global:SPDscUSageAppProxyStarted = $true
+                                } -PassThru |
+                                    Add-Member -NotePropertyName Status `
+                                        -NotePropertyValue "Disabled" `
+                                        -PassThru |
+                                        Add-Member -NotePropertyName TypeName `
+                                            -NotePropertyValue "Usage and Health Data Collection Proxy" `
+                                            -PassThru)
                         $proxy = $proxy | Add-Member -MemberType ScriptMethod -Name GetType -Value {
                             return @{ FullName = $getTypeFullNameProxy }
                         } -PassThru -Force
@@ -412,6 +412,62 @@ try
                     $Global:SPDscUSageAppProxyStarted = $false
                     Set-TargetResource @testParams
                     $Global:SPDscUSageAppProxyStarted | Should -Be $true
+                }
+            }
+
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Mock -CommandName Write-Host -MockWith { }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            Name                  = "Usage Service Application"
+                            DatabaseName          = "SP_Usage"
+                            DatabaseServer        = "SQL01"
+                            UsageLogCutTime       = 5
+                            UsageLogLocation      = "L:\UsageLogs"
+                            UsageLogMaxFileSizeKB = 1024
+                            UsageLogMaxSpaceGB    = 5
+                            Ensure                = "Present"
+                        }
+                    }
+
+                    Mock -CommandName Get-SPUsageApplication -MockWith {
+                        $spServiceApp = @(
+                            @{
+                                TypeName    = "Usage Service Application"
+                                DisplayName = "Usage Service Application"
+                                Name        = "Usage Service Application"
+                            }
+                        )
+                        return $spServiceApp
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
+
+                    $result = @'
+        SPUsageApplication UsageServiceApplication
+        {
+            DatabaseName          = "SP_Usage";
+            DatabaseServer        = $ConfigurationData.NonNodeData.DatabaseServer;
+            Ensure                = "Present";
+            Name                  = "Usage Service Application";
+            PsDscRunAsCredential  = $Credsspfarm;
+            UsageLogCutTime       = 5;
+            UsageLogLocation      = $ConfigurationData.NonNodeData.UsageLogLocation;
+            UsageLogMaxFileSizeKB = 1024;
+            UsageLogMaxSpaceGB    = 5;
+        }
+
+'@
+                }
+
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource | Should -Be $result
                 }
             }
         }

@@ -1,4 +1,5 @@
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param
 (
     [Parameter()]
@@ -49,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 #Initialize tests
                 $getTypeFullName = "Microsoft.PerformancePoint.Scorecards.BIMonitoringServiceApplication"
@@ -245,6 +246,63 @@ try
 
                 It "Should return true when the Test method is called" {
                     Test-TargetResource @testParams | Should -Be $true
+                }
+            }
+
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Mock -CommandName Write-Host -MockWith { }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            Name            = "PerformancePoint Service Application"
+                            ProxyName       = "PerformancePoint Service Application Proxy"
+                            ApplicationPool = "Service App Pool"
+                            DatabaseName    = "PerformancePointDB"
+                            DatabaseServer  = "SQL01"
+                            Ensure          = "Present"
+                        }
+                    }
+
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        $spServiceApp = [PSCustomObject]@{
+                            TypeName    = "BIMonitoringServiceApplication"
+                            DisplayName = "PerformancePoint Service Application"
+                            Name        = "PerformancePoint Service Application"
+                        }
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                            -Name GetType `
+                            -Value {
+                            return @{
+                                Name = "BIMonitoringServiceApplication"
+                            }
+                        } -PassThru -Force
+                        return $spServiceApp
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
+
+                    $result = @'
+        SPPerformancePointServiceApp PerformancePointServiceApplication
+        {
+            ApplicationPool      = "Service App Pool";
+            DatabaseName         = "PerformancePointDB";
+            DatabaseServer       = $ConfigurationData.NonNodeData.DatabaseServer;
+            Ensure               = "Present";
+            Name                 = "PerformancePoint Service Application";
+            ProxyName            = "PerformancePoint Service Application Proxy";
+            PsDscRunAsCredential = $Credsspfarm;
+        }
+
+'@
+                }
+
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource | Should -Be $result
                 }
             }
         }

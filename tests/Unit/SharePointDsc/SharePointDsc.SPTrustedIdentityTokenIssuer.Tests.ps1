@@ -1,4 +1,5 @@
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param
 (
     [Parameter()]
@@ -49,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Mocks for all contexts
                 Mock -CommandName Get-ChildItem -MockWith {
@@ -549,6 +550,85 @@ try
 
                 It "should fail validation of IdentifierClaim in the set method" {
                     { Set-TargetResource @testParams } | Should -Throw "IdentifierClaim does not match any claim type specified in ClaimsMappings."
+                }
+            }
+
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Mock -CommandName Write-Host -MockWith { }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            Name                       = "Contoso"
+                            Description                = "Contoso"
+                            Realm                      = "https://sharepoint.contoso.com"
+                            SignInUrl                  = "https://adfs.contoso.com/adfs/ls/"
+                            IdentifierClaim            = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                            ClaimsMappings             = @(
+                                @{
+                                    Name              = "Email"
+                                    IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                                }
+                                @{
+                                    Name              = "Role"
+                                    IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
+                                    LocalClaimType    = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                                }
+                            )
+                            SigningCertificateFilePath = "F:\Data\DSC\FakeSigning.cer"
+                            ClaimProviderName          = "LDAPCP"
+                            ProviderSignOutUri         = "https://adfs.contoso.com/adfs/ls/"
+                            Ensure                     = "Present"
+                        }
+                    }
+
+                    Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith {
+                        $spIdentityProv = @(
+                            @{
+                                Name        = "Contoso"
+                                Description = "Contoso"
+                            }
+                        )
+                        return $spIdentityProv
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
+
+                    $result = @'
+        \$members = \@\(\);
+        \$members \+= MSFT_SPClaimTypeMapping {
+                Name = "Email"
+                IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+            };
+        \$members \+= MSFT_SPClaimTypeMapping {
+                LocalClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                Name = "Role"
+                IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
+            };
+        SPTrustedIdentityTokenIssuer [0-9A-Fa-f]{8}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{12}
+        {
+            ClaimProviderName          = "LDAPCP";
+            ClaimsMappings             = "\$members";
+            Description                = "Contoso";
+            Ensure                     = "Present";
+            IdentifierClaim            = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress";
+            Name                       = "Contoso";
+            ProviderSignOutUri         = "https://adfs.contoso.com/adfs/ls/";
+            PsDscRunAsCredential       = \$Credsspfarm;
+            Realm                      = "https://sharepoint.contoso.com";
+            SigningCertificateFilePath = "F:\\Data\\DSC\\FakeSigning.cer";
+            SignInUrl                  = "https://adfs.contoso.com/adfs/ls/";
+        }
+
+'@
+                }
+
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource | Should -Match $result
                 }
             }
         }

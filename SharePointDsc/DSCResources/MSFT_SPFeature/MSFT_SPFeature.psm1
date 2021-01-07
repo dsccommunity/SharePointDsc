@@ -243,13 +243,14 @@ function Export-TargetResource
         Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction 0
     }
     $VerbosePreference = "SilentlyContinue"
-    $spMajorVersion = (Get-SPDscInstalledProductVersion).FileMajorPart
-    $versionFilter = $spMajorVersion.ToString() + "*"
-    $Features = Get-SPFeature | Where-Object { $_.Scope -eq $Scope -and $_.Version -like $versionFilter }
     $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
     $module = Join-Path -Path $ParentModuleBase -ChildPath "\DSCResources\MSFT_SPFeature\MSFT_SPFeature.psm1" -Resolve
     Import-Module $module -Scope Local
     $params = Get-DSCFakeParameters -ModulePath $module
+
+    $spMajorVersion = (Get-SPDscInstalledProductVersion).FileMajorPart
+    $versionFilter = $spMajorVersion.ToString() + "*"
+    $Features = Get-SPFeature | Where-Object { $_.Scope -eq $Scope -and $_.Version -like $versionFilter }
 
     $j = 1
     $totalFeat = $Features.Length

@@ -449,8 +449,6 @@ function Test-TargetResource
     return $result
 }
 
-<## This function retrieves all settings related to the Secure Store Service Application. Currently this function makes a direct call to the Secure Store database on the farm's SQL server to retrieve information about the logging details. There are currently no publicly available hooks in the SharePoint/Office Server Object Model that allow us to do it. This forces the user executing this reverse DSC script to have to install the SQL Server Client components on the server on which they execute the script, which is not a "best practice". #>
-<# TODO: Change the logic to extract information about the logging from being a direct SQL call to something that uses the Object Model. #>
 function Export-TargetResource
 {
     if (!(Get-PSSnapin Microsoft.SharePoint.Powershell -ErrorAction SilentlyContinue))
@@ -478,17 +476,6 @@ function Export-TargetResource
             $PartialContent = "        SPSecureStoreServiceApp " + $ssa.Name.Replace(" ", "") + "`r`n"
             $PartialContent += "        {`r`n"
             $results = Get-TargetResource @params
-
-            <# WA - Issue with 1.6.0.0 where DB Aliases not returned in Get-TargetResource #>
-            $secStoreDBs = Get-SPDatabase | Where-Object { $_.Type -eq "Microsoft.Office.SecureStoreService.Server.SecureStoreServiceDatabase" }
-            $results.DatabaseName = $secStoreDBs.DisplayName
-            $results.DatabaseServer = $secStoreDBs.NormalizedDataSource
-
-            <# WA - Can't dynamically retrieve value from the Secure Store at the moment #>
-            if (!$results.Contains("AuditingEnabled"))
-            {
-                $results.Add("AuditingEnabled", $true)
-            }
 
             if ($results.Contains("InstallAccount"))
             {

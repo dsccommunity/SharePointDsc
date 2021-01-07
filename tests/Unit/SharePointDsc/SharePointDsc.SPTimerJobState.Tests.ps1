@@ -1,4 +1,5 @@
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param
 (
     [Parameter()]
@@ -49,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
 
@@ -429,6 +430,56 @@ try
 
                 It "Should return true from the test method" {
                     Test-TargetResource @testParams | Should -Be $true
+                }
+            }
+
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Mock -CommandName Write-Host -MockWith { }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            TypeName  = "Microsoft.Office.Server.Administration.ApplicationServerJob"
+                            WebAppUrl = "http://sites.sharepoint.contoso.com"
+                            Enabled   = $false
+                            Schedule  = "weekly at sat 5:00"
+                        }
+                    }
+
+                    Mock -CommandName Get-SPTimerJob -MockWith {
+                        $spTimerjob = @(
+                            @{
+                                TypeName       = "Microsoft.Office.Server.Administration.ApplicationServerJob"
+                                Name           = "Application Server Job"
+                                WebApplication = @{
+                                    Url = "http://sites.sharepoint.contoso.com"
+                                }
+                            }
+                        )
+                        return $spTimerjob
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
+
+                    $result = @'
+        SPTimerJobState [0-9A-Fa-f]{8}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{12}
+        {
+            Enabled              = \$False;
+            PsDscRunAsCredential = \$Credsspfarm;
+            Schedule             = "weekly at sat 5:00";
+            TypeName             = "Microsoft.Office.Server.Administration.ApplicationServerJob";
+            WebAppUrl            = "http://sites.sharepoint.contoso.com";
+        }
+
+'@
+                }
+
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource | Should -Match $result
                 }
             }
         }

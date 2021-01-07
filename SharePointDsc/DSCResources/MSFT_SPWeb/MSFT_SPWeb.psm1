@@ -171,12 +171,12 @@ function Set-TargetResource
         if ($null -eq $web)
         {
             @("InstallAccount", "Ensure", "RequestAccessEmail") |
-            ForEach-Object -Process {
-                if ($params.ContainsKey($_) -eq $true)
-                {
-                    $params.Remove($_) | Out-Null
+                ForEach-Object -Process {
+                    if ($params.ContainsKey($_) -eq $true)
+                    {
+                        $params.Remove($_) | Out-Null
+                    }
                 }
-            }
 
             New-SPWeb @params | Out-Null
         }
@@ -362,7 +362,7 @@ function Export-TargetResource
     $module = Join-Path -Path $ParentModuleBase -ChildPath "\DSCResources\MSFT_SPWeb\MSFT_SPWeb.psm1" -Resolve
     $SPWebs = Get-SPWeb -Limit All -Site $URL
     $j = 1
-    $totalWebs = $webs.Length
+    $totalWebs = $SPWebs.Length
     foreach ($SPWeb in $SPWebs)
     {
         Write-Host "    -> Scanning Web [$j/$totalWebs] {$($SPWeb.URL)}"

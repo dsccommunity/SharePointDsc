@@ -270,7 +270,7 @@ function Export-TargetResource
         Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction 0
     }
     $VerbosePreference = "SilentlyContinue"
-    if ($null -ne $modulePath)
+    if ([System.String]::IsNullOrEmpty($modulePath) -eq $false)
     {
         $module = Resolve-Path $modulePath
     }

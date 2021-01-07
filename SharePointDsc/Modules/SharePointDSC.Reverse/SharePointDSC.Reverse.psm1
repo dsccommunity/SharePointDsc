@@ -922,7 +922,7 @@ function Get-SPWebPolicyPermissions
         [System.Collections.Hashtable]
         $Params
     )
-    $permission = "            MSFT_SPWebPolicyPermissions`r`n            {`r`n"
+    $permission = "`r`n                MSFT_SPWebPolicyPermissions {`r`n"
     foreach ($key in $params.Keys)
     {
         try
@@ -942,15 +942,15 @@ function Get-SPWebPolicyPermissions
 
             if (($params[$key].ToString().ToLower() -eq "false" -or $params[$key].ToString().ToLower() -eq "true") -and !$isCredentials)
             {
-                $permission += "                " + $key + " = `$" + $params[$key] + "`r`n"
+                $permission += "                    " + $key + " = `$" + $params[$key] + "`r`n"
             }
             elseif (!$isCredentials)
             {
-                $permission += "                " + $key + " = '" + $params[$key] + "'`r`n"
+                $permission += "                    " + $key + " = '" + $params[$key] + "'`r`n"
             }
             else
             {
-                $permission += "                " + $key + " =  " + (Resolve-Credentials -UserName $params[$key]) + ".UserName`r`n"
+                $permission += "                    " + $key + " =  " + (Resolve-Credentials -UserName $params[$key]) + ".UserName`r`n"
             }
         }
         catch
@@ -959,11 +959,11 @@ function Get-SPWebPolicyPermissions
             $Global:ErrorLog += "$_`r`n`r`n"
         }
     }
-    $permission += "            }`r`n"
+    $permission += "                }"
     return $permission
 }
 
-function CheckDBForAliases()
+function Get-SPDscDBForAlias()
 {
     [CmdletBinding()]
     param
@@ -1010,7 +1010,41 @@ function Set-SPFarmAdministrators
     return $newMemberList
 }
 
-function Get-SPWebAppHappyHour
+function Get-SPDscClaimTypeMapping
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [System.Collections.Hashtable]
+        $params
+    )
+
+    $ctm = "MSFT_SPClaimTypeMapping {`r`n"
+    foreach ($key in $params.Keys)
+    {
+        try
+        {
+            if ($params[$key].ToString().ToLower() -eq "false" -or $params[$key].ToString().ToLower() -eq "true")
+            {
+                $ctm += "                " + $key + " = `$" + $params[$key] + "`r`n"
+            }
+            else
+            {
+                $ctm += "                " + $key + " = `"" + $params[$key] + "`"`r`n"
+            }
+        }
+        catch
+        {
+            $Script:ErrorLog += "[MSFT_SPClaimTypeMapping]" + $key + "`r`n"
+            $Script:ErrorLog += "$_`r`n`r`n"
+        }
+    }
+    $ctm += "            }"
+    return $ctm
+}
+
+function Get-SPDscWebAppHappyHour
 {
     [CmdletBinding()]
     param
@@ -1019,12 +1053,12 @@ function Get-SPWebAppHappyHour
         [System.Collections.Hashtable]
         $Params
     )
-    $happyHour = "MSFT_SPWebApplicationHappyHour{`r`n"
+    $happyHour = "MSFT_SPWebApplicationHappyHour {`r`n"
     foreach ($key in $params.Keys)
     {
         try
         {
-            $happyHour += "                " + $key + " = `"" + $params[$key] + "`"`r`n"
+            $happyHour += "                " + $key + " = " + $params[$key] + "`r`n"
         }
         catch
         {
@@ -1036,13 +1070,13 @@ function Get-SPWebAppHappyHour
     return $happyHour
 }
 
-function Get-SPServiceAppSecurityMembers
+function Get-SPDscServiceAppSecurityMembers
 {
     [CmdletBinding()]
     param
     (
         [Parameter(Mandatory = $true)]
-        [System.Management.Automation.PSCredential]
+        [System.Collections.Hashtable]
         $Member
     )
     try
@@ -1055,7 +1089,7 @@ function Get-SPServiceAppSecurityMembers
         $isUserGuid = $false
     }
 
-    if ($null -ne $member.AccessLevel -and !($member.AccessLevel -match "^[\d\.]+$") -and (!$isUserGuid) -and $member.AccessLevel -ne "")
+    if ($null -ne $member.AccessLevels -and !($member.AccessLevels -match "^[\d\.]+$") -and (!$isUserGuid) -and $member.AccessLevels -ne "")
     {
         $userName = Get-Credentials -UserName $member.UserName
         $value = $userName
@@ -1067,10 +1101,14 @@ function Get-SPServiceAppSecurityMembers
         {
             $value = "`"" + $member.UserName + "`";"
         }
-        return "MSFT_SPServiceAppSecurityEntry { `
-            Username    = " + $value + " `
-            AccessLevel = `"" + $member.AccessLevel + "`" `
-        }"
+        $resultString = @()
+        $resultString += "MSFT_SPServiceAppSecurityEntry`r`n"
+        $resultString += "       {`r`n"
+        $resultString += "           Username     = $value`r`n"
+        $resultString += "           AccessLevels = @(`"$($member.AccessLevels -join "`", `"")`");`r`n"
+        $resultString += "       }"
+
+        return $resultString
     }
     return $null
 }
@@ -2161,7 +2199,7 @@ function Invoke-SQL()
     $DataSet.Tables
 }
 
-function Set-TermStoreAdministratorsBlock
+function Set-SPDscTermStoreAdministratorsBlock
 {
     [CmdletBinding()]
     param
@@ -2248,7 +2286,7 @@ function Set-SPFarmAdministratorsBlock
     return $DSCBlock
 }
 
-function Set-TermStoreAdministrators
+function Set-SPDscTermStoreAdministrators
 {
     [CmdletBinding()]
     param

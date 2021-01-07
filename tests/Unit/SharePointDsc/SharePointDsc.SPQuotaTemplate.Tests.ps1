@@ -1,4 +1,5 @@
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param
 (
     [Parameter()]
@@ -49,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
                 Add-Type -TypeDefinition @"
@@ -478,7 +479,58 @@ try
                 It "Should return true from the test method" {
                     Test-TargetResource @testParams | Should -Be $true
                 }
+            }
 
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Mock -CommandName Write-Host -MockWith { }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            Name                        = "Teamsite"
+                            StorageMaxInMB              = 1024
+                            StorageWarningInMB          = 512
+                            MaximumUsagePointsSolutions = 1000
+                            WarningUsagePointsSolutions = 800
+                            Ensure                      = "Present"
+                        }
+                    }
+
+                    Mock -CommandName Get-SPDscContentService -MockWith {
+                        $spContentSvc = @{
+                            QuotaTemplates = @(
+                                @{
+                                    Name = "Teamsite"
+                                }
+                            )
+                        }
+                        return $spContentSvc
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
+
+                    $result = @'
+        SPQuotaTemplate [0-9A-Fa-f]{8}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{12}
+        {
+            Ensure                      = "Present";
+            MaximumUsagePointsSolutions = 1000;
+            Name                        = "Teamsite";
+            PsDscRunAsCredential        = \$Credsspfarm;
+            StorageMaxInMB              = 1024;
+            StorageWarningInMB          = 512;
+            WarningUsagePointsSolutions = 800;
+        }
+
+'@
+                }
+
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource | Should -Match $result
+                }
             }
         }
     }

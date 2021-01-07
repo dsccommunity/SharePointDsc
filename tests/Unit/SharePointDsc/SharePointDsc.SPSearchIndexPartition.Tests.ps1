@@ -1,4 +1,5 @@
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param
 (
     [Parameter()]
@@ -49,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
                 Add-Type -TypeDefinition @"
@@ -195,6 +196,77 @@ try
                 It "Should remove the search index in the set method" {
                     Set-TargetResource @testParams
                     Assert-MockCalled Remove-SPEnterpriseSearchComponent
+                }
+            }
+
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Mock -CommandName Write-Host -MockWith { }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            Servers        = @("Server2", "Server3")
+                            Index          = 1
+                            RootDirectory  = "I:\SearchIndexes\1"
+                            ServiceAppName = "Search Service Application"
+                        }
+                    }
+
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        $spServiceApp = [PSCustomObject]@{
+                            DisplayName    = "Search Service Application"
+                            Name           = "Search Service Application"
+                            ActiveTopology = @{
+                                Id = "Test"
+                            }
+                        }
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                            -Name GetType `
+                            -Value {
+                            return @{
+                                FullName = "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
+                            }
+                        } -PassThru -Force
+                        return $spServiceApp
+                    }
+
+                    Mock -CommandName Get-SPEnterpriseSearchComponent -MockWith {
+                        $spSearchIndexComponent = [PSCustomObject]@{
+                            IndexPartitionOrdinal = 1
+                            ServerName            = "Server02"
+                            RootDirectory         = "I:\SearchIndexes\1"
+                        }
+                        $spSearchIndexComponent = $spSearchIndexComponent | Add-Member -MemberType ScriptMethod `
+                            -Name GetType `
+                            -Value {
+                            return @{
+                                Name = "IndexComponent"
+                            }
+                        } -PassThru -Force
+                        return $spSearchIndexComponent
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
+
+                    $result = @'
+        SPSearchIndexPartition [0-9A-Fa-f]{8}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{12}
+        {
+            Index                = 1;
+            PsDscRunAsCredential = \$Credsspfarm;
+            RootDirectory        = "I:\\SearchIndexes\\1";
+            Servers              = "\$ConfigurationData.NonNodeData.SearchIndexPartitionServers";
+            ServiceAppName       = "Search Service Application";
+        }
+
+'@
+                }
+
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource | Should -Match $result
                 }
             }
         }

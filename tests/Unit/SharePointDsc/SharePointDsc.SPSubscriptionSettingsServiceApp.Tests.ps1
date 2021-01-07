@@ -1,4 +1,5 @@
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param
 (
     [Parameter()]
@@ -173,14 +174,16 @@ try
                                             -Name GetValue `
                                             -Value {
                                             param($x)
-                                            return (@{
+                                            return (
+                                                @{
                                                     FullName             = $getTypeFullName
                                                     Name                 = "Test_DB"
                                                     NormalizedDataSource = "TestServer\Instance"
                                                     FailoverServer       = @{
                                                         Name = "DBServer_Failover"
                                                     }
-                                                })
+                                                }
+                                            )
                                         } -PassThru
                                     )
                                 )
@@ -259,14 +262,16 @@ try
                                             -Name GetValue `
                                             -Value {
                                             param($x)
-                                            return (@{
+                                            return (
+                                                @{
                                                     FullName             = $getTypeFullName
                                                     Name                 = "Test_DB"
                                                     NormalizedDataSource = "TestServer\Instance"
                                                     FailoverServer       = @{
                                                         Name = "DBServer_Failover"
                                                     }
-                                                })
+                                                }
+                                            )
                                         } -PassThru
                                     )
                                 )
@@ -328,14 +333,16 @@ try
                                             -Name GetValue `
                                             -Value {
                                             param($x)
-                                            return (@{
+                                            return (
+                                                @{
                                                     FullName             = $getTypeFullName
                                                     Name                 = "Test_DB"
                                                     NormalizedDataSource = "TestServer\Instance"
                                                     FailoverServer       = @{
                                                         Name = "DBServer_Failover"
                                                     }
-                                                })
+                                                }
+                                            )
                                         } -PassThru
                                     )
                                 )
@@ -420,14 +427,16 @@ try
                                             -Name GetValue `
                                             -Value {
                                             param($x)
-                                            return (@{
+                                            return (
+                                                @{
                                                     FullName             = $getTypeFullName
                                                     Name                 = "Test_DB"
                                                     NormalizedDataSource = "TestServer\Instance"
                                                     FailoverServer       = @{
                                                         Name = "DBServer_Failover"
                                                     }
-                                                })
+                                                }
+                                            )
                                         } -PassThru
                                     )
                                 )
@@ -470,6 +479,58 @@ try
 
                 It "Should return false from the test method" {
                     Test-TargetResource @testParams | Should -Be $true
+                }
+            }
+
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Mock -CommandName Write-Host -MockWith { }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            Name                 = "Subscription Settings Service Application"
+                            ApplicationPool      = "Service App Pool"
+                            DatabaseServer       = "SQL01"
+                            DatabaseName         = "SP_SubscriptionSettings"
+                        }
+                    }
+
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        $spServiceApp = [PSCustomObject]@{
+                            DisplayName     = "Subscription Settings Service Application"
+                            Name            = "Subscription Settings Service Application"
+                        }
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                            -Name GetType `
+                            -Value {
+                            return @{
+                                Name = "SPSubscriptionSettingsServiceApplication"
+                            }
+                        } -PassThru -Force
+                        return $spServiceApp
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
+
+                    $result = @'
+        SPSubscriptionSettingsServiceApp SubscriptionSettingsServiceApplication[0-9A-Fa-f]{8}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{12}
+        {
+            ApplicationPool      = "Service App Pool";
+            DatabaseName         = "SP_SubscriptionSettings";
+            DatabaseServer       = "SQL01";
+            Name                 = "Subscription Settings Service Application";
+            PsDscRunAsCredential = \$Credsspfarm;
+        }
+
+'@
+                }
+
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource | Should -Match $result
                 }
             }
         }

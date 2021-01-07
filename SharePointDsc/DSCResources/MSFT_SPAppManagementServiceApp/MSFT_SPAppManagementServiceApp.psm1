@@ -365,9 +365,6 @@ function Export-TargetResource
         $params.Name = $appManagement.Name
 
         $results = Get-TargetResource @params
-        <# WA - Fixes a bug in 1.5.0.0 where the Database Name and Server is not properly returned; #>
-        $results.DatabaseName = $appManagement.Databases.Name
-        $results.DatabaseServer = $appManagement.Databases.NormalizedDataSource
         $results = Repair-Credentials -results $results
 
         Add-ConfigurationDataEntry -Node "NonNodeData" -Key "DatabaseServer" -Value $results.DatabaseServer -Description "Name of the Database Server associated with the destination SharePoint Farm;"

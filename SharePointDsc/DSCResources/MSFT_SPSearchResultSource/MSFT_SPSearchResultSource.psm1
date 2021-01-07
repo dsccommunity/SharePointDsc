@@ -347,6 +347,8 @@ function Export-TargetResource
 
     $ssas = Get-SPServiceApplication | Where-Object -FilterScript { $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication" }
 
+    $Content = ''
+
     $i = 1
     $total = $ssas.Length
     foreach ($ssa in $ssas)
@@ -501,7 +503,6 @@ function Export-TargetResource
             $Global:ErrorLog += "[Search Result Source]" + $ssa.DisplayName + "`r`n"
             $Global:ErrorLog += "$_`r`n`r`n"
         }
-        $Content += $partialContent
     }
     return $content
 }

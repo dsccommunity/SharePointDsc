@@ -1,4 +1,5 @@
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param
 (
     [Parameter()]
@@ -50,7 +51,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Mocks for all contexts
                 Mock -CommandName Use-CacheCluster -MockWith { }
@@ -84,22 +85,22 @@ try
                         Services = @(@{
                                 Name            = "AppFabricCachingService"
                                 ProcessIdentity = New-Object -TypeName "Object" |
-                                Add-Member -MemberType NoteProperty `
-                                    -Name ManagedAccount `
-                                    -Value $null `
-                                    -PassThru |
-                                Add-Member -MemberType NoteProperty `
-                                    -Name CurrentIdentityType `
-                                    -Value $null `
-                                    -PassThru |
-                                Add-Member -MemberType ScriptMethod `
-                                    -Name Update `
-                                    -Value { $global:SPDscUpdatedProcessID = $true } `
-                                    -PassThru |
-                                Add-Member -MemberType ScriptMethod `
-                                    -Name Deploy `
-                                    -Value { } `
-                                    -PassThru
+                                    Add-Member -MemberType NoteProperty `
+                                        -Name ManagedAccount `
+                                        -Value $null `
+                                        -PassThru |
+                                        Add-Member -MemberType NoteProperty `
+                                            -Name CurrentIdentityType `
+                                            -Value $null `
+                                            -PassThru |
+                                            Add-Member -MemberType ScriptMethod `
+                                                -Name Update `
+                                                -Value { $global:SPDscUpdatedProcessID = $true } `
+                                                -PassThru |
+                                                Add-Member -MemberType ScriptMethod `
+                                                    -Name Deploy `
+                                                    -Value { } `
+                                                    -PassThru
                             })
                     } }
                 Mock -CommandName Stop-SPServiceInstance -MockWith {
@@ -113,62 +114,62 @@ try
                     if ($Global:SPDscDCacheOnline -eq $false)
                     {
                         return @(New-Object -TypeName "Object" |
-                            Add-Member -MemberType NoteProperty `
-                                -Name Status `
-                                -Value "Disabled" `
-                                -PassThru |
-                            Add-Member -MemberType NoteProperty `
-                                -Name Service `
-                                -Value "SPDistributedCacheService Name=AppFabricCachingService" `
-                                -PassThru |
-                            Add-Member -MemberType NoteProperty `
-                                -Name Server `
-                                -Value @{
-                                Name = $env:COMPUTERNAME
-                            } -PassThru |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name Delete `
-                                -Value { } `
-                                -PassThru |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name GetType `
-                                -Value {
-                                New-Object -TypeName "Object" |
                                 Add-Member -MemberType NoteProperty `
-                                    -Name Name `
-                                    -Value "SPDistributedCacheServiceInstance" `
-                                    -PassThru
-                            } -PassThru -Force)
+                                    -Name Status `
+                                    -Value "Disabled" `
+                                    -PassThru |
+                                    Add-Member -MemberType NoteProperty `
+                                        -Name Service `
+                                        -Value "SPDistributedCacheService Name=AppFabricCachingService" `
+                                        -PassThru |
+                                        Add-Member -MemberType NoteProperty `
+                                            -Name Server `
+                                            -Value @{
+                                            Name = $env:COMPUTERNAME
+                                        } -PassThru |
+                                            Add-Member -MemberType ScriptMethod `
+                                                -Name Delete `
+                                                -Value { } `
+                                                -PassThru |
+                                                Add-Member -MemberType ScriptMethod `
+                                                    -Name GetType `
+                                                    -Value {
+                                                    New-Object -TypeName "Object" |
+                                                        Add-Member -MemberType NoteProperty `
+                                                            -Name Name `
+                                                            -Value "SPDistributedCacheServiceInstance" `
+                                                            -PassThru
+                                                    } -PassThru -Force)
                     }
                     else
                     {
                         return @(New-Object -TypeName "Object" |
-                            Add-Member -MemberType NoteProperty `
-                                -Name Status `
-                                -Value "Online" `
-                                -PassThru |
-                            Add-Member -MemberType NoteProperty `
-                                -Name Service `
-                                -Value "SPDistributedCacheService Name=AppFabricCachingService" `
-                                -PassThru |
-                            Add-Member -MemberType NoteProperty `
-                                -Name Server `
-                                -Value @{
-                                Name = $env:COMPUTERNAME
-                            } -PassThru |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name Delete `
-                                -Value { } `
-                                -PassThru |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name GetType `
-                                -Value {
-                                New-Object -TypeName "Object" |
                                 Add-Member -MemberType NoteProperty `
-                                    -Name Name `
-                                    -Value "SPDistributedCacheServiceInstance" `
-                                    -PassThru
-                            } -PassThru -Force)
+                                    -Name Status `
+                                    -Value "Online" `
+                                    -PassThru |
+                                    Add-Member -MemberType NoteProperty `
+                                        -Name Service `
+                                        -Value "SPDistributedCacheService Name=AppFabricCachingService" `
+                                        -PassThru |
+                                        Add-Member -MemberType NoteProperty `
+                                            -Name Server `
+                                            -Value @{
+                                            Name = $env:COMPUTERNAME
+                                        } -PassThru |
+                                            Add-Member -MemberType ScriptMethod `
+                                                -Name Delete `
+                                                -Value { } `
+                                                -PassThru |
+                                                Add-Member -MemberType ScriptMethod `
+                                                    -Name GetType `
+                                                    -Value {
+                                                    New-Object -TypeName "Object" |
+                                                        Add-Member -MemberType NoteProperty `
+                                                            -Name Name `
+                                                            -Value "SPDistributedCacheServiceInstance" `
+                                                            -PassThru
+                                                    } -PassThru -Force)
                     }
                 }
 
@@ -251,63 +252,63 @@ try
                             {
                                 $Global:SPDscRunCount++
                                 return @(New-Object -TypeName "Object" |
-                                    Add-Member -MemberType NoteProperty `
-                                        -Name Status `
-                                        -Value "Disabled" `
-                                        -PassThru |
-                                    Add-Member -MemberType NoteProperty `
-                                        -Name Service `
-                                        -Value "SPDistributedCacheService Name=AppFabricCachingService" `
-                                        -PassThru |
-                                    Add-Member -MemberType NoteProperty `
-                                        -Name Server `
-                                        -Value @{
-                                        Name = $env:COMPUTERNAME
-                                    } -PassThru |
-                                    Add-Member -MemberType ScriptMethod `
-                                        -Name Delete `
-                                        -Value { } `
-                                        -PassThru |
-                                    Add-Member -MemberType ScriptMethod `
-                                        -Name GetType `
-                                        -Value {
-                                        New-Object -TypeName "Object" |
                                         Add-Member -MemberType NoteProperty `
-                                            -Name Name `
-                                            -Value "SPDistributedCacheServiceInstance" `
-                                            -PassThru
-                                    } -PassThru -Force)
+                                            -Name Status `
+                                            -Value "Disabled" `
+                                            -PassThru |
+                                            Add-Member -MemberType NoteProperty `
+                                                -Name Service `
+                                                -Value "SPDistributedCacheService Name=AppFabricCachingService" `
+                                                -PassThru |
+                                                Add-Member -MemberType NoteProperty `
+                                                    -Name Server `
+                                                    -Value @{
+                                                    Name = $env:COMPUTERNAME
+                                                } -PassThru |
+                                                    Add-Member -MemberType ScriptMethod `
+                                                        -Name Delete `
+                                                        -Value { } `
+                                                        -PassThru |
+                                                        Add-Member -MemberType ScriptMethod `
+                                                            -Name GetType `
+                                                            -Value {
+                                                            New-Object -TypeName "Object" |
+                                                                Add-Member -MemberType NoteProperty `
+                                                                    -Name Name `
+                                                                    -Value "SPDistributedCacheServiceInstance" `
+                                                                    -PassThru
+                                                            } -PassThru -Force)
                             }
                             { 1, 2, 6, 7 -contains $_ }
                             {
                                 $Global:SPDscRunCount = $Global:SPDscRunCount + 1
                                 return @(New-Object -TypeName "Object" |
-                                    Add-Member -MemberType NoteProperty `
-                                        -Name Status `
-                                        -Value "Online" `
-                                        -PassThru |
-                                    Add-Member -MemberType NoteProperty `
-                                        -Name Service `
-                                        -Value "SPDistributedCacheService Name=AppFabricCachingService" `
-                                        -PassThru |
-                                    Add-Member -MemberType NoteProperty `
-                                        -Name Server `
-                                        -Value @{
-                                        Name = $env:COMPUTERNAME
-                                    } -PassThru |
-                                    Add-Member -MemberType ScriptMethod `
-                                        -Name Delete `
-                                        -Value { } `
-                                        -PassThru |
-                                    Add-Member -MemberType ScriptMethod `
-                                        -Name GetType `
-                                        -Value {
-                                        New-Object -TypeName "Object" |
                                         Add-Member -MemberType NoteProperty `
-                                            -Name Name `
-                                            -Value "SPDistributedCacheServiceInstance" `
-                                            -PassThru
-                                    } -PassThru -Force)
+                                            -Name Status `
+                                            -Value "Online" `
+                                            -PassThru |
+                                            Add-Member -MemberType NoteProperty `
+                                                -Name Service `
+                                                -Value "SPDistributedCacheService Name=AppFabricCachingService" `
+                                                -PassThru |
+                                                Add-Member -MemberType NoteProperty `
+                                                    -Name Server `
+                                                    -Value @{
+                                                    Name = $env:COMPUTERNAME
+                                                } -PassThru |
+                                                    Add-Member -MemberType ScriptMethod `
+                                                        -Name Delete `
+                                                        -Value { } `
+                                                        -PassThru |
+                                                        Add-Member -MemberType ScriptMethod `
+                                                            -Name GetType `
+                                                            -Value {
+                                                            New-Object -TypeName "Object" |
+                                                                Add-Member -MemberType NoteProperty `
+                                                                    -Name Name `
+                                                                    -Value "SPDistributedCacheServiceInstance" `
+                                                                    -PassThru
+                                                            } -PassThru -Force)
                             }
                         }
                     }
@@ -522,63 +523,63 @@ try
                             {
                                 $Global:SPDscRunCount++
                                 return @(New-Object -TypeName "Object" |
-                                    Add-Member -MemberType NoteProperty `
-                                        -Name Status `
-                                        -Value "Disabled" `
-                                        -PassThru |
-                                    Add-Member -MemberType NoteProperty `
-                                        -Name Service `
-                                        -Value "SPDistributedCacheService Name=AppFabricCachingService" `
-                                        -PassThru |
-                                    Add-Member -MemberType NoteProperty `
-                                        -Name Server `
-                                        -Value @{
-                                        Name = $env:COMPUTERNAME
-                                    } -PassThru |
-                                    Add-Member -MemberType ScriptMethod `
-                                        -Name Delete `
-                                        -Value { } `
-                                        -PassThru |
-                                    Add-Member -MemberType ScriptMethod `
-                                        -Name GetType `
-                                        -Value {
-                                        New-Object -TypeName "Object" |
                                         Add-Member -MemberType NoteProperty `
-                                            -Name Name `
-                                            -Value "SPDistributedCacheServiceInstance" `
-                                            -PassThru
-                                    } -PassThru -Force)
+                                            -Name Status `
+                                            -Value "Disabled" `
+                                            -PassThru |
+                                            Add-Member -MemberType NoteProperty `
+                                                -Name Service `
+                                                -Value "SPDistributedCacheService Name=AppFabricCachingService" `
+                                                -PassThru |
+                                                Add-Member -MemberType NoteProperty `
+                                                    -Name Server `
+                                                    -Value @{
+                                                    Name = $env:COMPUTERNAME
+                                                } -PassThru |
+                                                    Add-Member -MemberType ScriptMethod `
+                                                        -Name Delete `
+                                                        -Value { } `
+                                                        -PassThru |
+                                                        Add-Member -MemberType ScriptMethod `
+                                                            -Name GetType `
+                                                            -Value {
+                                                            New-Object -TypeName "Object" |
+                                                                Add-Member -MemberType NoteProperty `
+                                                                    -Name Name `
+                                                                    -Value "SPDistributedCacheServiceInstance" `
+                                                                    -PassThru
+                                                            } -PassThru -Force)
                             }
                             { 1, 2, 6, 7 -contains $_ }
                             {
                                 $Global:SPDscRunCount = $Global:SPDscRunCount + 1
                                 return @(New-Object -TypeName "Object" |
-                                    Add-Member -MemberType NoteProperty `
-                                        -Name Status `
-                                        -Value "Online" `
-                                        -PassThru |
-                                    Add-Member -MemberType NoteProperty `
-                                        -Name Service `
-                                        -Value "SPDistributedCacheService Name=AppFabricCachingService" `
-                                        -PassThru |
-                                    Add-Member -MemberType NoteProperty `
-                                        -Name Server `
-                                        -Value @{
-                                        Name = $env:COMPUTERNAME
-                                    } -PassThru |
-                                    Add-Member -MemberType ScriptMethod `
-                                        -Name Delete `
-                                        -Value { } `
-                                        -PassThru |
-                                    Add-Member -MemberType ScriptMethod `
-                                        -Name GetType `
-                                        -Value {
-                                        New-Object -TypeName "Object" |
                                         Add-Member -MemberType NoteProperty `
-                                            -Name Name `
-                                            -Value "SPDistributedCacheServiceInstance" `
-                                            -PassThru
-                                    } -PassThru -Force)
+                                            -Name Status `
+                                            -Value "Online" `
+                                            -PassThru |
+                                            Add-Member -MemberType NoteProperty `
+                                                -Name Service `
+                                                -Value "SPDistributedCacheService Name=AppFabricCachingService" `
+                                                -PassThru |
+                                                Add-Member -MemberType NoteProperty `
+                                                    -Name Server `
+                                                    -Value @{
+                                                    Name = $env:COMPUTERNAME
+                                                } -PassThru |
+                                                    Add-Member -MemberType ScriptMethod `
+                                                        -Name Delete `
+                                                        -Value { } `
+                                                        -PassThru |
+                                                        Add-Member -MemberType ScriptMethod `
+                                                            -Name GetType `
+                                                            -Value {
+                                                            New-Object -TypeName "Object" |
+                                                                Add-Member -MemberType NoteProperty `
+                                                                    -Name Name `
+                                                                    -Value "SPDistributedCacheServiceInstance" `
+                                                                    -PassThru
+                                                            } -PassThru -Force)
                             }
                         }
                     }
@@ -662,6 +663,46 @@ try
                     Set-TargetResource @testParams
                     Assert-MockCalled Remove-SPDistributedCacheServiceInstance
                     Assert-MockCalled Disable-NetFirewallRule
+                }
+            }
+
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Mock -CommandName Write-Host -MockWith { }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            Name                 = "AppFabricCachingService"
+                            CacheSizeInMB        = 8192
+                            ServiceAccount       = "DEMO\ServiceAccount"
+                            ServerProvisionOrder = @("Server1", "Server2")
+                            CreateFirewallRules  = $true
+                            Ensure               = "Present"
+                        }
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
+
+                    $result = @'
+        SPDistributedCacheService [0-9A-Fa-f]{8}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{12}
+        {
+            CacheSizeInMB        = 8192;
+            CreateFirewallRules  = \$True;
+            Ensure               = "Present";
+            Name                 = "AppFabricCachingService";
+            PsDscRunAsCredential = \$Credsspfarm;
+            ServiceAccount       = "DEMO\\ServiceAccount";
+        }
+
+'@
+                }
+
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource | Should -Match $result
                 }
             }
         }

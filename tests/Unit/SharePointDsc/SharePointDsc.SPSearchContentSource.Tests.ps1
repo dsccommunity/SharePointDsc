@@ -1,4 +1,5 @@
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param
 (
     [Parameter()]
@@ -49,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
                 Add-Type -TypeDefinition @"
@@ -1464,11 +1465,11 @@ try
                             -Name Type `
                             -Value "Business" `
                             -PassThru |
-                        Add-Member -MemberType ScriptMethod `
-                            -Name StopCrawl `
-                            -Value {
-                            $null
-                        }  -PassThru -Force
+                            Add-Member -MemberType ScriptMethod `
+                                -Name StopCrawl `
+                                -Value {
+                                $null
+                            }  -PassThru -Force
                         return $returnval
                     }
                 }
@@ -1496,6 +1497,60 @@ try
                     Set-TargetResource @testParams
 
                     Assert-MockCalled -CommandName Remove-SPEnterpriseSearchCrawlContentSource
+                }
+            }
+
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Mock -CommandName Write-Host -MockWith { }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            Name              = "Local SharePoint Sites"
+                            ServiceAppName    = "Search Service Application"
+                            ContentSourceType = "SharePoint"
+                            Addresses         = @("http://sharepointsite1.contoso.com", "http://sharepointsite2.contoso.com")
+                            CrawlSetting      = "CrawlSites"
+                            ContinuousCrawl   = $true
+                            Priority          = "Normal"
+                            Ensure            = "Present"
+                        }
+                    }
+
+                    Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
+                        return @(
+                            @{
+                                Name = "Local SharePoint Sites"
+                                Type = "SharePoint"
+                            }
+                        )
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
+
+                    $result = @'
+        SPSearchContentSource LocalSharePointSites[0-9A-Fa-f]{8}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{12}
+        {
+            Addresses            = \@\("http://sharepointsite1.contoso.com","http://sharepointsite2.contoso.com"\);
+            ContentSourceType    = "SharePoint";
+            ContinuousCrawl      = \$True;
+            CrawlSetting         = "CrawlSites";
+            Ensure               = "Present";
+            Name                 = "Local SharePoint Sites";
+            Priority             = "Normal";
+            PsDscRunAsCredential = \$Credsspfarm;
+            ServiceAppName       = "Search Service Application";
+        }
+
+'@
+                }
+
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource -SearchSAName "Search Service Application" | Should -Match $result
                 }
             }
         }

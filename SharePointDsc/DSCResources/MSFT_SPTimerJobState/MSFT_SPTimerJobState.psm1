@@ -470,6 +470,8 @@ function Export-TargetResource
             Write-Host "Scanning Timer Job {"$timer.Name"}[$i/$totalTimers]..."
             if ($null -ne $timer -and $timer.TypeName -ne "Microsoft.SharePoint.Administration.Health.SPHealthAnalyzerJobDefinition")
             {
+                $PartialContent = ''
+
                 $params.TypeName = $timer.TypeName
                 if ($null -ne $timer.WebApplication)
                 {
@@ -480,8 +482,6 @@ function Export-TargetResource
                     $params.WebAppUrl = "N/A";
                 }
 
-                <# TODO: Remove comment tags when version 2.0.0.0 of SharePointDSC gets released;#>
-                $PartialContent += "<#`r`n"
                 $PartialContent = "        SPTimerJobState " + [System.Guid]::NewGuid().toString() + "`r`n"
                 $PartialContent += "        {`r`n"
                 $results = Get-TargetResource @params
@@ -496,7 +496,6 @@ function Export-TargetResource
                 $PartialContent += $currentBlock
                 $PartialContent += "        }`r`n"
                 $Content += $PartialContent
-                $PartialContent += "#>`r`n"
             }
         }
         catch

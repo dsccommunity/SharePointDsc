@@ -50,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
                 $getTypeFullName = "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
@@ -852,6 +852,74 @@ try
                     }
 
                     { Set-TargetResource @testParams } | Should -Throw
+                }
+            }
+
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Mock -CommandName Write-Host -MockWith { }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            Name                        = "Search Service Application"
+                            ProxyName                   = "Search Service Application Proxy"
+                            DatabaseName                = "SP_Search"
+                            DatabaseServer              = "SQL01"
+                            ApplicationPool             = "Service App Pool"
+                            SearchCenterUrl             = "http://sharepoint.contoso.com/sites/search/Pages/search.aspx"
+                            DefaultContentAccessAccount = $mockCredential
+                            CloudIndex                  = $false
+                            AlertsEnabled               = $true
+                            Ensure                      = "Present"
+                        }
+                    }
+
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        $spServiceApp = [PSCustomObject]@{
+                            DisplayName     = "Search Service Application"
+                            Name            = "Search Service Application"
+                            ApplicationPool = @{
+                                Name = "Service App Pool"
+                            }
+                        }
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                            -Name GetType `
+                            -Value {
+                            return @{
+                                Name = "SearchServiceApplication"
+                            }
+                        } -PassThru -Force
+                        return $spServiceApp
+                    }
+
+                    Mock -CommandName Read-TargetResource -MockWith { }
+
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
+
+                    $result = @'
+        SPSearchServiceApp SearchServiceApplication
+        {
+            AlertsEnabled               = $True;
+            ApplicationPool             = "Service App Pool";
+            DatabaseName                = "SP_Search";
+            DatabaseServer              = $ConfigurationData.NonNodeData.DatabaseServer;
+            DefaultContentAccessAccount = $Credsusername;
+            Ensure                      = "Present";
+            Name                        = "Search Service Application";
+            ProxyName                   = "Search Service Application Proxy";
+            PsDscRunAsCredential        = $Credsspfarm;
+            SearchCenterUrl             = "http://sharepoint.contoso.com/sites/search/Pages/search.aspx";
+        }
+
+'@
+                }
+
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource | Should -Be $result
                 }
             }
         }

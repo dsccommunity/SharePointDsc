@@ -1,4 +1,5 @@
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param
 (
     [Parameter()]
@@ -49,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize the tests
                 $relativePath = "\inetpub\wwwroot\Virtual Directories\8080"
@@ -453,6 +454,62 @@ try
 
                 It "Should throw exception in the set method" {
                     { Set-TargetResource @testParams } | Should -Throw "Server isn't running the Web Application role"
+                }
+            }
+
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Mock -CommandName Write-Host -MockWith { }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            WebAppUrl       = "http://sharepoint.contoso.com"
+                            Zone            = "Default"
+                            EnableCache     = $true
+                            Location        = "C:\Blobcache"
+                            MaxSizeInGB     = 5
+                            MaxAgeInSeconds = 300
+                            FileTypes       = "\.(gif|jpg|jpeg)$"
+                        }
+                    }
+
+                    Mock -CommandName Get-SPWebApplication -MockWith {
+                        $obj = "placeholder"
+                        $obj = $obj | Add-Member -MemberType NoteProperty -Name Zone -Value "Default" -PassThru
+                        $alternateUrl = @()
+                        $alternateUrl += $obj
+
+                        $spWebApp = [PSCustomObject]@{
+                            Url          = "http://sharepoint.contoso.com"
+                            AlternateUrl = $alternateUrl
+                        }
+                        return $spWebApp
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
+
+                    $result = @'
+        SPBlobCacheSettings [0-9A-Fa-f]{8}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{12}
+        {
+            EnableCache          = \$True;
+            FileTypes            = "\\.\(gif\|jpg\|jpeg\)\$";
+            Location             = \$ConfigurationData.NonNodeData.BlobCacheLocation;
+            MaxAgeInSeconds      = 300;
+            MaxSizeInGB          = 5;
+            PsDscRunAsCredential = \$Credsspfarm;
+            WebAppUrl            = "http://sharepoint.contoso.com";
+            Zone                 = "Default";
+        }
+
+'@
+                }
+
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource | Should -Match $result
                 }
             }
         }

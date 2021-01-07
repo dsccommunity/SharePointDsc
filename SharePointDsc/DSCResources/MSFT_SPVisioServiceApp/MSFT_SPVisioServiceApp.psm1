@@ -242,21 +242,21 @@ function Export-TargetResource
     $Content = ''
     $params = Get-DSCFakeParameters -ModulePath $module
 
-    $was = Get-SPServiceApplication | Where-Object { $_.GetType().Name -eq "VisioGraphicsServiceApplication" }
+    $serviceApps = Get-SPServiceApplication | Where-Object { $_.GetType().Name -eq "VisioGraphicsServiceApplication" }
 
     $i = 1
-    $total = $was.Length
-    foreach ($wa in $was)
+    $total = $serviceApps.Length
+    foreach ($serviceApp in $serviceApps)
     {
         try
         {
-            if ($null -ne $wa)
+            if ($null -ne $serviceApp)
             {
-                $serviceName = $wa.Name
+                $serviceName = $serviceApp.Name
                 Write-Host "Scanning Visio Service Application [$i/$total] {$serviceName}"
 
                 $params.Name = $serviceName
-                $PartialContent = "        SPVisioServiceApp " + $wa.Name.Replace(" ", "") + "`r`n"
+                $PartialContent = "        SPVisioServiceApp " + $serviceApp.Name.Replace(" ", "") + "`r`n"
                 $PartialContent += "        {`r`n"
                 $results = Get-TargetResource @params
 
@@ -275,7 +275,7 @@ function Export-TargetResource
         }
         catch
         {
-            $Global:ErrorLog += "[Visio Graphics Service Application]" + $wa.Name + "`r`n"
+            $Global:ErrorLog += "[Visio Graphics Service Application]" + $serviceApp.Name + "`r`n"
             $Global:ErrorLog += "$_`r`n`r`n"
         }
     }

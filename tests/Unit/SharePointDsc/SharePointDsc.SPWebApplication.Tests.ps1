@@ -1,4 +1,5 @@
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param
 (
     [Parameter()]
@@ -49,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
 
@@ -762,6 +763,79 @@ try
 
                 It "Should return false from the set method" {
                     Test-TargetResource @testParams | Should -Be $false
+                }
+            }
+
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Mock -CommandName Write-Host -MockWith { }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            Name                   = "SharePoint Sites"
+                            ApplicationPool        = "SharePoint Sites"
+                            ApplicationPoolAccount = "CONTOSO\svcSPWebApp"
+                            AllowAnonymous         = $false
+                            DatabaseName           = "SP_Content_01"
+                            DatabaseServer         = "SQL.contoso.local\SQLINSTANCE"
+                            WebAppUrl              = "http://example.contoso.local"
+                            HostHeader             = "http://example.contoso.local"
+                            Path                   = "C:\InetPub\wwwroot"
+                            Port                   = 80
+                            UseClassic             = $false
+                            Ensure                 = "Present"
+                        }
+                    }
+
+                    Mock -CommandName Get-SPWebApplication -MockWith {
+                        $spWebApp = [PSCustomObject]@{
+                            Name = "SharePoint Sites"
+                            Url  = "http://example.contoso.local"
+                        }
+                        return $spWebApp
+                    }
+
+                    Mock -CommandName Read-TargetResource -MockWith { return "" }
+
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'ExtractionModeValue' -ErrorAction SilentlyContinue))
+                    {
+                        $Global:ExtractionModeValue = 1
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'ComponentsToExtract' -ErrorAction SilentlyContinue))
+                    {
+                        $Global:ComponentsToExtract = @()
+                    }
+
+                    $result = @'
+        SPWebApplication SharePointSites
+        {
+            AllowAnonymous         = $False;
+            ApplicationPool        = "SharePoint Sites";
+            ApplicationPoolAccount = "CONTOSO\svcSPWebApp";
+            DatabaseName           = "SP_Content_01";
+            DatabaseServer         = $ConfigurationData.NonNodeData.DatabaseServer;
+            Ensure                 = "Present";
+            HostHeader             = "http://example.contoso.local";
+            Name                   = "SharePoint Sites";
+            Path                   = "C:\InetPub\wwwroot";
+            Port                   = 80;
+            PsDscRunAsCredential   = $Credsspfarm;
+            UseClassic             = $False;
+            WebAppUrl              = "http://example.contoso.local";
+        }
+
+'@
+                }
+
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource | Should -Be $result
                 }
             }
         }

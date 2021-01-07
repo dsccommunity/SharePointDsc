@@ -332,7 +332,7 @@ function Export-TargetResource
         Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction 0
     }
     $VerbosePreference = "SilentlyContinue"
-    if ($null -ne $modulePath)
+    if ([System.String]::IsNullOrEmpty($modulePath) -eq $false)
     {
         $module = Resolve-Path $modulePath
     }
@@ -340,8 +340,8 @@ function Export-TargetResource
     {
         $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
         $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPBCSServiceApp\MSFT_SPBCSServiceApp.psm1" -Resolve
-        $Content = ''
     }
+    $Content = ''
 
     if ($null -eq $params)
     {
@@ -360,9 +360,6 @@ function Export-TargetResource
                 $PartialContent += "        {`r`n"
                 $params.Name = $bcsaInstance.DisplayName
                 $results = Get-TargetResource @params
-
-                <# WA - Issue with 1.6.0.0 where DB Aliases not returned in Get-TargetResource #>
-                $results["DatabaseServer"] = CheckDBForAliases -DatabaseName $results["DatabaseName"]
 
                 if ($results.Contains("InstallAccount"))
                 {

@@ -887,7 +887,7 @@ function Export-TargetResource
                     $results = Get-TargetResource @params
 
                     <# WA - Issue with 1.6.0.0 where DB Aliases not returned in Get-TargetResource #>
-                    $results["DatabaseServer"] = CheckDBForAliases -DatabaseName $results["DatabaseName"]
+                    $results["DatabaseServer"] = Get-SpDscDBForAlias -DatabaseName $results["DatabaseName"]
                     $results = Repair-Credentials -results $results
 
                     if (!$results.Languages)
@@ -895,13 +895,13 @@ function Export-TargetResource
                         $results.Remove("Languages")
                     }
 
-                    $results.TermStoreAdministrators = Set-TermStoreAdministratorsBlock $results.TermStoreAdministrators
+                    $results.TermStoreAdministrators = Set-SPDscTermStoreAdministratorsBlock $results.TermStoreAdministrators
 
                     Add-ConfigurationDataEntry -Node "NonNodeData" -Key "DatabaseServer" -Value $results.DatabaseServer -Description "Name of the Database Server associated with the destination SharePoint Farm;"
                     $results.DatabaseServer = "`$ConfigurationData.NonNodeData.DatabaseServer"
 
                     $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
-                    $currentBlock = Set-TermStoreAdministrators $currentBlock
+                    $currentBlock = Set-SPDscTermStoreAdministrators $currentBlock
                     $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "DatabaseServer"
                     $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
                     $PartialContent += $currentBlock

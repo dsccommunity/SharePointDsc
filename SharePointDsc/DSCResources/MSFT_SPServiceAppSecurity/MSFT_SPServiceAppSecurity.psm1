@@ -755,11 +755,12 @@ function Export-TargetResource
 
             if ($results.Members.Count -gt 0)
             {
+                $PartialContent = ''
                 $stringMember = ""
                 $foundOne = $false
                 foreach ($member in $results.Members)
                 {
-                    $stringMember = Get-SPServiceAppSecurityMembers $member
+                    $stringMember = Get-SPDscServiceAppSecurityMembers $member
                     if ($null -ne $stringMember)
                     {
                         if (!$foundOne)
@@ -773,7 +774,7 @@ function Export-TargetResource
 
                 if ($foundOne)
                 {
-                    $PartialContent = "        SPServiceAppSecurity " + [System.Guid]::NewGuid().ToString() + "`r`n"
+                    $PartialContent += "        SPServiceAppSecurity " + [System.Guid]::NewGuid().ToString() + "`r`n"
                     $PartialContent += "        {`r`n"
                     $results.Members = "`$members"
                     $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
@@ -795,10 +796,11 @@ function Export-TargetResource
 
             if ($results.Members.Count -gt 0)
             {
+                $PartialContent = ''
                 $foundOne = $false
                 foreach ($member in $results.Members)
                 {
-                    $stringMember = Get-SPServiceAppSecurityMembers $member
+                    $stringMember = Get-SPDscServiceAppSecurityMembers $member
                     if ($null -ne $stringMember)
                     {
                         if (!$foundOne)
@@ -812,7 +814,7 @@ function Export-TargetResource
 
                 if ($foundOne)
                 {
-                    $PartialContent = "        SPServiceAppSecurity " + [System.Guid]::NewGuid().ToString() + "`r`n"
+                    $PartialContent += "        SPServiceAppSecurity " + [System.Guid]::NewGuid().ToString() + "`r`n"
                     $PartialContent += "        {`r`n"
                     $results.Members = "`$members"
                     $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
@@ -830,7 +832,7 @@ function Export-TargetResource
             $Global:ErrorLog += "$_`r`n`r`n"
         }
     }
-    return $Content
+    return $Content.ToString()
 }
 
 Export-ModuleMember -Function *-TargetResource
