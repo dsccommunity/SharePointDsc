@@ -3,24 +3,30 @@ trigger:
     include:
     - master
   paths:
-    exclude:
-    - CHANGELOG.md
+    include:
+    - SharePointDsc/*
   tags:
     include:
     - "v*"
     exclude:
     - "*-*"
-#variables:
+variables:
+  buildFolderName: output
+  buildArtifactName: output
+  testResultFolderName: testResults
+  testArtifactName: testResults
 
 stages:
   - stage: Build
     jobs:
-      - job: BuildModuleJob
+      - job: Package_Module
+        displayName: 'Package Module'
         pool:
           vmImage: 'ubuntu 16.04'
         steps:
           - task: GitVersion@5
-            name: gitversion
+            name: gitVersion
+            displayName: 'Evaluate Next Version'
             inputs:
               runtime: 'core'
               configFilePath: 'GitVersion.yml'
@@ -33,21 +39,23 @@ stages:
               arguments: '-ResolveDependency -tasks pack'
               pwsh: true
             env:
-              ModuleVersion: $(GitVersion.NuGetVersionV2)
+              ModuleVersion: $(gitVersion.NuGetVersionV2)
 
-          - task: PublishBuildArtifacts@1
-            displayName: 'Publish Build Artifact'
+          - task: PublishPipelineArtifact@1
+            displayName: 'Publish Pipeline Artifact'
             inputs:
-              PathtoPublish: 'output/'
-              ArtifactName: 'output'
-              publishLocation: 'Container'
+              targetPath: '$(buildFolderName)/'
+              artifact: $(buildArtifactName)
+              publishLocation: 'pipeline'
+              parallel: true
 
-          - task: PublishBuildArtifacts@1
+          - task: PublishPipelineArtifact@1
             displayName: 'Publish Wiki Content Artifact'
             inputs:
-              pathToPublish: 'output/WikiContent/'
-              artifactName: 'WikiContent'
-              publishLocation: 'Container'
+              targetPath: '$(buildFolderName)/WikiContent'
+              artifact: 'WikiContent'
+              publishLocation: 'pipeline'
+              parallel: true
 
   - stage: Test
     dependsOn: Build
@@ -58,13 +66,12 @@ stages:
           vmImage: 'windows-2019'
         timeoutInMinutes: 0
         steps:
-          - task: DownloadBuildArtifacts@0
-            displayName: 'Download Build Artifact'
+          - task: DownloadPipelineArtifact@2
+            displayName: 'Download Pipeline Artifact'
             inputs:
               buildType: 'current'
-              downloadType: 'single'
-              artifactName: 'output'
-              downloadPath: '$(Build.SourcesDirectory)'
+              artifactName: $(buildArtifactName)
+              targetPath: '$(Build.SourcesDirectory)/$(buildArtifactName)'
 
           - task: PowerShell@2
             name: test
@@ -88,22 +95,12 @@ stages:
           vmImage: 'windows-2019'
         timeoutInMinutes: 0
         steps:
-          - powershell: |
-              $repositoryOwner,$repositoryName = $env:BUILD_REPOSITORY_NAME -split '/'
-
-              echo "##vso[task.setvariable variable=RepositoryOwner;isOutput=true]$repositoryOwner"
-              echo "##vso[task.setvariable variable=RepositoryName;isOutput=true]$repositoryName"
-            name: dscBuildVariable
-            displayName: 'Set Environment Variables'
-
-          - task: DownloadBuildArtifacts@0
-            displayName: 'Download Build Artifact'
+          - task: DownloadPipelineArtifact@2
+            displayName: 'Download Pipeline Artifact'
             inputs:
               buildType: 'current'
-              downloadType: 'single'
-              artifactName: 'output'
-              downloadPath: '$(Build.SourcesDirectory)'
-
+              artifactName: $(buildArtifactName)
+              targetPath: '$(Build.SourcesDirectory)/$(buildArtifactName)'
           - task: PowerShell@2
             name: test
             displayName: 'Run Unit Test for SP2013'
@@ -117,15 +114,15 @@ stages:
             condition: succeededOrFailed()
             inputs:
               testResultsFormat: 'NUnit'
-              testResultsFiles: 'output/testResults/NUnit*.xml'
-              testRunTitle: 'Unit (Windows Server Core)'
+              testResultsFiles: '$(buildFolderName)/$(testResultFolderName)/NUnit*.xml'
+              testRunTitle: 'Unit (SP2013)'
 
-          - task: PublishBuildArtifacts@1
+          - task: PublishPipelineArtifact@1
             displayName: 'Publish CodeCoverage Artifact'
             inputs:
-              pathToPublish: '$(Build.SourcesDirectory)/output/testResults'
+              targetPath: '$(buildFolderName)/$(testResultFolderName)/'
               artifactName: 'CodeCoverage_2013'
-              publishLocation: 'Container'
+              parallel: true
 
       - job: Test_Unit_2016
         displayName: 'Unit SP2016'
@@ -133,21 +130,12 @@ stages:
           vmImage: 'windows-2019'
         timeoutInMinutes: 0
         steps:
-          - powershell: |
-              $repositoryOwner,$repositoryName = $env:BUILD_REPOSITORY_NAME -split '/'
-
-              echo "##vso[task.setvariable variable=RepositoryOwner;isOutput=true]$repositoryOwner"
-              echo "##vso[task.setvariable variable=RepositoryName;isOutput=true]$repositoryName"
-            name: dscBuildVariable
-            displayName: 'Set Environment Variables'
-
-          - task: DownloadBuildArtifacts@0
-            displayName: 'Download Build Artifact'
+          - task: DownloadPipelineArtifact@2
+            displayName: 'Download Pipeline Artifact'
             inputs:
               buildType: 'current'
-              downloadType: 'single'
-              artifactName: 'output'
-              downloadPath: '$(Build.SourcesDirectory)'
+              artifactName: $(buildArtifactName)
+              targetPath: '$(Build.SourcesDirectory)/$(buildArtifactName)'
 
           - task: PowerShell@2
             name: test
@@ -162,15 +150,15 @@ stages:
             condition: succeededOrFailed()
             inputs:
               testResultsFormat: 'NUnit'
-              testResultsFiles: 'output/testResults/NUnit*.xml'
-              testRunTitle: 'Unit (Windows Server Core)'
+              testResultsFiles: '$(buildFolderName)/$(testResultFolderName)/NUnit*.xml'
+              testRunTitle: 'Unit (SP2016)'
 
-          - task: PublishBuildArtifacts@1
+          - task: PublishPipelineArtifact@1
             displayName: 'Publish CodeCoverage Artifact'
             inputs:
-              pathToPublish: '$(Build.SourcesDirectory)/output/testResults'
+              targetPath: '$(buildFolderName)/$(testResultFolderName)/'
               artifactName: 'CodeCoverage_2016'
-              publishLocation: 'Container'
+              parallel: true
 
       - job: Test_Unit_2019
         displayName: 'Unit SP2019'
@@ -178,22 +166,12 @@ stages:
           vmImage: 'windows-2019'
         timeoutInMinutes: 0
         steps:
-          - powershell: |
-              $repositoryOwner,$repositoryName = $env:BUILD_REPOSITORY_NAME -split '/'
-
-              echo "##vso[task.setvariable variable=RepositoryOwner;isOutput=true]$repositoryOwner"
-              echo "##vso[task.setvariable variable=RepositoryName;isOutput=true]$repositoryName"
-            name: dscBuildVariable
-            displayName: 'Set Environment Variables'
-
-          - task: DownloadBuildArtifacts@0
-            displayName: 'Download Build Artifact'
+          - task: DownloadPipelineArtifact@2
+            displayName: 'Download Pipeline Artifact'
             inputs:
               buildType: 'current'
-              downloadType: 'single'
-              artifactName: 'output'
-              downloadPath: '$(Build.SourcesDirectory)'
-
+              artifactName: $(buildArtifactName)
+              targetPath: '$(Build.SourcesDirectory)/$(buildArtifactName)'
           - task: PowerShell@2
             name: test
             displayName: 'Run Unit Test for SP2019'
@@ -207,65 +185,60 @@ stages:
             condition: succeededOrFailed()
             inputs:
               testResultsFormat: 'NUnit'
-              testResultsFiles: 'output/testResults/NUnit*.xml'
-              testRunTitle: 'Unit (Windows Server Core)'
+              testResultsFiles: '$(buildFolderName)/$(testResultFolderName)/NUnit*.xml'
+              testRunTitle: 'Unit (SP2019)'
 
-          - task: PublishBuildArtifacts@1
+          - task: PublishPipelineArtifact@1
             displayName: 'Publish CodeCoverage Artifact'
             inputs:
-              pathToPublish: '$(Build.SourcesDirectory)/output/testResults'
+              targetPath: '$(buildFolderName)/$(testResultFolderName)/'
               artifactName: 'CodeCoverage_2019'
-              publishLocation: 'Container'
+              parallel: true
 
-      - job: MergeCodeCoverage
+      - job: Code_Coverage
+        displayName: 'Publish Code Coverage'
         dependsOn:
         - 'Test_Unit_2013'
         - 'Test_Unit_2016'
         - 'Test_Unit_2019'
-        displayName: 'Merge Code Coverage'
         pool:
-          vmImage: 'windows-2019'
+          vmImage: 'ubuntu 16.04'
         timeoutInMinutes: 0
         steps:
-          - powershell: |
+          - pwsh: |
               $repositoryOwner,$repositoryName = $env:BUILD_REPOSITORY_NAME -split '/'
-
               echo "##vso[task.setvariable variable=RepositoryOwner;isOutput=true]$repositoryOwner"
               echo "##vso[task.setvariable variable=RepositoryName;isOutput=true]$repositoryName"
             name: dscBuildVariable
             displayName: 'Set Environment Variables'
 
-          - task: DownloadBuildArtifacts@0
-            displayName: 'Download Build Artifact'
+          - task: DownloadPipelineArtifact@2
+            displayName: 'Download Pipeline Artifact'
             inputs:
               buildType: 'current'
-              downloadType: 'single'
-              artifactName: 'output'
-              downloadPath: '$(Build.SourcesDirectory)'
+              artifactName: $(buildArtifactName)
+              targetPath: '$(Build.SourcesDirectory)/$(buildArtifactName)'
 
-          - task: DownloadBuildArtifacts@0
-            displayName: 'Download Build Artifact'
+          - task: DownloadPipelineArtifact@2
+            displayName: 'Download Test Artifact'
             inputs:
               buildType: 'current'
-              downloadType: 'single'
               artifactName: 'CodeCoverage_2013'
-              downloadPath: '$(Build.SourcesDirectory)/output'
+              targetPath: '$(Build.SourcesDirectory)/output/CodeCov2013'
 
-          - task: DownloadBuildArtifacts@0
-            displayName: 'Download Build Artifact'
+          - task: DownloadPipelineArtifact@2
+            displayName: 'Download Test Artifact'
             inputs:
               buildType: 'current'
-              downloadType: 'single'
               artifactName: 'CodeCoverage_2016'
-              downloadPath: '$(Build.SourcesDirectory)/output'
+              targetPath: '$(Build.SourcesDirectory)/output/CodeCov2016'
 
-          - task: DownloadBuildArtifacts@0
-            displayName: 'Download Build Artifact'
+          - task: DownloadPipelineArtifact@2
+            displayName: 'Download Test Artifact'
             inputs:
               buildType: 'current'
-              downloadType: 'single'
               artifactName: 'CodeCoverage_2019'
-              downloadPath: '$(Build.SourcesDirectory)/output'
+              targetPath: '$(Build.SourcesDirectory)/output/CodeCov2019'
 
           - task: PowerShell@2
             name: merge
@@ -273,39 +246,48 @@ stages:
             inputs:
               filePath: './build.ps1'
               arguments: "-Tasks merge"
-              pwsh: false
+              pwsh: true
 
           - task: PublishCodeCoverageResults@1
-            displayName: 'Publish Code Coverage'
+            displayName: 'Publish Azure Code Coverage'
+            condition: succeededOrFailed()
             inputs:
               codeCoverageTool: 'JaCoCo'
-              summaryFileLocation: 'output/CodeCov_Merged.xml'
-              pathToSources: '$(Build.SourcesDirectory)/output/$(dscBuildVariable.RepositoryName)'
+              summaryFileLocation: '$(Build.SourcesDirectory)/output/CodeCov_Merged.xml'
+              pathToSources: '$(Build.SourcesDirectory)/$(buildFolderName)/$(dscBuildVariable.RepositoryName)'
+
+          - script: |
+              bash <(curl -s https://codecov.io/bash) -f "./$(buildFolderName)/CodeCov_Merged.xml" -F unit
+            displayName: 'Upload to Codecov.io'
+            condition: succeededOrFailed()
 
   - stage: Deploy
     dependsOn: Test
-    # Only execute deploy stage if we're on master and previous stage succeeded
     condition: |
       and(
         succeeded(),
         or(
           eq(variables['Build.SourceBranch'], 'refs/heads/master'),
           startsWith(variables['Build.SourceBranch'], 'refs/tags/')
-        )
+        ),
+        contains(variables['System.TeamFoundationCollectionUri'], 'dsccommunity')
       )
     jobs:
-      - job: Deploy_Artefact
+      - job: Deploy_Module
+        displayName: 'Deploy Module'
         pool:
           vmImage: 'ubuntu 16.04'
         steps:
-          - task: DownloadBuildArtifacts@0
+          - task: DownloadPipelineArtifact@2
+            displayName: 'Download Pipeline Artifact'
             inputs:
               buildType: 'current'
-              downloadType: 'single'
-              artifactName: 'output'
-              downloadPath: '$(Build.SourcesDirectory)'
+              artifactName: $(buildArtifactName)
+              targetPath: '$(Build.SourcesDirectory)/$(buildArtifactName)'
+
           - task: PowerShell@2
-            name: publish_prerelease
+            name: publishRelease
+            displayName: 'Publish Release'
             inputs:
               filePath: './build.ps1'
               arguments: '-tasks publish'
@@ -313,8 +295,10 @@ stages:
             env:
               GitHubToken: $(GitHubToken)
               GalleryApiToken: $(GalleryApiToken)
+
           - task: PowerShell@2
-            name: send_changelog_PR
+            name: sendChangelogPR
+            displayName: 'Send Changelog PR'
             inputs:
               filePath: './build.ps1'
               arguments: '-tasks Create_ChangeLog_GitHub_PR'

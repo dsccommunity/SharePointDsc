@@ -1,15 +1,32 @@
-# Change log for SharePointDsc
+# Changelog for SharePointDsc
 
 The format is based on and uses the types of changes according to [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- SPUserProfileSyncConnection
+  - Added ability to update UseSSL and UseDisabledFilter parameters
+- SPWordAutomationServiceApp
+  - Added ability to specify that the new service app should be added
+    to the default proxy group
+
 ### Changed
 
+- SharePointDsc
+  - Updated pipeline build scripts
+- SPProjectServerConnector
+  - Updated logic to check to required DLL file
+- SPFarmAdministrators
+  - Update the event log messages so they are better formatted
+- SPQuotaTemplate
+  - Updated resource to prevent errors when specified limits are conflicting
+    configured values. E.g. new warning is high than the current max limit.
 - SPTrustedIdentityTokenIssuer
   - Do not set property ProviderSignOutUri in SharePoint 2013 as it does
-  not exist
+    not exist
 - SPUserProfileServiceApp
   - Changed MySiteHostLocation to not be mandatory
   - Added validation to Set function for testing if SiteNamingConflictResolution parameter
@@ -20,9 +37,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- SPTrustedIdentityTokenIssuer
+  - Do not set property ProviderSignOutUri in SharePoint 2013 as it does
+    not exist
 - SPWebAppPolicy
   - Fixed a blocking issue introduced in version 4.4.0 when extracting cache
     accounts
+
+### Removed
+
+- SharePointDsc
+  - Removed two old files from the previous CD/CI system
 
 ## [4.4.0] - 2020-11-14
 

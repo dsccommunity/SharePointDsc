@@ -19,7 +19,8 @@ class MSFT_SPWordAutomationServiceApp : OMI_BaseResource
     [Write, Description("What is the maximum number of sync conversion requests for the service app")] uint32 MaximumSyncConversionRequests;
     [Write, Description("How long is the keep alive timeout set to for the service app")] uint32 KeepAliveTimeout;
     [Write, Description("What is the maximum time in seconds for a document conversion to be allowed to run")] uint32 MaximumConversionTime;
-    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] string InstallAccount;
+    [Write, Description("Should the service application be added to the default proxy group?")] Boolean AddToDefault;
     [Write, Description("Should SQL Server authentication be used to connect to the database?")] Boolean UseSQLAuthentication;
     [Write, Description("If using SQL authentication, the SQL credentials to use to connect to the instance"), EmbeddedInstance("MSFT_Credential")] String DatabaseCredentials;
+    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] string InstallAccount;
 };

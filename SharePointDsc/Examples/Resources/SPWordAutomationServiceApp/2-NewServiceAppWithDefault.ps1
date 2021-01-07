@@ -35,7 +35,8 @@ Updated author, copyright notice, and URLs.
 <#
 
 .DESCRIPTION
- This example makes sure the service application exists and has a specific configuration
+ This example makes sure the service application exists and has a specific configuration.
+ The new service application is also added to the default proxy group.
 
 #>
 
@@ -69,6 +70,7 @@ Configuration Example
             MaximumSyncConversionRequests   = 25
             KeepAliveTimeout                = 30
             MaximumConversionTime           = 300
+            AddToDefault                    = $true
             PsDscRunAsCredential            = $SetupAccount
         }
     }
