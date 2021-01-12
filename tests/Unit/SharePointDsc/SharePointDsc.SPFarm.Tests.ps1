@@ -2822,6 +2822,11 @@ try
                         $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
                     }
 
+                    if ($null -eq (Get-Variable -Name 'DynamicCompilation' -ErrorAction SilentlyContinue))
+                    {
+                        $DynamicCompilation = $false
+                    }
+
                     if ($null -eq (Get-Variable -Name 'StandAlone' -ErrorAction SilentlyContinue))
                     {
                         $StandAlone = $true
@@ -2854,6 +2859,7 @@ try
                 }
 
                 It "Should return valid DSC block from the Export method" {
+                    Import-Module (Join-Path -Path (Split-Path -Path (Get-Module SharePointDsc).Path -Parent) -ChildPath "Modules\SharePointDSC.Reverse\SharePointDSC.Reverse.psm1")
                     Export-TargetResource | Should -Match $result
                 }
             }

@@ -1382,13 +1382,8 @@ function Export-TargetResource
         [System.Boolean]
         $RunCentralAdmin
     )
-    if (!(Get-PSSnapin Microsoft.SharePoint.Powershell -ErrorAction SilentlyContinue))
-    {
-        Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction 0
-    }
+
     $spMajorVersion = (Get-SPDscInstalledProductVersion).FileMajorPart
-    #$module = Resolve-Path ($Script:SPDSCPath + "\DSCResources\MSFT_SPFarm\MSFT_SPFarm.psm1")
-    #Import-Module $module
     $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
     $module = Join-Path -Path $ParentModuleBase -ChildPath "\DSCResources\MSFT_SPFarm\MSFT_SPFarm.psm1" -Resolve
 
@@ -1422,7 +1417,7 @@ function Export-TargetResource
         $caAuthMethod = "Kerberos"
     }
     $params.CentralAdministrationAuth = $caAuthMethod
-    $params.CentralAdministrationPort = $spCentralAdmin.IisSettings[0].ServerBindings.Port
+    $params.CentralAdministrationPort = (New-Object -TypeName System.Uri $spCentralAdmin.Url).Port
     $params.FarmAccount = $Global:spFarmAccount
     $params.Passphrase = $Global:spFarmAccount
     $results = Get-TargetResource @params
@@ -1438,16 +1433,14 @@ function Export-TargetResource
     {
         $results.Remove("CentralAdministrationUrl") | Out-Null
     }
-    if ($null -eq (Get-ConfigurationDataEntry -Node "NonNodeData" -Key "DatabaseServer"))
+
+    if ($DynamicCompilation)
     {
-        if ($DynamicCompilation)
-        {
-            Add-ConfigurationDataEntry -Node "NonNodeData" -Key "DatabaseServer" -Value 'localhost' -Description "Name of the Database Server associated with the destination SharePoint Farm;"
-        }
-        else
-        {
-            Add-ConfigurationDataEntry -Node "NonNodeData" -Key "DatabaseServer" -Value $configDB.NormalizedDataSource -Description "Name of the Database Server associated with the destination SharePoint Farm;"
-        }
+        Add-ConfigurationDataEntry -Node "NonNodeData" -Key "DatabaseServer" -Value 'localhost' -Description "Name of the Database Server associated with the destination SharePoint Farm;"
+    }
+    else
+    {
+        Add-ConfigurationDataEntry -Node "NonNodeData" -Key "DatabaseServer" -Value $configDB.NormalizedDataSource -Description "Name of the Database Server associated with the destination SharePoint Farm;"
     }
 
     if ($null -eq (Get-ConfigurationDataEntry -Node "NonNodeData" -Key "PassPhrase"))
@@ -1501,7 +1494,7 @@ function Export-TargetResource
         $Properties = @{
             Scope = "Farm"
         }
-        $Content += Read-TargetResource -ResourceName 'SPFeature' -ExportParam $Properties
+        $Content += Read-TargetResource -ResourceName 'SPFeature' -ExportParams $Properties
     }
     return $Content
 }

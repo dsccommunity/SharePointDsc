@@ -321,8 +321,8 @@ try
 
                     Mock -CommandName Get-SPWebApplication -MockWith {
                         $spWebApp = [PSCustomObject]@{
-                            Name                         = "SharePoint Sites"
-                            Url                          = "https://intranet.sharepoint.contoso.com"
+                            Name = "SharePoint Sites"
+                            Url  = "https://intranet.sharepoint.contoso.com"
                         }
                         return $spWebApp
                     }
@@ -348,6 +348,7 @@ try
                 }
 
                 It "Should return valid DSC block from the Export method" {
+                    Import-Module (Join-Path -Path (Split-Path -Path (Get-Module SharePointDsc).Path -Parent) -ChildPath "Modules\SharePointDSC.Reverse\SharePointDSC.Reverse.psm1")
                     Export-TargetResource | Should -Match $result
                 }
             }

@@ -179,10 +179,6 @@ function Test-TargetResource
 
 function Export-TargetResource
 {
-    if (!(Get-PSSnapin Microsoft.SharePoint.Powershell -ErrorAction SilentlyContinue))
-    {
-        Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction 0
-    }
     $VerbosePreference = "SilentlyContinue"
     $WOPIZone = Get-SPWOPIZone
     $bindings = Get-SPWOPIBinding  -WOPIZone $WOPIZone

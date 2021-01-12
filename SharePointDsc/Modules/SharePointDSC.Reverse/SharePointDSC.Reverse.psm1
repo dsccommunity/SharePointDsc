@@ -1,138 +1,8 @@
+[CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingWriteHost', '', Scope = 'Function', Target = '*')]
+param
+()
 
-<## Scripts Variables #>
-$Script:DH_SPQUOTATEMPLATE = @{}
-$Script:dscConfigContent = ""
-$Global:AllUsers = @()
-$Script:ErrorLog = ""
-$Script:configName = ""
-$Script:currentServerName = ""
-$SPDSCSource = "$env:ProgramFiles\WindowsPowerShell\Modules\SharePointDSC\"
-$SPDSCVersion = "4.4.0.0"
-$Script:spCentralAdmin = ""
-$Script:ExtractionModeValue = "2"
-$script:SkipSitesAndWebs = $SkipSitesAndWebs
-function Start-SharePointDSCExtract
-{
-    param
-    (
-        [Parameter()]
-        [switch]
-        $Quiet = $false,
-
-        [Parameter()]
-        [ValidateSet("Lite", "Default", "Full")]
-        [System.String]
-        $Mode = "Default",
-
-        [Parameter()]
-        [switch]
-        $Standalone,
-
-        [Parameter()]
-        [Boolean]
-        $Confirm = $true,
-
-        [Parameter()]
-        [String]
-        $OutputFile = $null,
-
-        [Parameter()]
-        [String]
-        $OutputPath = $null,
-
-        [Parameter()]
-        [switch]
-        $SkipSitesAndWebs = $false,
-
-        [Parameter()]
-        [switch]
-        $Azure = $false,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $Credentials,
-
-        [Parameter()]
-        [System.Object[]]
-        $ComponentsToExtract,
-
-        [Parameter()]
-        [switch]
-        $DynamicCompilation,
-
-        [Parameter()]
-        [String]
-        $ProductKey,
-
-        [Parameter()]
-        [String]
-        $BinaryLocation
-    )
-
-    <## Script Settings #>
-    $VerbosePreference = "SilentlyContinue"
-
-    if ($Quiet)
-    {
-        Write-Warning "-Quiet is deprecated. For unattended extraction, please use the -ComponentsToExtract parameter."
-    }
-
-    if ($Mode.ToLower() -eq "lite")
-    {
-        $Script:ExtractionModeValue = 1
-    }
-    elseif ($Mode.ToLower() -eq "full")
-    {
-        $Script:ExtractionModeValue = 3
-    }
-
-    try
-    {
-        $currentScript = Test-ScriptFileInfo $SCRIPT:MyInvocation.MyCommand.Path
-        $Script:version = $currentScript.Version.ToString()
-    }
-    catch
-    {
-        $Script:version = $SPDSCVersion
-    }
-    $Script:SPDSCPath = $SPDSCSource + $SPDSCVersion
-    $Global:spFarmAccount = ""
-
-    Add-PSSnapin Microsoft.SharePoint.PowerShell -EA SilentlyContinue
-    $sharePointSnapin = Get-PSSnapin | Where-Object { $_.Name -eq "Microsoft.SharePoint.PowerShell" }
-    if ($null -ne $sharePointSnapin)
-    {
-        if ($Quiet -or $ComponentsToExtract.Count -gt 0)
-        {
-            if ($StandAlone)
-            {
-                if ($DynamicCompilation)
-                {
-                    Get-SPReverseDSC -ComponentsToExtract $ComponentsToExtract -Credentials $Credentials -OutputPath $OutputPath -StandAlone -DynamicCompilation -ProductKey $ProductKey -BinaryLocation $BinaryLocation
-                }
-                else
-                {
-                    Get-SPReverseDSC -ComponentsToExtract $ComponentsToExtract -Credentials $Credentials -OutputPath $OutputPath -StandAlone -ProductKey $ProductKey -BinaryLocation $BinaryLocation
-                }
-            }
-            else
-            {
-                Get-SPReverseDSC -ComponentsToExtract $ComponentsToExtract -Credentials $Credentials -OutputPath $OutputPath -ProductKey $ProductKey -BinaryLocation $BinaryLocation
-            }
-        }
-        else
-        {
-            [System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms") | Out-Null
-            [System.Reflection.Assembly]::LoadWithPartialName("System.Drawing") | Out-Null
-            DisplayGUI
-        }
-    }
-    else
-    {
-        Write-Host "`r`nE102"  -BackgroundColor Red -ForegroundColor Black -NoNewline
-        Write-Host "    - We couldn't detect a SharePoint installation on this machine. Please execute the SharePoint ReverseDSC script on an existing SharePoint server."
-    }
-}
 function Get-SPReverseDSC
 {
     [CmdletBinding()]
@@ -257,7 +127,11 @@ function Get-SPReverseDSC
     }
 
     <## Save the content of the resulting DSC Configuration file into a file at the specified path. #>
-    $outputDSCFile = $OutputDSCPath + $fileName
+    $outputDSCFile = Join-Path -Path $OutputDSCPath -ChildPath $fileName
+    if (Test-Path -Path $outputDSCFile)
+    {
+        Remove-Item -Path $outputDSCFile -Force -Confirm $false
+    }
     $Script:dscConfigContent | Out-File $outputDSCFile
 
     <# Add the list of all user accounts detected to the configurationdata #>
@@ -278,7 +152,11 @@ function Get-SPReverseDSC
     }
     if (!$Azure)
     {
-        $outputConfigurationData = $OutputDSCPath + "ConfigurationData.psd1"
+        $outputConfigurationData = Join-Path -Path $OutputDSCPath -ChildPath "ConfigurationData.psd1"
+        if (Test-Path -Path $outputConfigurationData)
+        {
+            Remove-Item -Path $outputConfigurationData -Force -Confirm $false
+        }
         New-ConfigurationDataDocument -Path $outputConfigurationData
     }
     else
@@ -286,7 +164,11 @@ function Get-SPReverseDSC
         $resGroupName = Read-Host "Destination Resource Group Name"
         $automationAccountName = Read-Host "Destination Automation Account Name"
 
-        $azureDeployScriptPath = $OutputDSCPath + "DeployToAzure.ps1"
+        $azureDeployScriptPath = Join-Path -Path $OutputDSCPath -ChildPath "DeployToAzure.ps1"
+        if (Test-Path -Path $azureDeployScriptPath)
+        {
+            Remove-Item -Path $azureDeployScriptPath -Force -Confirm $false
+        }
         $configurationDataContent = Get-ConfigurationDataContent
         $deployScriptContent = "Login-AzureRMAccount`r`n`$configData = " + $configurationDataContent + "`r`n" + `
             "Import-AzureRmAutomationDscConfiguration -SourcePath (Get-Item '.\" + ($Script:configName + ".ps1") + "').FullName -ResourceGroupName `"" + $resGroupName + "`" -AutomationAccountName `"" + $automationAccountName + "`" -Verbose -Published -Force`r`n" + `
@@ -302,7 +184,7 @@ function Get-SPReverseDSC
 
     if ($Global:ErrorLog)
     {
-        $errorLogPath = $OutputDSCPath + "SharePointDSC.Reverse-Errors.log"
+        $errorLogPath = Join-Path -Path $OutputDSCPath -ChildPath "SharePointDSC.Reverse-Errors.log"
         $Global:ErrorLog | Out-File $errorLogPath
     }
 
@@ -334,13 +216,13 @@ function Read-TargetResource
     }
     catch
     {
-        Write-Host "$($ResourceName) not found" -ForegroundColor Magenta
+        Write-Host -Object "$($ResourceName) not found" -ForegroundColor Magenta
     }
 
     try
     {
         $FriendlyName = $ModuleName.Replace("MSFT_", "")
-        if ($Null -eq $Components -or $Components.Contains($FriendlyName))
+        if ($Null -eq $Global:ComponentsToExtract -or $Global:ComponentsToExtract.Contains($FriendlyName))
         {
             Import-Module $ResourceModule.FullName -Scope Local | Out-Null
             $module = Get-Module ($ModuleName) | Where-Object -FilterScript { $_.ExportedCommands.Keys -contains 'Export-TargetResource' }
@@ -396,8 +278,6 @@ function Orchestrator
     <#Skipped function for current time to disuss with Robert#>
     #Test-Prerequisites
 
-    Import-Module -Name "ReverseDSC" -Force
-
     $Global:ComponentsToExtract = $ComponentsToExtract
 
     if ($Credentials)
@@ -410,9 +290,6 @@ function Orchestrator
     }
     Save-Credentials $Global:spFarmAccount.UserName
 
-    <# Moved to Export-Target of MSFT_SPFarm.psm1
-    #$Script:spCentralAdmin = Get-SPWebApplication -IncludeCentralAdministration | Where-Object{$_.DisplayName -like '*Central Administration*'}
-     #>
     $spFarm = Get-SPFarm
     $spServers = $spFarm.Servers
     if ($Standalone)
@@ -429,14 +306,14 @@ function Orchestrator
     }
     $Script:dscConfigContent += "<# Generated with SharePointDSC " + $script:version + " #>`r`n"
 
-    Write-Host "Scanning Operating System Version..." -BackgroundColor DarkGreen -ForegroundColor White
-    Read-OperatingSystemVersion
+    Write-Host -Object "Scanning Operating System Version..." -BackgroundColor DarkGreen -ForegroundColor White
+    $Script:dscConfigContent += Read-OperatingSystemVersion
 
-    Write-Host "Scanning SQL Server Version..." -BackgroundColor DarkGreen -ForegroundColor White
-    Read-SQLVersion
+    Write-Host -Object "Scanning SQL Server Version..." -BackgroundColor DarkGreen -ForegroundColor White
+    $Script:dscConfigContent += Read-SQLVersion
 
-    Write-Host "Scanning Patch Levels..." -BackgroundColor DarkGreen -ForegroundColor White
-    Read-SPProductVersions
+    Write-Host -Object "Scanning Patch Levels..." -BackgroundColor DarkGreen -ForegroundColor White
+    $Script:dscConfigContent += Read-SPProductVersions
 
     $configName = "SharePointFarm"
     if ($Standalone)
@@ -447,7 +324,7 @@ function Orchestrator
     $Script:dscConfigContent += "{`r`n"
     $Script:dscConfigContent += "    <# Credentials #>`r`n"
 
-    Write-Host "Configuring Dependencies..." -BackgroundColor DarkGreen -ForegroundColor White
+    Write-Host -Object "Configuring Dependencies..." -BackgroundColor DarkGreen -ForegroundColor White
     Set-Imports
 
     $serverNumber = 1
@@ -461,283 +338,282 @@ function Orchestrator
             Add-ConfigurationDataEntry -Node $Script:currentServerName -Key "ServerNumber" -Value $serverNumber -Description ""
             $Script:dscConfigContent += "`r`n    Node `$AllNodes.Where{`$_.ServerNumber -eq '" + $serverNumber.ToString() + "'}.NodeName`r`n    {`r`n"
 
-            Write-Host "["$spServer.Name"] Generating the SharePoint Prerequisites Installation..." -BackgroundColor DarkGreen -ForegroundColor White
+            Write-Host -Object "[$($spServer.Name)] Generating the SharePoint Prerequisites Installation..." -BackgroundColor DarkGreen -ForegroundColor White
             $Script:dscConfigContent += Read-TargetResource -ResourceName SPInstallPrereqs
 
-            Write-Host "["$spServer.Name"] Generating the SharePoint Binary Installation..." -BackgroundColor DarkGreen -ForegroundColor White
+            Write-Host -Object "[$($spServer.Name)] Generating the SharePoint Binary Installation..." -BackgroundColor DarkGreen -ForegroundColor White
             $Script:dscConfigContent += Read-TargetResource -ResourceName SPInstall
 
-            Write-Host "["$spServer.Name"] Scanning the SharePoint Farm..." -BackgroundColor DarkGreen -ForegroundColor White
+            Write-Host -Object "[$($spServer.Name)] Scanning the SharePoint Farm..." -BackgroundColor DarkGreen -ForegroundColor White
             $Properties = @{
                 ServerName = $spServer.Address
             }
-            $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPFarm'
-            -ExportParams $Properties
+            $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPFarm' -ExportParams $Properties
 
             if ($serverNumber -eq 1)
             {
-                Write-Host "["$spServer.Name"] Scanning Managed Account(s)..." -BackgroundColor DarkGreen -ForegroundColor White
+                Write-Host -Object "[$($spServer.Name)] Scanning Managed Account(s)..." -BackgroundColor DarkGreen -ForegroundColor White
                 $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPManagedAccount'
 
-                Write-Host "["$spServer.Name"] Scanning Web Application(s)..." -BackgroundColor DarkGreen -ForegroundColor White
+                Write-Host -Object "[$($spServer.Name)] Scanning Web Application(s)..." -BackgroundColor DarkGreen -ForegroundColor White
                 $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPWebApplication'
 
-                Write-Host "["$spServer.Name"] Scanning Web Application(s) Permissions..." -BackgroundColor DarkGreen -ForegroundColor White
+                Write-Host -Object "[$($spServer.Name)] Scanning Web Application(s) Permissions..." -BackgroundColor DarkGreen -ForegroundColor White
                 $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPWebAppPermissions'
 
-                Write-Host "["$spServer.Name"] Scanning Alternate Url(s)..." -BackgroundColor DarkGreen -ForegroundColor White
+                Write-Host -Object "[$($spServer.Name)] Scanning Alternate Url(s)..." -BackgroundColor DarkGreen -ForegroundColor White
                 $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPAlternateUrl'
 
-                Write-Host "["$spServer.Name"] Scanning Managed Path(s)..." -BackgroundColor DarkGreen -ForegroundColor White
+                Write-Host -Object "[$($spServer.Name)] Scanning Managed Path(s)..." -BackgroundColor DarkGreen -ForegroundColor White
                 $Script:dscConfigContent += Read-TargetResource -ResourceName SPManagedPath
 
-                Write-Host "["$spServer.Name"] Scanning Application Pool(s)..." -BackgroundColor DarkGreen -ForegroundColor White
+                Write-Host -Object "[$($spServer.Name)] Scanning Application Pool(s)..." -BackgroundColor DarkGreen -ForegroundColor White
                 $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPServiceAppPool'
 
-                Write-Host "["$spServer.Name"] Scanning Content Database(s)..." -BackgroundColor DarkGreen -ForegroundColor White
+                Write-Host -Object "[$($spServer.Name)] Scanning Content Database(s)..." -BackgroundColor DarkGreen -ForegroundColor White
                 $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPContentDatabase'
 
-                Write-Host "["$spServer.Name"] Scanning Quota Template(s)..." -BackgroundColor DarkGreen -ForegroundColor White
+                Write-Host -Object "[$($spServer.Name)] Scanning Quota Template(s)..." -BackgroundColor DarkGreen -ForegroundColor White
                 $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPQuotaTemplate'
 
-                Write-Host "["$spServer.Name"] Scanning Site Collection(s)..." -BackgroundColor DarkGreen -ForegroundColor White
+                Write-Host -Object "[$($spServer.Name)] Scanning Site Collection(s)..." -BackgroundColor DarkGreen -ForegroundColor White
                 $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPSite'
 
-                Write-Host "["$spServer.Name"] Scanning Diagnostic Logging Settings..." -BackgroundColor DarkGreen -ForegroundColor White
+                Write-Host -Object "[$($spServer.Name)] Scanning Diagnostic Logging Settings..." -BackgroundColor DarkGreen -ForegroundColor White
                 $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPDiagnosticLoggingSettings'
 
-                Write-Host "["$spServer.Name"] Scanning Usage Service Application..." -BackgroundColor DarkGreen -ForegroundColor White
+                Write-Host -Object "[$($spServer.Name)] Scanning Usage Service Application..." -BackgroundColor DarkGreen -ForegroundColor White
                 $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPUsageApplication'
 
-                Write-Host "["$spServer.Name"] Scanning Web Application Policy..." -BackgroundColor DarkGreen -ForegroundColor White
+                Write-Host -Object "[$($spServer.Name)] Scanning Web Application Policy..." -BackgroundColor DarkGreen -ForegroundColor White
                 $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPWebAppPolicy'
 
-                Write-Host "["$spServer.Name"] Scanning State Service Application..." -BackgroundColor DarkGreen -ForegroundColor White
+                Write-Host -Object "[$($spServer.Name)] Scanning State Service Application..." -BackgroundColor DarkGreen -ForegroundColor White
                 $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPStateServiceApp'
 
-                Write-Host "["$spServer.Name"] Scanning User Profile Service Application(s)..." -BackgroundColor DarkGreen -ForegroundColor White
+                Write-Host -Object "[$($spServer.Name)] Scanning User Profile Service Application(s)..." -BackgroundColor DarkGreen -ForegroundColor White
                 $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPUserProfileServiceApp'
 
-                Write-Host "["$spServer.Name"] Scanning Machine Translation Service Application(s)..." -BackgroundColor DarkGreen -ForegroundColor White
+                Write-Host -Object "[$($spServer.Name)] Scanning Machine Translation Service Application(s)..." -BackgroundColor DarkGreen -ForegroundColor White
                 $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPMachineTranslationServiceApp'
 
-                Write-Host "["$spServer.Name"] Cache Account(s)..." -BackgroundColor DarkGreen -ForegroundColor White
+                Write-Host -Object "[$($spServer.Name)] Scanning Cache Account(s)..." -BackgroundColor DarkGreen -ForegroundColor White
                 $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPCacheAccounts'
 
-                Write-Host "["$spServer.Name"] Scanning Secure Store Service Application(s)..." -BackgroundColor DarkGreen -ForegroundColor White
+                Write-Host -Object "[$($spServer.Name)] Scanning Secure Store Service Application(s)..." -BackgroundColor DarkGreen -ForegroundColor White
                 $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPSecureStoreServiceApp'
 
-                Write-Host "["$spServer.Name"] Scanning Business Connectivity Service Application(s)..." -BackgroundColor DarkGreen -ForegroundColor White
+                Write-Host -Object "[$($spServer.Name)] Scanning Business Connectivity Service Application(s)..." -BackgroundColor DarkGreen -ForegroundColor White
                 $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPBCSServiceApp'
 
-                Write-Host "["$spServer.Name"] Scanning Search Service Application(s)..." -BackgroundColor DarkGreen -ForegroundColor White
+                Write-Host -Object "[$($spServer.Name)] Scanning Search Service Application(s)..." -BackgroundColor DarkGreen -ForegroundColor White
                 $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPSearchServiceApp'
 
-                Write-Host "["$spServer.Name"] Scanning Managed Metadata Service Application(s)..." -BackgroundColor DarkGreen -ForegroundColor White
+                Write-Host -Object "[$($spServer.Name)] Scanning Managed Metadata Service Application(s)..." -BackgroundColor DarkGreen -ForegroundColor White
                 $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPManagedMetadataServiceApp'
 
-                Write-Host "["$spServer.Name"] Scanning Access Service Application(s)..." -BackgroundColor DarkGreen -ForegroundColor White
+                Write-Host -Object "[$($spServer.Name)] Scanning Access Service Application(s)..." -BackgroundColor DarkGreen -ForegroundColor White
                 $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPAccessServiceApp'
 
-                Write-Host "["$spServer.Name"] Scanning Antivirus Settings(s)..." -BackgroundColor DarkGreen -ForegroundColor White
+                Write-Host -Object "[$($spServer.Name)] Scanning Antivirus Settings(s)..." -BackgroundColor DarkGreen -ForegroundColor White
                 $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPAntivirusSettings'
 
-                Write-Host "["$spServer.Name"] Scanning App Catalog Settings(s)..." -BackgroundColor DarkGreen -ForegroundColor White
+                Write-Host -Object "[$($spServer.Name)] Scanning App Catalog Settings(s)..." -BackgroundColor DarkGreen -ForegroundColor White
                 $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPAppCatalog'
 
-                Write-Host "["$spServer.Name"] Scanning Subscription Settings Service Application Settings(s)..." -BackgroundColor DarkGreen -ForegroundColor White
+                Write-Host -Object "[$($spServer.Name)] Scanning Subscription Settings Service Application Settings(s)..." -BackgroundColor DarkGreen -ForegroundColor White
                 $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPSubscriptionSettingsServiceApp'
 
-                Write-Host "["$spServer.Name"] Scanning App Domain Settings(s)..." -BackgroundColor DarkGreen -ForegroundColor White
+                Write-Host -Object "[$($spServer.Name)] Scanning App Domain Settings(s)..." -BackgroundColor DarkGreen -ForegroundColor White
                 $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPAppDomain'
 
-                Write-Host "["$spServer.Name"] Scanning App Management Service App Settings(s)..." -BackgroundColor DarkGreen -ForegroundColor White
+                Write-Host -Object "[$($spServer.Name)] Scanning App Management Service App Settings(s)..." -BackgroundColor DarkGreen -ForegroundColor White
                 $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPAppManagementServiceApp'
 
-                Write-Host "["$spServer.Name"] Scanning App Store Settings(s)..." -BackgroundColor DarkGreen -ForegroundColor White
+                Write-Host -Object "[$($spServer.Name)] Scanning App Store Settings(s)..." -BackgroundColor DarkGreen -ForegroundColor White
                 $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPAppStoreSettings'
 
-                Write-Host "["$spServer.Name"] Scanning Blob Cache Settings(s)..." -BackgroundColor DarkGreen -ForegroundColor White
+                Write-Host -Object "[$($spServer.Name)] Scanning Blob Cache Settings(s)..." -BackgroundColor DarkGreen -ForegroundColor White
                 $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPBlobCacheSettings'
                 <#
-                Write-Host "["$spServer.Name"] Scanning Configuration Wizard Settings(s)..." -BackgroundColor DarkGreen -ForegroundColor White
+                Write-Host "[$($spServer.Name)] Scanning Configuration Wizard Settings(s)..." -BackgroundColor DarkGreen -ForegroundColor White
                 $Script:dscConfigContent += Read-TargetResource -ResourceName SPConfigWizard
 #>
                 if ($Global:ExtractionModeValue -ge 2)
                 {
-                    Write-Host "["$spServer.Name"] Scanning Database(s) Availability Group Settings(s)..." -BackgroundColor DarkGreen -ForegroundColor White
+                    Write-Host -Object "[$($spServer.Name)] Scanning Database(s) Availability Group Settings(s)..." -BackgroundColor DarkGreen -ForegroundColor White
                     $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPDatabaseAAG'
                 }
 
-                Write-Host "["$spServer.Name"] Scanning Distributed Cache Settings(s)..." -BackgroundColor DarkGreen -ForegroundColor White
+                Write-Host -Object "[$($spServer.Name)] Scanning Distributed Cache Settings(s)..." -BackgroundColor DarkGreen -ForegroundColor White
                 $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPDistributedCacheService'
 
-                Write-Host "["$spServer.Name"] Scanning Excel Services Application Settings(s)..." -BackgroundColor DarkGreen -ForegroundColor White
+                Write-Host -Object "[$($spServer.Name)] Scanning Excel Services Application Settings(s)..." -BackgroundColor DarkGreen -ForegroundColor White
                 $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPExcelServiceApp'
 
-                Write-Host "["$spServer.Name"] Scanning Farm Administrator(s)..." -BackgroundColor DarkGreen -ForegroundColor White
+                Write-Host -Object "[$($spServer.Name)] Scanning Farm Administrator(s)..." -BackgroundColor DarkGreen -ForegroundColor White
                 $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPFarmAdministrators'
 
-                Write-Host "["$spServer.Name"] Scanning Farm Solution(s)..." -BackgroundColor DarkGreen -ForegroundColor White
+                Write-Host -Object "[$($spServer.Name)] Scanning Farm Solution(s)..." -BackgroundColor DarkGreen -ForegroundColor White
                 $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPFarmSolution'
 
                 if ($Global:ExtractionModeValue -eq 3)
                 {
-                    Write-Host "["$spServer.Name"] Scanning Health Rule(s)..." -BackgroundColor DarkGreen -ForegroundColor White
+                    Write-Host -Object "[$($spServer.Name)] Scanning Health Rule(s)..." -BackgroundColor DarkGreen -ForegroundColor White
                     $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPHealthAnalyzerRuleState'
                 }
 
-                Write-Host "["$spServer.Name"] Scanning IRM Settings(s)..." -BackgroundColor DarkGreen -ForegroundColor White
+                Write-Host -Object "[$($spServer.Name)] Scanning IRM Settings(s)..." -BackgroundColor DarkGreen -ForegroundColor White
                 $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPIrmSettings'
 
                 if ($Global:ExtractionModeValue -ge 2)
                 {
-                    Write-Host "["$spServer.Name"] Scanning Office Online Binding(s)..." -BackgroundColor DarkGreen -ForegroundColor White
+                    Write-Host -Object "[$($spServer.Name)] Scanning Office Online Binding(s)..." -BackgroundColor DarkGreen -ForegroundColor White
                     $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPOfficeOnlineServerBinding'
                 }
 
                 if ($Global:ExtractionModeValue -ge 2)
                 {
-                    Write-Host "["$spServer.Name"] Scanning Crawl Rules(s)..." -BackgroundColor DarkGreen -ForegroundColor White
+                    Write-Host -Object "[$($spServer.Name)] Scanning Crawl Rules(s)..." -BackgroundColor DarkGreen -ForegroundColor White
                     $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPSearchCrawlRule'
                 }
 
                 if ($Global:ExtractionModeValue -eq 3)
                 {
-                    Write-Host "["$spServer.Name"] Scanning Search File Type(s)..." -BackgroundColor DarkGreen -ForegroundColor White
+                    Write-Host -Object "[$($spServer.Name)] Scanning Search File Type(s)..." -BackgroundColor DarkGreen -ForegroundColor White
                     $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPSearchFileType'
                 }
 
-                Write-Host "["$spServer.Name"] Scanning Search Index Partition(s)..." -BackgroundColor DarkGreen -ForegroundColor White
+                Write-Host -Object "[$($spServer.Name)] Scanning Search Index Partition(s)..." -BackgroundColor DarkGreen -ForegroundColor White
                 $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPSearchIndexPartition'
 
                 if ($Global:ExtractionModeValue -ge 2)
                 {
-                    Write-Host "["$spServer.Name"] Scanning Search Result Source(s)..." -BackgroundColor DarkGreen -ForegroundColor White
+                    Write-Host -Object "[$($spServer.Name)] Scanning Search Result Source(s)..." -BackgroundColor DarkGreen -ForegroundColor White
                     $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPSearchResultSource'
                 }
 
-                Write-Host "["$spServer.Name"] Scanning Search Topology..." -BackgroundColor DarkGreen -ForegroundColor White
+                Write-Host -Object "[$($spServer.Name)] Scanning Search Topology..." -BackgroundColor DarkGreen -ForegroundColor White
                 $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPSearchTopology'
 
-                Write-Host "["$spServer.Name"] Scanning Word Automation Service Application..." -BackgroundColor DarkGreen -ForegroundColor White
+                Write-Host -Object "[$($spServer.Name)] Scanning Word Automation Service Application..." -BackgroundColor DarkGreen -ForegroundColor White
                 $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPWordAutomationServiceApp'
 
-                Write-Host "["$spServer.Name"] Scanning Visio Graphics Service Application..." -BackgroundColor DarkGreen -ForegroundColor White
+                Write-Host -Object "[$($spServer.Name)] Scanning Visio Graphics Service Application..." -BackgroundColor DarkGreen -ForegroundColor White
                 $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPVisioServiceApp'
 
-                Write-Host "["$spServer.Name"] Scanning Work Management Service Application..." -BackgroundColor DarkGreen -ForegroundColor White
+                Write-Host -Object "[$($spServer.Name)] Scanning Work Management Service Application..." -BackgroundColor DarkGreen -ForegroundColor White
                 $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPWorkManagementServiceApp'
 
-                Write-Host "["$spServer.Name"] Scanning Performance Point Service Application..." -BackgroundColor DarkGreen -ForegroundColor White
+                Write-Host -Object "[$($spServer.Name)] Scanning Performance Point Service Application..." -BackgroundColor DarkGreen -ForegroundColor White
                 $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPPerformancePointServiceApp'
 
                 if ($Global:ExtractionModeValue -ge 2)
                 {
-                    Write-Host "["$spServer.Name"] Scanning Web Applications Workflow Settings..." -BackgroundColor DarkGreen -ForegroundColor White
+                    Write-Host -Object "[$($spServer.Name)] Scanning Web Applications Workflow Settings..." -BackgroundColor DarkGreen -ForegroundColor White
                     $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPWebAppWorkflowSettings'
                 }
 
                 if ($Global:ExtractionModeValue -ge 2)
                 {
-                    Write-Host "["$spServer.Name"] Scanning Web Applications Throttling Settings..." -BackgroundColor DarkGreen -ForegroundColor White
+                    Write-Host -Object "[$($spServer.Name)] Scanning Web Applications Throttling Settings..." -BackgroundColor DarkGreen -ForegroundColor White
                     $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPWebAppThrottlingSettings'
                 }
 
                 if ($Global:ExtractionModeValue -eq 3)
                 {
-                    Write-Host "["$spServer.Name"] Scanning the Timer Job States..." -BackgroundColor DarkGreen -ForegroundColor White
+                    Write-Host -Object "[$($spServer.Name)] Scanning the Timer Job States..." -BackgroundColor DarkGreen -ForegroundColor White
                     $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPTimerJobState'
                 }
 
                 if ($Global:ExtractionModeValue -ge 2)
                 {
-                    Write-Host "["$spServer.Name"] Scanning Web Applications Usage and Deletion Settings..." -BackgroundColor DarkGreen -ForegroundColor White
+                    Write-Host -Object "[$($spServer.Name)] Scanning Web Applications Usage and Deletion Settings..." -BackgroundColor DarkGreen -ForegroundColor White
                     $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPWebAppSiteUseAndDeletion'
                 }
 
                 if ($Global:ExtractionModeValue -ge 2)
                 {
-                    Write-Host "["$spServer.Name"] Scanning Web Applications Proxy Groups..." -BackgroundColor DarkGreen -ForegroundColor White
+                    Write-Host -Object "[$($spServer.Name)] Scanning Web Applications Proxy Groups..." -BackgroundColor DarkGreen -ForegroundColor White
                     $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPWebAppProxyGroup'
                 }
 
                 if ($Global:ExtractionModeValue -ge 2)
                 {
-                    Write-Host "["$spServer.Name"] Scanning Web Applications Extension(s)..." -BackgroundColor DarkGreen -ForegroundColor White
+                    Write-Host -Object "[$($spServer.Name)] Scanning Web Applications Extension(s)..." -BackgroundColor DarkGreen -ForegroundColor White
                     $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPWebApplicationExtension'
                 }
 
-                Write-Host "["$spServer.Name"] Scanning Web Applications App Domain(s)..." -BackgroundColor DarkGreen -ForegroundColor White
+                Write-Host -Object "[$($spServer.Name)] Scanning Web Applications App Domain(s)..." -BackgroundColor DarkGreen -ForegroundColor White
                 $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPWebApplicationAppDomain'
 
                 if ($Global:ExtractionModeValue -ge 2)
                 {
-                    Write-Host "["$spServer.Name"] Scanning Web Application(s) General Settings..." -BackgroundColor DarkGreen -ForegroundColor White
+                    Write-Host -Object "[$($spServer.Name)] Scanning Web Application(s) General Settings..." -BackgroundColor DarkGreen -ForegroundColor White
                     $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPWebAppGeneralSettings'
                 }
 
-                Write-Host "["$spServer.Name"] Scanning Web Application(s) Blocked File Types..." -BackgroundColor DarkGreen -ForegroundColor White
+                Write-Host -Object "[$($spServer.Name)] Scanning Web Application(s) Blocked File Types..." -BackgroundColor DarkGreen -ForegroundColor White
                 $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPWebAppBlockedFileTypes'
 
                 if ($Global:ExtractionModeValue -ge 2)
                 {
-                    Write-Host "["$spServer.Name"] Scanning User Profile Section(s)..." -BackgroundColor DarkGreen -ForegroundColor White
+                    Write-Host -Object "[$($spServer.Name)] Scanning User Profile Section(s)..." -BackgroundColor DarkGreen -ForegroundColor White
                     $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPUserProfileSection'
                 }
 
                 if ($Global:ExtractionModeValue -ge 2)
                 {
-                    Write-Host "["$spServer.Name"] Scanning User Profile Properties..." -BackgroundColor DarkGreen -ForegroundColor White
+                    Write-Host -Object "[$($spServer.Name)] Scanning User Profile Properties..." -BackgroundColor DarkGreen -ForegroundColor White
                     $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPUserProfileProperty'
                 }
 
                 if ($Global:ExtractionModeValue -ge 2)
                 {
-                    Write-Host "["$spServer.Name"] Scanning User Profile Permissions..." -BackgroundColor DarkGreen -ForegroundColor White
+                    Write-Host -Object "[$($spServer.Name)] Scanning User Profile Permissions..." -BackgroundColor DarkGreen -ForegroundColor White
                     $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPUserProfileServiceAppPermissions'
                 }
                 if ($Global:ExtractionModeValue -ge 2)
                 {
-                    Write-Host "["$spServer.Name"] Scanning User Profile Sync Connections..." -BackgroundColor DarkGreen -ForegroundColor White
+                    Write-Host -Object "[$($spServer.Name)] Scanning User Profile Sync Connections..." -BackgroundColor DarkGreen -ForegroundColor White
                     $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPUserProfileSyncConnection'
                 }
 
                 if ($Global:ExtractionModeValue -ge 2)
                 {
-                    Write-Host "["$spServer.Name"] Scanning Trusted Identity Token Issuer(s)..." -BackgroundColor DarkGreen -ForegroundColor White
+                    Write-Host -Object "[$($spServer.Name)] Scanning Trusted Identity Token Issuer(s)..." -BackgroundColor DarkGreen -ForegroundColor White
                     $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPTrustedIdentityTokenIssuer'
                 }
 
-                Write-Host "["$spServer.Name"] Scanning Farm Property Bag..." -BackgroundColor DarkGreen -ForegroundColor White
+                Write-Host -Object "[$($spServer.Name)] Scanning Farm Property Bag..." -BackgroundColor DarkGreen -ForegroundColor White
                 $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPFarmPropertyBag'
 
-                Write-Host "["$spServer.Name"] Scanning Session State Service..." -BackgroundColor DarkGreen -ForegroundColor White
+                Write-Host -Object "[$($spServer.Name)] Scanning Session State Service..." -BackgroundColor DarkGreen -ForegroundColor White
                 $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPSessionStateService'
 
-                Write-Host "["$spServer.Name"] Scanning Published Service Application(s)..." -BackgroundColor DarkGreen -ForegroundColor White
+                Write-Host -Object "[$($spServer.Name)] Scanning Published Service Application(s)..." -BackgroundColor DarkGreen -ForegroundColor White
                 $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPPublishServiceApplication'
 
                 if ($Global:ExtractionModeValue -ge 2)
                 {
-                    Write-Host "["$spServer.Name"] Scanning Remote Farm Trust(s)..." -BackgroundColor DarkGreen -ForegroundColor White
+                    Write-Host -Object "[$($spServer.Name)] Scanning Remote Farm Trust(s)..." -BackgroundColor DarkGreen -ForegroundColor White
                     $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPRemoteFarmTrust'
                 }
 
                 if ($Global:ExtractionModeValue -ge 2)
                 {
-                    Write-Host "["$spServer.Name"] Scanning Farm Password Change Settings..." -BackgroundColor DarkGreen -ForegroundColor White
+                    Write-Host -Object "[$($spServer.Name)] Scanning Farm Password Change Settings..." -BackgroundColor DarkGreen -ForegroundColor White
                     $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPPasswordChangeSettings'
                 }
 
                 if ($Global:ExtractionModeValue -ge 2)
                 {
-                    Write-Host "["$spServer.Name"] Scanning Service Application(s) Security Settings..." -BackgroundColor DarkGreen -ForegroundColor White
+                    Write-Host -Object "[$($spServer.Name)] Scanning Service Application(s) Security Settings..." -BackgroundColor DarkGreen -ForegroundColor White
                     $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPServiceAppSecurity'
                 }
             }
 
-            Write-Host "["$spServer.Name"] Scanning Service Instance(s)..." -BackgroundColor DarkGreen -ForegroundColor White
+            Write-Host -Object "[$($spServer.Name)] Scanning Service Instance(s)..." -BackgroundColor DarkGreen -ForegroundColor White
             if (!$Standalone)
             {
                 $Properties = @{
@@ -761,7 +637,7 @@ function Orchestrator
                     -ExportParams $Properties
             }
 
-            Write-Host "["$spServer.Name"] Configuring Local Configuration Manager (LCM)..." -BackgroundColor DarkGreen -ForegroundColor White
+            Write-Host -Object "[$($spServer.Name)] Configuring Local Configuration Manager (LCM)..." -BackgroundColor DarkGreen -ForegroundColor White
             Set-LCM
 
             $Script:dscConfigContent += "`r`n    }`r`n"
@@ -769,7 +645,7 @@ function Orchestrator
         }
     }
     $Script:dscConfigContent += "`r`n}`r`n"
-    Write-Host "Configuring Credentials..." -BackgroundColor DarkGreen -ForegroundColor White
+    Write-Host -Object "Configuring Credentials..." -BackgroundColor DarkGreen -ForegroundColor White
     Set-ObtainRequiredCredentials
 
     $Script:dscConfigContent += "$configName -ConfigurationData .\ConfigurationData.psd1"
@@ -848,7 +724,7 @@ function Read-SQLVersion
 
 function Read-OperatingSystemVersion
 {
-    $servers = Get-SPServer
+    $servers = Get-SPServer | Where-Object { $_.Role -ne "Invalid" }
     $Content = "<#`r`n    Operating Systems in this Farm`r`n-------------------------------------------`r`n"
     $Content += "    Products and Language Packs`r`n"
     $Content += "-------------------------------------------`r`n"
@@ -856,7 +732,7 @@ function Read-OperatingSystemVersion
     $total = $servers.Length
     foreach ($spServer in $servers)
     {
-        Write-Host "Scanning Operating System Settings [$i/$total] for server {$($spServer.Name)}"
+        Write-Host -Object "Scanning Operating System Settings [$i/$total] for server {$($spServer.Name)}"
         $serverName = $spServer.Name
         try
         {
@@ -872,6 +748,7 @@ function Read-OperatingSystemVersion
             $Global:ErrorLog += "[Operating System]" + $spServer.Name + "`r`n"
             $Global:ErrorLog += "$_`r`n`r`n"
         }
+        $i++
     }
     $Content += "#>`r`n`r`n"
     return $Content
@@ -1362,7 +1239,7 @@ function DisplayGUI()
     $chckTrustedIdentity = New-Object System.Windows.Forms.CheckBox
     $chckTrustedIdentity.Top = 100
     $chckTrustedIdentity.AutoSize = $true;
-    $chckTrustedIdentity.Name = "chckTrustedIdentity"
+    $chckTrustedIdentity.Name = "SPTrustedIdentityTokenIssuer"
     $chckTrustedIdentity.Checked = $true
     $chckTrustedIdentity.Text = "Trusted Identity Token Issuer"
     $panelSecurity.Controls.Add($chckTrustedIdentity);
@@ -1691,7 +1568,7 @@ function DisplayGUI()
     $chckWAThrottling = New-Object System.Windows.Forms.CheckBox
     $chckWAThrottling.Top = 160
     $chckWAThrottling.AutoSize = $true;
-    $chckWAThrottling.Name = "chckWAThrottling"
+    $chckWAThrottling.Name = "SPWebAppThrottlingSettings"
     $chckWAThrottling.Checked = $true
     $chckWAThrottling.Text = "Throttling Settings"
     $panelWebApp.Controls.Add($chckWAThrottling);
@@ -1734,7 +1611,7 @@ function DisplayGUI()
     $chckAppCatalog = New-Object System.Windows.Forms.CheckBox
     $chckAppCatalog.Top = 0
     $chckAppCatalog.AutoSize = $true;
-    $chckAppCatalog.Name = "chckAppCatalog"
+    $chckAppCatalog.Name = "SPAppCatalog"
     $chckAppCatalog.Checked = $true
     $chckAppCatalog.Text = "App Catalog"
     $panelCustomization.Controls.Add($chckAppCatalog);
@@ -1742,7 +1619,7 @@ function DisplayGUI()
     $chckAppDomain = New-Object System.Windows.Forms.CheckBox
     $chckAppDomain.Top = 20
     $chckAppDomain.AutoSize = $true;
-    $chckAppDomain.Name = "SPAppCatalog"
+    $chckAppDomain.Name = "SPAppDomain"
     $chckAppDomain.Checked = $true
     $chckAppDomain.Text = "App Domain"
     $panelCustomization.Controls.Add($chckAppDomain);
@@ -2137,14 +2014,9 @@ function DisplayGUI()
                     }
                 }
                 $form.Hide()
-                $componentsToString = "@("
-                foreach ($component in $SelectedComponents)
-                {
-                    $componentsToString += "`"" + $component + "`","
-                }
-                $componentsToString = $componentsToString.Substring(0, $componentsToString.Length - 1) + ")"
-                Write-Host "To execute the same extraction process unattended, run the following command:" -BackgroundColor DarkGreen -ForegroundColor White
-                Write-Host ".\SharePointDSC.Reverse.ps1 -ComponentsToExtract $componentsToString"
+                $componentsToString = "@(`"$($SelectedComponents -join "`",`"")`")"
+                Write-Host -Object "To execute the same extraction process unattended, run the following command:" -BackgroundColor DarkGreen -ForegroundColor White
+                Write-Host -Object "Start-SharePointDSCExtract -ComponentsToExtract $componentsToString -Credentials (Get-Credential)"
 
                 $password = ConvertTo-SecureString $txtPassword.Text -AsPlainText -Force
                 $credentials = New-Object System.Management.Automation.PSCredential ($txtFarmAccount.Text, $password)
@@ -2312,7 +2184,7 @@ function Set-SPDscTermStoreAdministrators
             $total = $members.Length
             foreach ($member in $members)
             {
-                Write-Host "    -> Scanning TermStore Admins [$i/$total]"
+                Write-Host -Object "    -> Scanning TermStore Admins [$i/$total]"
                 if ($member.StartsWith("`"`$"))
                 {
                     $newLine += $member.Replace("`"", "") + ", "

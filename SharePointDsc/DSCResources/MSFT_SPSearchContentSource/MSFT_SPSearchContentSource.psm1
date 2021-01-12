@@ -1084,10 +1084,7 @@ function Export-TargetResource
         [System.String[]]
         $DependsOn
     )
-    if (!(Get-PSSnapin Microsoft.SharePoint.Powershell -ErrorAction SilentlyContinue))
-    {
-        Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction 0
-    }
+
     $VerbosePreference = "SilentlyContinue"
     $content = ''
     $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase

@@ -453,10 +453,6 @@ function Merge-SPDscFarmAdminList
 
 function Export-TargetResource
 {
-    if (!(Get-PSSnapin Microsoft.SharePoint.Powershell -ErrorAction SilentlyContinue))
-    {
-        Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction 0
-    }
     $VerbosePreference = "SilentlyContinue"
     try
     {

@@ -352,10 +352,7 @@ function Export-TargetResource
         [System.String[]]
         $DependsOn
     )
-    if (!(Get-PSSnapin Microsoft.SharePoint.Powershell -ErrorAction SilentlyContinue))
-    {
-        Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction 0
-    }
+
     $VerbosePreference = "SilentlyContinue"
     $content = ''
     $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
@@ -396,7 +393,7 @@ function Export-TargetResource
                     DependsOn = "[SPWeb]$($SPWebGuid)"
                 }
                 $partialContent += Read-TargetResource -ResourceName 'SPFeature' `
-                    -ExportParam $Properties
+                    -ExportParams $Properties
             }
             $j++
         }

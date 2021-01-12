@@ -582,10 +582,6 @@ function Test-TargetResource
 
 function Export-TargetResource
 {
-    if (!(Get-PSSnapin Microsoft.SharePoint.Powershell -ErrorAction SilentlyContinue))
-    {
-        Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction 0
-    }
     $VerbosePreference = "SilentlyContinue"
     $searchSA = Get-SPServiceApplication | Where-Object { $_.GetType().Name -eq "SearchServiceApplication" }
 
@@ -625,8 +621,15 @@ function Export-TargetResource
                     $results.Remove("SearchCenterUrl")
                 }
 
-                Save-Credentials -UserName $results["DefaultContentAccessAccount"].Username
-                $results["DefaultContentAccessAccount"] = Resolve-Credentials -UserName $results["DefaultContentAccessAccount"].Username
+                if ($null -eq $results["DefaultContentAccessAccount"])
+                {
+                    $results.Remove("DefaultContentAccessAccount")
+                }
+                else
+                {
+                    Save-Credentials -UserName $results["DefaultContentAccessAccount"].Username
+                    $results["DefaultContentAccessAccount"] = Resolve-Credentials -UserName $results["DefaultContentAccessAccount"].Username
+                }
 
                 $results = Repair-Credentials -results $results
 
@@ -634,7 +637,10 @@ function Export-TargetResource
                 $results.DatabaseServer = "`$ConfigurationData.NonNodeData.DatabaseServer"
 
                 $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
-                $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "DefaultContentAccessAccount"
+                if ($results.ContainsKey("DefaultContentAccessAccount"))
+                {
+                    $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "DefaultContentAccessAccount"
+                }
                 $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "DatabaseServer"
                 $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
                 $partialContent += $currentBlock

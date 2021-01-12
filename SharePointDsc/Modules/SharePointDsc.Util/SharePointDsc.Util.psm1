@@ -1338,11 +1338,11 @@ function Test-SPDscUserIsLocalAdmin
     $accountName = $UserName.Split('\')[1]
 
     return ([ADSI]"WinNT://$($env:computername)/Administrators,group").PSBase.Invoke("Members") | `
-        ForEach-Object -Process {
-        $_.GetType().InvokeMember("Name", 'GetProperty', $null, $_, $null)
-    } | Where-Object -FilterScript {
-        $_ -eq $accountName
-    }
+            ForEach-Object -Process {
+            $_.GetType().InvokeMember("Name", 'GetProperty', $null, $_, $null)
+        } | Where-Object -FilterScript {
+            $_ -eq $accountName
+        }
 }
 
 function Test-SPDscIsADUser
@@ -1536,6 +1536,135 @@ function ConvertTo-ReverseString
         $reverseString += $InputString[$i]
     }
     return $reverseString
+}
+
+function Start-SharePointDSCExtract
+{
+    param
+    (
+        [Parameter()]
+        [switch]
+        $Quiet = $false,
+
+        [Parameter()]
+        [ValidateSet("Lite", "Default", "Full")]
+        [System.String]
+        $Mode = "Default",
+
+        [Parameter()]
+        [switch]
+        $Standalone,
+
+        [Parameter()]
+        [Boolean]
+        $Confirm = $true,
+
+        [Parameter()]
+        [String]
+        $OutputFile = $null,
+
+        [Parameter()]
+        [String]
+        $OutputPath = $null,
+
+        [Parameter()]
+        [switch]
+        $SkipSitesAndWebs = $false,
+
+        [Parameter()]
+        [switch]
+        $Azure = $false,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $Credentials,
+
+        [Parameter()]
+        [System.Object[]]
+        $ComponentsToExtract,
+
+        [Parameter()]
+        [switch]
+        $DynamicCompilation,
+
+        [Parameter()]
+        [String]
+        $ProductKey,
+
+        [Parameter()]
+        [String]
+        $BinaryLocation
+    )
+
+    $spDscModule = (Get-Module "SharePointDSC")
+    $spDscModulePath = Split-Path -Path $spDscModule.Path -Parent
+    Import-Module -Name (Join-Path -Path $spDscModulePath -ChildPath "Modules\SharePointDSC.Reverse\SharePointDSC.Reverse.psm1") -Scope Global
+
+    <## Script Settings #>
+    $VerbosePreference = "SilentlyContinue"
+
+    <## Scripts Variables #>
+    $Script:DH_SPQUOTATEMPLATE = @{}
+    $Script:dscConfigContent = ""
+    $Global:AllUsers = @()
+    $Script:ErrorLog = ""
+    $Script:configName = ""
+    $Script:currentServerName = ""
+    $SPDSCSource = "$env:ProgramFiles\WindowsPowerShell\Modules\SharePointDSC\"
+    $Script:spCentralAdmin = ""
+    $Script:ExtractionModeValue = "2"
+    $script:SkipSitesAndWebs = $SkipSitesAndWebs
+
+    if ($Quiet)
+    {
+        Write-Warning "-Quiet is deprecated. For unattended extraction, please use the -ComponentsToExtract parameter."
+    }
+
+    if ($Mode.ToLower() -eq "lite")
+    {
+        $Script:ExtractionModeValue = 1
+    }
+    elseif ($Mode.ToLower() -eq "full")
+    {
+        $Script:ExtractionModeValue = 3
+    }
+
+    $Script:version = $spDscModule.Version.ToString()
+    $Global:spFarmAccount = ""
+
+    $sharePointSnapin = Get-PSSnapin | Where-Object { $_.Name -eq "Microsoft.SharePoint.PowerShell" }
+    if ($null -ne $sharePointSnapin)
+    {
+        if ($Quiet -or $ComponentsToExtract.Count -gt 0)
+        {
+            if ($StandAlone)
+            {
+                if ($DynamicCompilation)
+                {
+                    Get-SPReverseDSC -ComponentsToExtract $ComponentsToExtract -Credentials $Credentials -OutputPath $OutputPath -StandAlone -DynamicCompilation -ProductKey $ProductKey -BinaryLocation $BinaryLocation
+                }
+                else
+                {
+                    Get-SPReverseDSC -ComponentsToExtract $ComponentsToExtract -Credentials $Credentials -OutputPath $OutputPath -StandAlone -ProductKey $ProductKey -BinaryLocation $BinaryLocation
+                }
+            }
+            else
+            {
+                Get-SPReverseDSC -ComponentsToExtract $ComponentsToExtract -Credentials $Credentials -OutputPath $OutputPath -ProductKey $ProductKey -BinaryLocation $BinaryLocation
+            }
+        }
+        else
+        {
+            [System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms") | Out-Null
+            [System.Reflection.Assembly]::LoadWithPartialName("System.Drawing") | Out-Null
+            DisplayGUI
+        }
+    }
+    else
+    {
+        Write-Host -Object "`r`nE102"  -BackgroundColor Red -ForegroundColor Black -NoNewline
+        Write-Host -Object "    - We couldn't detect a SharePoint installation on this machine. Please execute the SharePoint ReverseDSC script on an existing SharePoint server."
+    }
 }
 
 Export-ModuleMember -Function *

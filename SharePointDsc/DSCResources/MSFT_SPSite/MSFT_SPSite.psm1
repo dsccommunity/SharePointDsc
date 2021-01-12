@@ -163,9 +163,9 @@ function Get-TargetResource
 
             $admService = Get-SPDscContentService
             $quota = ($admService.QuotaTemplates | `
-                    Where-Object -FilterScript {
-                    $_.QuotaID -eq $site.Quota.QuotaID
-                }).Name
+                        Where-Object -FilterScript {
+                        $_.QuotaID -eq $site.Quota.QuotaID
+                    }).Name
 
             $CreateDefaultGroups = $true
             if ($null -eq $site.RootWeb.AssociatedVisitorGroup -and
@@ -518,10 +518,6 @@ function Test-TargetResource
 
 function Export-TargetResource
 {
-    if (!(Get-PSSnapin Microsoft.SharePoint.Powershell -ErrorAction SilentlyContinue))
-    {
-        Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction 0
-    }
     $VerbosePreference = "SilentlyContinue"
     $spSites = Get-SPSite -Limit All
     $siteGuid = $null
@@ -668,7 +664,7 @@ function Export-TargetResource
                     URL = $SPSite.URL
                 }
                 $partialContent += Read-TargetResource -ResourceName 'SPSiteUrl' `
-                    -ExportParam $properties
+                    -ExportParams $properties
 
                 <# Nik20170112 - There are restrictions preventing this setting from being applied if the PsDscRunAsCredential parameter is not used.
                             Since this is only available in WMF 5, we check to see if the node farm we are extracting the configuration from is
@@ -680,7 +676,7 @@ function Export-TargetResource
                         Scope = "SiteCollection"
                     }
                     $partialContent += Read-TargetResource -Resource 'SPDesignerSettings' `
-                        -ExportParam $properties
+                        -ExportParams $properties
                 }
 
                 <# SPSite Feature Section #>
@@ -692,7 +688,7 @@ function Export-TargetResource
                         DependsOn = "[SPSite]$($siteGuid)"
                     }
                     $partialContent += Read-TargetResource -ResourceName 'SPFeature' `
-                        -ExportParam $properties
+                        -ExportParams $properties
                 }
 
                 if (($Global:ExtractionModeValue -eq 3 -and $Quiet) -or $Global:ComponentsToExtract.Contains("SPWeb"))
@@ -702,7 +698,7 @@ function Export-TargetResource
                         DependsOn = "[SPSite]$($siteGuid)"
                     }
                     $partialContent += Read-TargetResource -ResourceName 'SPWeb' `
-                        -ExportParam $properties
+                        -ExportParams $properties
                 }
             }
             $i++

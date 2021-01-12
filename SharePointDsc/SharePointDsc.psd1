@@ -59,7 +59,7 @@
     # RequiredAssemblies = @()
 
     # Script files (.ps1) that are run in the caller's environment prior to importing this module.
-    # ScriptsToProcess = @()
+    ScriptsToProcess     = @("Modules\SharePointDsc.Reverse\Import-SPPowerShellSnapIn.ps1")
 
     # Type files (.ps1xml) to be loaded when importing this module
     # TypesToProcess = @()
@@ -68,8 +68,7 @@
     # FormatsToProcess = @()
 
     # Modules to import as nested modules of the module specified in RootModule/ModuleToProcess
-    NestedModules        = @("Modules\SharePointDsc.Reverse\SharePointDsc.Reverse.psm1",
-        "Modules\SharePointDsc.Util\SharePointDsc.Util.psm1")
+    NestedModules        = @("Modules\SharePointDsc.Util\SharePointDsc.Util.psm1")
 
     # Functions to export from this module
     FunctionsToExport    = @(

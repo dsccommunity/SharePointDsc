@@ -39,6 +39,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- SPBlobCacheSettings
+  - Fixed issue where the Get method threw an error when the zone didn't exist.
 - SPTrustedIdentityTokenIssuer
   - Do not set property ProviderSignOutUri in SharePoint 2013 as it does
     not exist

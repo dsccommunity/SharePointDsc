@@ -50,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
                 $getTypeFullName = "Microsoft.SharePoint.SPSubscriptionSettingsServiceApplication"
@@ -156,367 +156,367 @@ try
 
                         $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
                             New-Object -TypeName "Object" |
-                            Add-Member -MemberType NoteProperty `
-                                -Name FullName `
-                                -Value $getTypeFullName `
-                                -PassThru |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name GetProperties `
-                                -Value {
-                                param($x)
-                                return @(
-                                    (New-Object -TypeName "Object" |
-                                        Add-Member -MemberType NoteProperty `
-                                            -Name Name `
-                                            -Value "Database" `
-                                            -PassThru |
-                                        Add-Member -MemberType ScriptMethod `
-                                            -Name GetValue `
+                                Add-Member -MemberType NoteProperty `
+                                    -Name FullName `
+                                    -Value $getTypeFullName `
+                                    -PassThru |
+                                    Add-Member -MemberType ScriptMethod `
+                                        -Name GetProperties `
+                                        -Value {
+                                        param($x)
+                                        return @(
+                                            (New-Object -TypeName "Object" |
+                                                    Add-Member -MemberType NoteProperty `
+                                                        -Name Name `
+                                                        -Value "Database" `
+                                                        -PassThru |
+                                                        Add-Member -MemberType ScriptMethod `
+                                                            -Name GetValue `
+                                                            -Value {
+                                                            param($x)
+                                                            return (
+                                                                @{
+                                                                    FullName             = $getTypeFullName
+                                                                    Name                 = "Test_DB"
+                                                                    NormalizedDataSource = "TestServer\Instance"
+                                                                    FailoverServer       = @{
+                                                                        Name = "DBServer_Failover"
+                                                                    }
+                                                                }
+                                                            )
+                                                        } -PassThru
+                                                    )
+                                                )
+                                            } -PassThru
+                                        } -PassThru -Force
+
+                                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                                            -Name IsConnected `
                                             -Value {
                                             param($x)
-                                            return (
-                                                @{
-                                                    FullName             = $getTypeFullName
-                                                    Name                 = "Test_DB"
-                                                    NormalizedDataSource = "TestServer\Instance"
-                                                    FailoverServer       = @{
-                                                        Name = "DBServer_Failover"
+                                            return $false
+                                        } -PassThru -Force
+
+                                        return $spServiceApp
+                                    }
+
+                                    Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
+                                        return @(
+                                            @{
+                                                Name = "Managed Metadata Service Application Proxy"
+                                            }
+                                        )
+                                    }
+                                }
+
+                                It "Should return Present from the Get method" {
+                                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
+                                }
+
+                                It "Should create the proxy in the Set method" {
+                                    Set-TargetResource @testParams
+                                    Assert-MockCalled New-SPSubscriptionSettingsServiceApplicationProxy
+                                }
+
+                                It "Should return false from the Test method" {
+                                    Test-TargetResource @testParams | Should -Be $false
+                                }
+                            }
+
+                            Context -Name "When a service application exists and is configured correctly" -Fixture {
+                                BeforeAll {
+                                    $testParams = @{
+                                        Name            = "Test App"
+                                        ApplicationPool = "Test App Pool"
+                                        DatabaseName    = "Test_DB"
+                                        DatabaseServer  = "TestServer\Instance"
+                                        Ensure          = "Present"
+                                    }
+
+                                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                                        $spServiceApp = [PSCustomObject]@{
+                                            TypeName        = "Microsoft SharePoint Foundation Subscription Settings Service Application"
+                                            DisplayName     = $testParams.Name
+                                            ApplicationPool = @{
+                                                Name = $testParams.ApplicationPool
+                                            }
+                                        }
+
+                                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                                            New-Object -TypeName "Object" |
+                                                Add-Member -MemberType NoteProperty `
+                                                    -Name FullName `
+                                                    -Value $getTypeFullName `
+                                                    -PassThru |
+                                                    Add-Member -MemberType ScriptMethod `
+                                                        -Name GetProperties `
+                                                        -Value {
+                                                        param($x)
+                                                        return @(
+                                                            (New-Object -TypeName "Object" |
+                                                                    Add-Member -MemberType NoteProperty `
+                                                                        -Name Name `
+                                                                        -Value "Database" `
+                                                                        -PassThru |
+                                                                        Add-Member -MemberType ScriptMethod `
+                                                                            -Name GetValue `
+                                                                            -Value {
+                                                                            param($x)
+                                                                            return (
+                                                                                @{
+                                                                                    FullName             = $getTypeFullName
+                                                                                    Name                 = "Test_DB"
+                                                                                    NormalizedDataSource = "TestServer\Instance"
+                                                                                    FailoverServer       = @{
+                                                                                        Name = "DBServer_Failover"
+                                                                                    }
+                                                                                }
+                                                                            )
+                                                                        } -PassThru
+                                                                    )
+                                                                )
+                                                            } -PassThru
+                                                        } -PassThru -Force
+
+                                                        return $spServiceApp
                                                     }
                                                 }
-                                            )
-                                        } -PassThru
-                                    )
-                                )
-                            } -PassThru
-                        } -PassThru -Force
 
-                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
-                            -Name IsConnected `
-                            -Value {
-                            param($x)
-                            return $false
-                        } -PassThru -Force
-
-                        return $spServiceApp
-                    }
-
-                    Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
-                        return @(
-                            @{
-                                Name = "Managed Metadata Service Application Proxy"
-                            }
-                        )
-                    }
-                }
-
-                It "Should return Present from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
-                }
-
-                It "Should create the proxy in the Set method" {
-                    Set-TargetResource @testParams
-                    Assert-MockCalled New-SPSubscriptionSettingsServiceApplicationProxy
-                }
-
-                It "Should return false from the Test method" {
-                    Test-TargetResource @testParams | Should -Be $false
-                }
-            }
-
-            Context -Name "When a service application exists and is configured correctly" -Fixture {
-                BeforeAll {
-                    $testParams = @{
-                        Name            = "Test App"
-                        ApplicationPool = "Test App Pool"
-                        DatabaseName    = "Test_DB"
-                        DatabaseServer  = "TestServer\Instance"
-                        Ensure          = "Present"
-                    }
-
-                    Mock -CommandName Get-SPServiceApplication -MockWith {
-                        $spServiceApp = [PSCustomObject]@{
-                            TypeName        = "Microsoft SharePoint Foundation Subscription Settings Service Application"
-                            DisplayName     = $testParams.Name
-                            ApplicationPool = @{
-                                Name = $testParams.ApplicationPool
-                            }
-                        }
-
-                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
-                            New-Object -TypeName "Object" |
-                            Add-Member -MemberType NoteProperty `
-                                -Name FullName `
-                                -Value $getTypeFullName `
-                                -PassThru |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name GetProperties `
-                                -Value {
-                                param($x)
-                                return @(
-                                    (New-Object -TypeName "Object" |
-                                        Add-Member -MemberType NoteProperty `
-                                            -Name Name `
-                                            -Value "Database" `
-                                            -PassThru |
-                                        Add-Member -MemberType ScriptMethod `
-                                            -Name GetValue `
-                                            -Value {
-                                            param($x)
-                                            return (
-                                                @{
-                                                    FullName             = $getTypeFullName
-                                                    Name                 = "Test_DB"
-                                                    NormalizedDataSource = "TestServer\Instance"
-                                                    FailoverServer       = @{
-                                                        Name = "DBServer_Failover"
-                                                    }
+                                                It "Should return present from the get method" {
+                                                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                                                 }
-                                            )
-                                        } -PassThru
-                                    )
-                                )
-                            } -PassThru
-                        } -PassThru -Force
 
-                        return $spServiceApp
-                    }
-                }
-
-                It "Should return present from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
-                }
-
-                It "Should return true when the Test method is called" {
-                    Test-TargetResource @testParams | Should -Be $true
-                }
-            }
-
-            Context -Name "When a service application exists and the app pool is not configured correctly" -Fixture {
-                BeforeAll {
-                    $testParams = @{
-                        Name            = "Test App"
-                        ApplicationPool = "Test App Pool"
-                        DatabaseName    = "Test_DB"
-                        DatabaseServer  = "TestServer\Instance"
-                        Ensure          = "Present"
-                    }
-
-                    Mock -CommandName Get-SPServiceApplication -MockWith {
-                        $spServiceApp = [pscustomobject]@{
-                            TypeName        = "Microsoft SharePoint Foundation Subscription Settings Service Application"
-                            DisplayName     = $testParams.Name
-                            ApplicationPool = @{ Name = "Wrong App Pool Name" }
-                        }
-                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
-                            -Name Update `
-                            -Value {
-                            $Global:SPDscSubscriptionServiceUpdateCalled = $true
-                        } -PassThru
-
-                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
-                            New-Object -TypeName "Object" |
-                            Add-Member -MemberType NoteProperty `
-                                -Name FullName `
-                                -Value $getTypeFullName `
-                                -PassThru |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name GetProperties `
-                                -Value {
-                                param($x)
-                                return @(
-                                    (New-Object -TypeName "Object" |
-                                        Add-Member -MemberType NoteProperty `
-                                            -Name Name `
-                                            -Value "Database" `
-                                            -PassThru |
-                                        Add-Member -MemberType ScriptMethod `
-                                            -Name GetValue `
-                                            -Value {
-                                            param($x)
-                                            return (
-                                                @{
-                                                    FullName             = $getTypeFullName
-                                                    Name                 = "Test_DB"
-                                                    NormalizedDataSource = "TestServer\Instance"
-                                                    FailoverServer       = @{
-                                                        Name = "DBServer_Failover"
-                                                    }
+                                                It "Should return true when the Test method is called" {
+                                                    Test-TargetResource @testParams | Should -Be $true
                                                 }
-                                            )
-                                        } -PassThru
-                                    )
-                                )
-                            } -PassThru
-                        } -PassThru -Force
+                                            }
 
-                        return $spServiceApp
-                    }
-
-                    Mock -CommandName Get-SPServiceApplicationPool {
-                        return @{
-                            Name = $testParams.ApplicationPool
-                        }
-                    }
-                }
-
-                It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should -Be $false
-                }
-
-                It "Should call the update service app cmdlet from the set method" {
-                    $Global:SPDscSubscriptionServiceUpdateCalled = $false
-                    Set-TargetResource @testParams
-                    Assert-MockCalled Get-SPServiceApplicationPool
-                    $Global:SPDscSubscriptionServiceUpdateCalled | Should -Be $true
-                }
-            }
-
-            Context -Name "When a service app needs to be created and no database parameters are provided" -Fixture {
-                BeforeAll {
-                    $testParams = @{
-                        Name            = "Test App"
-                        ApplicationPool = "Test App Pool"
-                        Ensure          = "Present"
-                    }
-
-                    Mock -CommandName Get-SPServiceApplication -MockWith {
-                        return $null
-                    }
-                }
-
-                It "should not throw an exception in the set method" {
-                    Set-TargetResource @testParams
-                    Assert-MockCalled New-SPSubscriptionSettingsServiceApplication
-                    Assert-MockCalled New-SPSubscriptionSettingsServiceApplicationProxy
-                }
-            }
-
-            Context -Name "When the service app exists but it shouldn't" -Fixture {
-                BeforeAll {
-                    $testParams = @{
-                        Name            = "Test App"
-                        ApplicationPool = "-"
-                        Ensure          = "Absent"
-                    }
-
-                    Mock -CommandName Get-SPServiceApplication -MockWith {
-                        $spServiceApp = [PSCustomObject]@{
-                            TypeName        = "Microsoft SharePoint Foundation Subscription Settings Service Application"
-                            DisplayName     = $testParams.Name
-                            ApplicationPool = @{
-                                Name = $testParams.ApplicationPool
-                            }
-                        }
-                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
-                            New-Object -TypeName "Object" |
-                            Add-Member -MemberType NoteProperty `
-                                -Name FullName `
-                                -Value $getTypeFullName `
-                                -PassThru |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name GetProperties `
-                                -Value {
-                                param($x)
-                                return @(
-                                    (New-Object -TypeName "Object" |
-                                        Add-Member -MemberType NoteProperty `
-                                            -Name Name `
-                                            -Value "Database" `
-                                            -PassThru |
-                                        Add-Member -MemberType ScriptMethod `
-                                            -Name GetValue `
-                                            -Value {
-                                            param($x)
-                                            return (
-                                                @{
-                                                    FullName             = $getTypeFullName
-                                                    Name                 = "Test_DB"
-                                                    NormalizedDataSource = "TestServer\Instance"
-                                                    FailoverServer       = @{
-                                                        Name = "DBServer_Failover"
+                                            Context -Name "When a service application exists and the app pool is not configured correctly" -Fixture {
+                                                BeforeAll {
+                                                    $testParams = @{
+                                                        Name            = "Test App"
+                                                        ApplicationPool = "Test App Pool"
+                                                        DatabaseName    = "Test_DB"
+                                                        DatabaseServer  = "TestServer\Instance"
+                                                        Ensure          = "Present"
                                                     }
-                                                }
-                                            )
-                                        } -PassThru
-                                    )
-                                )
-                            } -PassThru
-                        } -PassThru -Force
-                        return $spServiceApp
-                    }
-                }
 
-                It "Should return present from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
-                }
+                                                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                                                        $spServiceApp = [pscustomobject]@{
+                                                            TypeName        = "Microsoft SharePoint Foundation Subscription Settings Service Application"
+                                                            DisplayName     = $testParams.Name
+                                                            ApplicationPool = @{ Name = "Wrong App Pool Name" }
+                                                        }
+                                                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                                                            -Name Update `
+                                                            -Value {
+                                                            $Global:SPDscSubscriptionServiceUpdateCalled = $true
+                                                        } -PassThru
 
-                It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should -Be $false
-                }
+                                                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                                                            New-Object -TypeName "Object" |
+                                                                Add-Member -MemberType NoteProperty `
+                                                                    -Name FullName `
+                                                                    -Value $getTypeFullName `
+                                                                    -PassThru |
+                                                                    Add-Member -MemberType ScriptMethod `
+                                                                        -Name GetProperties `
+                                                                        -Value {
+                                                                        param($x)
+                                                                        return @(
+                                                                            (New-Object -TypeName "Object" |
+                                                                                    Add-Member -MemberType NoteProperty `
+                                                                                        -Name Name `
+                                                                                        -Value "Database" `
+                                                                                        -PassThru |
+                                                                                        Add-Member -MemberType ScriptMethod `
+                                                                                            -Name GetValue `
+                                                                                            -Value {
+                                                                                            param($x)
+                                                                                            return (
+                                                                                                @{
+                                                                                                    FullName             = $getTypeFullName
+                                                                                                    Name                 = "Test_DB"
+                                                                                                    NormalizedDataSource = "TestServer\Instance"
+                                                                                                    FailoverServer       = @{
+                                                                                                        Name = "DBServer_Failover"
+                                                                                                    }
+                                                                                                }
+                                                                                            )
+                                                                                        } -PassThru
+                                                                                    )
+                                                                                )
+                                                                            } -PassThru
+                                                                        } -PassThru -Force
 
-                It "Should remove the service application in the set method" {
-                    Set-TargetResource @testParams
-                    Assert-MockCalled Remove-SPServiceApplication
-                }
-            }
+                                                                        return $spServiceApp
+                                                                    }
 
-            Context -Name "When the service app doesn't exist and shouldn't" -Fixture {
-                BeforeAll {
-                    $testParams = @{
-                        Name            = "Test App"
-                        ApplicationPool = "-"
-                        Ensure          = "Absent"
-                    }
+                                                                    Mock -CommandName Get-SPServiceApplicationPool {
+                                                                        return @{
+                                                                            Name = $testParams.ApplicationPool
+                                                                        }
+                                                                    }
+                                                                }
 
-                    Mock -CommandName Get-SPServiceApplication -MockWith {
-                        return $null
-                    }
-                }
+                                                                It "Should return false when the Test method is called" {
+                                                                    Test-TargetResource @testParams | Should -Be $false
+                                                                }
 
-                It "Should return absent from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
-                }
+                                                                It "Should call the update service app cmdlet from the set method" {
+                                                                    $Global:SPDscSubscriptionServiceUpdateCalled = $false
+                                                                    Set-TargetResource @testParams
+                                                                    Assert-MockCalled Get-SPServiceApplicationPool
+                                                                    $Global:SPDscSubscriptionServiceUpdateCalled | Should -Be $true
+                                                                }
+                                                            }
 
-                It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should -Be $true
-                }
-            }
+                                                            Context -Name "When a service app needs to be created and no database parameters are provided" -Fixture {
+                                                                BeforeAll {
+                                                                    $testParams = @{
+                                                                        Name            = "Test App"
+                                                                        ApplicationPool = "Test App Pool"
+                                                                        Ensure          = "Present"
+                                                                    }
 
-            Context -Name "Running ReverseDsc Export" -Fixture {
-                BeforeAll {
-                    Mock -CommandName Write-Host -MockWith { }
+                                                                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                                                                        return $null
+                                                                    }
+                                                                }
 
-                    Mock -CommandName Get-TargetResource -MockWith {
-                        return @{
-                            Name                 = "Subscription Settings Service Application"
-                            ApplicationPool      = "Service App Pool"
-                            DatabaseServer       = "SQL01"
-                            DatabaseName         = "SP_SubscriptionSettings"
-                        }
-                    }
+                                                                It "should not throw an exception in the set method" {
+                                                                    Set-TargetResource @testParams
+                                                                    Assert-MockCalled New-SPSubscriptionSettingsServiceApplication
+                                                                    Assert-MockCalled New-SPSubscriptionSettingsServiceApplicationProxy
+                                                                }
+                                                            }
 
-                    Mock -CommandName Get-SPServiceApplication -MockWith {
-                        $spServiceApp = [PSCustomObject]@{
-                            DisplayName     = "Subscription Settings Service Application"
-                            Name            = "Subscription Settings Service Application"
-                        }
-                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
-                            -Name GetType `
-                            -Value {
-                            return @{
-                                Name = "SPSubscriptionSettingsServiceApplication"
-                            }
-                        } -PassThru -Force
-                        return $spServiceApp
-                    }
+                                                            Context -Name "When the service app exists but it shouldn't" -Fixture {
+                                                                BeforeAll {
+                                                                    $testParams = @{
+                                                                        Name            = "Test App"
+                                                                        ApplicationPool = "-"
+                                                                        Ensure          = "Absent"
+                                                                    }
 
-                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
-                    {
-                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
-                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
-                    }
+                                                                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                                                                        $spServiceApp = [PSCustomObject]@{
+                                                                            TypeName        = "Microsoft SharePoint Foundation Subscription Settings Service Application"
+                                                                            DisplayName     = $testParams.Name
+                                                                            ApplicationPool = @{
+                                                                                Name = $testParams.ApplicationPool
+                                                                            }
+                                                                        }
+                                                                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                                                                            New-Object -TypeName "Object" |
+                                                                                Add-Member -MemberType NoteProperty `
+                                                                                    -Name FullName `
+                                                                                    -Value $getTypeFullName `
+                                                                                    -PassThru |
+                                                                                    Add-Member -MemberType ScriptMethod `
+                                                                                        -Name GetProperties `
+                                                                                        -Value {
+                                                                                        param($x)
+                                                                                        return @(
+                                                                                            (New-Object -TypeName "Object" |
+                                                                                                    Add-Member -MemberType NoteProperty `
+                                                                                                        -Name Name `
+                                                                                                        -Value "Database" `
+                                                                                                        -PassThru |
+                                                                                                        Add-Member -MemberType ScriptMethod `
+                                                                                                            -Name GetValue `
+                                                                                                            -Value {
+                                                                                                            param($x)
+                                                                                                            return (
+                                                                                                                @{
+                                                                                                                    FullName             = $getTypeFullName
+                                                                                                                    Name                 = "Test_DB"
+                                                                                                                    NormalizedDataSource = "TestServer\Instance"
+                                                                                                                    FailoverServer       = @{
+                                                                                                                        Name = "DBServer_Failover"
+                                                                                                                    }
+                                                                                                                }
+                                                                                                            )
+                                                                                                        } -PassThru
+                                                                                                    )
+                                                                                                )
+                                                                                            } -PassThru
+                                                                                        } -PassThru -Force
+                                                                                        return $spServiceApp
+                                                                                    }
+                                                                                }
 
-                    $result = @'
+                                                                                It "Should return present from the Get method" {
+                                                                                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
+                                                                                }
+
+                                                                                It "Should return false from the test method" {
+                                                                                    Test-TargetResource @testParams | Should -Be $false
+                                                                                }
+
+                                                                                It "Should remove the service application in the set method" {
+                                                                                    Set-TargetResource @testParams
+                                                                                    Assert-MockCalled Remove-SPServiceApplication
+                                                                                }
+                                                                            }
+
+                                                                            Context -Name "When the service app doesn't exist and shouldn't" -Fixture {
+                                                                                BeforeAll {
+                                                                                    $testParams = @{
+                                                                                        Name            = "Test App"
+                                                                                        ApplicationPool = "-"
+                                                                                        Ensure          = "Absent"
+                                                                                    }
+
+                                                                                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                                                                                        return $null
+                                                                                    }
+                                                                                }
+
+                                                                                It "Should return absent from the Get method" {
+                                                                                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
+                                                                                }
+
+                                                                                It "Should return false from the test method" {
+                                                                                    Test-TargetResource @testParams | Should -Be $true
+                                                                                }
+                                                                            }
+
+                                                                            Context -Name "Running ReverseDsc Export" -Fixture {
+                                                                                BeforeAll {
+                                                                                    Mock -CommandName Write-Host -MockWith { }
+
+                                                                                    Mock -CommandName Get-TargetResource -MockWith {
+                                                                                        return @{
+                                                                                            Name            = "Subscription Settings Service Application"
+                                                                                            ApplicationPool = "Service App Pool"
+                                                                                            DatabaseServer  = "SQL01"
+                                                                                            DatabaseName    = "SP_SubscriptionSettings"
+                                                                                        }
+                                                                                    }
+
+                                                                                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                                                                                        $spServiceApp = [PSCustomObject]@{
+                                                                                            DisplayName = "Subscription Settings Service Application"
+                                                                                            Name        = "Subscription Settings Service Application"
+                                                                                        }
+                                                                                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                                                                                            -Name GetType `
+                                                                                            -Value {
+                                                                                            return @{
+                                                                                                Name = "SPSubscriptionSettingsServiceApplication"
+                                                                                            }
+                                                                                        } -PassThru -Force
+                                                                                        return $spServiceApp
+                                                                                    }
+
+                                                                                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                                                                                    {
+                                                                                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                                                                                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                                                                                    }
+
+                                                                                    $result = @'
         SPSubscriptionSettingsServiceApp SubscriptionSettingsServiceApplication[0-9A-Fa-f]{8}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{12}
         {
             ApplicationPool      = "Service App Pool";
@@ -527,16 +527,17 @@ try
         }
 
 '@
-                }
+                                                                                }
 
-                It "Should return valid DSC block from the Export method" {
-                    Export-TargetResource | Should -Match $result
-                }
-            }
-        }
-    }
-}
-finally
-{
-    Invoke-TestCleanup
-}
+                                                                                It "Should return valid DSC block from the Export method" {
+                                                                                    Import-Module (Join-Path -Path (Split-Path -Path (Get-Module SharePointDsc).Path -Parent) -ChildPath "Modules\SharePointDSC.Reverse\SharePointDSC.Reverse.psm1")
+                                                                                    Export-TargetResource | Should -Match $result
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                                finally
+                                                                {
+                                                                    Invoke-TestCleanup
+                                                                }
