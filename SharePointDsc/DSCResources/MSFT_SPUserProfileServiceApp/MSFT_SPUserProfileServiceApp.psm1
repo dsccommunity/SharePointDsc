@@ -810,7 +810,7 @@ function Export-TargetResource
     }
     else
     {
-        $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+        $ParentModuleBase = Get-Module "SharePointDsc" -ListAvailable | Select-Object -ExpandProperty Modulebase
         $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPUserProfileServiceApp\MSFT_SPUserProfileServiceApp.psm1" -Resolve
         $Content = ''
     }

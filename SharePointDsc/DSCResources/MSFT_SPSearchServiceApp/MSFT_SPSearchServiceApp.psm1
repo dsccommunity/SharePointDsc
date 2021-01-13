@@ -588,7 +588,7 @@ function Export-TargetResource
     $i = 1
     $total = $searchSA.Length
     $content = ''
-    $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+    $ParentModuleBase = Get-Module "SharePointDsc" -ListAvailable | Select-Object -ExpandProperty Modulebase
     $module = Join-Path -Path $ParentModuleBase -ChildPath "\DSCResources\MSFT_SPSearchServiceApp\MSFT_SPSearchServiceApp.psm1" -Resolve
 
     foreach ($searchSAInstance in $searchSA)

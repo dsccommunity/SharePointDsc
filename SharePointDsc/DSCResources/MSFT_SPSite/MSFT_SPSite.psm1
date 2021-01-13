@@ -529,7 +529,7 @@ function Export-TargetResource
     $i = 1
     $total = $spSites.Length
 
-    $ParentModueBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+    $ParentModueBase = Get-Module "SharePointDsc" -ListAvailable | Select-Object -ExpandProperty Modulebase
     $module = Join-Path -Path $ParentModueBase -ChildPath "\DSCResources\MSFT_SPSite\MSFT_SPSite.psm1" -Resolve
 
     foreach ($spSite in $spSites)

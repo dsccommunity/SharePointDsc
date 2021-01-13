@@ -355,7 +355,7 @@ function Export-TargetResource
 
     $VerbosePreference = "SilentlyContinue"
     $content = ''
-    $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+    $ParentModuleBase = Get-Module "SharePointDsc" -ListAvailable | Select-Object -ExpandProperty Modulebase
     $module = Join-Path -Path $ParentModuleBase -ChildPath "\DSCResources\MSFT_SPWeb\MSFT_SPWeb.psm1" -Resolve
     $SPWebs = Get-SPWeb -Limit All -Site $URL
     $j = 1

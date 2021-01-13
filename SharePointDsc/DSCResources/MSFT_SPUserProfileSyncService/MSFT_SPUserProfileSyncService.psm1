@@ -569,7 +569,7 @@ function Export-TargetResource
                     $servicesMasterList += $serviceTypeName
                     if ($serviceTypeName -eq "ProfileSynchronizationServiceInstance")
                     {
-                        $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+                        $ParentModuleBase = Get-Module "SharePointDsc" -ListAvailable | Select-Object -ExpandProperty Modulebase
                         $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPUserProfileSyncService\MSFT_SPUserProfileSyncService.psm1" -Resolve
                         $Content = ''
                         $params = Get-DSCFakeParameters -ModulePath $module

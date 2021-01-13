@@ -456,7 +456,7 @@ function Export-TargetResource
     $VerbosePreference = "SilentlyContinue"
     try
     {
-        $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+        $ParentModuleBase = Get-Module "SharePointDsc" -ListAvailable | Select-Object -ExpandProperty Modulebase
         $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPFarmAdministrators\MSFT_SPFarmAdministrators.psm1" -Resolve
         $Content = ''
         $params = Get-DSCFakeParameters -ModulePath $module

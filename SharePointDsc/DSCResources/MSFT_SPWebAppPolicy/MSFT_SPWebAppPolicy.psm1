@@ -1021,7 +1021,7 @@ function Get-SPDscCacheAccountConfiguration()
 function Export-TargetResource
 {
     $VerbosePreference = "SilentlyContinue"
-    $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+    $ParentModuleBase = Get-Module "SharePointDsc" -ListAvailable | Select-Object -ExpandProperty Modulebase
     $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPWebAppPolicy\MSFT_SPWebAppPolicy.psm1" -Resolve
     $Content = ''
 

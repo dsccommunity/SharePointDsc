@@ -541,7 +541,7 @@ function Export-TargetResource
 {
     $VerbosePreference = "SilentlyContinue"
     $Global:DH_SPQUOTATEMPLATE = @{}
-    $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+    $ParentModuleBase = Get-Module "SharePointDsc" -ListAvailable | Select-Object -ExpandProperty Modulebase
     $module = Join-Path -Path $ParentModuleBase -ChildPath "\DSCResources\MSFT_SPQuotaTemplate\MSFT_SPQuotaTemplate.psm1" -Resolve
 
     $contentService = Get-SPDscContentService

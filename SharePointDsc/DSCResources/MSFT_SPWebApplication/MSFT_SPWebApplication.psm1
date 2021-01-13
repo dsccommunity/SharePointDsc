@@ -401,7 +401,7 @@ function Export-TargetResource
 {
     $VerbosePreference = "SilentlyContinue"
     $content = ''
-    $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+    $ParentModuleBase = Get-Module "SharePointDsc" -ListAvailable | Select-Object -ExpandProperty Modulebase
     $module = Join-Path -Path $ParentModuleBase -ChildPath "\DSCResources\MSFT_SPWebApplication\MSFT_SPWebApplication.psm1" -Resolve
 
     $spWebApplications = Get-SPWebApplication | Sort-Object -Property Name

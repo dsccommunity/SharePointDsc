@@ -1384,7 +1384,7 @@ function Export-TargetResource
     )
 
     $spMajorVersion = (Get-SPDscInstalledProductVersion).FileMajorPart
-    $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+    $ParentModuleBase = Get-Module "SharePointDsc" -ListAvailable | Select-Object -ExpandProperty Modulebase
     $module = Join-Path -Path $ParentModuleBase -ChildPath "\DSCResources\MSFT_SPFarm\MSFT_SPFarm.psm1" -Resolve
 
     $Content = "        SPFarm " + [System.Guid]::NewGuid().ToString() + "`r`n        {`r`n"

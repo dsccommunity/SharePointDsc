@@ -107,7 +107,7 @@ function Export-TargetResource
     $appDomain = Get-SPAppDomain
     if ($serviceApp.Length -ge 1 -and $appDomain.Length -ge 1)
     {
-        $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+        $ParentModuleBase = Get-Module "SharePointDsc" -ListAvailable | Select-Object -ExpandProperty Modulebase
         $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPAppDomain\MSFT_SPAppDomain.psm1" -Resolve
         $Content = ''
         $params = Get-DSCFakeParameters -ModulePath $module
