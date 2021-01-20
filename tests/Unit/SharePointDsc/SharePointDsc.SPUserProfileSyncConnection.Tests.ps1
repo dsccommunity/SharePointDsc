@@ -268,10 +268,6 @@ try
                     }
                 }
 
-                Mock -CommandName Import-Module { } -ParameterFilter {
-                    $_.Name -eq $ModuleName
-                }
-
                 function Add-SPDscEvent
                 {
                     param (
@@ -309,6 +305,10 @@ try
                         ConnectionType        = "ActiveDirectory"
                     }
 
+                    Mock -CommandName Import-Module { } -ParameterFilter {
+                        $_.Name -eq $ModuleName
+                    }
+
                     Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
                 }
 
@@ -337,6 +337,10 @@ try
                         UseSSL                = $false
                         IncludedOUs           = @("OU=SharePoint Users,DC=Contoso,DC=com")
                         ConnectionType        = "ActiveDirectory"
+                    }
+
+                    Mock -CommandName Import-Module { } -ParameterFilter {
+                        $_.Name -eq $ModuleName
                     }
 
                     $userProfileServiceNoConnections = @{
@@ -376,6 +380,10 @@ try
                         UseSSL                = $false
                         IncludedOUs           = @("OU=SharePoint Users,DC=Contoso,DC=com")
                         ConnectionType        = "ActiveDirectory"
+                    }
+
+                    Mock -CommandName Import-Module { } -ParameterFilter {
+                        $_.Name -eq $ModuleName
                     }
 
                     Mock -CommandName Get-SPServiceApplication -MockWith {
@@ -419,6 +427,10 @@ try
                         ConnectionType        = "ActiveDirectory"
                     }
 
+                    Mock -CommandName Import-Module { } -ParameterFilter {
+                        $_.Name -eq $ModuleName
+                    }
+
                     Mock -CommandName Get-SPServiceApplication -MockWith {
                         return $userProfileServiceValidConnection
                     }
@@ -452,6 +464,10 @@ try
                         Server                = "server.contoso.com"
                         IncludedOUs           = @("OU=SharePoint Users,DC=Contoso,DC=com")
                         ConnectionType        = "ActiveDirectory"
+                    }
+
+                    Mock -CommandName Import-Module { } -ParameterFilter {
+                        $_.Name -eq $ModuleName
                     }
 
                     $litWareconnection = @{
@@ -581,6 +597,10 @@ try
                         ConnectionType        = "ActiveDirectory"
                     }
 
+                    Mock -CommandName Import-Module { } -ParameterFilter {
+                        $_.Name -eq $ModuleName
+                    }
+
                     Mock -CommandName Get-SPServiceApplication -MockWith {
                         return @(
                             New-Object -TypeName "Object" | Add-Member -MemberType NoteProperty `
@@ -624,6 +644,10 @@ try
                         UseSSL                = $false
                         IncludedOUs           = @("OU=SharePoint Users,DC=Contoso,DC=com")
                         ConnectionType        = "ActiveDirectory"
+                    }
+
+                    Mock -CommandName Import-Module { } -ParameterFilter {
+                        $_.Name -eq $ModuleName
                     }
 
                     $userProfileServiceValidConnection = @{
@@ -697,6 +721,10 @@ try
                         Server                = "server.contoso.com"
                         IncludedOUs           = @("OU=SharePoint Users,DC=Contoso,DC=com")
                         ConnectionType        = "ActiveDirectory"
+                    }
+
+                    Mock -CommandName Import-Module { } -ParameterFilter {
+                        $_.Name -eq $ModuleName
                     }
 
                     $litWareconnection = @{
@@ -789,6 +817,10 @@ try
                         Server                = "server.contoso.com"
                         IncludedOUs           = @("OU=SharePoint Users,DC=Contoso,DC=com")
                         ConnectionType        = "ActiveDirectory"
+                    }
+
+                    Mock -CommandName Import-Module { } -ParameterFilter {
+                        $_.Name -eq $ModuleName
                     }
 
                     if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
@@ -907,6 +939,10 @@ try
                             ConnectionType        = "ActiveDirectory"
                         }
 
+                        Mock -CommandName Import-Module { } -ParameterFilter {
+                            $_.Name -eq $ModuleName
+                        }
+
                         $litWareconnection = @{
                             DisplayName       = $name
                             Server            = "litware.net"
@@ -988,6 +1024,10 @@ try
                             Server                = "server.contoso.com"
                             IncludedOUs           = @("OU=SharePoint Users,DC=Contoso,DC=com")
                             ConnectionType        = "ActiveDirectory"
+                        }
+
+                        Mock -CommandName Import-Module { } -ParameterFilter {
+                            $_.Name -eq $ModuleName
                         }
 
                         $litWareconnection = @{
@@ -1083,6 +1123,10 @@ try
                             ConnectionType        = "ActiveDirectory"
                         }
 
+                        Mock -CommandName Import-Module { } -ParameterFilter {
+                            $_.Name -eq $ModuleName
+                        }
+
                         $litWareconnection = @{
                             DisplayName       = "contoso-com"
                             Server            = "litware.net"
@@ -1151,6 +1195,8 @@ try
 
             Context -Name "Running ReverseDsc Export" -Fixture {
                 BeforeAll {
+                    Import-Module (Join-Path -Path (Split-Path -Path (Get-Module SharePointDsc -ListAvailable).Path -Parent) -ChildPath "Modules\SharePointDSC.Reverse\SharePointDSC.Reverse.psm1")
+
                     Mock -CommandName Write-Host -MockWith { }
 
                     Mock -CommandName Get-TargetResource -MockWith {
@@ -1216,7 +1262,6 @@ try
                 }
 
                 It "Should return valid DSC block from the Export method" {
-                    Import-Module (Join-Path -Path (Split-Path -Path (Get-Module SharePointDsc -ListAvailable).Path -Parent) -ChildPath "Modules\SharePointDSC.Reverse\SharePointDSC.Reverse.psm1")
                     Export-TargetResource | Should -Match $result
                 }
             }

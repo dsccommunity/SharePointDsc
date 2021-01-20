@@ -157,7 +157,7 @@ try
                 }
 
                 It "Should throw exception from the get method" {
-                    (Get-TargetResource @testParams).WebAppUrl | Should -Be $null
+                    (Get-TargetResource @testParams).EnableCache | Should -Be $null
                 }
 
                 It "Should throw exception from the test method" {
@@ -445,7 +445,7 @@ try
                 }
 
                 It "Should return values from the get method" {
-                    (Get-TargetResource @testParams).WebAppUrl | Should -BeNullOrEmpty
+                    (Get-TargetResource @testParams).EnableCache | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
@@ -459,6 +459,8 @@ try
 
             Context -Name "Running ReverseDsc Export" -Fixture {
                 BeforeAll {
+                    Import-Module (Join-Path -Path (Split-Path -Path (Get-Module SharePointDsc -ListAvailable).Path -Parent) -ChildPath "Modules\SharePointDSC.Reverse\SharePointDSC.Reverse.psm1")
+
                     Mock -CommandName Write-Host -MockWith { }
 
                     Mock -CommandName Get-TargetResource -MockWith {
@@ -509,7 +511,6 @@ try
                 }
 
                 It "Should return valid DSC block from the Export method" {
-                    Import-Module (Join-Path -Path (Split-Path -Path (Get-Module SharePointDsc -ListAvailable).Path -Parent) -ChildPath "Modules\SharePointDSC.Reverse\SharePointDSC.Reverse.psm1")
                     Export-TargetResource | Should -Match $result
                 }
             }

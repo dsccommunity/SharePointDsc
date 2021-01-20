@@ -510,6 +510,8 @@ namespace Microsoft.SharePoint.Administration {
 
             Context -Name "Running ReverseDsc Export" -Fixture {
                 BeforeAll {
+                    Import-Module (Join-Path -Path (Split-Path -Path (Get-Module SharePointDsc -ListAvailable).Path -Parent) -ChildPath "Modules\SharePointDSC.Reverse\SharePointDSC.Reverse.psm1")
+
                     Mock -CommandName Write-Host -MockWith { }
 
                     Mock -CommandName Get-TargetResource -MockWith {
@@ -557,7 +559,6 @@ namespace Microsoft.SharePoint.Administration {
                 }
 
                 It "Should return valid DSC block from the Export method" {
-                    Import-Module (Join-Path -Path (Split-Path -Path (Get-Module SharePointDsc -ListAvailable).Path -Parent) -ChildPath "Modules\SharePointDSC.Reverse\SharePointDSC.Reverse.psm1")
                     Export-TargetResource | Should -Be $result
                 }
             }

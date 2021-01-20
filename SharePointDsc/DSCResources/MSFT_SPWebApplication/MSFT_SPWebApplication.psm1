@@ -406,7 +406,6 @@ function Export-TargetResource
 
     $spWebApplications = Get-SPWebApplication | Sort-Object -Property Name
 
-
     $i = 1;
     $total = $spWebApplications.Length
     foreach ($spWebApp in $spWebApplications)

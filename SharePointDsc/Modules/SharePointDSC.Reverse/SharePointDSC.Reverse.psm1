@@ -77,7 +77,7 @@ function Get-SPReverseDSC
         $fileName += "-Lite"
     }
     $fileName += ".ps1"
-    if (!$outputfile)
+    if (-not $outputfile)
     {
         if ($OutputPath)
         {
@@ -96,7 +96,7 @@ function Get-SPReverseDSC
     }
 
     <## Ensures the specified output folder path actually exists; if not, tries to create it and throws an exception if we can't. ##>
-    while (!(Test-Path -Path $OutputDSCPath -PathType Container -ErrorAction SilentlyContinue))
+    while (-not (Test-Path -Path $OutputDSCPath -PathType Container -ErrorAction SilentlyContinue))
     {
         try
         {
@@ -123,7 +123,7 @@ function Get-SPReverseDSC
     <# Now that we have acquired the output path, save all custom solutions (.wsp) in that directory; #>
     if ($chckFarmSolution.Checked)
     {
-        Save-SPFarmsolution($OutputDSCPath)
+        Save-SPFarmsolution -Path $OutputDSCPath
     }
 
     <## Save the content of the resulting DSC Configuration file into a file at the specified path. #>
@@ -132,7 +132,7 @@ function Get-SPReverseDSC
     {
         Remove-Item -Path $outputDSCFile -Force -Confirm $false
     }
-    $Script:dscConfigContent | Out-File $outputDSCFile
+    $Script:dscConfigContent | Out-File -FilePath $outputDSCFile
 
     <# Add the list of all user accounts detected to the configurationdata #>
     if ($Global:AllUsers.Length -gt 0)
@@ -150,7 +150,7 @@ function Get-SPReverseDSC
     {
         $Azure = $true
     }
-    if (!$Azure)
+    if (-not $Azure)
     {
         $outputConfigurationData = Join-Path -Path $OutputDSCPath -ChildPath "ConfigurationData.psd1"
         if (Test-Path -Path $outputConfigurationData)
@@ -189,7 +189,7 @@ function Get-SPReverseDSC
     }
 
     <## Wait a second, then open our $outputDSCPath in Windows Explorer so we can review the glorious output. ##>
-    Start-Sleep 1
+    Start-Sleep -Seconds 1
     Invoke-Item -Path $OutputDSCPath
 }
 
@@ -208,7 +208,9 @@ function Read-TargetResource
     )
     $ParentModueBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
     $ResourcesPath = Join-Path -Path $ParentModueBase -ChildPath "DSCResources" -Resolve
-    $ResourceModule = Get-ChildItem $ResourcesPath -Recurse | Where-Object { $_.Name -like "MSFT_$($ResourceName).psm1" }
+    $ResourceModule = Get-ChildItem -Path $ResourcesPath -Recurse | Where-Object -FilterScript {
+        $_.Name -like "MSFT_$($ResourceName).psm1"
+    }
 
     try
     {
@@ -222,16 +224,17 @@ function Read-TargetResource
     try
     {
         $FriendlyName = $ModuleName.Replace("MSFT_", "")
-        if ($Null -eq $Global:ComponentsToExtract -or $Global:ComponentsToExtract.Contains($FriendlyName))
+        if ($null -eq $Global:ComponentsToExtract -or $Global:ComponentsToExtract.Contains($FriendlyName))
         {
             Import-Module $ResourceModule.FullName -Scope Local | Out-Null
-            $module = Get-Module ($ModuleName) | Where-Object -FilterScript { $_.ExportedCommands.Keys -contains 'Export-TargetResource' }
+            $module = Get-Module -Name ($ModuleName) | Where-Object -FilterScript {
+                $_.ExportedCommands.Keys -contains 'Export-TargetResource'
+            }
             if ($null -ne $module)
             {
                 Write-Information "Exporting $($module.Name)"
                 $exportString = Export-TargetResource @ExportParams
                 return $exportString
-                #[void]$sb.Append($exportString)
             }
         }
     }
@@ -275,9 +278,6 @@ function Orchestrator
         $BinaryLocation
     )
 
-    <#Skipped function for current time to disuss with Robert#>
-    #Test-Prerequisites
-
     $Global:ComponentsToExtract = $ComponentsToExtract
 
     if ($Credentials)
@@ -294,7 +294,7 @@ function Orchestrator
     $spServers = $spFarm.Servers
     if ($Standalone)
     {
-        $i = 0;
+        $i = 0
         foreach ($spServer in $spServers)
         {
             if ($i -eq 0)
@@ -339,10 +339,10 @@ function Orchestrator
             $Script:dscConfigContent += "`r`n    Node `$AllNodes.Where{`$_.ServerNumber -eq '" + $serverNumber.ToString() + "'}.NodeName`r`n    {`r`n"
 
             Write-Host -Object "[$($spServer.Name)] Generating the SharePoint Prerequisites Installation..." -BackgroundColor DarkGreen -ForegroundColor White
-            $Script:dscConfigContent += Read-TargetResource -ResourceName SPInstallPrereqs
+            $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPInstallPrereqs'
 
             Write-Host -Object "[$($spServer.Name)] Generating the SharePoint Binary Installation..." -BackgroundColor DarkGreen -ForegroundColor White
-            $Script:dscConfigContent += Read-TargetResource -ResourceName SPInstall
+            $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPInstall'
 
             Write-Host -Object "[$($spServer.Name)] Scanning the SharePoint Farm..." -BackgroundColor DarkGreen -ForegroundColor White
             $Properties = @{
@@ -996,9 +996,9 @@ function Set-ObtainRequiredCredentials
 
     foreach ($credential in $Global:CredsRepo)
     {
-        if (!$credential.ToLower().StartsWith("builtin"))
+        if (-not $credential.ToLower().StartsWith("builtin"))
         {
-            if (!$chckAzure.Checked)
+            if ($chckAzure.Checked -eq $false)
             {
                 $credsContent += "    " + (Resolve-Credentials $credential) + " = Get-Credential -UserName `"" + $credential + "`" -Message `"Please provide credentials`"`r`n"
             }
@@ -2003,6 +2003,8 @@ function DisplayGUI()
             if ($txtPassword.Text.Length -gt 0)
             {
                 $SelectedComponents = @()
+                $SelectedComponents += "SPInstallPrereqs"
+                $SelectedComponents += "SPInstall"
                 foreach ($panel in ($form.Controls[0].Controls | Where-Object { $_.GetType().Name -eq "Panel" }))
                 {
                     foreach ($checkbox in ($panel.Controls | Where-Object { $_.GetType().Name -eq "Checkbox" }))

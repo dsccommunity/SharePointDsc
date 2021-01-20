@@ -236,515 +236,517 @@ try
                                                         -Name Name `
                                                         -Value "Database" `
                                                         -PassThru |
+                                                    Add-Member -MemberType ScriptMethod `
+                                                        -Name GetValue `
+                                                        -Value {
+                                                        param ($x)
+                                                        return (
+                                                            @{
+                                                                FullName             = $getTypeFullName
+                                                                Name                 = "Database"
+                                                                NormalizedDataSource = "DBServer"
+                                                                Server               = @{
+                                                                    Name = "DBServer"
+                                                                }
+                                                                FailoverServer       = @{
+                                                                    Name = "DBServer_Failover"
+                                                                }
+                                                            }
+                                                        )
+                                                    } -PassThru
+                                            ),
+                                            (New-Object -TypeName "Object" |
+                                                    Add-Member -MemberType NoteProperty `
+                                                        -Name Name `
+                                                        -Value "AuditEnabled" `
+                                                        -PassThru |
                                                         Add-Member -MemberType ScriptMethod `
                                                             -Name GetValue `
                                                             -Value {
-                                                            param ($x)
-                                                            return (
-                                                                @{
-                                                                    FullName             = $getTypeFullName
-                                                                    Name                 = "Database"
-                                                                    NormalizedDataSource = "DBServer"
-                                                                    Server               = @{
-                                                                        Name = "DBServer"
-                                                                    }
-                                                                    FailoverServer       = @{
-                                                                        Name = "DBServer_Failover"
-                                                                    }
-                                                                }
-                                                            )
+                                                            param($x)
+                                                            return $params.AuditEnabled
                                                         } -PassThru
-                                                    ),
-                                                    (New-Object -TypeName "Object" |
-                                                            Add-Member -MemberType NoteProperty `
-                                                                -Name Name `
-                                                                -Value "AuditEnabled" `
-                                                                -PassThru |
-                                                                Add-Member -MemberType ScriptMethod `
-                                                                    -Name GetValue `
-                                                                    -Value {
-                                                                    param($x)
-                                                                    return $params.AuditEnabled
-                                                                } -PassThru
-                                                            )
+                                            )
+                                        )
+                                    } -PassThru
+                        } -PassThru -Force
+
+                        return $spServiceApp
+                    }
+                }
+
+                It "Should return present from the get method" {
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
+                }
+
+                It "Should return true when the Test method is called" {
+                    Test-TargetResource @testParams | Should -Be $true
+                }
+            }
+
+            Context -Name "When a service application exists and the app pool is not configured correctly" -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        Name            = "Secure Store Service Application"
+                        ApplicationPool = "SharePoint Services"
+                        AuditingEnabled = $false
+                        Ensure          = "Present"
+                    }
+
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        $spServiceApp = [PSCustomObject]@{
+                            TypeName        = "Secure Store Service Application"
+                            DisplayName     = $testParams.Name
+                            ApplicationPool = @{
+                                Name = "Wrong App Pool Name"
+                            }
+                        }
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                            New-Object -TypeName "Object" |
+                                Add-Member -MemberType NoteProperty `
+                                    -Name FullName `
+                                    -Value $getTypeFullName `
+                                    -PassThru |
+                                    Add-Member -MemberType ScriptMethod `
+                                        -Name GetProperties `
+                                        -Value {
+                                        param($x)
+                                        return @(
+                                            (New-Object -TypeName "Object" |
+                                                    Add-Member -MemberType NoteProperty `
+                                                        -Name Name `
+                                                        -Value "Database" `
+                                                        -PassThru |
+                                                    Add-Member -MemberType ScriptMethod `
+                                                        -Name GetValue `
+                                                        -Value {
+                                                        param($x)
+                                                        return (
+                                                            @{
+                                                                FullName             = $getTypeFullName
+                                                                Name                 = "Database"
+                                                                NormalizedDataSource = "DBServer"
+                                                                Server               = @{
+                                                                    Name = "DBServer"
+                                                                }
+                                                                FailoverServer       = @{
+                                                                    Name = "DBServer_Failover"
+                                                                }
+                                                            }
                                                         )
                                                     } -PassThru
-                                                } -PassThru -Force
+                                            ),
+                                            (New-Object -TypeName "Object" |
+                                                    Add-Member -MemberType NoteProperty `
+                                                        -Name Name `
+                                                        -Value "AuditEnabled" `
+                                                        -PassThru |
+                                                        Add-Member -MemberType ScriptMethod `
+                                                            -Name GetValue `
+                                                            -Value {
+                                                            param($x)
+                                                            return $params.AuditEnabled
+                                                        } -PassThru
+                                            )
+                                        )
+                                    } -PassThru
+                        } -PassThru -Force
 
-                                                return $spServiceApp
-                                            }
-                                        }
+                        return $spServiceApp
+                    }
 
-                                        It "Should return present from the get method" {
-                                            (Get-TargetResource @testParams).Ensure | Should -Be "Present"
-                                        }
+                    Mock -CommandName Get-SPServiceApplicationPool -MockWith {
+                        return @{
+                            Name = $testParams.ApplicationPool
+                        }
+                    }
+                }
 
-                                        It "Should return true when the Test method is called" {
-                                            Test-TargetResource @testParams | Should -Be $true
-                                        }
-                                    }
+                It "Should return false when the Test method is called" {
+                    Test-TargetResource @testParams | Should -Be $false
+                }
 
-                                    Context -Name "When a service application exists and the app pool is not configured correctly" -Fixture {
-                                        BeforeAll {
-                                            $testParams = @{
-                                                Name            = "Secure Store Service Application"
-                                                ApplicationPool = "SharePoint Services"
-                                                AuditingEnabled = $false
-                                                Ensure          = "Present"
-                                            }
+                It "Should call the update service app cmdlet from the set method" {
+                    Set-TargetResource @testParams
 
-                                            Mock -CommandName Get-SPServiceApplication -MockWith {
-                                                $spServiceApp = [PSCustomObject]@{
-                                                    TypeName        = "Secure Store Service Application"
-                                                    DisplayName     = $testParams.Name
-                                                    ApplicationPool = @{
-                                                        Name = "Wrong App Pool Name"
-                                                    }
-                                                }
-                                                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
-                                                    New-Object -TypeName "Object" |
-                                                        Add-Member -MemberType NoteProperty `
-                                                            -Name FullName `
-                                                            -Value $getTypeFullName `
-                                                            -PassThru |
-                                                            Add-Member -MemberType ScriptMethod `
-                                                                -Name GetProperties `
-                                                                -Value {
-                                                                param($x)
-                                                                return @(
-                                                                    (New-Object -TypeName "Object" |
-                                                                            Add-Member -MemberType NoteProperty `
-                                                                                -Name Name `
-                                                                                -Value "Database" `
-                                                                                -PassThru |
-                                                                                Add-Member -MemberType ScriptMethod `
-                                                                                    -Name GetValue `
-                                                                                    -Value {
-                                                                                    param($x)
-                                                                                    return (
-                                                                                        @{
-                                                                                            FullName             = $getTypeFullName
-                                                                                            Name                 = "Database"
-                                                                                            NormalizedDataSource = "DBServer"
-                                                                                            Server               = @{
-                                                                                                Name = "DBServer"
-                                                                                            }
-                                                                                            FailoverServer       = @{
-                                                                                                Name = "DBServer_Failover"
-                                                                                            }
-                                                                                        }
-                                                                                    )
-                                                                                } -PassThru
-                                                                            ),
-                                                                            (New-Object -TypeName "Object" |
-                                                                                    Add-Member -MemberType NoteProperty `
-                                                                                        -Name Name `
-                                                                                        -Value "AuditEnabled" `
-                                                                                        -PassThru |
-                                                                                        Add-Member -MemberType ScriptMethod `
-                                                                                            -Name GetValue `
-                                                                                            -Value {
-                                                                                            param($x)
-                                                                                            return $params.AuditEnabled
-                                                                                        } -PassThru
-                                                                                    )
-                                                                                )
-                                                                            } -PassThru
-                                                                        } -PassThru -Force
+                    Assert-MockCalled Get-SPServiceApplicationPool
+                    Assert-MockCalled Set-SPSecureStoreServiceApplication
+                }
+            }
 
-                                                                        return $spServiceApp
-                                                                    }
+            Context -Name "When specific windows credentials are to be used for the database" -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        Name                = "Secure Store Service Application"
+                        ApplicationPool     = "SharePoint Services"
+                        AuditingEnabled     = $false
+                        DatabaseName        = "SP_ManagedMetadata"
+                        DatabaseCredentials = $mockCredential
+                        Ensure              = "Present"
+                    }
 
-                                                                    Mock -CommandName Get-SPServiceApplicationPool -MockWith {
-                                                                        return @{
-                                                                            Name = $testParams.ApplicationPool
-                                                                        }
-                                                                    }
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        return $null
+                    }
+                }
+
+                It "allows valid Windows credentials can be passed" {
+                    Set-TargetResource @testParams
+                    Assert-MockCalled New-SPSecureStoreServiceApplication
+                }
+            }
+
+            Context -Name "When specific SQL credentials are to be used for the database" -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        Name                = "Secure Store Service Application"
+                        ApplicationPool     = "SharePoint Services"
+                        AuditingEnabled     = $false
+                        DatabaseName        = "SP_ManagedMetadata"
+                        DatabaseCredentials = $mockCredential
+                        Ensure              = "Present"
+                    }
+
+                    Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
+                }
+
+                It "allows valid SQL credentials can be passed" {
+                    Set-TargetResource @testParams
+                    Assert-MockCalled New-SPSecureStoreServiceApplication
+                }
+
+            }
+
+            Context -Name "When the service app exists but it shouldn't" -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        Name            = "Secure Store Service Application"
+                        ApplicationPool = "-"
+                        AuditingEnabled = $false
+                        Ensure          = "Absent"
+                    }
+
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        $spServiceApp = [PSCustomObject]@{
+                            TypeName        = "Secure Store Service Application"
+                            DisplayName     = $testParams.Name
+                            ApplicationPool = @{
+                                Name = "Wrong App Pool Name"
+                            }
+                        }
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                            New-Object -TypeName "Object" |
+                                Add-Member -MemberType NoteProperty `
+                                    -Name FullName `
+                                    -Value $getTypeFullName `
+                                    -PassThru |
+                                    Add-Member -MemberType ScriptMethod `
+                                        -Name GetProperties `
+                                        -Value {
+                                        param($x)
+                                        return @(
+                                            (New-Object -TypeName "Object" |
+                                                    Add-Member -MemberType NoteProperty `
+                                                        -Name Name `
+                                                        -Value "Database" `
+                                                        -PassThru |
+                                                    Add-Member -MemberType ScriptMethod `
+                                                        -Name GetValue `
+                                                        -Value {
+                                                        param($x)
+                                                        return (
+                                                            @{
+                                                                FullName             = $getTypeFullName
+                                                                Name                 = "Database"
+                                                                NormalizedDataSource = "DBServer"
+                                                                Server               = @{
+                                                                    Name = "DBServer"
                                                                 }
-
-                                                                It "Should return false when the Test method is called" {
-                                                                    Test-TargetResource @testParams | Should -Be $false
-                                                                }
-
-                                                                It "Should call the update service app cmdlet from the set method" {
-                                                                    Set-TargetResource @testParams
-
-                                                                    Assert-MockCalled Get-SPServiceApplicationPool
-                                                                    Assert-MockCalled Set-SPSecureStoreServiceApplication
+                                                                FailoverServer       = @{
+                                                                    Name = "DBServer_Failover"
                                                                 }
                                                             }
+                                                        )
+                                                    } -PassThru
+                                            ),
+                                            (New-Object -TypeName "Object" |
+                                                    Add-Member -MemberType NoteProperty `
+                                                        -Name Name `
+                                                        -Value "AuditEnabled" `
+                                                        -PassThru |
+                                                        Add-Member -MemberType ScriptMethod `
+                                                            -Name GetValue `
+                                                            -Value {
+                                                            param($x)
+                                                            return $params.AuditEnabled
+                                                        } -PassThru
+                                                    )
+                                                )
+                                        } -PassThru
+                        } -PassThru -Force
 
-                                                            Context -Name "When specific windows credentials are to be used for the database" -Fixture {
-                                                                BeforeAll {
-                                                                    $testParams = @{
-                                                                        Name                = "Secure Store Service Application"
-                                                                        ApplicationPool     = "SharePoint Services"
-                                                                        AuditingEnabled     = $false
-                                                                        DatabaseName        = "SP_ManagedMetadata"
-                                                                        DatabaseCredentials = $mockCredential
-                                                                        Ensure              = "Present"
-                                                                    }
+                        return $spServiceApp
+                    }
+                }
 
-                                                                    Mock -CommandName Get-SPServiceApplication -MockWith {
-                                                                        return $null
-                                                                    }
+                It "Should return present from the Get method" {
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
+                }
+
+                It "Should return false from the test method" {
+                    Test-TargetResource @testParams | Should -Be $false
+                }
+
+                It "Should remove the service application in the set method" {
+                    Set-TargetResource @testParams
+                    Assert-MockCalled Remove-SPServiceApplication
+                }
+            }
+
+            Context -Name "When the database name does not match the actual name" -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        Name            = "Secure Store Service Application"
+                        ApplicationPool = "Service App Pool"
+                        AuditingEnabled = $false
+                        DatabaseName    = "SecureStoreDB"
+                        Ensure          = "Present"
+                    }
+
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        $spServiceApp = [PSCustomObject]@{
+                            TypeName        = "Secure Store Service Application"
+                            DisplayName     = $testParams.Name
+                            ApplicationPool = @{
+                                Name = $testParams.ApplicationPool
+                            }
+                        }
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                            New-Object -TypeName "Object" |
+                                Add-Member -MemberType NoteProperty `
+                                    -Name FullName `
+                                    -Value $getTypeFullName `
+                                    -PassThru |
+                                    Add-Member -MemberType ScriptMethod `
+                                        -Name GetProperties `
+                                        -Value {
+                                        param($x)
+                                        return @(
+                                            (New-Object -TypeName "Object" |
+                                                    Add-Member -MemberType NoteProperty `
+                                                        -Name Name `
+                                                        -Value "Database" `
+                                                        -PassThru |
+                                                    Add-Member -MemberType ScriptMethod `
+                                                        -Name GetValue `
+                                                        -Value {
+                                                        param($x)
+                                                        return (
+                                                            @{
+                                                                FullName             = $getTypeFullName
+                                                                Name                 = "Wrong Database"
+                                                                NormalizedDataSource = "DBServer"
+                                                                Server               = @{
+                                                                    Name = "DBServer"
                                                                 }
-
-                                                                It "allows valid Windows credentials can be passed" {
-                                                                    Set-TargetResource @testParams
-                                                                    Assert-MockCalled New-SPSecureStoreServiceApplication
+                                                                FailoverServer       = @{
+                                                                    Name = "DBServer_Failover"
                                                                 }
                                                             }
+                                                        )
+                                                    } -PassThru
+                                            ),
+                                            (New-Object -TypeName "Object" |
+                                                    Add-Member -MemberType NoteProperty `
+                                                        -Name Name `
+                                                        -Value "AuditEnabled" `
+                                                        -PassThru |
+                                                    Add-Member -MemberType ScriptMethod `
+                                                        -Name GetValue `
+                                                        -Value {
+                                                        param($x)
+                                                        return $params.AuditEnabled
+                                                    } -PassThru
+                                            )
+                                        )
+                                    } -PassThru
+                        } -PassThru -Force
 
-                                                            Context -Name "When specific SQL credentials are to be used for the database" -Fixture {
-                                                                BeforeAll {
-                                                                    $testParams = @{
-                                                                        Name                = "Secure Store Service Application"
-                                                                        ApplicationPool     = "SharePoint Services"
-                                                                        AuditingEnabled     = $false
-                                                                        DatabaseName        = "SP_ManagedMetadata"
-                                                                        DatabaseCredentials = $mockCredential
-                                                                        Ensure              = "Present"
-                                                                    }
+                        return $spServiceApp
+                    }
+                }
 
-                                                                    Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
+                It "Should return present from the Get method" {
+                    $result = Get-TargetResource @testParams
+                    $result.Ensure | Should -Be "Present"
+                }
+
+                It "Should return false from the test method" {
+                    Test-TargetResource @testParams | Should -Be $false
+                }
+
+                It "Should throw exception in the set method" {
+                    { Set-TargetResource @testParams } | Should -Throw ("Specified database name does not match " + `
+                            "the actual database name. This resource " + `
+                            "cannot rename the database.")
+                }
+            }
+
+            Context -Name "When the database server does not match the actual server" -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        Name            = "Secure Store Service Application"
+                        ApplicationPool = "Service App Pool"
+                        AuditingEnabled = $false
+                        DatabaseName    = "SecureStoreDB"
+                        DatabaseServer  = "SQL_Instance"
+                        Ensure          = "Present"
+                    }
+
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        $spServiceApp = [PSCustomObject]@{
+                            TypeName        = "Secure Store Service Application"
+                            DisplayName     = $testParams.Name
+                            ApplicationPool = @{
+                                Name = $testParams.ApplicationPool
+                            }
+                        }
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                            New-Object -TypeName "Object" |
+                                Add-Member -MemberType NoteProperty `
+                                    -Name FullName `
+                                    -Value $getTypeFullName `
+                                    -PassThru |
+                                    Add-Member -MemberType ScriptMethod `
+                                        -Name GetProperties `
+                                        -Value {
+                                        param($x)
+                                        return @(
+                                            (New-Object -TypeName "Object" |
+                                                    Add-Member -MemberType NoteProperty `
+                                                        -Name Name `
+                                                        -Value "Database" `
+                                                        -PassThru |
+                                                    Add-Member -MemberType ScriptMethod `
+                                                        -Name GetValue `
+                                                        -Value {
+                                                        param($x)
+                                                        return (
+                                                            @{
+                                                                FullName             = $getTypeFullName
+                                                                Name                 = "SecureStoreDB"
+                                                                NormalizedDataSource = "Wrong DBServer"
+                                                                Server               = @{
+                                                                    Name = "Wrong DBServer"
                                                                 }
-
-                                                                It "allows valid SQL credentials can be passed" {
-                                                                    Set-TargetResource @testParams
-                                                                    Assert-MockCalled New-SPSecureStoreServiceApplication
+                                                                FailoverServer       = @{
+                                                                    Name = "DBServer_Failover"
                                                                 }
-
                                                             }
+                                                        )
+                                                    } -PassThru
+                                            ),
+                                            (New-Object -TypeName "Object" |
+                                                    Add-Member -MemberType NoteProperty `
+                                                        -Name Name `
+                                                        -Value "AuditEnabled" `
+                                                        -PassThru |
+                                                        Add-Member -MemberType ScriptMethod `
+                                                            -Name GetValue `
+                                                            -Value {
+                                                            param($x)
+                                                            return $params.AuditEnabled
+                                                        } -PassThru
+                                            )
+                                        )
+                                    } -PassThru
+                        } -PassThru -Force
 
-                                                            Context -Name "When the service app exists but it shouldn't" -Fixture {
-                                                                BeforeAll {
-                                                                    $testParams = @{
-                                                                        Name            = "Secure Store Service Application"
-                                                                        ApplicationPool = "-"
-                                                                        AuditingEnabled = $false
-                                                                        Ensure          = "Absent"
-                                                                    }
+                        return $spServiceApp
+                    }
+                }
 
-                                                                    Mock -CommandName Get-SPServiceApplication -MockWith {
-                                                                        $spServiceApp = [PSCustomObject]@{
-                                                                            TypeName        = "Secure Store Service Application"
-                                                                            DisplayName     = $testParams.Name
-                                                                            ApplicationPool = @{
-                                                                                Name = "Wrong App Pool Name"
-                                                                            }
-                                                                        }
-                                                                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
-                                                                            New-Object -TypeName "Object" |
-                                                                                Add-Member -MemberType NoteProperty `
-                                                                                    -Name FullName `
-                                                                                    -Value $getTypeFullName `
-                                                                                    -PassThru |
-                                                                                    Add-Member -MemberType ScriptMethod `
-                                                                                        -Name GetProperties `
-                                                                                        -Value {
-                                                                                        param($x)
-                                                                                        return @(
-                                                                                            (New-Object -TypeName "Object" |
-                                                                                                    Add-Member -MemberType NoteProperty `
-                                                                                                        -Name Name `
-                                                                                                        -Value "Database" `
-                                                                                                        -PassThru |
-                                                                                                        Add-Member -MemberType ScriptMethod `
-                                                                                                            -Name GetValue `
-                                                                                                            -Value {
-                                                                                                            param($x)
-                                                                                                            return (
-                                                                                                                @{
-                                                                                                                    FullName             = $getTypeFullName
-                                                                                                                    Name                 = "Database"
-                                                                                                                    NormalizedDataSource = "DBServer"
-                                                                                                                    Server               = @{
-                                                                                                                        Name = "DBServer"
-                                                                                                                    }
-                                                                                                                    FailoverServer       = @{
-                                                                                                                        Name = "DBServer_Failover"
-                                                                                                                    }
-                                                                                                                }
-                                                                                                            )
-                                                                                                        } -PassThru
-                                                                                                    ),
-                                                                                                    (New-Object -TypeName "Object" |
-                                                                                                            Add-Member -MemberType NoteProperty `
-                                                                                                                -Name Name `
-                                                                                                                -Value "AuditEnabled" `
-                                                                                                                -PassThru |
-                                                                                                                Add-Member -MemberType ScriptMethod `
-                                                                                                                    -Name GetValue `
-                                                                                                                    -Value {
-                                                                                                                    param($x)
-                                                                                                                    return $params.AuditEnabled
-                                                                                                                } -PassThru
-                                                                                                            )
-                                                                                                        )
-                                                                                                    } -PassThru
-                                                                                                } -PassThru -Force
+                It "Should return present from the Get method" {
+                    $result = Get-TargetResource @testParams
+                    $result.Ensure | Should -Be "Present"
+                }
 
-                                                                                                return $spServiceApp
-                                                                                            }
-                                                                                        }
+                It "Should return false from the test method" {
+                    Test-TargetResource @testParams | Should -Be $false
+                }
 
-                                                                                        It "Should return present from the Get method" {
-                                                                                            (Get-TargetResource @testParams).Ensure | Should -Be "Present"
-                                                                                        }
+                It "Should throw exception in the set method" {
+                    { Set-TargetResource @testParams } | Should -Throw ("Specified database server does " + `
+                            "not match the actual database server. " + `
+                            "This resource cannot move the database " + `
+                            "to a different SQL instance.")
+                }
+            }
 
-                                                                                        It "Should return false from the test method" {
-                                                                                            Test-TargetResource @testParams | Should -Be $false
-                                                                                        }
+            Context -Name "When the service app doesn't exist and shouldn't" -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        Name            = "Secure Store Service Application"
+                        ApplicationPool = "-"
+                        AuditingEnabled = $false
+                        Ensure          = "Absent"
+                    }
 
-                                                                                        It "Should remove the service application in the set method" {
-                                                                                            Set-TargetResource @testParams
-                                                                                            Assert-MockCalled Remove-SPServiceApplication
-                                                                                        }
-                                                                                    }
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        return $null
+                    }
+                }
 
-                                                                                    Context -Name "When the database name does not match the actual name" -Fixture {
-                                                                                        BeforeAll {
-                                                                                            $testParams = @{
-                                                                                                Name            = "Secure Store Service Application"
-                                                                                                ApplicationPool = "Service App Pool"
-                                                                                                AuditingEnabled = $false
-                                                                                                DatabaseName    = "SecureStoreDB"
-                                                                                                Ensure          = "Present"
-                                                                                            }
+                It "Should return absent from the Get method" {
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
+                }
 
-                                                                                            Mock -CommandName Get-SPServiceApplication -MockWith {
-                                                                                                $spServiceApp = [PSCustomObject]@{
-                                                                                                    TypeName        = "Secure Store Service Application"
-                                                                                                    DisplayName     = $testParams.Name
-                                                                                                    ApplicationPool = @{
-                                                                                                        Name = $testParams.ApplicationPool
-                                                                                                    }
-                                                                                                }
-                                                                                                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
-                                                                                                    New-Object -TypeName "Object" |
-                                                                                                        Add-Member -MemberType NoteProperty `
-                                                                                                            -Name FullName `
-                                                                                                            -Value $getTypeFullName `
-                                                                                                            -PassThru |
-                                                                                                            Add-Member -MemberType ScriptMethod `
-                                                                                                                -Name GetProperties `
-                                                                                                                -Value {
-                                                                                                                param($x)
-                                                                                                                return @(
-                                                                                                                    (New-Object -TypeName "Object" |
-                                                                                                                            Add-Member -MemberType NoteProperty `
-                                                                                                                                -Name Name `
-                                                                                                                                -Value "Database" `
-                                                                                                                                -PassThru |
-                                                                                                                                Add-Member -MemberType ScriptMethod `
-                                                                                                                                    -Name GetValue `
-                                                                                                                                    -Value {
-                                                                                                                                    param($x)
-                                                                                                                                    return (
-                                                                                                                                        @{
-                                                                                                                                            FullName             = $getTypeFullName
-                                                                                                                                            Name                 = "Wrong Database"
-                                                                                                                                            NormalizedDataSource = "DBServer"
-                                                                                                                                            Server               = @{
-                                                                                                                                                Name = "DBServer"
-                                                                                                                                            }
-                                                                                                                                            FailoverServer       = @{
-                                                                                                                                                Name = "DBServer_Failover"
-                                                                                                                                            }
-                                                                                                                                        }
-                                                                                                                                    )
-                                                                                                                                } -PassThru
-                                                                                                                            ),
-                                                                                                                            (New-Object -TypeName "Object" |
-                                                                                                                                    Add-Member -MemberType NoteProperty `
-                                                                                                                                        -Name Name `
-                                                                                                                                        -Value "AuditEnabled" `
-                                                                                                                                        -PassThru |
-                                                                                                                                        Add-Member -MemberType ScriptMethod `
-                                                                                                                                            -Name GetValue `
-                                                                                                                                            -Value {
-                                                                                                                                            param($x)
-                                                                                                                                            return $params.AuditEnabled
-                                                                                                                                        } -PassThru
-                                                                                                                                    )
-                                                                                                                                )
-                                                                                                                            } -PassThru
-                                                                                                                        } -PassThru -Force
+                It "Should return false from the test method" {
+                    Test-TargetResource @testParams | Should -Be $true
+                }
+            }
 
-                                                                                                                        return $spServiceApp
-                                                                                                                    }
-                                                                                                                }
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Import-Module (Join-Path -Path (Split-Path -Path (Get-Module SharePointDsc -ListAvailable).Path -Parent) -ChildPath "Modules\SharePointDSC.Reverse\SharePointDSC.Reverse.psm1")
 
-                                                                                                                It "Should return present from the Get method" {
-                                                                                                                    $result = Get-TargetResource @testParams
-                                                                                                                    $result.Ensure | Should -Be "Present"
-                                                                                                                }
+                    Mock -CommandName Write-Host -MockWith { }
 
-                                                                                                                It "Should return false from the test method" {
-                                                                                                                    Test-TargetResource @testParams | Should -Be $false
-                                                                                                                }
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            Name            = "Secure Store Service Application"
+                            ProxyName       = "Secure Store Service Application Proxy"
+                            DatabaseName    = "SP_SecureStore"
+                            DatabaseServer  = "SQL01"
+                            ApplicationPool = "Service App Pool"
+                            AuditingEnabled = $true
+                            AuditlogMaxSize = 30
+                            Ensure          = "Present"
+                        }
+                    }
 
-                                                                                                                It "Should throw exception in the set method" {
-                                                                                                                    { Set-TargetResource @testParams } | Should -Throw ("Specified database name does not match " + `
-                                                                                                                            "the actual database name. This resource " + `
-                                                                                                                            "cannot rename the database.")
-                                                                                                                }
-                                                                                                            }
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        $spServiceApp = [PSCustomObject]@{
+                            DisplayName = "Secure Store Service Application"
+                            Name        = "Secure Store Service Application"
+                        }
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                            -Name GetType `
+                            -Value {
+                            return @{
+                                Name = "SecureStoreServiceApplication"
+                            }
+                        } -PassThru -Force
+                        return $spServiceApp
+                    }
 
-                                                                                                            Context -Name "When the database server does not match the actual server" -Fixture {
-                                                                                                                BeforeAll {
-                                                                                                                    $testParams = @{
-                                                                                                                        Name            = "Secure Store Service Application"
-                                                                                                                        ApplicationPool = "Service App Pool"
-                                                                                                                        AuditingEnabled = $false
-                                                                                                                        DatabaseName    = "SecureStoreDB"
-                                                                                                                        DatabaseServer  = "SQL_Instance"
-                                                                                                                        Ensure          = "Present"
-                                                                                                                    }
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
 
-                                                                                                                    Mock -CommandName Get-SPServiceApplication -MockWith {
-                                                                                                                        $spServiceApp = [PSCustomObject]@{
-                                                                                                                            TypeName        = "Secure Store Service Application"
-                                                                                                                            DisplayName     = $testParams.Name
-                                                                                                                            ApplicationPool = @{
-                                                                                                                                Name = $testParams.ApplicationPool
-                                                                                                                            }
-                                                                                                                        }
-                                                                                                                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
-                                                                                                                            New-Object -TypeName "Object" |
-                                                                                                                                Add-Member -MemberType NoteProperty `
-                                                                                                                                    -Name FullName `
-                                                                                                                                    -Value $getTypeFullName `
-                                                                                                                                    -PassThru |
-                                                                                                                                    Add-Member -MemberType ScriptMethod `
-                                                                                                                                        -Name GetProperties `
-                                                                                                                                        -Value {
-                                                                                                                                        param($x)
-                                                                                                                                        return @(
-                                                                                                                                            (New-Object -TypeName "Object" |
-                                                                                                                                                    Add-Member -MemberType NoteProperty `
-                                                                                                                                                        -Name Name `
-                                                                                                                                                        -Value "Database" `
-                                                                                                                                                        -PassThru |
-                                                                                                                                                        Add-Member -MemberType ScriptMethod `
-                                                                                                                                                            -Name GetValue `
-                                                                                                                                                            -Value {
-                                                                                                                                                            param($x)
-                                                                                                                                                            return (
-                                                                                                                                                                @{
-                                                                                                                                                                    FullName             = $getTypeFullName
-                                                                                                                                                                    Name                 = "SecureStoreDB"
-                                                                                                                                                                    NormalizedDataSource = "Wrong DBServer"
-                                                                                                                                                                    Server               = @{
-                                                                                                                                                                        Name = "Wrong DBServer"
-                                                                                                                                                                    }
-                                                                                                                                                                    FailoverServer       = @{
-                                                                                                                                                                        Name = "DBServer_Failover"
-                                                                                                                                                                    }
-                                                                                                                                                                }
-                                                                                                                                                            )
-                                                                                                                                                        } -PassThru
-                                                                                                                                                    ),
-                                                                                                                                                    (New-Object -TypeName "Object" |
-                                                                                                                                                            Add-Member -MemberType NoteProperty `
-                                                                                                                                                                -Name Name `
-                                                                                                                                                                -Value "AuditEnabled" `
-                                                                                                                                                                -PassThru |
-                                                                                                                                                                Add-Member -MemberType ScriptMethod `
-                                                                                                                                                                    -Name GetValue `
-                                                                                                                                                                    -Value {
-                                                                                                                                                                    param($x)
-                                                                                                                                                                    return $params.AuditEnabled
-                                                                                                                                                                } -PassThru
-                                                                                                                                                            )
-                                                                                                                                                        )
-                                                                                                                                                    } -PassThru
-                                                                                                                                                } -PassThru -Force
-
-                                                                                                                                                return $spServiceApp
-                                                                                                                                            }
-                                                                                                                                        }
-
-                                                                                                                                        It "Should return present from the Get method" {
-                                                                                                                                            $result = Get-TargetResource @testParams
-                                                                                                                                            $result.Ensure | Should -Be "Present"
-                                                                                                                                        }
-
-                                                                                                                                        It "Should return false from the test method" {
-                                                                                                                                            Test-TargetResource @testParams | Should -Be $false
-                                                                                                                                        }
-
-                                                                                                                                        It "Should throw exception in the set method" {
-                                                                                                                                            { Set-TargetResource @testParams } | Should -Throw ("Specified database server does " + `
-                                                                                                                                                    "not match the actual database server. " + `
-                                                                                                                                                    "This resource cannot move the database " + `
-                                                                                                                                                    "to a different SQL instance.")
-                                                                                                                                        }
-                                                                                                                                    }
-
-                                                                                                                                    Context -Name "When the service app doesn't exist and shouldn't" -Fixture {
-                                                                                                                                        BeforeAll {
-                                                                                                                                            $testParams = @{
-                                                                                                                                                Name            = "Secure Store Service Application"
-                                                                                                                                                ApplicationPool = "-"
-                                                                                                                                                AuditingEnabled = $false
-                                                                                                                                                Ensure          = "Absent"
-                                                                                                                                            }
-
-                                                                                                                                            Mock -CommandName Get-SPServiceApplication -MockWith {
-                                                                                                                                                return $null
-                                                                                                                                            }
-                                                                                                                                        }
-
-                                                                                                                                        It "Should return absent from the Get method" {
-                                                                                                                                            (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
-                                                                                                                                        }
-
-                                                                                                                                        It "Should return false from the test method" {
-                                                                                                                                            Test-TargetResource @testParams | Should -Be $true
-                                                                                                                                        }
-                                                                                                                                    }
-
-                                                                                                                                    Context -Name "Running ReverseDsc Export" -Fixture {
-                                                                                                                                        BeforeAll {
-                                                                                                                                            Mock -CommandName Write-Host -MockWith { }
-
-                                                                                                                                            Mock -CommandName Get-TargetResource -MockWith {
-                                                                                                                                                return @{
-                                                                                                                                                    Name            = "Secure Store Service Application"
-                                                                                                                                                    ProxyName       = "Secure Store Service Application Proxy"
-                                                                                                                                                    DatabaseName    = "SP_SecureStore"
-                                                                                                                                                    DatabaseServer  = "SQL01"
-                                                                                                                                                    ApplicationPool = "Service App Pool"
-                                                                                                                                                    AuditingEnabled = $true
-                                                                                                                                                    AuditlogMaxSize = 30
-                                                                                                                                                    Ensure          = "Present"
-                                                                                                                                                }
-                                                                                                                                            }
-
-                                                                                                                                            Mock -CommandName Get-SPServiceApplication -MockWith {
-                                                                                                                                                $spServiceApp = [PSCustomObject]@{
-                                                                                                                                                    DisplayName = "Secure Store Service Application"
-                                                                                                                                                    Name        = "Secure Store Service Application"
-                                                                                                                                                }
-                                                                                                                                                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
-                                                                                                                                                    -Name GetType `
-                                                                                                                                                    -Value {
-                                                                                                                                                    return @{
-                                                                                                                                                        Name = "SecureStoreServiceApplication"
-                                                                                                                                                    }
-                                                                                                                                                } -PassThru -Force
-                                                                                                                                                return $spServiceApp
-                                                                                                                                            }
-
-                                                                                                                                            if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
-                                                                                                                                            {
-                                                                                                                                                $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
-                                                                                                                                                $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
-                                                                                                                                            }
-
-                                                                                                                                            $result = @'
+                    $result = @'
         SPSecureStoreServiceApp SecureStoreServiceApplication
         {
             ApplicationPool      = "Service App Pool";
@@ -759,17 +761,16 @@ try
         }
 
 '@
-                                                                                                                                        }
+                }
 
-                                                                                                                                        It "Should return valid DSC block from the Export method" {
-                                                                                                                                            Import-Module (Join-Path -Path (Split-Path -Path (Get-Module SharePointDsc -ListAvailable).Path -Parent) -ChildPath "Modules\SharePointDSC.Reverse\SharePointDSC.Reverse.psm1")
-                                                                                                                                            Export-TargetResource | Should -Be $result
-                                                                                                                                        }
-                                                                                                                                    }
-                                                                                                                                }
-                                                                                                                            }
-                                                                                                                        }
-                                                                                                                        finally
-                                                                                                                        {
-                                                                                                                            Invoke-TestCleanup
-                                                                                                                        }
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource | Should -Be $result
+                }
+            }
+        }
+    }
+}
+finally
+{
+    Invoke-TestCleanup
+}
