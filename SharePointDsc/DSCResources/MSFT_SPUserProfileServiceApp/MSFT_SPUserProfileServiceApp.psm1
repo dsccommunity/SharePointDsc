@@ -834,8 +834,7 @@ function Export-TargetResource
         {
             if ($null -ne $ups)
             {
-                Write-Host "`r`nW103"  -BackgroundColor Yellow -ForegroundColor Black -NoNewline
-                Write-Host "   - Farm Account does not have Full Control on the User Profile Service Application."
+                Write-Host "   - Farm Account does not have Full Control on the User Profile Service Application." -BackgroundColor Yellow -ForegroundColor Black
             }
         }
 

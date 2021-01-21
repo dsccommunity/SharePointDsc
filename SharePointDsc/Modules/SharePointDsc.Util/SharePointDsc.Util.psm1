@@ -1662,8 +1662,7 @@ function Start-SharePointDSCExtract
     }
     else
     {
-        Write-Host -Object "`r`nE102"  -BackgroundColor Red -ForegroundColor Black -NoNewline
-        Write-Host -Object "    - We couldn't detect a SharePoint installation on this machine. Please execute the SharePoint ReverseDSC script on an existing SharePoint server."
+        Write-Host -Object "    - We couldn't detect a SharePoint installation on this machine. Please execute the SharePoint ReverseDSC script on an existing SharePoint server." -BackgroundColor Red -ForegroundColor Black
     }
 }
 

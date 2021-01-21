@@ -1409,15 +1409,6 @@ function Export-TargetResource
         $params.Remove("InstallAccount")
     }
 
-    $spCentralAdmin = Get-SPWebApplication -IncludeCentralAdministration | Where-Object { $_.DisplayName -like '*Central Administration*' }
-    <# WA - Bug in 1.6.0.0 Get-TargetResource does not return the current Authentication Method; #>
-    $caAuthMethod = "NTLM"
-    if (!$spCentralAdmin.IisSettings[0].DisableKerberos)
-    {
-        $caAuthMethod = "Kerberos"
-    }
-    $params.CentralAdministrationAuth = $caAuthMethod
-    $params.CentralAdministrationPort = (New-Object -TypeName System.Uri $spCentralAdmin.Url).Port
     $params.FarmAccount = $Global:spFarmAccount
     $params.Passphrase = $Global:spFarmAccount
     $results = Get-TargetResource @params
@@ -1425,8 +1416,7 @@ function Export-TargetResource
     <# Remove the default generated PassPhrase and ensure the resulting Configuration Script will prompt user for it. #>
     $results.Remove("Passphrase");
 
-    <# WA - Bug in 1.6.0.0 Get-TargetResource not returning name if aliases are used #>
-    $configDB = Get-SPDatabase | Where-Object { $_.GetType().Name -eq "SPConfigurationDatabase" }
+    $dbServer = $results.DatabaseServer
     $results.DatabaseServer = "`$ConfigurationData.NonNodeData.DatabaseServer"
 
     if ($null -ne $results.CentralAdministrationUrl -and $results.CentralAdministrationUrl.ToLower() -like 'http://*')
@@ -1440,7 +1430,7 @@ function Export-TargetResource
     }
     else
     {
-        Add-ConfigurationDataEntry -Node "NonNodeData" -Key "DatabaseServer" -Value $configDB.NormalizedDataSource -Description "Name of the Database Server associated with the destination SharePoint Farm;"
+        Add-ConfigurationDataEntry -Node "NonNodeData" -Key "DatabaseServer" -Value $dbServer -Description "Name of the Database Server associated with the destination SharePoint Farm;"
     }
 
     if ($null -eq (Get-ConfigurationDataEntry -Node "NonNodeData" -Key "PassPhrase"))
