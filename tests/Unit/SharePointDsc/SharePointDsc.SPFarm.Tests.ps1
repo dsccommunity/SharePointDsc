@@ -2856,7 +2856,6 @@ try
             IsSingleInstance          = "Yes";
             PsDscRunAsCredential      = \$Credsspfarm;
             RunCentralAdmin           = \$True;
-        }
 
 '@
                 }
