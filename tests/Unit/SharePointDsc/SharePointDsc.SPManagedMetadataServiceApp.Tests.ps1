@@ -1,4 +1,5 @@
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param
 (
     [Parameter()]
@@ -49,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 #Initialize Tests
                 $getTypeFullName = "Microsoft.SharePoint.Taxonomy.MetadataWebServiceApplication"
@@ -354,460 +355,460 @@ try
                             }
                             $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
                                 New-Object -TypeName "Object" |
-                                Add-Member -MemberType NoteProperty `
-                                    -Name FullName `
-                                    -Value $getTypeFullName `
-                                    -PassThru |
-                                Add-Member -MemberType ScriptMethod `
-                                    -Name GetProperties `
-                                    -Value {
-                                    param($x)
-                                    return @(
-                                        (New-Object -TypeName "Object" |
-                                            Add-Member -MemberType NoteProperty `
-                                                -Name Name `
-                                                -Value "DatabaseMapper" `
-                                                -PassThru |
-                                            Add-Member -MemberType ScriptMethod `
-                                                -Name GetValue `
+                                    Add-Member -MemberType NoteProperty `
+                                        -Name FullName `
+                                        -Value $getTypeFullName `
+                                        -PassThru |
+                                        Add-Member -MemberType ScriptMethod `
+                                            -Name GetProperties `
+                                            -Value {
+                                            param($x)
+                                            return @(
+                                                (New-Object -TypeName "Object" |
+                                                        Add-Member -MemberType NoteProperty `
+                                                            -Name Name `
+                                                            -Value "DatabaseMapper" `
+                                                            -PassThru |
+                                                            Add-Member -MemberType ScriptMethod `
+                                                                -Name GetValue `
+                                                                -Value {
+                                                                param($x)
+                                                                return (@{
+                                                                        FullName = $getTypeFullName
+                                                                    }) | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                                                                    return (@{
+                                                                            FullName = $getTypeFullName
+                                                                        }) | Add-Member -MemberType ScriptMethod -Name GetMethods -Value {
+                                                                        return (@{
+                                                                                Name = "GetContentTypeSyndicationHubLocal"
+                                                                            }) | Add-Member -MemberType ScriptMethod -Name Invoke -Value {
+                                                                            return @{
+                                                                                AbsoluteUri = "http://contoso.sharepoint.com/sites/ct"
+                                                                            }
+                                                                        } -PassThru -Force
+                                                                    } -PassThru -Force
+                                                                } -PassThru -Force
+                                                            } -PassThru
+                                                        )
+                                                    )
+                                                } -PassThru
+                                            } -PassThru -Force
+                                            $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                                                -Name IsConnected `
                                                 -Value {
                                                 param($x)
-                                                return (@{
-                                                        FullName = $getTypeFullName
-                                                    }) | Add-Member -MemberType ScriptMethod -Name GetType -Value {
-                                                    return (@{
-                                                            FullName = $getTypeFullName
-                                                        }) | Add-Member -MemberType ScriptMethod -Name GetMethods -Value {
-                                                        return (@{
-                                                                Name = "GetContentTypeSyndicationHubLocal"
-                                                            }) | Add-Member -MemberType ScriptMethod -Name Invoke -Value {
-                                                            return @{
-                                                                AbsoluteUri = "http://contoso.sharepoint.com/sites/ct"
-                                                            }
-                                                        } -PassThru -Force
-                                                    } -PassThru -Force
-                                                } -PassThru -Force
-                                            } -PassThru
-                                        )
-                                    )
-                                } -PassThru
-                            } -PassThru -Force
-                            $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
-                                -Name IsConnected `
-                                -Value {
-                                param($x)
-                                return $true
-                            } -PassThru -Force
-                            return $spServiceApp
-                        }
-                    }
-                }
-
-                It "Should return present from the get method" {
-                    $results = Get-TargetResource @testParams
-                    $results.Ensure | Should -Be "Present"
-                    $results.ContentTypeHubUrl | Should -Not -BeNullOrEmpty
-                }
-
-                It "Should return true when the Test method is called" {
-                    Test-TargetResource @testParams | Should -Be $true
-                }
-            }
-
-
-            Context -Name "When a service application exists and the app pool is not configured correctly" -Fixture {
-                BeforeAll {
-                    $testParams = @{
-                        Name            = "Managed Metadata Service App"
-                        ApplicationPool = "SharePoint Service Applications"
-                        DatabaseServer  = "databaseserver\instance"
-                        DatabaseName    = "SP_MMS"
-                        Ensure          = "Present"
-                    }
-
-                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
-                    {
-                        Mock -CommandName Get-SPServiceApplication -MockWith {
-                            $spServiceApp = [PSCustomObject]@{
-                                TypeName        = "Managed Metadata Service"
-                                DisplayName     = $testParams.Name
-                                ApplicationPool = @{
-                                    Name = "Wrong App Pool Name"
-                                }
-                                Database        = @{
-                                    Name                 = $testParams.DatabaseName
-                                    NormalizedDataSource = $testParams.DatabaseServer
-                                }
-                            }
-                            $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
-                                return (@{
-                                        FullName = $getTypeFullName
-                                    }) | Add-Member -MemberType ScriptMethod -Name GetMethods -Value {
-                                    return (@{
-                                            Name = "GetContentTypeSyndicationHubLocal"
-                                        }) | Add-Member -MemberType ScriptMethod -Name Invoke -Value {
-                                        return @{
-                                            AbsoluteUri = ""
+                                                return $true
+                                            } -PassThru -Force
+                                            return $spServiceApp
                                         }
-                                    } -PassThru -Force
-                                } -PassThru -Force
-                            } -PassThru -Force
-                            $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
-                                -Name IsConnected `
-                                -Value {
-                                param($x)
-                                return $true
-                            } -PassThru -Force
-                            return $spServiceApp
-                        }
-                    }
-
-                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16)
-                    {
-                        Mock -CommandName Get-SPServiceApplication -MockWith {
-                            $spServiceApp = [PSCustomObject]@{
-                                TypeName        = "Managed Metadata Service"
-                                DisplayName     = $testParams.Name
-                                ApplicationPool = @{
-                                    Name = "Wrong App Pool Name"
+                                    }
                                 }
-                                Database        = @{
-                                    Name                 = $testParams.DatabaseName
-                                    NormalizedDataSource = $testParams.DatabaseServer
+
+                                It "Should return present from the get method" {
+                                    $results = Get-TargetResource @testParams
+                                    $results.Ensure | Should -Be "Present"
+                                    $results.ContentTypeHubUrl | Should -Not -BeNullOrEmpty
+                                }
+
+                                It "Should return true when the Test method is called" {
+                                    Test-TargetResource @testParams | Should -Be $true
                                 }
                             }
-                            $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
-                                New-Object -TypeName "Object" |
-                                Add-Member -MemberType NoteProperty `
-                                    -Name FullName `
-                                    -Value $getTypeFullName `
-                                    -PassThru |
-                                Add-Member -MemberType ScriptMethod `
-                                    -Name GetProperties `
-                                    -Value {
-                                    param($x)
-                                    return @(
-                                        (New-Object -TypeName "Object" |
-                                            Add-Member -MemberType NoteProperty `
-                                                -Name Name `
-                                                -Value "DatabaseMapper" `
-                                                -PassThru |
-                                            Add-Member -MemberType ScriptMethod `
-                                                -Name GetValue `
-                                                -Value {
-                                                param($x)
+
+
+                            Context -Name "When a service application exists and the app pool is not configured correctly" -Fixture {
+                                BeforeAll {
+                                    $testParams = @{
+                                        Name            = "Managed Metadata Service App"
+                                        ApplicationPool = "SharePoint Service Applications"
+                                        DatabaseServer  = "databaseserver\instance"
+                                        DatabaseName    = "SP_MMS"
+                                        Ensure          = "Present"
+                                    }
+
+                                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
+                                    {
+                                        Mock -CommandName Get-SPServiceApplication -MockWith {
+                                            $spServiceApp = [PSCustomObject]@{
+                                                TypeName        = "Managed Metadata Service"
+                                                DisplayName     = $testParams.Name
+                                                ApplicationPool = @{
+                                                    Name = "Wrong App Pool Name"
+                                                }
+                                                Database        = @{
+                                                    Name                 = $testParams.DatabaseName
+                                                    NormalizedDataSource = $testParams.DatabaseServer
+                                                }
+                                            }
+                                            $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
                                                 return (@{
                                                         FullName = $getTypeFullName
-                                                    }) | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                                                    }) | Add-Member -MemberType ScriptMethod -Name GetMethods -Value {
                                                     return (@{
-                                                            FullName = $getTypeFullName
-                                                        }) | Add-Member -MemberType ScriptMethod -Name GetMethods -Value {
-                                                        return (@{
-                                                                Name = "GetContentTypeSyndicationHubLocal"
-                                                            }) | Add-Member -MemberType ScriptMethod -Name Invoke -Value {
-                                                            return @{
-                                                                AbsoluteUri = ""
-                                                            }
-                                                        } -PassThru -Force
+                                                            Name = "GetContentTypeSyndicationHubLocal"
+                                                        }) | Add-Member -MemberType ScriptMethod -Name Invoke -Value {
+                                                        return @{
+                                                            AbsoluteUri = ""
+                                                        }
                                                     } -PassThru -Force
                                                 } -PassThru -Force
-                                            } -PassThru
-                                        )
-                                    )
-                                } -PassThru
-                            } -PassThru -Force
-                            $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
-                                -Name IsConnected `
-                                -Value {
-                                param($x)
-                                return $true
-                            } -PassThru -Force
-
-                            return $spServiceApp
-                        }
-                    }
-
-                    Mock -CommandName Get-SPServiceApplicationPool -MockWith {
-                        return @{
-                            Name = $testParams.ApplicationPool
-                        }
-                    }
-                }
-
-                It "Should return Wrong App Pool Name from the Get method" {
-                    (Get-TargetResource @testParams).ApplicationPool | Should -Be "Wrong App Pool Name"
-                }
-
-                It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should -Be $false
-                }
-
-                It "Should call the update service app cmdlet from the set method" {
-                    Set-TargetResource @testParams
-
-                    Assert-MockCalled Get-SPServiceApplicationPool
-                    Assert-MockCalled Set-SPMetadataServiceApplication -ParameterFilter {
-                        $ApplicationPool.Name -eq $testParams.ApplicationPool
-                    }
-                }
-            }
-
-            Context -Name "When a service application exists and the content type hub is not configured correctly" -Fixture {
-                BeforeAll {
-                    $testParams = @{
-                        Name              = "Managed Metadata Service App"
-                        ApplicationPool   = "SharePoint Service Applications"
-                        DatabaseServer    = "databaseserver\instance"
-                        DatabaseName      = "SP_MMS"
-                        ContentTypeHubUrl = "https://contenttypes.contoso.com"
-                        Ensure            = "Present"
-                    }
-
-                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
-                    {
-                        Mock -CommandName Get-SPServiceApplication -MockWith {
-                            $spServiceApp = [PSCustomObject]@{
-                                TypeName        = "Managed Metadata Service"
-                                DisplayName     = $testParams.Name
-                                ApplicationPool = @{
-                                    Name = $testParams.ApplicationPool
-                                }
-                                Database        = @{
-                                    Name                 = $testParams.DatabaseName
-                                    NormalizedDataSource = $testParams.DatabaseServer
-                                }
-                            }
-                            $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
-                                return (@{
-                                        FullName = $getTypeFullName
-                                    }) | Add-Member -MemberType ScriptMethod -Name GetMethods -Value {
-                                    return (@{
-                                            Name = "GetContentTypeSyndicationHubLocal"
-                                        }) | Add-Member -MemberType ScriptMethod -Name Invoke -Value {
-                                        return @{
-                                            AbsoluteUri = "https://contenttypes.contoso.com/wrong"
+                                            } -PassThru -Force
+                                            $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                                                -Name IsConnected `
+                                                -Value {
+                                                param($x)
+                                                return $true
+                                            } -PassThru -Force
+                                            return $spServiceApp
                                         }
-                                    } -PassThru -Force
-                                } -PassThru -Force
-                            } -PassThru -Force
-                            $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
-                                -Name IsConnected `
-                                -Value {
-                                param($x)
-                                return $true
-                            } -PassThru -Force
-                            return $spServiceApp
-                        }
-                    }
+                                    }
 
-                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16)
-                    {
-                        Mock -CommandName Get-SPServiceApplication -MockWith {
-                            $spServiceApp = [PSCustomObject]@{
-                                TypeName        = "Managed Metadata Service"
-                                DisplayName     = $testParams.Name
-                                ApplicationPool = @{
-                                    Name = "Wrong App Pool Name"
-                                }
-                                Database        = @{
-                                    Name                 = $testParams.DatabaseName
-                                    NormalizedDataSource = $testParams.DatabaseServer
-                                }
-                            }
-                            $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
-                                New-Object -TypeName "Object" |
-                                Add-Member -MemberType NoteProperty `
-                                    -Name FullName `
-                                    -Value $getTypeFullName `
-                                    -PassThru |
-                                Add-Member -MemberType ScriptMethod `
-                                    -Name GetProperties `
-                                    -Value {
-                                    param($x)
-                                    return @(
-                                        (New-Object -TypeName "Object" |
-                                            Add-Member -MemberType NoteProperty `
-                                                -Name Name `
-                                                -Value "DatabaseMapper" `
-                                                -PassThru |
-                                            Add-Member -MemberType ScriptMethod `
-                                                -Name GetValue `
-                                                -Value {
-                                                param($x)
-                                                return (@{
-                                                        FullName = $getTypeFullName
-                                                    }) | Add-Member -MemberType ScriptMethod -Name GetType -Value {
-                                                    return (@{
-                                                            FullName = $getTypeFullName
-                                                        }) | Add-Member -MemberType ScriptMethod -Name GetMethods -Value {
-                                                        return (@{
-                                                                Name = "GetContentTypeSyndicationHubLocal"
-                                                            }) | Add-Member -MemberType ScriptMethod -Name Invoke -Value {
-                                                            return @{
-                                                                AbsoluteUri = "https://contenttypes.contoso.com/wrong"
+                                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16)
+                                    {
+                                        Mock -CommandName Get-SPServiceApplication -MockWith {
+                                            $spServiceApp = [PSCustomObject]@{
+                                                TypeName        = "Managed Metadata Service"
+                                                DisplayName     = $testParams.Name
+                                                ApplicationPool = @{
+                                                    Name = "Wrong App Pool Name"
+                                                }
+                                                Database        = @{
+                                                    Name                 = $testParams.DatabaseName
+                                                    NormalizedDataSource = $testParams.DatabaseServer
+                                                }
+                                            }
+                                            $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                                                New-Object -TypeName "Object" |
+                                                    Add-Member -MemberType NoteProperty `
+                                                        -Name FullName `
+                                                        -Value $getTypeFullName `
+                                                        -PassThru |
+                                                        Add-Member -MemberType ScriptMethod `
+                                                            -Name GetProperties `
+                                                            -Value {
+                                                            param($x)
+                                                            return @(
+                                                                (New-Object -TypeName "Object" |
+                                                                        Add-Member -MemberType NoteProperty `
+                                                                            -Name Name `
+                                                                            -Value "DatabaseMapper" `
+                                                                            -PassThru |
+                                                                            Add-Member -MemberType ScriptMethod `
+                                                                                -Name GetValue `
+                                                                                -Value {
+                                                                                param($x)
+                                                                                return (@{
+                                                                                        FullName = $getTypeFullName
+                                                                                    }) | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                                                                                    return (@{
+                                                                                            FullName = $getTypeFullName
+                                                                                        }) | Add-Member -MemberType ScriptMethod -Name GetMethods -Value {
+                                                                                        return (@{
+                                                                                                Name = "GetContentTypeSyndicationHubLocal"
+                                                                                            }) | Add-Member -MemberType ScriptMethod -Name Invoke -Value {
+                                                                                            return @{
+                                                                                                AbsoluteUri = ""
+                                                                                            }
+                                                                                        } -PassThru -Force
+                                                                                    } -PassThru -Force
+                                                                                } -PassThru -Force
+                                                                            } -PassThru
+                                                                        )
+                                                                    )
+                                                                } -PassThru
+                                                            } -PassThru -Force
+                                                            $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                                                                -Name IsConnected `
+                                                                -Value {
+                                                                param($x)
+                                                                return $true
+                                                            } -PassThru -Force
+
+                                                            return $spServiceApp
+                                                        }
+                                                    }
+
+                                                    Mock -CommandName Get-SPServiceApplicationPool -MockWith {
+                                                        return @{
+                                                            Name = $testParams.ApplicationPool
+                                                        }
+                                                    }
+                                                }
+
+                                                It "Should return Wrong App Pool Name from the Get method" {
+                                                    (Get-TargetResource @testParams).ApplicationPool | Should -Be "Wrong App Pool Name"
+                                                }
+
+                                                It "Should return false when the Test method is called" {
+                                                    Test-TargetResource @testParams | Should -Be $false
+                                                }
+
+                                                It "Should call the update service app cmdlet from the set method" {
+                                                    Set-TargetResource @testParams
+
+                                                    Assert-MockCalled Get-SPServiceApplicationPool
+                                                    Assert-MockCalled Set-SPMetadataServiceApplication -ParameterFilter {
+                                                        $ApplicationPool.Name -eq $testParams.ApplicationPool
+                                                    }
+                                                }
+                                            }
+
+                                            Context -Name "When a service application exists and the content type hub is not configured correctly" -Fixture {
+                                                BeforeAll {
+                                                    $testParams = @{
+                                                        Name              = "Managed Metadata Service App"
+                                                        ApplicationPool   = "SharePoint Service Applications"
+                                                        DatabaseServer    = "databaseserver\instance"
+                                                        DatabaseName      = "SP_MMS"
+                                                        ContentTypeHubUrl = "https://contenttypes.contoso.com"
+                                                        Ensure            = "Present"
+                                                    }
+
+                                                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
+                                                    {
+                                                        Mock -CommandName Get-SPServiceApplication -MockWith {
+                                                            $spServiceApp = [PSCustomObject]@{
+                                                                TypeName        = "Managed Metadata Service"
+                                                                DisplayName     = $testParams.Name
+                                                                ApplicationPool = @{
+                                                                    Name = $testParams.ApplicationPool
+                                                                }
+                                                                Database        = @{
+                                                                    Name                 = $testParams.DatabaseName
+                                                                    NormalizedDataSource = $testParams.DatabaseServer
+                                                                }
                                                             }
-                                                        } -PassThru -Force
-                                                    } -PassThru -Force
-                                                } -PassThru -Force
-                                            } -PassThru
-                                        )
-                                    )
-                                } -PassThru
-                            } -PassThru -Force
-                            $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
-                                -Name IsConnected `
-                                -Value {
-                                param($x)
-                                return $true
-                            } -PassThru -Force
+                                                            $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                                                                return (@{
+                                                                        FullName = $getTypeFullName
+                                                                    }) | Add-Member -MemberType ScriptMethod -Name GetMethods -Value {
+                                                                    return (@{
+                                                                            Name = "GetContentTypeSyndicationHubLocal"
+                                                                        }) | Add-Member -MemberType ScriptMethod -Name Invoke -Value {
+                                                                        return @{
+                                                                            AbsoluteUri = "https://contenttypes.contoso.com/wrong"
+                                                                        }
+                                                                    } -PassThru -Force
+                                                                } -PassThru -Force
+                                                            } -PassThru -Force
+                                                            $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                                                                -Name IsConnected `
+                                                                -Value {
+                                                                param($x)
+                                                                return $true
+                                                            } -PassThru -Force
+                                                            return $spServiceApp
+                                                        }
+                                                    }
 
-                            return $spServiceApp
-                        }
-                    }
-
-                    Mock -CommandName Get-SPServiceApplicationPool -MockWith {
-                        return @{
-                            Name = $testParams.ApplicationPool
-                        }
-                    }
-                }
-
-                It "Should return wrong content type url from the Get method" {
-                    (Get-TargetResource @testParams).ContentTypeHubUrl | Should -Be "https://contenttypes.contoso.com/wrong"
-                }
-
-                It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should -Be $false
-                }
-
-                It "Should call the update service app cmdlet from the set method" {
-                    Set-TargetResource @testParams
-
-                    Assert-MockCalled Set-SPMetadataServiceApplication
-                }
-            }
-
-            Context -Name "When the service application exists but it shouldn't" -Fixture {
-                BeforeAll {
-                    $testParams = @{
-                        Name            = "Test App"
-                        ApplicationPool = "-"
-                        Ensure          = "Absent"
-                    }
-
-                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
-                    {
-                        Mock -CommandName Get-SPServiceApplication -MockWith {
-                            $spServiceApp = [PSCustomObject]@{
-                                TypeName        = "Managed Metadata Service"
-                                DisplayName     = $testParams.Name
-                                ApplicationPool = @{
-                                    Name = "Wrong App Pool Name"
-                                }
-                                Database        = @{
-                                    Name                 = $testParams.DatabaseName
-                                    NormalizedDataSource = $testParams.DatabaseServer
-                                }
-                            }
-                            $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
-                                return (@{
-                                        FullName = $getTypeFullName
-                                    }) | Add-Member -MemberType ScriptMethod -Name GetMethods -Value {
-                                    return (@{
-                                            Name = "GetContentTypeSyndicationHubLocal"
-                                        }) | Add-Member -MemberType ScriptMethod -Name Invoke -Value {
-                                        return @{
-                                            AbsoluteUri = ""
-                                        }
-                                    } -PassThru -Force
-                                } -PassThru -Force
-                            } -PassThru -Force
-                            $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
-                                -Name IsConnected `
-                                -Value {
-                                param($x)
-                                return $true
-                            } -PassThru -Force
-                            return $spServiceApp
-                        }
-                    }
-
-                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16)
-                    {
-                        Mock -CommandName Get-SPServiceApplication -MockWith {
-                            $spServiceApp = [PSCustomObject]@{
-                                TypeName        = "Managed Metadata Service"
-                                DisplayName     = $testParams.Name
-                                ApplicationPool = @{
-                                    Name = "Wrong App Pool Name"
-                                }
-                                Database        = @{
-                                    Name                 = $testParams.DatabaseName
-                                    NormalizedDataSource = $testParams.DatabaseServer
-                                }
-                            }
-                            $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
-                                New-Object -TypeName "Object" |
-                                Add-Member -MemberType NoteProperty `
-                                    -Name FullName `
-                                    -Value $getTypeFullName `
-                                    -PassThru |
-                                Add-Member -MemberType ScriptMethod `
-                                    -Name GetProperties `
-                                    -Value {
-                                    param($x)
-                                    return @(
-                                        (New-Object -TypeName "Object" |
-                                            Add-Member -MemberType NoteProperty `
-                                                -Name Name `
-                                                -Value "DatabaseMapper" `
-                                                -PassThru |
-                                            Add-Member -MemberType ScriptMethod `
-                                                -Name GetValue `
-                                                -Value {
-                                                param($x)
-                                                return (@{
-                                                        FullName = $getTypeFullName
-                                                    }) | Add-Member -MemberType ScriptMethod -Name GetType -Value {
-                                                    return (@{
-                                                            FullName = $getTypeFullName
-                                                        }) | Add-Member -MemberType ScriptMethod -Name GetMethods -Value {
-                                                        return (@{
-                                                                Name = "GetContentTypeSyndicationHubLocal"
-                                                            }) | Add-Member -MemberType ScriptMethod -Name Invoke -Value {
-                                                            return @{
-                                                                AbsoluteUri = ""
+                                                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16)
+                                                    {
+                                                        Mock -CommandName Get-SPServiceApplication -MockWith {
+                                                            $spServiceApp = [PSCustomObject]@{
+                                                                TypeName        = "Managed Metadata Service"
+                                                                DisplayName     = $testParams.Name
+                                                                ApplicationPool = @{
+                                                                    Name = "Wrong App Pool Name"
+                                                                }
+                                                                Database        = @{
+                                                                    Name                 = $testParams.DatabaseName
+                                                                    NormalizedDataSource = $testParams.DatabaseServer
+                                                                }
                                                             }
-                                                        } -PassThru -Force
-                                                    } -PassThru -Force
-                                                } -PassThru -Force
-                                            } -PassThru
-                                        )
-                                    )
-                                } -PassThru
-                            } -PassThru -Force
-                            $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
-                                -Name IsConnected `
-                                -Value {
-                                param($x)
-                                return $true
-                            } -PassThru -Force
-                            return $spServiceApp
-                        }
-                    }
+                                                            $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                                                                New-Object -TypeName "Object" |
+                                                                    Add-Member -MemberType NoteProperty `
+                                                                        -Name FullName `
+                                                                        -Value $getTypeFullName `
+                                                                        -PassThru |
+                                                                        Add-Member -MemberType ScriptMethod `
+                                                                            -Name GetProperties `
+                                                                            -Value {
+                                                                            param($x)
+                                                                            return @(
+                                                                                (New-Object -TypeName "Object" |
+                                                                                        Add-Member -MemberType NoteProperty `
+                                                                                            -Name Name `
+                                                                                            -Value "DatabaseMapper" `
+                                                                                            -PassThru |
+                                                                                            Add-Member -MemberType ScriptMethod `
+                                                                                                -Name GetValue `
+                                                                                                -Value {
+                                                                                                param($x)
+                                                                                                return (@{
+                                                                                                        FullName = $getTypeFullName
+                                                                                                    }) | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                                                                                                    return (@{
+                                                                                                            FullName = $getTypeFullName
+                                                                                                        }) | Add-Member -MemberType ScriptMethod -Name GetMethods -Value {
+                                                                                                        return (@{
+                                                                                                                Name = "GetContentTypeSyndicationHubLocal"
+                                                                                                            }) | Add-Member -MemberType ScriptMethod -Name Invoke -Value {
+                                                                                                            return @{
+                                                                                                                AbsoluteUri = "https://contenttypes.contoso.com/wrong"
+                                                                                                            }
+                                                                                                        } -PassThru -Force
+                                                                                                    } -PassThru -Force
+                                                                                                } -PassThru -Force
+                                                                                            } -PassThru
+                                                                                        )
+                                                                                    )
+                                                                                } -PassThru
+                                                                            } -PassThru -Force
+                                                                            $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                                                                                -Name IsConnected `
+                                                                                -Value {
+                                                                                param($x)
+                                                                                return $true
+                                                                            } -PassThru -Force
 
-                    Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
-                        return @(
-                            @{
-                                Name = "Managed Metadata Service App Proxy"
-                            } | Add-Member -MemberType ScriptMethod `
-                                -Name Update `
-                                -Value { $Global:SPDscServiceProxyUpdateCalled = $true }  `
-                                -PassThru -Force `
-                            | Add-Member -MemberType ScriptMethod `
-                                -Name Delete `
-                                -Value { $Global:SPDscServiceProxyDeleteCalled = $true } `
-                                -PassThru -Force
+                                                                            return $spServiceApp
+                                                                        }
+                                                                    }
+
+                                                                    Mock -CommandName Get-SPServiceApplicationPool -MockWith {
+                                                                        return @{
+                                                                            Name = $testParams.ApplicationPool
+                                                                        }
+                                                                    }
+                                                                }
+
+                                                                It "Should return wrong content type url from the Get method" {
+                                                                    (Get-TargetResource @testParams).ContentTypeHubUrl | Should -Be "https://contenttypes.contoso.com/wrong"
+                                                                }
+
+                                                                It "Should return false when the Test method is called" {
+                                                                    Test-TargetResource @testParams | Should -Be $false
+                                                                }
+
+                                                                It "Should call the update service app cmdlet from the set method" {
+                                                                    Set-TargetResource @testParams
+
+                                                                    Assert-MockCalled Set-SPMetadataServiceApplication
+                                                                }
+                                                            }
+
+                                                            Context -Name "When the service application exists but it shouldn't" -Fixture {
+                                                                BeforeAll {
+                                                                    $testParams = @{
+                                                                        Name            = "Test App"
+                                                                        ApplicationPool = "-"
+                                                                        Ensure          = "Absent"
+                                                                    }
+
+                                                                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
+                                                                    {
+                                                                        Mock -CommandName Get-SPServiceApplication -MockWith {
+                                                                            $spServiceApp = [PSCustomObject]@{
+                                                                                TypeName        = "Managed Metadata Service"
+                                                                                DisplayName     = $testParams.Name
+                                                                                ApplicationPool = @{
+                                                                                    Name = "Wrong App Pool Name"
+                                                                                }
+                                                                                Database        = @{
+                                                                                    Name                 = $testParams.DatabaseName
+                                                                                    NormalizedDataSource = $testParams.DatabaseServer
+                                                                                }
+                                                                            }
+                                                                            $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                                                                                return (@{
+                                                                                        FullName = $getTypeFullName
+                                                                                    }) | Add-Member -MemberType ScriptMethod -Name GetMethods -Value {
+                                                                                    return (@{
+                                                                                            Name = "GetContentTypeSyndicationHubLocal"
+                                                                                        }) | Add-Member -MemberType ScriptMethod -Name Invoke -Value {
+                                                                                        return @{
+                                                                                            AbsoluteUri = ""
+                                                                                        }
+                                                                                    } -PassThru -Force
+                                                                                } -PassThru -Force
+                                                                            } -PassThru -Force
+                                                                            $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                                                                                -Name IsConnected `
+                                                                                -Value {
+                                                                                param($x)
+                                                                                return $true
+                                                                            } -PassThru -Force
+                                                                            return $spServiceApp
+                                                                        }
+                                                                    }
+
+                                                                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16)
+                                                                    {
+                                                                        Mock -CommandName Get-SPServiceApplication -MockWith {
+                                                                            $spServiceApp = [PSCustomObject]@{
+                                                                                TypeName        = "Managed Metadata Service"
+                                                                                DisplayName     = $testParams.Name
+                                                                                ApplicationPool = @{
+                                                                                    Name = "Wrong App Pool Name"
+                                                                                }
+                                                                                Database        = @{
+                                                                                    Name                 = $testParams.DatabaseName
+                                                                                    NormalizedDataSource = $testParams.DatabaseServer
+                                                                                }
+                                                                            }
+                                                                            $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                                                                                New-Object -TypeName "Object" |
+                                                                                    Add-Member -MemberType NoteProperty `
+                                                                                        -Name FullName `
+                                                                                        -Value $getTypeFullName `
+                                                                                        -PassThru |
+                                                                                        Add-Member -MemberType ScriptMethod `
+                                                                                            -Name GetProperties `
+                                                                                            -Value {
+                                                                                            param($x)
+                                                                                            return @(
+                                                                                                (New-Object -TypeName "Object" |
+                                                                                                        Add-Member -MemberType NoteProperty `
+                                                                                                            -Name Name `
+                                                                                                            -Value "DatabaseMapper" `
+                                                                                                            -PassThru |
+                                                                                                            Add-Member -MemberType ScriptMethod `
+                                                                                                                -Name GetValue `
+                                                                                                                -Value {
+                                                                                                                param($x)
+                                                                                                                return (@{
+                                                                                                                        FullName = $getTypeFullName
+                                                                                                                    }) | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                                                                                                                    return (@{
+                                                                                                                            FullName = $getTypeFullName
+                                                                                                                        }) | Add-Member -MemberType ScriptMethod -Name GetMethods -Value {
+                                                                                                                        return (@{
+                                                                                                                                Name = "GetContentTypeSyndicationHubLocal"
+                                                                                                                            }) | Add-Member -MemberType ScriptMethod -Name Invoke -Value {
+                                                                                                                            return @{
+                                                                                                                                AbsoluteUri = ""
+                                                                                                                            }
+                                                                                                                        } -PassThru -Force
+                                                                                                                    } -PassThru -Force
+                                                                                                                } -PassThru -Force
+                                                                                                            } -PassThru
+                                                                                                        )
+                                                                                                    )
+                                                                                                } -PassThru
+                                                                                            } -PassThru -Force
+                                                                                            $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                                                                                                -Name IsConnected `
+                                                                                                -Value {
+                                                                                                param($x)
+                                                                                                return $true
+                                                                                            } -PassThru -Force
+                                                                                            return $spServiceApp
+                                                                                        }
+                                                                                    }
+
+                                                                                    Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
+                                                                                        return @(
+                                                                                            @{
+                                                                                                Name = "Managed Metadata Service App Proxy"
+                                                                                            } | Add-Member -MemberType ScriptMethod `
+                                                                                                -Name Update `
+                                                                                                -Value { $Global:SPDscServiceProxyUpdateCalled = $true }  `
+                                                                                                -PassThru -Force `
+                                                                                            | Add-Member -MemberType ScriptMethod `
+                                                                                                -Name Delete `
+                                                                                                -Value { $Global:SPDscServiceProxyDeleteCalled = $true } `
+                                                                                                -PassThru -Force
                         )
                     }
                 }
@@ -1383,102 +1384,102 @@ try
                             }
                             $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
                                 New-Object -TypeName "Object" |
-                                Add-Member -MemberType NoteProperty `
-                                    -Name FullName `
-                                    -Value $getTypeFullName `
-                                    -PassThru |
-                                Add-Member -MemberType ScriptMethod `
-                                    -Name GetProperties `
-                                    -Value {
-                                    param($x)
-                                    return @(
-                                        (New-Object -TypeName "Object" |
-                                            Add-Member -MemberType NoteProperty `
-                                                -Name Name `
-                                                -Value "DatabaseMapper" `
-                                                -PassThru |
-                                            Add-Member -MemberType ScriptMethod `
-                                                -Name GetValue `
+                                    Add-Member -MemberType NoteProperty `
+                                        -Name FullName `
+                                        -Value $getTypeFullName `
+                                        -PassThru |
+                                        Add-Member -MemberType ScriptMethod `
+                                            -Name GetProperties `
+                                            -Value {
+                                            param($x)
+                                            return @(
+                                                (New-Object -TypeName "Object" |
+                                                        Add-Member -MemberType NoteProperty `
+                                                            -Name Name `
+                                                            -Value "DatabaseMapper" `
+                                                            -PassThru |
+                                                            Add-Member -MemberType ScriptMethod `
+                                                                -Name GetValue `
+                                                                -Value {
+                                                                param($x)
+                                                                return (@{
+                                                                        FullName = $getTypeFullName
+                                                                    }) | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                                                                    return (@{
+                                                                            FullName = $getTypeFullName
+                                                                        }) | Add-Member -MemberType ScriptMethod -Name GetMethods -Value {
+                                                                        return (@{
+                                                                                Name = "GetContentTypeSyndicationHubLocal"
+                                                                            }) | Add-Member -MemberType ScriptMethod -Name Invoke -Value {
+                                                                            return @{
+                                                                                AbsoluteUri = "http://contoso.sharepoint.com/sites/ct"
+                                                                            }
+                                                                        } -PassThru -Force
+                                                                    } -PassThru -Force
+                                                                } -PassThru -Force
+                                                            } -PassThru
+                                                        )
+                                                    )
+                                                } -PassThru
+                                            } -PassThru -Force
+                                            $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                                                -Name IsConnected `
                                                 -Value {
                                                 param($x)
-                                                return (@{
-                                                        FullName = $getTypeFullName
-                                                    }) | Add-Member -MemberType ScriptMethod -Name GetType -Value {
-                                                    return (@{
-                                                            FullName = $getTypeFullName
-                                                        }) | Add-Member -MemberType ScriptMethod -Name GetMethods -Value {
-                                                        return (@{
-                                                                Name = "GetContentTypeSyndicationHubLocal"
-                                                            }) | Add-Member -MemberType ScriptMethod -Name Invoke -Value {
-                                                            return @{
-                                                                AbsoluteUri = "http://contoso.sharepoint.com/sites/ct"
-                                                            }
-                                                        } -PassThru -Force
-                                                    } -PassThru -Force
-                                                } -PassThru -Force
-                                            } -PassThru
-                                        )
+                                                return $true
+                                            } -PassThru -Force
+                                            return $spServiceApp
+                                        }
+                                    }
+
+                                    $termStoreAdmins = @(
+                                        New-Object -TypeName PSObject -Property @{
+                                            PrincipalName               = "Contoso\User1"
+                                            IsWindowsAuthenticationMode = $true
+                                        }
+                                        New-Object -TypeName PSObject -Property @{
+                                            PrincipalName               = "Contoso\User2"
+                                            IsWindowsAuthenticationMode = $true
+                                        }
                                     )
-                                } -PassThru
-                            } -PassThru -Force
-                            $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
-                                -Name IsConnected `
-                                -Value {
-                                param($x)
-                                return $true
-                            } -PassThru -Force
-                            return $spServiceApp
-                        }
-                    }
+                                    $termStoreAdmins = $termStoreAdmins | Add-Member -MemberType ScriptMethod `
+                                        -Name DoesUserHavePermissions `
+                                        -Value {
+                                        param ($userName)
+                                        return $true
+                                    } -PassThru -Force
 
-                    $termStoreAdmins = @(
-                        New-Object -TypeName PSObject -Property @{
-                            PrincipalName               = "Contoso\User1"
-                            IsWindowsAuthenticationMode = $true
-                        }
-                        New-Object -TypeName PSObject -Property @{
-                            PrincipalName               = "Contoso\User2"
-                            IsWindowsAuthenticationMode = $true
-                        }
-                    )
-                    $termStoreAdmins = $termStoreAdmins | Add-Member -MemberType ScriptMethod `
-                        -Name DoesUserHavePermissions `
-                        -Value {
-                        param ($userName)
-                        return $true
-                    } -PassThru -Force
-
-                    $termStores = @{
-                        "Managed Metadata Service App Proxy" = @{
-                            Name                    = "Managed Metadata Service App Proxy"
-                            Languages               = @(1031)
-                            DefaultLanguage         = 1031
-                            WorkingLanguage         = 1033
-                            TermStoreAdministrators = $termStoreAdmins
-                        } | Add-Member -MemberType ScriptMethod `
-                            -Name AddTermStoreAdministrator `
-                            -Value { $Global:SPDscAddUserCalled = $true }  `
-                            -PassThru -Force `
-                        | Add-Member -MemberType ScriptMethod `
-                            -Name DeleteTermStoreAdministrator `
-                            -Value { $Global:SPDscDeleteUserCalled = $true }  `
-                            -PassThru -Force `
-                        | Add-Member -MemberType ScriptMethod `
-                            -Name CommitAll `
-                            -Value { }  `
-                            -PassThru -Force `
-                        | Add-Member -MemberType ScriptMethod `
-                            -Name AddLanguage `
-                            -Value { $Global:SPDscAddLanguageCalled = $true }  `
-                            -PassThru -Force `
-                        | Add-Member -MemberType ScriptMethod `
-                            -Name DeleteLanguage `
-                            -Value { $Global:SPDscDeleteLanguageCalled = $true }  `
-                            -PassThru -Force `
-                        | Add-Member -MemberType ScriptMethod `
-                            -Name CommitAll `
-                            -Value { }  `
-                            -PassThru -Force
+                                    $termStores = @{
+                                        "Managed Metadata Service App Proxy" = @{
+                                            Name                    = "Managed Metadata Service App Proxy"
+                                            Languages               = @(1031)
+                                            DefaultLanguage         = 1031
+                                            WorkingLanguage         = 1033
+                                            TermStoreAdministrators = $termStoreAdmins
+                                        } | Add-Member -MemberType ScriptMethod `
+                                            -Name AddTermStoreAdministrator `
+                                            -Value { $Global:SPDscAddUserCalled = $true }  `
+                                            -PassThru -Force `
+                                        | Add-Member -MemberType ScriptMethod `
+                                            -Name DeleteTermStoreAdministrator `
+                                            -Value { $Global:SPDscDeleteUserCalled = $true }  `
+                                            -PassThru -Force `
+                                        | Add-Member -MemberType ScriptMethod `
+                                            -Name CommitAll `
+                                            -Value { }  `
+                                            -PassThru -Force `
+                                        | Add-Member -MemberType ScriptMethod `
+                                            -Name AddLanguage `
+                                            -Value { $Global:SPDscAddLanguageCalled = $true }  `
+                                            -PassThru -Force `
+                                        | Add-Member -MemberType ScriptMethod `
+                                            -Name DeleteLanguage `
+                                            -Value { $Global:SPDscDeleteLanguageCalled = $true }  `
+                                            -PassThru -Force `
+                                        | Add-Member -MemberType ScriptMethod `
+                                            -Name CommitAll `
+                                            -Value { }  `
+                                            -PassThru -Force
                     }
 
                     Mock -CommandName Get-SPTaxonomySession -MockWith {
@@ -1677,66 +1678,66 @@ try
                             }
                             $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
                                 New-Object -TypeName "Object" |
-                                Add-Member -MemberType NoteProperty `
-                                    -Name FullName `
-                                    -Value $getTypeFullName `
-                                    -PassThru |
-                                Add-Member -MemberType ScriptMethod `
-                                    -Name GetProperties `
-                                    -Value {
-                                    param($x)
-                                    return @(
-                                        (New-Object -TypeName "Object" |
-                                            Add-Member -MemberType NoteProperty `
-                                                -Name Name `
-                                                -Value "DatabaseMapper" `
-                                                -PassThru |
-                                            Add-Member -MemberType ScriptMethod `
-                                                -Name GetValue `
+                                    Add-Member -MemberType NoteProperty `
+                                        -Name FullName `
+                                        -Value $getTypeFullName `
+                                        -PassThru |
+                                        Add-Member -MemberType ScriptMethod `
+                                            -Name GetProperties `
+                                            -Value {
+                                            param($x)
+                                            return @(
+                                                (New-Object -TypeName "Object" |
+                                                        Add-Member -MemberType NoteProperty `
+                                                            -Name Name `
+                                                            -Value "DatabaseMapper" `
+                                                            -PassThru |
+                                                            Add-Member -MemberType ScriptMethod `
+                                                                -Name GetValue `
+                                                                -Value {
+                                                                param($x)
+                                                                return (@{
+                                                                        FullName = $getTypeFullName
+                                                                    }) | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                                                                    return (@{
+                                                                            FullName = $getTypeFullName
+                                                                        }) | Add-Member -MemberType ScriptMethod -Name GetMethods -Value {
+                                                                        return (@{
+                                                                                Name = "GetContentTypeSyndicationHubLocal"
+                                                                            }) | Add-Member -MemberType ScriptMethod -Name Invoke -Value {
+                                                                            return @{
+                                                                                AbsoluteUri = "http://contoso.sharepoint.com/sites/ct"
+                                                                            }
+                                                                        } -PassThru -Force
+                                                                    } -PassThru -Force
+                                                                } -PassThru -Force
+                                                            } -PassThru
+                                                        )
+                                                    )
+                                                } -PassThru
+                                            } -PassThru -Force
+                                            $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                                                -Name IsConnected `
                                                 -Value {
                                                 param($x)
-                                                return (@{
-                                                        FullName = $getTypeFullName
-                                                    }) | Add-Member -MemberType ScriptMethod -Name GetType -Value {
-                                                    return (@{
-                                                            FullName = $getTypeFullName
-                                                        }) | Add-Member -MemberType ScriptMethod -Name GetMethods -Value {
-                                                        return (@{
-                                                                Name = "GetContentTypeSyndicationHubLocal"
-                                                            }) | Add-Member -MemberType ScriptMethod -Name Invoke -Value {
-                                                            return @{
-                                                                AbsoluteUri = "http://contoso.sharepoint.com/sites/ct"
-                                                            }
-                                                        } -PassThru -Force
-                                                    } -PassThru -Force
-                                                } -PassThru -Force
-                                            } -PassThru
-                                        )
-                                    )
-                                } -PassThru
-                            } -PassThru -Force
-                            $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
-                                -Name IsConnected `
-                                -Value {
-                                param($x)
-                                return $true
-                            } -PassThru -Force
-                            return $spServiceApp
-                        }
-                    }
+                                                return $true
+                                            } -PassThru -Force
+                                            return $spServiceApp
+                                        }
+                                    }
 
-                    Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
-                        return @(
-                            @{
-                                Name = "Managed Metadata Service Application Proxy"
-                            } | Add-Member -MemberType ScriptMethod `
-                                -Name Update `
-                                -Value { $Global:SPDscServiceProxyUpdateCalled = $true }  `
-                                -PassThru -Force `
-                            | Add-Member -MemberType ScriptMethod `
-                                -Name Delete `
-                                -Value { $Global:SPDscServiceProxyDeleteCalled = $true } `
-                                -PassThru -Force
+                                    Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
+                                        return @(
+                                            @{
+                                                Name = "Managed Metadata Service Application Proxy"
+                                            } | Add-Member -MemberType ScriptMethod `
+                                                -Name Update `
+                                                -Value { $Global:SPDscServiceProxyUpdateCalled = $true }  `
+                                                -PassThru -Force `
+                                            | Add-Member -MemberType ScriptMethod `
+                                                -Name Delete `
+                                                -Value { $Global:SPDscServiceProxyDeleteCalled = $true } `
+                                                -PassThru -Force
                         )
                     }
 
@@ -1830,6 +1831,81 @@ try
                     $Global:SPDscDeleteLanguageCalled | Should -Be $true
                     $Global:SPDscAddUserCalled | Should -Be $true
                     $Global:SPDscDeleteUserCalled | Should -Be $true
+                }
+            }
+
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Import-Module (Join-Path -Path (Split-Path -Path (Get-Module SharePointDsc -ListAvailable).Path -Parent) -ChildPath "Modules\SharePointDSC.Reverse\SharePointDSC.Reverse.psm1")
+
+                    Mock -CommandName Write-Host -MockWith { }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            Name                          = "Managed Metadata Service Application"
+                            ProxyName                     = "Managed Metadata Service Application Proxy"
+                            Ensure                        = "Present"
+                            ApplicationPool               = "Service App Pool"
+                            DatabaseServer                = "SQL01"
+                            DatabaseName                  = "SP_ManagedMetadata"
+                            TermStoreAdministrators       = @(
+                                "CONTOSO\user1",
+                                "CONTOSO\user2"
+                            )
+                            ContentTypeHubUrl             = "http://sharepoint.contoso.com/sites/ct"
+                            DefaultLanguage               = 1033
+                            Languages                     = @(1031, 1033)
+                            ContentTypePushdownEnabled    = $true
+                            ContentTypeSyndicationEnabled = $true
+                        }
+                    }
+
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        $spServiceApp = [PSCustomObject]@{
+                            DisplayName = "Managed Metadata Service Application"
+                            Name        = "Managed Metadata Service Application"
+                        }
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                            -Name GetType `
+                            -Value {
+                            return @{
+                                Name = "MetadataWebServiceApplication"
+                            }
+                        } -PassThru -Force
+                        return $spServiceApp
+                    }
+
+                    Mock -CommandName Get-SPDscDBForAlias -MockWith { return "SQL01" }
+
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
+
+                    $result = @'
+        SPManagedMetaDataServiceApp ManagedMetadataServiceApplication
+        {
+            ApplicationPool               = "Service App Pool";
+            ContentTypeHubUrl             = "http://sharepoint.contoso.com/sites/ct";
+            ContentTypePushdownEnabled    = $True;
+            ContentTypeSyndicationEnabled = $True;
+            DatabaseName                  = "SP_ManagedMetadata";
+            DatabaseServer                = $ConfigurationData.NonNodeData.DatabaseServer;
+            DefaultLanguage               = 1033;
+            Ensure                        = "Present";
+            Languages                     = @(10311033);
+            Name                          = "Managed Metadata Service Application";
+            ProxyName                     = "Managed Metadata Service Application Proxy";
+            PsDscRunAsCredential          = $Credsspfarm;
+            TermStoreAdministrators       = @("CONTOSO\user1","CONTOSO\user2");
+        }
+
+'@
+                }
+
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource | Should -Be $result
                 }
             }
         }

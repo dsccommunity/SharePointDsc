@@ -311,5 +311,48 @@ function Test-TargetResource
     return $result
 }
 
+function Export-TargetResource
+{
+    $VerbosePreference = "SilentlyContinue"
+    $ParentModuleBase = Get-Module "SharePointDsc" -ListAvailable | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPMachineTranslationServiceApp\MSFT_SPMachineTranslationServiceApp.psm1" -Resolve
+    $Content = ''
+    $params = Get-DSCFakeParameters -ModulePath $module
+
+    $machineTranslationServiceApps = Get-SPServiceApplication | Where-Object { $_.GetType().Name -eq "TranslationServiceApplication" }
+    $i = 1
+    $total = $machineTranslationServiceApps.Length
+    foreach ($machineTranslation in $machineTranslationServiceApps)
+    {
+        try
+        {
+            $serviceName = $machineTranslation.Name
+            Write-Host "Scanning Machine Translation Service [$i/$total] {$serviceName}"
+
+            $PartialContent = "        SPMachineTranslationServiceApp " + [System.Guid]::NewGuid().toString() + "`r`n"
+            $PartialContent += "        {`r`n"
+            $params.Name = $serviceName
+            $results = Get-TargetResource @params
+            $results = Repair-Credentials -results $results
+
+            Add-ConfigurationDataEntry -Node "NonNodeData" -Key "DatabaseServer" -Value $results.DatabaseServer -Description "Name of the Database Server associated with the destination SharePoint Farm;"
+            $results.DatabaseServer = "`$ConfigurationData.NonNodeData.DatabaseServer"
+
+            $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+            $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "DatabaseServer"
+            $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+            $PartialContent += $currentBlock
+            $PartialContent += "        }`r`n"
+            $Content += $PartialContent
+            $i++
+        }
+        catch
+        {
+            $Global:ErrorLog += "[Machine Translation Service Application]" + $machineTranslation.Name + "`r`n"
+            $Global:ErrorLog += "$_`r`n`r`n"
+        }
+    }
+    return $Content
+}
 
 Export-ModuleMember -Function *-TargetResource

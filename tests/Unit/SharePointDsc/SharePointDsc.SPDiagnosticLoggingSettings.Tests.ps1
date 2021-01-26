@@ -50,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Mocks for all contexts
                 Mock -CommandName Set-SPDiagnosticConfig -MockWith { }
@@ -322,6 +322,75 @@ try
                 It "Should repair the diagnostic configuration" {
                     Set-TargetResource @testParams
                     Assert-MockCalled Set-SPDiagnosticConfig
+                }
+            }
+
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Import-Module (Join-Path -Path (Split-Path -Path (Get-Module SharePointDsc -ListAvailable).Path -Parent) -ChildPath "Modules\SharePointDSC.Reverse\SharePointDSC.Reverse.psm1")
+
+                    Mock -CommandName Write-Host -MockWith { }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            IsSingleInstance                            = "Yes"
+                            AppAnalyticsAutomaticUploadEnabled          = $false
+                            CustomerExperienceImprovementProgramEnabled = $false
+                            ErrorReportingEnabled                       = $true
+                            ErrorReportingAutomaticUploadEnabled        = $false
+                            DownloadErrorReportingUpdatesEnabled        = $true
+                            DaysToKeepLogs                              = 7
+                            LogMaxDiskSpaceUsageEnabled                 = $true
+                            LogSpaceInGB                                = 10
+                            LogPath                                     = 'C:\ULS'
+                            LogCutInterval                              = 30
+                            EventLogFloodProtectionEnabled              = $true
+                            EventLogFloodProtectionThreshold            = 5
+                            EventLogFloodProtectionTriggerPeriod        = 5
+                            EventLogFloodProtectionQuietPeriod          = 5
+                            EventLogFloodProtectionNotifyInterval       = 5
+                            ScriptErrorReportingEnabled                 = $false
+                            ScriptErrorReportingRequireAuth             = $false
+                            ScriptErrorReportingDelay                   = 30
+                        }
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
+
+                    $result = @'
+        SPDiagnosticLoggingSettings ApplyDiagnosticLogSettings
+        {
+            AppAnalyticsAutomaticUploadEnabled          = $False;
+            CustomerExperienceImprovementProgramEnabled = $False;
+            DaysToKeepLogs                              = 7;
+            DownloadErrorReportingUpdatesEnabled        = $True;
+            ErrorReportingAutomaticUploadEnabled        = $False;
+            ErrorReportingEnabled                       = $True;
+            EventLogFloodProtectionEnabled              = $True;
+            EventLogFloodProtectionNotifyInterval       = 5;
+            EventLogFloodProtectionQuietPeriod          = 5;
+            EventLogFloodProtectionThreshold            = 5;
+            EventLogFloodProtectionTriggerPeriod        = 5;
+            IsSingleInstance                            = "Yes";
+            LogCutInterval                              = 30;
+            LogMaxDiskSpaceUsageEnabled                 = $True;
+            LogPath                                     = $ConfigurationData.NonNodeData.LogPath;
+            LogSpaceInGB                                = 10;
+            PsDscRunAsCredential                        = $Credsspfarm;
+            ScriptErrorReportingDelay                   = 30;
+            ScriptErrorReportingEnabled                 = $False;
+            ScriptErrorReportingRequireAuth             = $False;
+        }
+
+'@
+                }
+
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource | Should -Be $result
                 }
             }
         }

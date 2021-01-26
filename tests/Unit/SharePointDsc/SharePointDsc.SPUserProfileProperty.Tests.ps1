@@ -50,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 $testParamsNewProperty = @{
                     Name                = "WorkEmailNew"
@@ -344,7 +344,7 @@ try
                 } -ParameterFilter {
                     $TypeName -eq "Microsoft.Office.Server.UserProfiles.UserProfileManager" }
                 Mock Invoke-SPDscCommand {
-                    return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
+                    return Invoke-Command -Scriptblock $ScriptBlock -ArgumentList $Arguments -NoNewScope
                 }
 
                 $propertyMappingItem = @{
@@ -389,7 +389,6 @@ try
                     $Global:SPUPSSyncConnectionAddPropertyMappingCalled = $true
                 } -PassThru
 
-
                 $ConnnectionManager = @{
                     $($connection.DisplayName) = @($connection) | Add-Member ScriptMethod  AddActiveDirectoryConnection {
                         param(
@@ -418,13 +417,21 @@ try
                         $Global:UpsConfigManagerGetProfileTypePropertiesCalled = $true
                         return $userProfileSubTypePropertiesUpdateProperty
                     } -PassThru
-                    return (@{
+                    return (
+                        @{
                             ProfilePropertyManager = $ProfilePropertyManager
                             ConnectionManager      = $ConnnectionManager
                         } | Add-Member ScriptMethod IsSynchronizationRunning {
                             $Global:UpsSyncIsSynchronizationRunning = $true
                             return $false
-                        } -PassThru   )
+                        } -PassThru | Add-Member ScriptMethod GetPropertiesWithSection {
+                            return @(
+                                @{
+                                    IsSection = $false
+                                    Name      = 'DemoProperty'
+                                }
+                            )
+                        } -PassThru  )
                 } -ParameterFilter {
                     $TypeName -eq "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" }
 
@@ -1032,6 +1039,7 @@ try
 
                     $ConnnectionManager = @{
                         $($connection.DisplayName) = $connection
+                        PropertyMapping            = "Fake"
                     }
                     Mock -CommandName New-Object -MockWith {
                         $ProfilePropertyManager = @{
@@ -1059,6 +1067,101 @@ try
                     $testParamsUpdateProperty.PropertyMappings[0].Direction = "Import"
                     $testresults = Test-TargetResource @testParamsUpdateProperty
                     $testresults | Should -Be $true
+                }
+            }
+
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Import-Module (Join-Path -Path (Split-Path -Path (Get-Module SharePointDsc -ListAvailable).Path -Parent) -ChildPath "Modules\SharePointDSC.Reverse\SharePointDSC.Reverse.psm1")
+
+                    Mock -CommandName Write-Host -MockWith { }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            Name                = "WorkEmail2"
+                            Ensure              = "Present"
+                            UserProfileService  = "User Profile Service Application"
+                            DisplayName         = "Work Email"
+                            Type                = "Email"
+                            Description         = ""
+                            PolicySetting       = "Mandatory"
+                            PrivacySetting      = "Public"
+                            PropertyMappings    = @(
+                                @{
+                                    ConnectionName = "contoso.com"
+                                    PropertyName   = "mail"
+                                    Direction      = "Import"
+                                }
+                            )
+                            Length              = 10
+                            DisplayOrder        = 25
+                            IsEventLog          = $false
+                            IsVisibleOnEditor   = $true
+                            IsVisibleOnViewer   = $true
+                            IsUserEditable      = $true
+                            IsAlias             = $false
+                            IsSearchable        = $false
+                            IsReplicable        = $false
+                            TermStore           = ""
+                            TermGroup           = ""
+                            TermSet             = ""
+                            UserOverridePrivacy = $false
+                        }
+                    }
+
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        $spServiceApp = [PSCustomObject]@{
+                            DisplayName = "User Profile Service Application"
+                            Name        = "User Profile Service Application"
+                        }
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                            -Name GetType `
+                            -Value {
+                            return @{
+                                Name = "UserProfileApplication"
+                            }
+                        } -PassThru -Force
+                        return $spServiceApp
+                    }
+
+                    Mock -CommandName Get-SPServiceContext -MockWith { return "" }
+
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
+
+                    $result = @'
+        SPUserProfileProperty [0-9A-Fa-f]{8}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{12}
+        {
+            Description          = "";
+            DisplayName          = "Work Email";
+            DisplayOrder         = 25;
+            Ensure               = "Present";
+            IsAlias              = \$False;
+            IsEventLog           = \$False;
+            IsReplicable         = \$False;
+            IsSearchable         = \$False;
+            IsUserEditable       = \$True;
+            IsVisibleOnEditor    = \$True;
+            IsVisibleOnViewer    = \$True;
+            Length               = 10;
+            Name                 = "WorkEmail2";
+            PolicySetting        = "Mandatory";
+            PrivacySetting       = "Public";
+            PropertyMappings     = \@\(System.Collections.Hashtable\);
+            PsDscRunAsCredential = \$Credsspfarm;
+            Type                 = "Email";
+            UserOverridePrivacy  = \$False;
+            UserProfileService   = "User Profile Service Application";
+        }
+
+'@
+                }
+
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource | Should -Match $result
                 }
             }
         }

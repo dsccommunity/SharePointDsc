@@ -233,4 +233,23 @@ function Test-TargetResource
     return $result
 }
 
+function Export-TargetResource
+{
+    $VerbosePreference = "SilentlyContinue"
+    $ParentModuleBase = Get-Module "SharePointDsc" -ListAvailable | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPAntivirusSettings\MSFT_SPAntivirusSettings.psm1" -Resolve
+    $Content = ''
+    $params = Get-DSCFakeParameters -ModulePath $module
+    $PartialContent = "        SPAntivirusSettings AntivirusSettings`r`n"
+    $PartialContent += "        {`r`n"
+    $results = Get-TargetResource @params
+    $results = Repair-Credentials -results $results
+    $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+    $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+    $PartialContent += $currentBlock
+    $PartialContent += "        }`r`n"
+    $Content += $PartialContent
+    return $Content
+}
+
 Export-ModuleMember -Function *-TargetResource

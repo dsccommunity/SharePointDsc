@@ -1,4 +1,5 @@
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param
 (
     [Parameter()]
@@ -49,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
                 {
@@ -277,6 +278,72 @@ try
                         Set-TargetResource @testParams
                         Assert-MockCalled Set-SPWorkManagementServiceApplication
                         Assert-MockCalled Get-SPServiceApplication
+                    }
+                }
+
+                Context -Name "Running ReverseDsc Export" -Fixture {
+                    BeforeAll {
+                        Import-Module (Join-Path -Path (Split-Path -Path (Get-Module SharePointDsc -ListAvailable).Path -Parent) -ChildPath "Modules\SharePointDSC.Reverse\SharePointDSC.Reverse.psm1")
+
+                        Mock -CommandName Write-Host -MockWith { }
+
+                        Mock -CommandName Get-TargetResource -MockWith {
+                            return @{
+                                Name                                          = "Work Management Service Application"
+                                ProxyName                                     = "Work Management Service Application Proxy"
+                                ApplicationPool                               = "SharePoint web services"
+                                MinimumTimeBetweenEwsSyncSubscriptionSearches = 10
+                                MinimumTimeBetweenProviderRefreshes           = 10
+                                MinimumTimeBetweenSearchQueries               = 10
+                                NumberOfSubscriptionSyncsPerEwsSyncRun        = 10
+                                NumberOfUsersEwsSyncWillProcessAtOnce         = 10
+                                NumberOfUsersPerEwsSyncBatch                  = 10
+                                Ensure                                        = "Present"
+                            }
+                        }
+
+                        Mock -CommandName Get-SPServiceApplication -MockWith {
+                            $spServiceApp = [PSCustomObject]@{
+                                DisplayName = "Work Management Service Application"
+                                Name        = "Work Management Service Application"
+                            }
+                            $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                                -Name GetType `
+                                -Value {
+                                return @{
+                                    Name = "WorkManagementServiceApplication"
+                                }
+                            } -PassThru -Force
+                            return $spServiceApp
+                        }
+
+                        if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                        {
+                            $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                            $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                        }
+
+                        $result = @'
+        SPWorkManagementServiceApp WorkManagementServiceApplication
+        {
+            ApplicationPool                               = "SharePoint web services";
+            Ensure                                        = "Present";
+            MinimumTimeBetweenEwsSyncSubscriptionSearches = 10;
+            MinimumTimeBetweenProviderRefreshes           = 10;
+            MinimumTimeBetweenSearchQueries               = 10;
+            Name                                          = "Work Management Service Application";
+            NumberOfSubscriptionSyncsPerEwsSyncRun        = 10;
+            NumberOfUsersEwsSyncWillProcessAtOnce         = 10;
+            NumberOfUsersPerEwsSyncBatch                  = 10;
+            ProxyName                                     = "Work Management Service Application Proxy";
+            PsDscRunAsCredential                          = $Credsspfarm;
+        }
+
+'@
+                    }
+
+                    It "Should return valid DSC block from the Export method" {
+                        Export-TargetResource | Should -Be $result
                     }
                 }
             }

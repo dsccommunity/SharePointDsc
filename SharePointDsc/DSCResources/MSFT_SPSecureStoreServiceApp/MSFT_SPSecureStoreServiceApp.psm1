@@ -449,4 +449,71 @@ function Test-TargetResource
     return $result
 }
 
+function Export-TargetResource
+{
+    $VerbosePreference = "SilentlyContinue"
+    $ParentModuleBase = Get-Module "SharePointDsc" -ListAvailable | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPSecureStoreServiceApp\MSFT_SPSecureStoreServiceApp.psm1" -Resolve
+    $Content = ''
+    $params = Get-DSCFakeParameters -ModulePath $module
+
+    $ssas = Get-SPServiceApplication | Where-Object { $_.GetType().Name -eq "SecureStoreServiceApplication" }
+
+    $i = 1
+    $total = $ssas
+    foreach ($ssa in $ssas)
+    {
+        try
+        {
+            $serviceName = $ssa.DisplayName
+            Write-Host "Scanning Secure Store Service Application [$i/$total] {$serviceName}"
+
+            $params.Name = $serviceName
+            $PartialContent = "        SPSecureStoreServiceApp " + $ssa.Name.Replace(" ", "") + "`r`n"
+            $PartialContent += "        {`r`n"
+            $results = Get-TargetResource @params
+
+            if ($results.Contains("InstallAccount"))
+            {
+                $results.Remove("InstallAccount")
+            }
+
+            $results = Repair-Credentials -results $results
+
+            $foundFailOver = $false
+            if ($null -eq $results.FailOverDatabaseServer)
+            {
+                $results.Remove("FailOverDatabaseServer")
+            }
+            else
+            {
+                $foundFailOver = $true
+                Add-ConfigurationDataEntry -Node "NonNodeData" -Key "SecureStoreFailOverDatabaseServer" -Value $results.FailOverDatabaseServer -Description "Name of the SQL Server that hosts the FailOver database for your SharePoint Farm's Secure Store Service Application;"
+                $results.FailOverDatabaseServer = "`$ConfigurationData.NonNodeData.SecureStoreFailOverDatabaseServer"
+            }
+
+            Add-ConfigurationDataEntry -Node "NonNodeData" -Key "DatabaseServer" -Value $results.DatabaseServer -Description "Name of the Database Server associated with the destination SharePoint Farm;"
+            $results.DatabaseServer = "`$ConfigurationData.NonNodeData.DatabaseServer"
+
+            $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+            $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "DatabaseServer"
+            $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+            if ($foundFailOver)
+            {
+                $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "FailOverDatabaseServer"
+            }
+            $PartialContent += $currentBlock
+            $PartialContent += "        }`r`n"
+            $Content += $PartialContent
+            $i++
+        }
+        catch
+        {
+            $Global:ErrorLog += "[Secure Store Service Application]" + $ssa.DisplayName + "`r`n"
+            $Global:ErrorLog += "$_`r`n`r`n"
+        }
+    }
+    return $Content
+}
+
 Export-ModuleMember -Function *-TargetResource

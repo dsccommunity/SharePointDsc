@@ -48,13 +48,18 @@
     # ProcessorArchitecture = ''
 
     # Modules that must be imported into the global environment prior to importing this module
-    # RequiredModules = @()
+    RequiredModules      = @(
+        @{
+            ModuleName      = "ReverseDSC"
+            RequiredVersion = "2.0.0.7"
+        }
+    )
 
     # Assemblies that must be loaded prior to importing this module
     # RequiredAssemblies = @()
 
     # Script files (.ps1) that are run in the caller's environment prior to importing this module.
-    # ScriptsToProcess = @()
+    ScriptsToProcess     = @("Modules\SharePointDsc.Reverse\Import-SPPowerShellSnapIn.ps1")
 
     # Type files (.ps1xml) to be loaded when importing this module
     # TypesToProcess = @()
@@ -77,8 +82,10 @@
         'ConvertTo-ReverseString',
         'ConvertTo-TwoDigitFlipString',
         'Format-OfficePatchGUID',
+        'Get-SPDscDBForAlias',
         'Get-SPDscAssemblyVersion',
         'Get-SPDscBuildVersion',
+        'Get-SPDscClaimTypeMapping',
         'Get-SPDscContentService',
         'Get-SPDscFarmAccount',
         'Get-SPDscFarmAccountName',
@@ -89,16 +96,26 @@
         'Get-SPDscRegistryKey',
         'Get-SPDscRegProductsInfo',
         'Get-SPDscServerPatchStatus',
+        'Get-SPDscServiceAppSecurityMembers',
         'Get-SPDscServiceContext',
         'Get-SPDscUserProfileSubTypeManager',
+        'Get-SPDscWebAppHappyHour',
+        'Get-SPWebPolicyPermissions',
         'Invoke-SPDscCommand',
+        'Read-TargetResource',
         'Remove-SPDscGenericObject',
         'Remove-SPDscUserToLocalAdmin',
         'Remove-SPDscZoneMap',
         'Rename-SPDscParamValue',
+        'Repair-Credentials',
         'Resolve-SPDscSecurityIdentifier',
         'Set-SPDscObjectPropertyIfValuePresent',
         'Set-SPDscZoneMap',
+        'Set-SPFarmAdministrators',
+        'Set-SPFarmAdministratorsBlock',
+        'Set-SPDscTermStoreAdministrators',
+        'Set-SPDscTermStoreAdministratorsBlock',
+        'Start-SharePointDSCExtract',
         'Test-SPDscIsADUser',
         'Test-SPDscObjectHasProperty',
         'Test-SPDscParameterState',

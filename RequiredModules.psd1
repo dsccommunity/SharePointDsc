@@ -23,4 +23,7 @@
 
     # Required for examples
     xWebAdministration          = '3.1.0'
+
+    # Required for Export of Config
+    ReverseDSC                  = "2.0.0.7"
 }

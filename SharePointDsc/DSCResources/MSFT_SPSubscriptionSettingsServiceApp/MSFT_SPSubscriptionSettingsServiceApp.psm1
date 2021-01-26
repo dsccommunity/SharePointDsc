@@ -337,4 +337,41 @@ function Test-TargetResource
     return $result
 }
 
+function Export-TargetResource
+{
+    $VerbosePreference = "SilentlyContinue"
+    $ParentModuleBase = Get-Module "SharePointDsc" -ListAvailable | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPSubscriptionSettingsServiceApp\MSFT_SPSubscriptionSettingsServiceApp.psm1" -Resolve
+    $Content = ''
+    $params = Get-DSCFakeParameters -ModulePath $module
+    $serviceApps = Get-SPServiceApplication | Where-Object { $_.GetType().Name -eq "SPSubscriptionSettingsServiceApplication" }
+
+    foreach ($subSetting in $serviceApps)
+    {
+        $PartialContent = "        SPSubscriptionSettingsServiceApp " + $subSetting.Name.Replace(" ", "") + [System.Guid]::NewGuid().ToString() + "`r`n"
+        $PartialContent += "        {`r`n"
+        $params.Name = $subSetting.Name
+
+        $results = Get-TargetResource @params
+
+        if ($null -eq $results.DatabaseName)
+        {
+            $results.Remove("DatabaseName")
+        }
+
+        if ($null -eq $results.DatabaseServer)
+        {
+            $results.Remove("DatabaseServer")
+        }
+
+        $results = Repair-Credentials -results $results
+        $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+        $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+        $PartialContent += $currentBlock
+        $PartialContent += "        }`r`n"
+        $Content += $PartialContent
+    }
+    return $Content
+}
+
 Export-ModuleMember -Function *-TargetResource

@@ -1,4 +1,5 @@
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param
 (
     [Parameter()]
@@ -49,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
                 try
@@ -584,6 +585,105 @@ try
 
                 It "Should return true from the test method" {
                     Test-TargetResource @testParams | Should -Be $true
+                }
+            }
+
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Import-Module (Join-Path -Path (Split-Path -Path (Get-Module SharePointDsc -ListAvailable).Path -Parent) -ChildPath "Modules\SharePointDSC.Reverse\SharePointDSC.Reverse.psm1")
+
+                    Mock -CommandName Write-Host -MockWith { }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            Url                      = "http://sharepoint.contoso.com"
+                            OwnerAlias               = "CONTOSO\ExampleUser"
+                            OwnerEmail               = "user@contoso.com"
+                            HostHeaderWebApplication = "http://spsites.contoso.com"
+                            Name                     = "Team Sites"
+                            Template                 = "STS#0"
+                            QuotaTemplate            = "Teamsite"
+                            CompatibilityLevel       = 15
+                            ContentDatabase          = "ContentDB"
+                            Description              = "Demo Site Col"
+                            Language                 = 1033
+                            SecondaryEmail           = "user2@contoso.com"
+                            SecondaryOwnerAlias      = "CONTOSO\ExampleUser2"
+                            CreateDefaultGroups      = $true
+                        }
+                    }
+
+                    Mock -CommandName Get-SPDscContentService -MockWith {
+                        return @{
+                            QuotaTemplates = @(
+                                @{
+                                    QuotaId = 1
+                                }
+                            )
+                        }
+                    }
+                    Mock -CommandName Get-SPSite -MockWith {
+                        $spSites = @(
+                            @{
+                                IsSiteMaster   = $false
+                                RootWeb        = @{
+                                    Title = "Team Sites"
+                                }
+                                Url            = "http://sharepoint.contoso.com"
+                                WebApplication = @{
+                                    Name = "SharePoint Content WebApplication"
+                                }
+                                Quota          = @{
+                                    QuotaID = 1
+                                }
+                            }
+                        )
+                        return $spSites
+                    }
+
+                    Mock -CommandName Read-TargetResource -MockWith {}
+
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'ExtractionModeValue' -ErrorAction SilentlyContinue))
+                    {
+                        $Global:ExtractionModeValue = 1
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'ComponentsToExtract' -ErrorAction SilentlyContinue))
+                    {
+                        $Global:ComponentsToExtract = @()
+                    }
+
+                    $result = @'
+        SPSite [0-9A-Fa-f]{8}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{12}
+        {
+            CompatibilityLevel       = 15;
+            ContentDatabase          = "ContentDB";
+            CreateDefaultGroups      = \$True;
+            Description              = "Demo Site Col";
+            HostHeaderWebApplication = "http://spsites.contoso.com";
+            Language                 = 1033;
+            Name                     = "Team Sites";
+            OwnerAlias               = "CONTOSO\\ExampleUser";
+            OwnerEmail               = "user\@contoso.com";
+            PsDscRunAsCredential     = \$Credsspfarm;
+            SecondaryEmail           = "user2\@contoso.com";
+            SecondaryOwnerAlias      = "CONTOSO\\ExampleUser2";
+            Template                 = "STS\#0";
+            Url                      = "http://sharepoint.contoso.com";
+            DependsOn =  \@\("\[SPWebApplication\]SharePointContentWebApplication"\);
+        }
+
+'@
+                }
+
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource | Should -Match $result
                 }
             }
         }

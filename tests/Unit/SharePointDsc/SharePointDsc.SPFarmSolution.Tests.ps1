@@ -1,4 +1,5 @@
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param
 (
     [Parameter()]
@@ -49,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
 
@@ -467,6 +468,57 @@ try
 
                 It "Deploys the solution to the specified Web Application" {
                     Set-TargetResource @testParams
+                }
+            }
+
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Import-Module (Join-Path -Path (Split-Path -Path (Get-Module SharePointDsc -ListAvailable).Path -Parent) -ChildPath "Modules\SharePointDSC.Reverse\SharePointDSC.Reverse.psm1")
+
+                    Mock -CommandName Write-Host -MockWith { }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            Name          = "test.wsp"
+                            LiteralPath   = "C:\test.wsp"
+                            Deployed      = $true
+                            Ensure        = "Present"
+                            Version       = 1.0.0.0
+                            WebAppUrls    = "http://sharepoint.contoso.com"
+                            SolutionLevel = "All"
+                        }
+                    }
+
+                    Mock -CommandName Get-SPSolution -MockWith {
+                        $spSolution = [PSCustomObject]@{
+                            Name = "test.wsp"
+                        }
+                        return $spSolution
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
+
+                    $result = @'
+        SPFarmSolution [0-9A-Fa-f]{8}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{12}
+        {
+            Deployed             = \$True;
+            Ensure               = "Present";
+            LiteralPath          = \$AllNodes.Where{\$Null -ne \$_.SPSolutionPath}.SPSolutionPath\+"test.wsp";
+            Name                 = "test.wsp";
+            PsDscRunAsCredential = \$Credsspfarm;
+            SolutionLevel        = "All";
+            WebAppUrls           = "http://sharepoint.contoso.com";
+        }
+
+'@
+                }
+
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource | Should -Match $result
                 }
             }
         }

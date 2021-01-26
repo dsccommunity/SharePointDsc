@@ -343,4 +343,62 @@ function Test-TargetResource
     return $result
 }
 
+function Export-TargetResource
+{
+    $VerbosePreference = "SilentlyContinue"
+    $ParentModuleBase = Get-Module "SharePointDsc" -ListAvailable | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPWebApplicationExtension\MSFT_SPWebApplicationExtension.psm1" -Resolve
+    $Content = ''
+    $params = Get-DSCFakeParameters -ModulePath $module
+    $zones = @("Default", "Intranet", "Internet", "Extranet", "Custom")
+    $webApps = Get-SPWebApplication
+    foreach ($wa in $webApps)
+    {
+        try
+        {
+            if ($null -ne $wa)
+            {
+                $params.WebAppUrl = $wa.Url
+
+                for ($i = 0; $i -lt $zones.Length; $i++)
+                {
+                    if ($null -ne $wa.IisSettings[$zones[$i]])
+                    {
+                        $params.Zone = $zones[$i]
+                        $PartialContent = "        SPWebApplicationExtension " + [System.Guid]::NewGuid().toString() + "`r`n"
+                        $PartialContent += "        {`r`n"
+                        $results = Get-TargetResource @params
+
+                        if ($results.Contains("InstallAccount"))
+                        {
+                            $results.Remove("InstallAccount")
+                        }
+                        if ("" -eq $results.HostHeader)
+                        {
+                            $results.Remove("HostHeader")
+                        }
+                        if ($null -eq $results.AuthenticationProvider)
+                        {
+                            $results.Remove("AuthenticationProvider")
+                        }
+                        $results = Repair-Credentials -results $results
+                        $results["Path"] = $results["Path"].ToString()
+                        $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+                        $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+                        $PartialContent += $currentBlock
+                        $PartialContent += "        }`r`n"
+                        $Content += $PartialContent
+                    }
+                }
+            }
+        }
+        catch
+        {
+            $Global:ErrorLog += "[Web Application Extensions]" + $wa.Url + "`r`n"
+            $Global:ErrorLog += "$_`r`n`r`n"
+        }
+    }
+    return $Content
+}
+
 Export-ModuleMember -Function *-TargetResource

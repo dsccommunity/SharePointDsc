@@ -507,4 +507,53 @@ function Wait-SPDscSolutionJob
     }
 }
 
+function Export-TargetResource
+{
+    $VerbosePreference = "SilentlyContinue"
+    $ParentModuleBase = Get-Module "SharePointDsc" -ListAvailable | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPFarmSolution\MSFT_SPFarmSolution.psm1" -Resolve
+    $Content = ''
+    $params = Get-DSCFakeParameters -ModulePath $module
+    $solutions = Get-SPSolution
+
+    $i = 1
+    $total = $solutions.Length
+    foreach ($solution in $solutions)
+    {
+        try
+        {
+            Write-Host "Scanning Solution [$i/$total] {$($solution.Name)}"
+            $PartialContent = "        SPFarmSolution " + [System.Guid]::NewGuid().ToString() + "`r`n"
+            $PartialContent += "        {`r`n"
+            $params.Name = $solution.Name
+            $results = Get-TargetResource @params
+            if ($results.ContainsKey("ContainsGlobalAssembly"))
+            {
+                $results.Remove("ContainsGlobalAssembly")
+            }
+            $filePath = "`$AllNodes.Where{`$Null -ne `$_.SPSolutionPath}.SPSolutionPath+###" + $solution.Name + "###"
+            $results["LiteralPath"] = $filePath
+            $results = Repair-Credentials -results $results
+
+            $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+            $currentblock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "LiteralPath"
+            $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+            $currentBlock = $currentBlock.Replace("###", "`"")
+            $PartialContent += $currentBlock
+
+            $PartialContent += "        }`r`n"
+
+            $Content += $PartialContent
+        }
+        catch
+        {
+            $_
+            $Global:ErrorLog += "[Farm Solution]" + $solution.Name + "`r`n"
+            $Global:ErrorLog += "$_`r`n`r`n"
+        }
+        $i++
+    }
+    return $Content
+}
+
 Export-ModuleMember -Function *-TargetResource

@@ -304,4 +304,65 @@ function Test-TargetResource
     return $result
 }
 
+<## This function retrieves information about all the "Super" accounts (Super Reader & Super User) used for caching. #>
+function Export-TargetResource
+{
+    [CmdletBinding()]
+    [OutputType([System.String])]
+    param
+    (
+        [Parameter()]
+        [System.String]
+        $ModulePath,
+
+        [Parameter()]
+        [System.Collections.Hashtable]
+        $Params
+    )
+
+    $VerbosePreference = "SilentlyContinue"
+    if ([System.String]::IsNullOrEmpty($modulePath) -eq $false)
+    {
+        $module = Resolve-Path -Path $modulePath
+    }
+    else
+    {
+        $ParentModuleBase = Get-Module "SharePointDsc" -ListAvailable | Select-Object -ExpandProperty Modulebase
+        $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPCacheAccounts\MSFT_SPCacheAccounts.psm1" -Resolve
+        $Content = ''
+    }
+
+    if ($null -eq $params)
+    {
+        $params = Get-DSCFakeParameters -ModulePath $module
+    }
+
+    $webApps = Get-SPWebApplication
+
+    $i = 1
+    $total = $webApps.Length
+    foreach ($webApp in $webApps)
+    {
+        $webAppUrl = $webApp.Url
+        Write-Host "Scanning Cache Account [$i/$total] {$webAppUrl}"
+
+        $params.WebAppUrl = $webAppUrl
+        $results = Get-TargetResource @params
+
+        if ($results.SuperReaderAlias -ne "" -and $results.SuperUserAlias -ne "")
+        {
+            $PartialContent = "        SPCacheAccounts " + $webApp.DisplayName.Replace(" ", "") + "CacheAccounts`r`n"
+            $PartialContent += "        {`r`n"
+            $results = Repair-Credentials -results $results
+            $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+            $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+            $PartialContent += $currentBlock
+            $PartialContent += "        }`r`n"
+            $Content += $PartialContent
+        }
+        $i++
+    }
+    return $Content
+}
+
 Export-ModuleMember -Function *-TargetResource

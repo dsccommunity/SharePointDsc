@@ -86,7 +86,7 @@ function Get-TargetResource
 
         $source = Get-SPEnterpriseSearchCrawlContentSource -SearchApplication $params.ServiceAppName `
             -ErrorAction SilentlyContinue | `
-            Where-Object { $_.Name -eq $params.Name }
+                Where-Object { $_.Name -eq $params.Name }
         if ($null -eq $source)
         {
             return @{
@@ -460,7 +460,7 @@ function Set-TargetResource
 
             $source = Get-SPEnterpriseSearchCrawlContentSource -SearchApplication $params.ServiceAppName `
                 -ErrorAction SilentlyContinue | `
-                Where-Object { $_.Name -eq $params.Name }
+                    Where-Object { $_.Name -eq $params.Name }
 
             if ($null -eq $source)
             {
@@ -546,18 +546,18 @@ function Set-TargetResource
                         "stopping current crawls to allow settings to be updated")
 
                 $source = Get-SPEnterpriseSearchCrawlContentSource -SearchApplication $params.ServiceAppName | `
-                    Where-Object { $_.Name -eq $params.Name }
+                        Where-Object { $_.Name -eq $params.Name }
 
                 $source.StopCrawl()
                 $loopCount = 0
 
                 $sourceToWait = Get-SPEnterpriseSearchCrawlContentSource -SearchApplication $params.ServiceAppName | `
-                    Where-Object { $_.Name -eq $params.Name }
+                        Where-Object { $_.Name -eq $params.Name }
 
                 while ($sourceToWait.CrawlStatus -ne "Idle" -and $loopCount -lt 15)
                 {
                     $sourceToWait = Get-SPEnterpriseSearchCrawlContentSource -SearchApplication $params.ServiceAppName | `
-                        Where-Object { $_.Name -eq $params.Name }
+                            Where-Object { $_.Name -eq $params.Name }
 
                     Write-Verbose -Message ("$([DateTime]::Now.ToShortTimeString()) - Waiting " + `
                             "for content source '$($params.Name)' to be idle " + `
@@ -1068,6 +1068,109 @@ function Test-TargetResource
     Write-Verbose -Message "Test-TargetResource returned $result"
 
     return $result
+}
+
+function Export-TargetResource
+{
+    [CmdletBinding()]
+    [OutputType([System.String])]
+    param
+    (
+        [Parameter()]
+        [System.String]
+        $SearchSAName,
+
+        [Parameter()]
+        [System.String[]]
+        $DependsOn
+    )
+
+    $VerbosePreference = "SilentlyContinue"
+    $content = ''
+    $ParentModuleBase = Get-Module "SharePointDsc" -ListAvailable | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath "\DSCResources\MSFT_SPSearchContentSource\MSFT_SPSearchContentSource.psm1" -Resolve
+
+    $params = Get-DSCFakeParameters -ModulePath $module
+
+    $contentSources = Get-SPEnterpriseSearchCrawlContentSource -SearchApplication $searchSAName
+
+    $j = 1
+    $totalCS = $contentSources.Length
+    foreach ($contentSource in $contentSources)
+    {
+        try
+        {
+            $csName = $contentSource.Name
+            Write-Host "    -> Scanning Content Source [$j/$totalCS] {$csName}"
+
+            $sscsGuid = [System.Guid]::NewGuid().toString()
+
+            $params.Name = $csName
+            $params.ServiceAppName = $searchSAName
+
+            $partialContent = ""
+
+            if ($contentSource.Type -ne "CustomRepository")
+            {
+                $results = Get-TargetResource @params
+                $partialContent = "        SPSearchContentSource " + $contentSource.Name.Replace(" ", "") + $sscsGuid + "`r`n"
+                $partialContent += "        {`r`n"
+
+                $searchScheduleModulePath = Join-Path -Path $ParentModuleBase -ChildPath "\Modules\SharePointDsc.Search\SPSearchContentSource.Schedules.psm1"
+                Import-Module -Name $searchScheduleModulePath
+                # TODO: Figure out way to properly pass CimInstance objects and then add the schedules back;
+                if ($contentSource.IncrementalCrawlSchedule)
+                {
+                    $incremental = Get-SPDSCSearchCrawlSchedule -Schedule $contentSource.IncrementalCrawlSchedule
+                    $results.IncrementalSchedule = Get-SPCrawlSchedule $incremental
+                }
+                else
+                {
+                    $results.Remove("IncrementalSchedule")
+                }
+
+                if ($contentSource.FullCrawlSchedule)
+                {
+                    $full = Get-SPDSCSearchCrawlSchedule -Schedule $contentSource.FullCrawlSchedule
+                    $results.FullSchedule = Get-SPCrawlSchedule $full
+                }
+                else
+                {
+                    $results.Remove("FullSchedule")
+                }
+
+                if ($dependsOn)
+                {
+                    $results.add("DependsOn", $dependsOn)
+                }
+
+                $results = Repair-Credentials -results $results
+
+                $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+                $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+                if ($contentSource.IncrementalCrawlSchedule)
+                {
+                    $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "IncrementalSchedule"
+                }
+
+                if ($contentSource.FullCrawlSchedule)
+                {
+                    $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "FullSchedule"
+                }
+
+                $partialContent += $currentBlock.replace('`', '"')
+                $partialContent += "        }`r`n"
+            }
+        }
+        catch
+        {
+            $_
+        }
+        $Content += $partialContent
+        $j++
+    }
+    return $content
+    #endregion
 }
 
 Export-ModuleMember -Function *-TargetResource

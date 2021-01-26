@@ -338,4 +338,58 @@ function Test-TargetResource
     return $result
 }
 
+function Export-TargetResource
+{
+    $VerbosePreference = "SilentlyContinue"
+    $ParentModuleBase = Get-Module "SharePointDsc" -ListAvailable | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPUsageApplication\MSFT_SPUsageApplication.psm1" -Resolve
+    $Content = ''
+    $params = Get-DSCFakeParameters -ModulePath $module
+
+    $usageApplication = Get-SPUsageApplication
+    if ($usageApplication.Length -gt 0)
+    {
+        $PartialContent = "        SPUsageApplication " + $usageApplication.TypeName.Replace(" ", "") + "`r`n"
+        $PartialContent += "        {`r`n"
+        $params.Name = $usageApplication.Name
+        $params.Ensure = "Present"
+        $results = Get-TargetResource @params
+
+        $results.Remove("DatabaseCredentials")
+
+        $failOverFound = $false
+
+        $results = Repair-Credentials -results $results
+
+        if ($null -eq $results.FailOverDatabaseServer)
+        {
+            $results.Remove("FailOverDatabaseServer")
+        }
+        else
+        {
+            $failOverFound = $true
+            Add-ConfigurationDataEntry -Node $env:COMPUTERNAME -Key "UsageAppFailOverDatabaseServer" -Value $results.FailOverDatabaseServer -Description "Name of the Usage Service Application Failover Database;"
+            $results.FailOverDatabaseServer = "`$ConfigurationData.NonNodeData.UsageAppFailOverDatabaseServer"
+        }
+        $results.DatabaseServer = "`$ConfigurationData.NonNodeData.DatabaseServer"
+        Add-ConfigurationDataEntry -Node "NonNodeData" -Key "UsageLogLocation" -Value $results.UsageLogLocation -Description "Path where the Usage Logs will be stored;"
+        $results.UsageLogLocation = "`$ConfigurationData.NonNodeData.UsageLogLocation"
+
+        $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+        $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+        $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "UsageLogLocation"
+        $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "DatabaseServer"
+
+        if ($failOverFound)
+        {
+            $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "FailOverDatabaseServer"
+        }
+
+        $PartialContent += $currentBlock
+        $PartialContent += "        }`r`n"
+        $Content += $PartialContent
+    }
+    return $Content
+}
+
 Export-ModuleMember -Function *-TargetResource

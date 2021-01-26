@@ -1,5 +1,7 @@
 [CmdletBinding()]
-param(
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
+param
+(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
@@ -48,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
                 function New-SPDscMockPrereq
@@ -471,6 +473,50 @@ try
 
                     Set-TargetResource @testParams
                     $global:DSCMachineStatus | Should -Be 1
+                }
+            }
+
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Import-Module (Join-Path -Path (Split-Path -Path (Get-Module SharePointDsc -ListAvailable).Path -Parent) -ChildPath "Modules\SharePointDSC.Reverse\SharePointDSC.Reverse.psm1")
+
+                    Mock -CommandName Write-Host -MockWith { }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            IsSingleInstance = "Yes"
+                            BinaryDir        = "C:\Install"
+                            ProductKey       = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+                            InstallPath      = "C:\Program Files\Microsoft Server"
+                            DataPath         = "C:\Program Files\Microsoft Server\Data"
+                            Ensure           = "Present"
+                        }
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
+
+                    $result = @'
+        if ($ConfigurationData.NonNodeData.FullInstallation)
+        {
+            SPInstall BinaryInstallation
+            {
+                BinaryDir = $ConfigurationData.NonNodeData.SPInstallationBinaryPath;
+                ProductKey = $ConfigurationData.NonNodeData.SPProductKey;
+                Ensure = "Present";
+                IsSingleInstance = "Yes";
+                PSDscRunAsCredential = $Credsspfarm;
+            }
+        }
+
+'@
+                }
+
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource | Should -Be $result
                 }
             }
         }

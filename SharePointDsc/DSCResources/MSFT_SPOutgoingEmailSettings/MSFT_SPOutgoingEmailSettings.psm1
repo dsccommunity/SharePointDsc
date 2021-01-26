@@ -298,4 +298,72 @@ function Test-TargetResource
     return $result
 }
 
+function Export-TargetResource
+{
+    [CmdletBinding()]
+    [OutputType([System.String])]
+    param
+    (
+        [Parameter()]
+        [System.String]
+        $WebAppUrl,
+
+        [Parameter()]
+        [System.String[]]
+        $DependsOn
+    )
+    $VerbosePreference = "SilentlyContinue"
+    $ParentModuleBase = Get-Module "SharePointDsc" -ListAvailable | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath "\DSCResources\MSFT_SPOutgoingEmailSettings\MSFT_SPOutgoingEmailSettings.psm1" -Resolve
+    Import-Module $module
+    $params = Get-DSCFakeParameters -ModulePath $module
+
+    $params.WebAppUrl = $WebAppUrl
+    $spMajorVersion = (Get-SPDscInstalledProductVersion).FileMajorPart
+    if ($spMajorVersion.ToString() -ge "15" -and $params.Contains("UseTLS"))
+    {
+        $params.Remove("UseTLS")
+    }
+    if ($spMajorVersion.ToString() -ge "15" -and $params.Contains("SMTPPort"))
+    {
+        $params.Remove("SMTPPort")
+    }
+
+    $Content = ''
+
+    $results = Get-TargetResource @params
+    if ($null -eq $results["SMTPPort"])
+    {
+        $results.Remove("SMTPPort")
+    }
+    if ($null -eq $results["UseTLS"])
+    {
+        $results.Remove("UseTLS")
+    }
+    if ($null -eq $results["ReplyToAddress"])
+    {
+        $results["ReplyToAddress"] = "*"
+    }
+    if ($null -ne $results["SMTPServer"] -and "" -ne $results["SMTPServer"])
+    {
+        Write-Host "    -> Scanning Outgoing Email Settings"
+        $Content += "        SPOutgoingEmailSettings " + [System.Guid]::NewGuid().ToString() + "`r`n"
+        $Content += "        {`r`n"
+        $results = Repair-Credentials -results $results
+        if ($DependsOn)
+        {
+            $results.add("DependsOn", $DependsOn)
+        }
+        if ($null -eq $results.ReplyToAddress -or $results.ReplyToAddress -eq "")
+        {
+            $results.ReplyToAddress = "*"
+        }
+        $currentDSCBlock = Get-DSCBlock -Params $results -ModulePath $module
+        $currentDSCBlock = Convert-DSCStringParamToVariable -DSCBlock $currentDSCBlock -ParameterName "PsDscRunAsCredential"
+        $Content += $currentDSCBlock
+        $Content += "        }`r`n"
+    }
+    return $Content
+}
+
 Export-ModuleMember -Function *-TargetResource

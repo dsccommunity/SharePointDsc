@@ -457,4 +457,49 @@ function Test-TargetResource
     return $result
 }
 
+function Export-TargetResource
+{
+    $VerbosePreference = "SilentlyContinue"
+    $ParentModuleBase = Get-Module "SharePointDsc" -ListAvailable | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath "\DSCResources\MSFT_SPContentDatabase\MSFT_SPContentDatabase.psm1" -Resolve
+
+    $params = Get-DSCFakeParameters -ModulePath $module
+    $spContentDBs = Get-SPContentDatabase
+
+    $Content = ''
+    $i = 1
+    $total = $spContentDBs.Length
+    foreach ($spContentDB in $spContentDBs)
+    {
+        try
+        {
+            $dbName = $spContentDB.Name
+            Write-Host "Scanning Content Database [$i/$total] {$dbName}"
+            $PartialContent = "        SPContentDatabase " + $spContentDB.Name.Replace(" ", "") + "`r`n"
+            $PartialContent += "        {`r`n"
+            $params.Name = $dbName
+            $params.WebAppUrl = $spContentDB.WebApplication.Url
+            $results = Get-TargetResource @params
+            $results = Repair-Credentials -results $results
+
+            Add-ConfigurationDataEntry -Node "NonNodeData" -Key "DatabaseServer" -Value $results.DatabaseServer -Description "Name of the Database Server associated with the destination SharePoint Farm;"
+            $results.DatabaseServer = "`$ConfigurationData.NonNodeData.DatabaseServer"
+
+            $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+            $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "DatabaseServer"
+            $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+            $PartialContent += $currentBlock
+            $PartialContent += "        }`r`n"
+            $i++
+        }
+        catch
+        {
+            $Global:ErrorLog += "[Content Database]" + $spContentDB.Name + "`r`n"
+            $Global:ErrorLog += "$_`r`n`r`n"
+        }
+        $Content += $PartialContent
+    }
+    return $Content
+}
+
 Export-ModuleMember -Function *-TargetResource

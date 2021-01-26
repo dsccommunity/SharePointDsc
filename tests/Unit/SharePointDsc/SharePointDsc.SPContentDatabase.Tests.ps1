@@ -1,4 +1,5 @@
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param
 (
     [Parameter()]
@@ -49,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
                 try
@@ -504,6 +505,61 @@ namespace Microsoft.SharePoint.Administration {
 
                 It "Should return true from the test method" {
                     Test-TargetResource @testParams | Should -Be $true
+                }
+            }
+
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Import-Module (Join-Path -Path (Split-Path -Path (Get-Module SharePointDsc -ListAvailable).Path -Parent) -ChildPath "Modules\SharePointDSC.Reverse\SharePointDSC.Reverse.psm1")
+
+                    Mock -CommandName Write-Host -MockWith { }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            Name             = 'Content01DB'
+                            DatabaseServer   = 'SQL01'
+                            WebAppUrl        = 'https://sharepoint.contoso.com'
+                            Enabled          = $true
+                            WarningSiteCount = 2000
+                            MaximumSiteCount = 5000
+                            Ensure           = "Present"
+                        }
+                    }
+
+                    Mock -CommandName Get-SPContentDatabase -MockWith {
+                        $spContentDB = [PSCustomObject]@{
+                            Name           = "Content01DB"
+                            WebApplication = @{
+                                Url = 'https://sharepoint.contoso.com'
+                            }
+                        }
+                        return $spContentDB
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
+
+                    $result = @'
+        SPContentDatabase Content01DB
+        {
+            DatabaseServer       = $ConfigurationData.NonNodeData.DatabaseServer;
+            Enabled              = $True;
+            Ensure               = "Present";
+            MaximumSiteCount     = 5000;
+            Name                 = "Content01DB";
+            PsDscRunAsCredential = $Credsspfarm;
+            WarningSiteCount     = 2000;
+            WebAppUrl            = "https://sharepoint.contoso.com";
+        }
+
+'@
+                }
+
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource | Should -Be $result
                 }
             }
         }

@@ -381,4 +381,38 @@ function Confirm-SPDscUpaPermissionsConfig()
     }
 }
 
+function Export-TargetResource
+{
+    $VerbosePreference = "SilentlyContinue"
+    $ParentModuleBase = Get-Module "SharePointDsc" -ListAvailable | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPUserProfileServiceAppPermissions\MSFT_SPUserProfileServiceAppPermissions.psm1" -Resolve
+    $Content = ''
+    $params = Get-DSCFakeParameters -ModulePath $module
+    $proxies = Get-SPServiceApplicationProxy | Where-Object { $_.GetType().Name -eq "UserProfileApplicationProxy" }
+
+    foreach ($proxy in $proxies)
+    {
+        try
+        {
+            $params.ProxyName = $proxy.Name
+            $PartialContent = "        SPUserProfileServiceAppPermissions " + [System.Guid]::NewGuid().ToString() + "`r`n"
+            $PartialContent += "        {`r`n"
+            $results = Get-TargetResource @params
+
+            $results = Repair-Credentials -results $results
+            $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+            $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+            $PartialContent += $currentBlock
+            $PartialContent += "        }`r`n"
+            $Content += $PartialContent
+        }
+        catch
+        {
+            $Global:ErrorLog += "[User Profile Service Application Permissions]" + $proxy.Name + "`r`n"
+            $Global:ErrorLog += "$_`r`n`r`n"
+        }
+    }
+    return $Content
+}
+
 Export-ModuleMember -Function *-TargetResource

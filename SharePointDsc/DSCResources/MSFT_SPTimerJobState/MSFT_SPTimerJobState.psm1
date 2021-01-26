@@ -447,4 +447,60 @@ function Test-TargetResource
     return $result
 }
 
+function Export-TargetResource
+{
+    $VerbosePreference = "SilentlyContinue"
+    $ParentModuleBase = Get-Module "SharePointDsc" -ListAvailable | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPTimerJobState\MSFT_SPTimerJobState.psm1" -Resolve
+    $Content = ''
+    $params = Get-DSCFakeParameters -ModulePath $module
+
+    $spTimers = Get-SPTimerJob
+    $totalTimers = $spTimers.Length
+    $i = 0;
+    foreach ($timer in $spTimers)
+    {
+        try
+        {
+            $i++
+            Write-Host "Scanning Timer Job {"$timer.Name"}[$i/$totalTimers]..."
+            if ($null -ne $timer -and $timer.TypeName -ne "Microsoft.SharePoint.Administration.Health.SPHealthAnalyzerJobDefinition")
+            {
+                $PartialContent = ''
+
+                $params.TypeName = $timer.TypeName
+                if ($null -ne $timer.WebApplication)
+                {
+                    $params.WebAppUrl = $timer.WebApplication.Url;
+                }
+                else
+                {
+                    $params.WebAppUrl = "N/A";
+                }
+
+                $PartialContent = "        SPTimerJobState " + [System.Guid]::NewGuid().toString() + "`r`n"
+                $PartialContent += "        {`r`n"
+                $results = Get-TargetResource @params
+
+                if ($results.Contains("InstallAccount"))
+                {
+                    $results.Remove("InstallAccount")
+                }
+                $results = Repair-Credentials -results $results
+                $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+                $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+                $PartialContent += $currentBlock
+                $PartialContent += "        }`r`n"
+                $Content += $PartialContent
+            }
+        }
+        catch
+        {
+            $Global:ErrorLog += "[Timer Job]" + $timer.TypeName + "`r`n"
+            $Global:ErrorLog += "$_`r`n`r`n"
+        }
+    }
+    return $Content
+}
+
 Export-ModuleMember -Function *-TargetResource

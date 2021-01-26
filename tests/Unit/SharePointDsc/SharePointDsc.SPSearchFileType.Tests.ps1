@@ -1,4 +1,5 @@
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param
 (
     [Parameter()]
@@ -49,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
                 $getTypeFullName = "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
@@ -62,16 +63,16 @@ try
                 Mock -CommandName Get-SPServiceApplication -MockWith {
                     return @(
                         New-Object -TypeName "Object" |
-                        Add-Member -MemberType ScriptMethod `
-                            -Name GetType `
-                            -Value {
-                            New-Object -TypeName "Object" |
-                            Add-Member -MemberType NoteProperty `
-                                -Name FullName `
-                                -Value $getTypeFullName `
-                                -PassThru
-                        } `
-                            -PassThru -Force)
+                            Add-Member -MemberType ScriptMethod `
+                                -Name GetType `
+                                -Value {
+                                New-Object -TypeName "Object" |
+                                    Add-Member -MemberType NoteProperty `
+                                        -Name FullName `
+                                        -Value $getTypeFullName `
+                                        -PassThru
+                                } `
+                                    -PassThru -Force)
                 }
 
                 function Add-SPDscEvent
@@ -334,6 +335,70 @@ try
 
                 It "Should return true when the Test method is called" {
                     Test-TargetResource @testParams | Should -Be $true
+                }
+            }
+
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Import-Module (Join-Path -Path (Split-Path -Path (Get-Module SharePointDsc -ListAvailable).Path -Parent) -ChildPath "Modules\SharePointDSC.Reverse\SharePointDSC.Reverse.psm1")
+
+                    Mock -CommandName Write-Host -MockWith { }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            FileType       = "pdf"
+                            ServiceAppName = "Search Service Application"
+                            Description    = "PDF"
+                            MimeType       = "application/pdf"
+                            Ensure         = "Present"
+                        }
+                    }
+
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        $spServiceApp = [PSCustomObject]@{
+                            DisplayName = "Search Service Application"
+                            Name        = "Search Service Application"
+                        }
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                            -Name GetType `
+                            -Value {
+                            return @{
+                                FullName = "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
+                            }
+                        } -PassThru -Force
+                        return $spServiceApp
+                    }
+
+                    Mock -CommandName Get-SPEnterpriseSearchFileFormat -MockWith {
+                        return @(
+                            @{
+                                Identity = "pdf"
+                            }
+                        )
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
+
+                    $result = @'
+        SPSearchFileType [0-9A-Fa-f]{8}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{12}
+        {
+            Description          = "PDF";
+            Ensure               = "Present";
+            FileType             = "pdf";
+            MimeType             = "application/pdf";
+            PsDscRunAsCredential = \$Credsspfarm;
+            ServiceAppName       = "Search Service Application";
+        }
+
+'@
+                }
+
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource | Should -Match $result
                 }
             }
         }

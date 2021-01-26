@@ -50,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
                 $getTypeFullName = "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
@@ -102,8 +102,6 @@ try
                     }
                 }
 
-                Mock Import-Module -MockWith { } -ParameterFilter { $_.Name -eq $ModuleName }
-
                 function Add-SPDscEvent
                 {
                     param (
@@ -136,6 +134,8 @@ try
                         Ensure          = "Present"
                     }
 
+                    Mock Import-Module -MockWith { } -ParameterFilter { $_.Name -eq $ModuleName }
+
                     Mock -CommandName Get-SPServiceApplicationPool -MockWith {
                         return $null
                     }
@@ -154,6 +154,8 @@ try
                         AlertsEnabled   = $true
                         Ensure          = "Present"
                     }
+
+                    Mock Import-Module -MockWith { } -ParameterFilter { $_.Name -eq $ModuleName }
 
                     $global:SPDscCounter = 0
                     Mock -CommandName Get-SPServiceApplication -MockWith {
@@ -212,6 +214,8 @@ try
                         Ensure          = "Present"
                     }
 
+                    Mock Import-Module -MockWith { } -ParameterFilter { $_.Name -eq $ModuleName }
+
                     Mock -CommandName Get-SPServiceApplication -MockWith {
                         $spServiceApp = [PSCustomObject]@{
                             DisplayName = $testParams.Name
@@ -249,6 +253,8 @@ try
                         Ensure          = "Present"
                     }
 
+                    Mock Import-Module -MockWith { } -ParameterFilter { $_.Name -eq $ModuleName }
+
                     Mock -CommandName Get-SPServiceApplication -MockWith {
                         $spServiceApp = [PSCustomObject]@{
                             TypeName        = "Search Service Application"
@@ -283,6 +289,8 @@ try
                         ApplicationPool = "SharePoint Search Services"
                         Ensure          = "Present"
                     }
+
+                    Mock Import-Module -MockWith { } -ParameterFilter { $_.Name -eq $ModuleName }
 
                     Mock -CommandName Get-SPServiceApplication -MockWith {
                         $spServiceApp = [PSCustomObject]@{
@@ -336,6 +344,8 @@ try
                         ApplicationPool = "SharePoint Search Services"
                         Ensure          = "Present"
                     }
+
+                    Mock Import-Module -MockWith { } -ParameterFilter { $_.Name -eq $ModuleName }
 
                     Mock -CommandName Get-SPServiceApplication -MockWith {
                         $spServiceApp = [PSCustomObject]@{
@@ -394,6 +404,8 @@ try
                         Ensure          = "Present"
                     }
 
+                    Mock Import-Module -MockWith { } -ParameterFilter { $_.Name -eq $ModuleName }
+
                     Mock -CommandName Get-SPServiceApplication -MockWith {
                         $spServiceApp = [PSCustomObject]@{
                             TypeName        = "Search Service Application"
@@ -442,6 +454,8 @@ try
                         Ensure                      = "Present"
                         DefaultContentAccessAccount = $mockCredential
                     }
+
+                    Mock Import-Module -MockWith { } -ParameterFilter { $_.Name -eq $ModuleName }
 
                     Mock -CommandName Get-SPServiceApplication -MockWith {
                         $spServiceApp = [PSCustomObject]@{
@@ -498,6 +512,8 @@ try
                         DefaultContentAccessAccount = $mockCredential
                     }
 
+                    Mock Import-Module -MockWith { } -ParameterFilter { $_.Name -eq $ModuleName }
+
                     Mock -CommandName Get-SPServiceApplication -MockWith {
                         $spServiceApp = [PSCustomObject]@{
                             TypeName        = "Search Service Application"
@@ -538,6 +554,8 @@ try
                         Ensure          = "Present"
                         SearchCenterUrl = "http://search.sp.contoso.com"
                     }
+
+                    Mock Import-Module -MockWith { } -ParameterFilter { $_.Name -eq $ModuleName }
 
                     $Global:SPDscSearchURLUpdated = $false
 
@@ -604,6 +622,8 @@ try
                         AlertsEnabled   = $true
                     }
 
+                    Mock Import-Module -MockWith { } -ParameterFilter { $_.Name -eq $ModuleName }
+
                     $Global:SPDscAlertsEnabledUpdated = $false
 
                     Mock -CommandName Get-SPServiceApplication -MockWith {
@@ -668,6 +688,8 @@ try
                         Ensure          = "Present"
                     }
 
+                    Mock Import-Module -MockWith { } -ParameterFilter { $_.Name -eq $ModuleName }
+
                     Mock -CommandName Get-SPServiceApplicationPool -MockWith {
                         return @{
                             Name = $testParams.ApplicationPool
@@ -713,6 +735,8 @@ try
                         Ensure          = "Absent"
                     }
 
+                    Mock Import-Module -MockWith { } -ParameterFilter { $_.Name -eq $ModuleName }
+
                     Mock -CommandName Get-SPServiceApplication -MockWith {
                         $spServiceApp = [PSCustomObject]@{
                             TypeName        = "Search Service Application"
@@ -754,6 +778,8 @@ try
                         Ensure          = "Absent"
                     }
 
+                    Mock Import-Module -MockWith { } -ParameterFilter { $_.Name -eq $ModuleName }
+
                     Mock -CommandName Get-SPServiceApplication -MockWith {
                         return $null
                     }
@@ -776,6 +802,8 @@ try
                         Ensure          = "Present"
                         CloudIndex      = $true
                     }
+
+                    Mock Import-Module -MockWith { } -ParameterFilter { $_.Name -eq $ModuleName }
 
                     Mock -CommandName Get-SPServiceApplication -MockWith {
                         $spServiceApp = [PSCustomObject]@{
@@ -827,6 +855,8 @@ try
                         CloudIndex      = $true
                     }
 
+                    Mock Import-Module -MockWith { } -ParameterFilter { $_.Name -eq $ModuleName }
+
                     Mock -CommandName Get-SPServiceApplication -MockWith {
                         return $null
                     }
@@ -852,6 +882,76 @@ try
                     }
 
                     { Set-TargetResource @testParams } | Should -Throw
+                }
+            }
+
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Import-Module (Join-Path -Path (Split-Path -Path (Get-Module SharePointDsc -ListAvailable).Path -Parent) -ChildPath "Modules\SharePointDSC.Reverse\SharePointDSC.Reverse.psm1")
+
+                    Mock -CommandName Write-Host -MockWith { }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            Name                        = "Search Service Application"
+                            ProxyName                   = "Search Service Application Proxy"
+                            DatabaseName                = "SP_Search"
+                            DatabaseServer              = "SQL01"
+                            ApplicationPool             = "Service App Pool"
+                            SearchCenterUrl             = "http://sharepoint.contoso.com/sites/search/Pages/search.aspx"
+                            DefaultContentAccessAccount = $mockCredential
+                            CloudIndex                  = $false
+                            AlertsEnabled               = $true
+                            Ensure                      = "Present"
+                        }
+                    }
+
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        $spServiceApp = [PSCustomObject]@{
+                            DisplayName     = "Search Service Application"
+                            Name            = "Search Service Application"
+                            ApplicationPool = @{
+                                Name = "Service App Pool"
+                            }
+                        }
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                            -Name GetType `
+                            -Value {
+                            return @{
+                                Name = "SearchServiceApplication"
+                            }
+                        } -PassThru -Force
+                        return $spServiceApp
+                    }
+
+                    Mock -CommandName Read-TargetResource -MockWith { }
+
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
+
+                    $result = @'
+        SPSearchServiceApp SearchServiceApplication
+        {
+            AlertsEnabled               = $True;
+            ApplicationPool             = "Service App Pool";
+            DatabaseName                = "SP_Search";
+            DatabaseServer              = $ConfigurationData.NonNodeData.DatabaseServer;
+            DefaultContentAccessAccount = $Credsusername;
+            Ensure                      = "Present";
+            Name                        = "Search Service Application";
+            ProxyName                   = "Search Service Application Proxy";
+            PsDscRunAsCredential        = $Credsspfarm;
+            SearchCenterUrl             = "http://sharepoint.contoso.com/sites/search/Pages/search.aspx";
+        }
+
+'@
+                }
+
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource | Should -Be $result
                 }
             }
         }

@@ -50,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
                 $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
@@ -69,7 +69,8 @@ try
                 }
 
                 try
-                { [Microsoft.Office.Server.UserProfiles]
+                {
+                    [Microsoft.Office.Server.UserProfiles]
                 }
                 catch
                 {
@@ -89,7 +90,8 @@ try
 
                 }
                 try
-                { [Microsoft.Office.Server.UserProfiles.DirectoryServiceNamingContext]
+                {
+                    [Microsoft.Office.Server.UserProfiles.DirectoryServiceNamingContext]
                 }
                 catch
                 {
@@ -114,7 +116,8 @@ try
                 }
 
                 try
-                { [Microsoft.Office.Server.UserProfiles.ActiveDirectoryImportConnection]
+                {
+                    [Microsoft.Office.Server.UserProfiles.ActiveDirectoryImportConnection]
                 }
                 catch
                 {
@@ -136,16 +139,20 @@ try
                         }
 "@ -ErrorAction SilentlyContinue -PassThru | Add-Member -MemberType ScriptMethod -Name GetMethod -Value {
                             param ($a, $b)
-                            return (@{
+                            return (
+                                @{
                                     FullName = $a
-                                }) | Add-Member -MemberType ScriptMethod -Name Invoke -Value {
+                                }
+                            ) | Add-Member -MemberType ScriptMethod -Name Invoke -Value {
                                 switch ($this.FullName)
                                 {
                                     get_NamingContexts
-                                    { return "NC"
+                                    {
+                                        return "NC"
                                     }
                                     get_UseSSL
-                                    { return $false
+                                    {
+                                        return $false
                                     }
                                 }
                             } -PassThru -Force
@@ -185,22 +192,22 @@ try
                     -Value {
                     $Global:SPDscUPSSyncConnectionRefreshSchemaCalled = $true
                 } -PassThru |
-                Add-Member -MemberType ScriptMethod `
-                    -Name Update `
-                    -Value {
-                    $Global:SPDscUPSSyncConnectionUpdateCalled = $true
-                } -PassThru | `
                     Add-Member -MemberType ScriptMethod `
-                    -Name SetCredentials `
-                    -Value {
-                    param($userAccount, $securePassword)
-                    $Global:SPDscUPSSyncConnectionSetCredentialsCalled = $true
-                } -PassThru |
-                Add-Member -MemberType ScriptMethod `
-                    -Name Delete `
-                    -Value {
-                    $Global:SPDscUPSSyncConnectionDeleteCalled = $true
-                } -PassThru
+                        -Name Update `
+                        -Value {
+                        $Global:SPDscUPSSyncConnectionUpdateCalled = $true
+                    } -PassThru | `
+                            Add-Member -MemberType ScriptMethod `
+                            -Name SetCredentials `
+                            -Value {
+                            param($userAccount, $securePassword)
+                            $Global:SPDscUPSSyncConnectionSetCredentialsCalled = $true
+                        } -PassThru |
+                            Add-Member -MemberType ScriptMethod `
+                                -Name Delete `
+                                -Value {
+                                $Global:SPDscUPSSyncConnectionDeleteCalled = $true
+                            } -PassThru
 
                 $namingContext = @{
                     ContainersIncluded         = New-Object -TypeName System.Collections.ArrayList
@@ -213,26 +220,27 @@ try
                 $connection.NamingContexts.Add($namingContext);
 
                 $ConnnectionManager = New-Object -TypeName System.Collections.ArrayList |
-                Add-Member -MemberType ScriptMethod `
-                    -Name AddActiveDirectoryConnection `
-                    -Value {
-                    param(
-                        [Microsoft.Office.Server.UserProfiles.ConnectionType]
-                        $connectionType,
-                        $name,
-                        $forest,
-                        $useSSL,
-                        $userName,
-                        $securePassword,
-                        $namingContext,
-                        $p1,
-                        $p2
-                    )
-                    $Global:SPDscUPSAddActiveDirectoryConnectionCalled = $true
-                } -PassThru
+                    Add-Member -MemberType ScriptMethod `
+                        -Name AddActiveDirectoryConnection `
+                        -Value {
+                        param(
+                            [Microsoft.Office.Server.UserProfiles.ConnectionType]
+                            $connectionType,
+                            $name,
+                            $forest,
+                            $useSSL,
+                            $userName,
+                            $securePassword,
+                            $namingContext,
+                            $p1,
+                            $p2
+                        )
+                        $Global:SPDscUPSAddActiveDirectoryConnectionCalled = $true
+                    } -PassThru
 
                 Mock -CommandName New-Object -MockWith {
-                    return (@{
+                    return (
+                        @{
                             ConnectionManager = $ConnnectionManager
                         } | Add-Member -MemberType ScriptMethod `
                             -Name IsSynchronizationRunning `
@@ -258,10 +266,6 @@ try
                         distinguishedName = "DC=Contoso,DC=Com"
                         objectGUID        = (New-Guid).ToString()
                     }
-                }
-
-                Mock -CommandName Import-Module { } -ParameterFilter {
-                    $_.Name -eq $ModuleName
                 }
 
                 function Add-SPDscEvent
@@ -301,6 +305,10 @@ try
                         ConnectionType        = "ActiveDirectory"
                     }
 
+                    Mock -CommandName Import-Module { } -ParameterFilter {
+                        $_.Name -eq $ModuleName
+                    }
+
                     Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
                 }
 
@@ -329,6 +337,10 @@ try
                         UseSSL                = $false
                         IncludedOUs           = @("OU=SharePoint Users,DC=Contoso,DC=com")
                         ConnectionType        = "ActiveDirectory"
+                    }
+
+                    Mock -CommandName Import-Module { } -ParameterFilter {
+                        $_.Name -eq $ModuleName
                     }
 
                     $userProfileServiceNoConnections = @{
@@ -368,6 +380,10 @@ try
                         UseSSL                = $false
                         IncludedOUs           = @("OU=SharePoint Users,DC=Contoso,DC=com")
                         ConnectionType        = "ActiveDirectory"
+                    }
+
+                    Mock -CommandName Import-Module { } -ParameterFilter {
+                        $_.Name -eq $ModuleName
                     }
 
                     Mock -CommandName Get-SPServiceApplication -MockWith {
@@ -411,11 +427,13 @@ try
                         ConnectionType        = "ActiveDirectory"
                     }
 
+                    Mock -CommandName Import-Module { } -ParameterFilter {
+                        $_.Name -eq $ModuleName
+                    }
+
                     Mock -CommandName Get-SPServiceApplication -MockWith {
                         return $userProfileServiceValidConnection
                     }
-
-                    $ConnnectionManager.Add($connection)
                 }
 
                 It "Should return service instance from the Get method" {
@@ -446,6 +464,10 @@ try
                         Server                = "server.contoso.com"
                         IncludedOUs           = @("OU=SharePoint Users,DC=Contoso,DC=com")
                         ConnectionType        = "ActiveDirectory"
+                    }
+
+                    Mock -CommandName Import-Module { } -ParameterFilter {
+                        $_.Name -eq $ModuleName
                     }
 
                     $litWareconnection = @{
@@ -575,6 +597,10 @@ try
                         ConnectionType        = "ActiveDirectory"
                     }
 
+                    Mock -CommandName Import-Module { } -ParameterFilter {
+                        $_.Name -eq $ModuleName
+                    }
+
                     Mock -CommandName Get-SPServiceApplication -MockWith {
                         return @(
                             New-Object -TypeName "Object" | Add-Member -MemberType NoteProperty `
@@ -620,6 +646,10 @@ try
                         ConnectionType        = "ActiveDirectory"
                     }
 
+                    Mock -CommandName Import-Module { } -ParameterFilter {
+                        $_.Name -eq $ModuleName
+                    }
+
                     $userProfileServiceValidConnection = @{
                         Name                         = "User Profile Service Application"
                         TypeName                     = "User Profile Service Application"
@@ -627,10 +657,12 @@ try
                         ServiceApplicationProxyGroup = "Proxy Group"
                         ConnectionManager            = New-Object -TypeName System.Collections.ArrayList
                     } | Add-Member -MemberType ScriptMethod -Name GetMethod -Value {
-                        return (@{
+                        return (
+                            @{
                                 FullName = $getTypeFullName
                             }) | Add-Member -MemberType ScriptMethod -Name GetMethods -Value {
-                            return (@{
+                            return (
+                                @{
                                     Name = "get_NamingContexts"
                                 }) | Add-Member -MemberType ScriptMethod -Name Invoke -Value {
                                 return @{
@@ -691,6 +723,10 @@ try
                         ConnectionType        = "ActiveDirectory"
                     }
 
+                    Mock -CommandName Import-Module { } -ParameterFilter {
+                        $_.Name -eq $ModuleName
+                    }
+
                     $litWareconnection = @{
                         DisplayName       = "contoso.com"
                         Server            = "litware.net"
@@ -714,10 +750,12 @@ try
                         ServiceApplicationProxyGroup = "Proxy Group"
                         ConnectionManager            = New-Object -TypeName System.Collections.ArrayList
                     } | Add-Member -MemberType ScriptMethod -Name GetMethod -Value {
-                        return (@{
+                        return (
+                            @{
                                 FullName = $getTypeFullName
                             }) | Add-Member -MemberType ScriptMethod -Name GetMethods -Value {
-                            return (@{
+                            return (
+                                @{
                                     Name = "get_NamingContexts"
                                 }) | Add-Member -MemberType ScriptMethod -Name Invoke -Value {
                                 return @{
@@ -781,6 +819,10 @@ try
                         ConnectionType        = "ActiveDirectory"
                     }
 
+                    Mock -CommandName Import-Module { } -ParameterFilter {
+                        $_.Name -eq $ModuleName
+                    }
+
                     if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
                     {
                         $litWareconnection = @{
@@ -824,10 +866,12 @@ try
                         ServiceApplicationProxyGroup = "Proxy Group"
                         ConnectionManager            = New-Object -TypeName System.Collections.ArrayList
                     } | Add-Member -MemberType ScriptMethod -Name GetMethod -Value {
-                        return (@{
+                        return (
+                            @{
                                 FullName = $getTypeFullName
                             }) | Add-Member -MemberType ScriptMethod -Name GetMethods -Value {
-                            return (@{
+                            return (
+                                @{
                                     Name = "get_NamingContexts"
                                 }) | Add-Member -MemberType ScriptMethod -Name Invoke -Value {
                                 return @{
@@ -895,6 +939,10 @@ try
                             ConnectionType        = "ActiveDirectory"
                         }
 
+                        Mock -CommandName Import-Module { } -ParameterFilter {
+                            $_.Name -eq $ModuleName
+                        }
+
                         $litWareconnection = @{
                             DisplayName       = $name
                             Server            = "litware.net"
@@ -918,10 +966,12 @@ try
                             ServiceApplicationProxyGroup = "Proxy Group"
                             ConnectionManager            = New-Object -TypeName System.Collections.ArrayList
                         } | Add-Member -MemberType ScriptMethod -Name GetMethod -Value {
-                            return (@{
+                            return (
+                                @{
                                     FullName = $getTypeFullName
                                 }) | Add-Member -MemberType ScriptMethod -Name GetMethod -Value {
-                                return (@{
+                                return (
+                                    @{
                                         Name = "get_NamingContexts"
                                     }) | Add-Member -MemberType ScriptMethod -Name Invoke -Value {
                                     return @{
@@ -976,6 +1026,10 @@ try
                             ConnectionType        = "ActiveDirectory"
                         }
 
+                        Mock -CommandName Import-Module { } -ParameterFilter {
+                            $_.Name -eq $ModuleName
+                        }
+
                         $litWareconnection = @{
                             DisplayName       = "contoso-com"
                             Server            = "litware.net"
@@ -999,10 +1053,12 @@ try
                             ServiceApplicationProxyGroup = "Proxy Group"
                             ConnectionManager            = New-Object -TypeName System.Collections.ArrayList
                         } | Add-Member -MemberType ScriptMethod -Name GetMethod -Value {
-                            return (@{
+                            return (
+                                @{
                                     FullName = $getTypeFullName
                                 }) | Add-Member -MemberType ScriptMethod -Name GetMethods -Value {
-                                return (@{
+                                return (
+                                    @{
                                         Name = "get_NamingContexts"
                                     }) | Add-Member -MemberType ScriptMethod -Name Invoke -Value {
                                     return @{
@@ -1067,6 +1123,10 @@ try
                             ConnectionType        = "ActiveDirectory"
                         }
 
+                        Mock -CommandName Import-Module { } -ParameterFilter {
+                            $_.Name -eq $ModuleName
+                        }
+
                         $litWareconnection = @{
                             DisplayName       = "contoso-com"
                             Server            = "litware.net"
@@ -1084,10 +1144,12 @@ try
                             ServiceApplicationProxyGroup = "Proxy Group"
                             ConnectionManager            = New-Object -TypeName System.Collections.ArrayList
                         } | Add-Member -MemberType ScriptMethod -Name GetMethod -Value {
-                            return (@{
+                            return (
+                                @{
                                     FullName = $getTypeFullName
                                 }) | Add-Member -MemberType ScriptMethod -Name GetMethods -Value {
-                                return (@{
+                                return (
+                                    @{
                                         Name = "get_NamingContexts"
                                     }) | Add-Member -MemberType ScriptMethod -Name Invoke -Value {
                                     return @{
@@ -1128,6 +1190,79 @@ try
                     It "Should return Ensure Absent from the get method" {
                         (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                     }
+                }
+            }
+
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Import-Module (Join-Path -Path (Split-Path -Path (Get-Module SharePointDsc -ListAvailable).Path -Parent) -ChildPath "Modules\SharePointDSC.Reverse\SharePointDSC.Reverse.psm1")
+
+                    Mock -CommandName Write-Host -MockWith { }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            Name                  = "Contoso"
+                            UserProfileService    = "User Profile Service Application"
+                            Forest                = "contoso.com"
+                            ConnectionCredentials = $mockCredential
+                            Server                = "server.contoso.com"
+                            UseSSL                = $false
+                            Port                  = 389
+                            UseDisabledFilter     = $true
+                            IncludedOUs           = @("OU=SharePoint Users,DC=Contoso,DC=com")
+                            ExcludedOUs           = @("OU=Notes Usersa,DC=Contoso,DC=com")
+                            Force                 = $false
+                            ConnectionType        = "ActiveDirectory"
+                            Ensure                = "Present"
+                        }
+                    }
+
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        $spServiceApp = [PSCustomObject]@{
+                            DisplayName = "User Profile Service Application"
+                            Name        = "User Profile Service Application"
+                        }
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                            -Name GetType `
+                            -Value {
+                            return @{
+                                Name = "UserProfileApplication"
+                            }
+                        } -PassThru -Force
+                        return $spServiceApp
+                    }
+
+                    Mock -CommandName Get-SPServiceContext -MockWith { return " " }
+
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
+
+                    $result = @'
+        SPUserProfileSyncConnection [0-9A-Fa-f]{8}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{12}
+        {
+            ConnectionCredentials = \$Credsinstallaccount;
+            ConnectionType        = "ActiveDirectory";
+            ExcludedOUs           = \@\("OU=Notes Usersa,DC=Contoso,DC=com"\);
+            Force                 = \$False;
+            Forest                = "contoso.com";
+            IncludedOUs           = \@\("OU=SharePoint Users,DC=Contoso,DC=com"\);
+            Name                  = "Contoso";
+            Port                  = 389;
+            PsDscRunAsCredential  = \$Credsspfarm;
+            Server                = "server.contoso.com";
+            UseDisabledFilter     = \$True;
+            UserProfileService    = "User Profile Service Application";
+            UseSSL                = \$False;
+        }
+
+'@
+                }
+
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource | Should -Match $result
                 }
             }
         }

@@ -171,12 +171,12 @@ function Set-TargetResource
         if ($null -eq $web)
         {
             @("InstallAccount", "Ensure", "RequestAccessEmail") |
-            ForEach-Object -Process {
-                if ($params.ContainsKey($_) -eq $true)
-                {
-                    $params.Remove($_) | Out-Null
+                ForEach-Object -Process {
+                    if ($params.ContainsKey($_) -eq $true)
+                    {
+                        $params.Remove($_) | Out-Null
+                    }
                 }
-            }
 
             New-SPWeb @params | Out-Null
         }
@@ -336,6 +336,76 @@ function Test-TargetResource
     Write-Verbose -Message "Test-TargetResource returned $result"
 
     return $result
+}
+
+function Export-TargetResource
+{
+    [CmdletBinding()]
+    [OutputType([System.String])]
+    param
+    (
+        [Parameter()]
+        [System.String]
+        $URL,
+
+        [Parameter()]
+        [System.String[]]
+        $DependsOn
+    )
+
+    $VerbosePreference = "SilentlyContinue"
+    $content = ''
+    $ParentModuleBase = Get-Module "SharePointDsc" -ListAvailable | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath "\DSCResources\MSFT_SPWeb\MSFT_SPWeb.psm1" -Resolve
+    $SPWebs = Get-SPWeb -Limit All -Site $URL
+    $j = 1
+    $totalWebs = $SPWebs.Length
+    foreach ($SPWeb in $SPWebs)
+    {
+        Write-Host "    -> Scanning Web [$j/$totalWebs] {$($SPWeb.URL)}"
+        try
+        {
+            $paramsWeb = Get-DSCFakeParameters -ModulePath $module
+            $SPWebGuid = [System.Guid]::NewGuid().toString()
+            $paramsWeb.Url = $SPWeb.URL
+            $results = Get-TargetResource @paramsWeb
+
+            $results.Description = $results.Description.Replace("`"", "'").Replace("`r`n", ' `
+            ')
+            $PartialContent = "        SPWeb $($SPWebGuid)`r`n"
+            $PartialContent += "        {`r`n"
+            $results = Repair-Credentials -results $results
+            if ($DependsOn)
+            {
+                $results.add("DependsOn", $DependsOn)
+            }
+            $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+            $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+            $PartialContent += $currentBlock
+            $PartialContent += "        }`r`n"
+
+            <# SPWeb Feature Section #>
+            if (($Global:ExtractionModeValue -eq 3 -and $Quiet) -or $Global:ComponentsToExtract.Contains("SPFeature"))
+            {
+                $Properties = @{
+                    Scope     = "Web"
+                    Url       = $SPWeb.URL
+                    DependsOn = "[SPWeb]$($SPWebGuid)"
+                }
+                $partialContent += Read-TargetResource -ResourceName 'SPFeature' `
+                    -ExportParams $Properties
+            }
+            $j++
+        }
+        catch
+        {
+            $_
+            $Global:ErrorLog += "[Web]" + $spweb.Url + "`r`n"
+            $Global:ErrorLog += "$_`r`n`r`n"
+        }
+        $Content += $PartialContent
+    }
+    return $Content
 }
 
 Export-ModuleMember -Function *-TargetResource

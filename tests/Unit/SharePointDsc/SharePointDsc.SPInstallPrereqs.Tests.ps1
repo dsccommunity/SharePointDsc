@@ -1,4 +1,5 @@
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param(
     [Parameter()]
     [string]
@@ -48,7 +49,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
                 function New-SPDscMockPrereq
@@ -1019,6 +1020,67 @@ try
 
                 It "throws an error in the test method" {
                     { Test-TargetResource @testParams } | Should -Throw ("PrerequisitesInstaller is blocked!")
+                }
+            }
+
+            if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
+            {
+                Context -Name "Running ReverseDsc Export" -Fixture {
+                    BeforeAll {
+                        Import-Module (Join-Path -Path (Split-Path -Path (Get-Module SharePointDsc -ListAvailable).Path -Parent) -ChildPath "Modules\SharePointDSC.Reverse\SharePointDSC.Reverse.psm1")
+
+                        Mock -CommandName Write-Host -MockWith { }
+
+                        Mock -CommandName Get-TargetResource -MockWith {
+                            return @{
+                                IsSingleInstance  = "Yes"
+                                InstallerPath     = "C:\SPInstall\Prerequisiteinstaller.exe"
+                                OnlineMode        = $false
+                                SXSpath           = "c:\SPInstall\Windows2012r2-SXS"
+                                SQLNCli           = "C:\SPInstall\prerequisiteinstallerfiles\sqlncli.msi"
+                                PowerShell        = "C:\SPInstall\prerequisiteinstallerfiles\Windows6.1-KB2506143-x64.msu"
+                                NETFX             = "C:\SPInstall\prerequisiteinstallerfiles\dotNetFx45_Full_setup.exe"
+                                IDFX              = "C:\SPInstall\prerequisiteinstallerfiles\Windows6.1-KB974405-x64.msu"
+                                Sync              = "C:\SPInstall\prerequisiteinstallerfiles\Synchronization.msi"
+                                AppFabric         = "C:\SPInstall\prerequisiteinstallerfiles\WindowsServerAppFabricSetup_x64.exe"
+                                IDFX11            = "C:\SPInstall\prerequisiteinstallerfiles\MicrosoftIdentityExtensions-64.msi"
+                                MSIPCClient       = "C:\SPInstall\prerequisiteinstallerfiles\setup_msipc_x64.msi"
+                                WCFDataServices   = "C:\SPInstall\prerequisiteinstallerfiles\WcfDataServices.exe"
+                                KB2671763         = "C:\SPInstall\prerequisiteinstallerfiles\AppFabric1.1-RTM-KB2671763-x64-ENU.exe"
+                                WCFDataServices56 = "C:\SPInstall\prerequisiteinstallerfiles\WcfDataServices56.exe"
+                            }
+                        }
+
+                        if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                        {
+                            $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                            $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                        }
+
+                        if ($null -eq (Get-Variable -Name 'DynamicCompilation' -ErrorAction SilentlyContinue))
+                        {
+                            $Global:DynamicCompilation = $true
+                        }
+
+                        $result = @'
+        if ($ConfigurationData.NonNodeData.FullInstallation)
+        {
+            SPInstallPrereqs PrerequisitesInstallation
+            {
+                InstallerPath = $ConfigurationData.NonNodeData.SPPrereqsInstallerPath;
+                OnlineMode = $True;
+                Ensure = "Present";
+                IsSingleInstance = "Yes";
+                PSDscRunAsCredential = $Credsspfarm;
+            }
+        }
+
+'@
+                    }
+
+                    It "Should return valid DSC block from the Export method" {
+                        Export-TargetResource | Should -Be $result
+                    }
                 }
             }
         }

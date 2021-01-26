@@ -1,4 +1,5 @@
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param
 (
     [Parameter()]
@@ -49,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Mocks for all contexts
                 Mock -CommandName Get-SPFarm -MockWith {
@@ -340,6 +341,55 @@ try
 
                 It "Should return true from the test method" {
                     Test-TargetResource @testParams | Should -Be $true
+                }
+            }
+
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Import-Module (Join-Path -Path (Split-Path -Path (Get-Module SharePointDsc -ListAvailable).Path -Parent) -ChildPath "Modules\SharePointDSC.Reverse\SharePointDSC.Reverse.psm1")
+
+                    Mock -CommandName Write-Host -MockWith { }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            WebAppUrl                              = 'https://sharepoint.contoso.com'
+                            SettingsScope                          = 'WebApplication'
+                            AllowSharePointDesigner                = $false
+                            AllowDetachPagesFromDefinition         = $false
+                            AllowCustomiseMasterPage               = $false
+                            AllowManageSiteURLStructure            = $false
+                            AllowCreateDeclarativeWorkflow         = $false
+                            AllowSavePublishDeclarativeWorkflow    = $false
+                            AllowSaveDeclarativeWorkflowAsTemplate = $false
+                        }
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
+
+                    $result = @'
+        SPDesignerSettings WebApplication[0-9A-Fa-f]{8}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{12}
+        {
+            AllowCreateDeclarativeWorkflow         = \$False;
+            AllowCustomiseMasterPage               = \$False;
+            AllowDetachPagesFromDefinition         = \$False;
+            AllowManageSiteURLStructure            = \$False;
+            AllowSaveDeclarativeWorkflowAsTemplate = \$False;
+            AllowSavePublishDeclarativeWorkflow    = \$False;
+            AllowSharePointDesigner                = \$False;
+            PsDscRunAsCredential                   = \$Credsspfarm;
+            SettingsScope                          = "WebApplication";
+            WebAppUrl                              = "https://sharepoint.contoso.com";
+        }
+
+'@
+                }
+
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource -Url 'https://sharepoint.contoso.com' -Scope 'WebApplication' | Should -Match $result
                 }
             }
         }

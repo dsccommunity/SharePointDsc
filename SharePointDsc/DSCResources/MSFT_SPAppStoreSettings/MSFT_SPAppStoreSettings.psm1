@@ -77,7 +77,7 @@ function Set-TargetResource
     Write-Verbose -Message "Setting app store settings of $WebAppUrl"
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters,$MyInvocation.MyCommand.Source) `
+        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
         $eventSource = $args[1]
@@ -189,6 +189,42 @@ function Test-TargetResource
 
     Write-Verbose -Message "Test-TargetResource returned true"
     return $true
+}
+
+function Export-TargetResource
+{
+    $VerbosePreference = "SilentlyContinue"
+    $ParentModuleBase = Get-Module "SharePointDsc" -ListAvailable | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPAppStoreSettings\MSFT_SPAppStoreSettings.psm1" -Resolve
+    $Content = ''
+    $params = Get-DSCFakeParameters -ModulePath $module
+    $webApps = Get-SPWebApplication
+
+    $i = 1
+    $total = $webApps.Length
+    foreach ($webApp in $webApps)
+    {
+        try
+        {
+            Write-Host "Scanning App Store Settings [$i/$total] for Web Application {$($webApp.Url)}"
+            $PartialContent = "        SPAppStoreSettings " + $webApp.Name.Replace(" ", "") + [System.Guid]::NewGuid().ToString() + "`r`n"
+            $PartialContent += "        {`r`n"
+            $params.WebAppUrl = $webApp.Url
+            $results = Get-TargetResource @params
+            $results = Repair-Credentials -results $results
+            $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+            $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+            $PartialContent += $currentBlock
+            $PartialContent += "        }`r`n"
+            $Content += $PartialContent
+        }
+        catch
+        {
+            $Global:ErrorLog += "[SPAppStoreSettings] Couldn't obtain information from App Store Settings for Web Application {$($webApp.Url)}`r`n"
+        }
+        $i++
+    }
+    return $Content
 }
 
 Export-ModuleMember -Function *-TargetResource

@@ -314,4 +314,73 @@ function Test-TargetResource
     return $result
 }
 
+function Export-TargetResource
+{
+    [CmdletBinding()]
+    [OutputType([System.String])]
+    param (
+        [Parameter()]
+        [System.String]
+        $ModulePath,
+
+        [Parameter()]
+        [System.Collections.Hashtable]
+        $Params
+    )
+
+    $VerbosePreference = "SilentlyContinue"
+    if ([System.String]::IsNullOrEmpty($modulePath) -eq $false)
+    {
+        $module = Resolve-Path $modulePath
+    }
+    else
+    {
+        $ParentModuleBase = Get-Module "SharePointDsc" -ListAvailable | Select-Object -ExpandProperty Modulebase
+        $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPBCSServiceApp\MSFT_SPBCSServiceApp.psm1" -Resolve
+    }
+    $Content = ''
+
+    if ($null -eq $params)
+    {
+        $params = Get-DSCFakeParameters -ModulePath $module
+    }
+
+    $bcsa = Get-SPServiceApplication | Where-Object { $_.GetType().Name -eq "BdcServiceApplication" }
+
+    foreach ($bcsaInstance in $bcsa)
+    {
+        try
+        {
+            if ($null -ne $bcsaInstance)
+            {
+                $PartialContent = "        SPBCSServiceApp " + $bcsaInstance.Name.Replace(" ", "") + "`r`n"
+                $PartialContent += "        {`r`n"
+                $params.Name = $bcsaInstance.DisplayName
+                $results = Get-TargetResource @params
+
+                if ($results.Contains("InstallAccount"))
+                {
+                    $results.Remove("InstallAccount")
+                }
+                $results = Repair-Credentials -results $results
+
+                Add-ConfigurationDataEntry -Node "NonNodeData" -Key "DatabaseServer" -Value $results.DatabaseServer -Description "Name of the Database Server associated with the destination SharePoint Farm;"
+                $results.DatabaseServer = "`$ConfigurationData.NonNodeData.DatabaseServer"
+                $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+                $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "DatabaseServer"
+                $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+                $PartialContent += $currentBlock
+                $PartialContent += "        }`r`n"
+                $Content += $PartialContent
+            }
+        }
+        catch
+        {
+            $Global:ErrorLog += "[Business Connectivity Service Application]" + $bcsaInstance.DisplayName + "`r`n"
+            $Global:ErrorLog += "$_`r`n`r`n"
+        }
+    }
+    return $Content
+}
+
 Export-ModuleMember -Function *-TargetResource

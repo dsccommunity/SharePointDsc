@@ -230,4 +230,52 @@ function Test-TargetResource
     return $result
 }
 
+function Export-TargetResource
+{
+    $VerbosePreference = "SilentlyContinue"
+    $ParentModuleBase = Get-Module "SharePointDsc" -ListAvailable | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPVisioServiceApp\MSFT_SPVisioServiceApp.psm1" -Resolve
+    $Content = ''
+    $params = Get-DSCFakeParameters -ModulePath $module
+
+    $serviceApps = Get-SPServiceApplication | Where-Object { $_.GetType().Name -eq "VisioGraphicsServiceApplication" }
+
+    $i = 1
+    $total = $serviceApps.Length
+    foreach ($serviceApp in $serviceApps)
+    {
+        try
+        {
+            if ($null -ne $serviceApp)
+            {
+                $serviceName = $serviceApp.Name
+                Write-Host "Scanning Visio Service Application [$i/$total] {$serviceName}"
+
+                $params.Name = $serviceName
+                $PartialContent = "        SPVisioServiceApp " + $serviceApp.Name.Replace(" ", "") + "`r`n"
+                $PartialContent += "        {`r`n"
+                $results = Get-TargetResource @params
+
+                if ($results.Contains("InstallAccount"))
+                {
+                    $results.Remove("InstallAccount")
+                }
+                $results = Repair-Credentials -results $results
+                $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+                $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+                $PartialContent += $currentBlock
+                $PartialContent += "        }`r`n"
+                $Content += $PartialContent
+            }
+            $i++
+        }
+        catch
+        {
+            $Global:ErrorLog += "[Visio Graphics Service Application]" + $serviceApp.Name + "`r`n"
+            $Global:ErrorLog += "$_`r`n`r`n"
+        }
+    }
+    return $Content
+}
+
 Export-ModuleMember -Function *-TargetResource

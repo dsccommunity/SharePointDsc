@@ -70,29 +70,29 @@ function Get-TargetResource
 
         $allServers = Get-SPServer | ForEach-Object -Process {
             return New-Object -TypeName System.Object | `
-                Add-Member -MemberType NoteProperty `
-                -Name Name `
-                -Value $_.Name `
-                -PassThru | `
-                Add-Member -MemberType NoteProperty `
-                -Name Id `
-                -Value $_.Id `
-                -PassThru
-        }
+                    Add-Member -MemberType NoteProperty `
+                    -Name Name `
+                    -Value $_.Name `
+                    -PassThru | `
+                        Add-Member -MemberType NoteProperty `
+                        -Name Id `
+                        -Value $_.Id `
+                        -PassThru
+                }
 
-        $allComponents = Get-SPEnterpriseSearchComponent -SearchTopology $currentTopology `
-            -ErrorAction SilentlyContinue
+                $allComponents = Get-SPEnterpriseSearchComponent -SearchTopology $currentTopology `
+                    -ErrorAction SilentlyContinue
 
-        $AdminComponents = @()
-        $AdminComponents += ($allComponents | Where-Object -FilterScript {
-                ($_.GetType().Name -eq "AdminComponent")
-            }).ServerId | ForEach-Object -Process {
-            $serverId = $_
-            $server = $allServers | Where-Object -FilterScript {
-                $_.Id -eq $serverId
-            } | Select-Object -First 1
-            return $server.Name
-        }
+                $AdminComponents = @()
+                $AdminComponents += ($allComponents | Where-Object -FilterScript {
+                        ($_.GetType().Name -eq "AdminComponent")
+                    }).ServerId | ForEach-Object -Process {
+                    $serverId = $_
+                    $server = $allServers | Where-Object -FilterScript {
+                        $_.Id -eq $serverId
+                    } | Select-Object -First 1
+                    return $server.Name
+                }
 
         $CrawlComponents = @()
         $CrawlComponents += ($allComponents | Where-Object -FilterScript {
@@ -472,115 +472,183 @@ function Set-TargetResource
                 if ($componentTypes.$CurrentSearchProperty -eq "IndexComponent")
                 {
                     $component = Get-SPEnterpriseSearchComponent -SearchTopology $newTopology | `
-                        Where-Object -FilterScript {
-                        ($_.GetType().Name -eq $componentTypes.$CurrentSearchProperty) `
-                            -and ($_.ServerName -eq $ComponentToRemove) `
-                            -and ($_.IndexPartitionOrdinal -eq 0)
+                            Where-Object -FilterScript {
+                            ($_.GetType().Name -eq $componentTypes.$CurrentSearchProperty) `
+                                -and ($_.ServerName -eq $ComponentToRemove) `
+                                -and ($_.IndexPartitionOrdinal -eq 0)
+                        }
                     }
-                }
-                else
-                {
-                    $component = Get-SPEnterpriseSearchComponent -SearchTopology $newTopology | `
-                        Where-Object -FilterScript {
-                        ($_.GetType().Name -eq $componentTypes.$CurrentSearchProperty) `
-                            -and ($_.ServerName -eq $ComponentToRemove)
-                    }
-                }
+                    else
+                    {
+                        $component = Get-SPEnterpriseSearchComponent -SearchTopology $newTopology | `
+                                Where-Object -FilterScript {
+                                ($_.GetType().Name -eq $componentTypes.$CurrentSearchProperty) `
+                                    -and ($_.ServerName -eq $ComponentToRemove)
+                            }
+                        }
 
-                if ($null -ne $component)
-                {
-                    $component | Remove-SPEnterpriseSearchComponent -SearchTopology $newTopology `
-                        -Confirm:$false
+                        if ($null -ne $component)
+                        {
+                            $component | Remove-SPEnterpriseSearchComponent -SearchTopology $newTopology `
+                                -Confirm:$false
+                        }
+                    }
                 }
-            }
-        }
 
         # Look for components that have no server name and remove them
         $idsWithNoName = (Get-SPEnterpriseSearchComponent -SearchTopology $newTopology | `
-                Where-Object -FilterScript {
-                $null -eq $_.ServerName
-            }).ComponentId
+                    Where-Object -FilterScript {
+                    $null -eq $_.ServerName
+                }).ComponentId
         $idsWithNoName | ForEach-Object -Process {
             $id = $_
             Get-SPEnterpriseSearchComponent -SearchTopology $newTopology | `
-                Where-Object -FilterScript {
-                $_.ComponentId -eq $id
-            } | `
-                Remove-SPEnterpriseSearchComponent -SearchTopology $newTopology `
-                -Confirm:$false
+                    Where-Object -FilterScript {
+                    $_.ComponentId -eq $id
+                } | `
+                        Remove-SPEnterpriseSearchComponent -SearchTopology $newTopology `
+                        -Confirm:$false
+                }
+
+                # Apply the new topology to the farm
+                Write-Verbose -Message "Applying new Search topology"
+                Set-SPEnterpriseSearchTopology -Identity $newTopology
+            }
         }
 
-        # Apply the new topology to the farm
-        Write-Verbose -Message "Applying new Search topology"
-        Set-SPEnterpriseSearchTopology -Identity $newTopology
-    }
-}
+        function Test-TargetResource
+        {
+            [CmdletBinding()]
+            [OutputType([System.Boolean])]
+            param
+            (
+                [Parameter(Mandatory = $true)]
+                [System.String]
+                $ServiceAppName,
 
-function Test-TargetResource
-{
-    [CmdletBinding()]
-    [OutputType([System.Boolean])]
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [System.String]
-        $ServiceAppName,
+                [Parameter(Mandatory = $true)]
+                [System.String[]]
+                $Admin,
 
-        [Parameter(Mandatory = $true)]
-        [System.String[]]
-        $Admin,
+                [Parameter(Mandatory = $true)]
+                [System.String[]]
+                $Crawler,
 
-        [Parameter(Mandatory = $true)]
-        [System.String[]]
-        $Crawler,
+                [Parameter(Mandatory = $true)]
+                [System.String[]]
+                $ContentProcessing,
 
-        [Parameter(Mandatory = $true)]
-        [System.String[]]
-        $ContentProcessing,
+                [Parameter(Mandatory = $true)]
+                [System.String[]]
+                $AnalyticsProcessing,
 
-        [Parameter(Mandatory = $true)]
-        [System.String[]]
-        $AnalyticsProcessing,
+                [Parameter(Mandatory = $true)]
+                [System.String[]]
+                $QueryProcessing,
 
-        [Parameter(Mandatory = $true)]
-        [System.String[]]
-        $QueryProcessing,
+                [Parameter(Mandatory = $true)]
+                [System.String[]]
+                $IndexPartition,
 
-        [Parameter(Mandatory = $true)]
-        [System.String[]]
-        $IndexPartition,
+                [Parameter(Mandatory = $true)]
+                [System.String]
+                $FirstPartitionDirectory,
 
-        [Parameter(Mandatory = $true)]
-        [System.String]
-        $FirstPartitionDirectory,
+                [Parameter()]
+                [System.Management.Automation.PSCredential]
+                $InstallAccount
+            )
 
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
-    )
+            Write-Verbose -Message "Testing Search Topology for '$ServiceAppName'"
 
-    Write-Verbose -Message "Testing Search Topology for '$ServiceAppName'"
+            $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    $CurrentValues = Get-TargetResource @PSBoundParameters
+            Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+            Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
-    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
-    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+            $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+                -Source $($MyInvocation.MyCommand.Source) `
+                -DesiredValues $PSBoundParameters `
+                -ValuesToCheck @(
+                "Admin",
+                "Crawler",
+                "ContentProcessing",
+                "AnalyticsProcessing",
+                "QueryProcessing",
+                "IndexPartition"
+            )
 
-    $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
-        -Source $($MyInvocation.MyCommand.Source) `
-        -DesiredValues $PSBoundParameters `
-        -ValuesToCheck @(
-        "Admin",
-        "Crawler",
-        "ContentProcessing",
-        "AnalyticsProcessing",
-        "QueryProcessing",
-        "IndexPartition"
-    )
+            Write-Verbose -Message "Test-TargetResource returned $result"
 
-    Write-Verbose -Message "Test-TargetResource returned $result"
+            return $result
+        }
 
-    return $result
-}
+        function Export-TargetResource
+        {
+            $VerbosePreference = "SilentlyContinue"
+            $ParentModuleBase = Get-Module "SharePointDsc" -ListAvailable | Select-Object -ExpandProperty Modulebase
+            $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPSearchTopology\MSFT_SPSearchTopology.psm1" -Resolve
+            $Content = ''
+            $params = Get-DSCFakeParameters -ModulePath $module
 
-Export-ModuleMember -Function *-TargetResource
+            $ssas = Get-SPServiceApplication | Where-Object -FilterScript { $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication" }
+
+            $i = 1
+            $total = $ssas.Length
+            foreach ($ssa in $ssas)
+            {
+                try
+                {
+                    if ($null -ne $ssa)
+                    {
+                        $serviceName = $ssa.DisplayName
+                        Write-Host "Scanning Search Topology for Service Application [$i/$total] {$serviceName}"
+                        $PartialContent = "        SPSearchTopology " + [System.Guid]::NewGuid().ToString() + "`r`n"
+                        $PartialContent += "        {`r`n"
+                        $params.ServiceAppName = $serviceName
+                        $results = Get-TargetResource @params
+
+                        Add-ConfigurationDataEntry -Node "NonNodeData" -Key "SearchContentProcessingServers" -Value $results.ContentProcessing -Description "List of servers that will act as Search Content Processors;"
+                        $results.ContentProcessing = "`$ConfigurationData.NonNodeData.SearchContentProcessingServers"
+
+                        Add-ConfigurationDataEntry -Node "NonNodeData" -Key "SearchAnalyticsProcessingServers" -Value $results.AnalyticsProcessing -Description "List of servers that will act as Search Analytics Processors;"
+                        $results.AnalyticsProcessing = "`$ConfigurationData.NonNodeData.SearchAnalyticsProcessingServers"
+
+                        Add-ConfigurationDataEntry -Node "NonNodeData" -Key "SearchIndexPartitionServers" -Value $results.IndexPartition -Description "List of servers that will host the Search Index Partitions;"
+                        $results.IndexPartition = "`$ConfigurationData.NonNodeData.SearchIndexPartitionServers"
+
+                        Add-ConfigurationDataEntry -Node "NonNodeData" -Key "SearchCrawlerServers" -Value $results.Crawler -Description "List of servers that will act as Search Crawlers;"
+                        $results.Crawler = "`$ConfigurationData.NonNodeData.SearchCrawlerServers"
+
+                        Add-ConfigurationDataEntry -Node "NonNodeData" -Key "SearchAdminServers" -Value $results.Admin -Description "List of servers that will host the Search Admin Components;"
+                        $results.Admin = "`$ConfigurationData.NonNodeData.SearchAdminServers"
+
+                        Add-ConfigurationDataEntry -Node "NonNodeData" -Key "QueryProcessingServers" -Value $results.QueryProcessing -Description "List of servers that will host the Search Query Components;"
+                        $results.QueryProcessing = "`$ConfigurationData.NonNodeData.QueryProcessingServers"
+
+                        if ($results.FirstPartitionDirectory.Length -gt 1)
+                        {
+                            $results.FirstPartitionDirectory = $results.FirstPartitionDirectory
+                        }
+
+                        $results = Repair-Credentials -results $results
+
+                        $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+                        $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+                        $PartialContent += $currentBlock
+                        $PartialContent += "        }`r`n"
+                        $Content += $PartialContent
+                        $i++
+                    }
+                }
+                catch
+                {
+                    $_
+                    $Global:ErrorLog += "[Search Topology]" + $ssa.DisplayName + "`r`n"
+                    $Global:ErrorLog += "$_`r`n`r`n"
+                }
+            }
+            return $Content
+        }
+
+        Export-ModuleMember -Function *-TargetResource

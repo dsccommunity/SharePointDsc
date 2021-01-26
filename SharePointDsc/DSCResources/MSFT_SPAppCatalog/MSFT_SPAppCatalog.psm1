@@ -204,4 +204,51 @@ function Test-TargetResource
     return $result
 }
 
+function Export-TargetResource
+{
+    $VerbosePreference = "SilentlyContinue"
+    $ParentModuleBase = Get-Module "SharePointDsc" -ListAvailable | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPAppCatalog\MSFT_SPAppCatalog.psm1" -Resolve
+    $Content = ''
+    $params = Get-DSCFakeParameters -ModulePath $module
+    $webApps = Get-SPWebApplication
+
+    foreach ($webApp in $webApps)
+    {
+        try
+        {
+            $feature = $webApp.Features.Item([Guid]::Parse("f8bea737-255e-4758-ab82-e34bb46f5828"))
+            if ($null -ne $feature)
+            {
+                $appCatalogSiteId = $feature.Properties["__AppCatSiteId"].Value
+                $appCatalogSite = $webApp.Sites | Where-Object { $_.ID -eq $appCatalogSiteId }
+
+                if ($null -ne $appCatalogSite)
+                {
+                    $params = Get-DSCFakeParameters -ModulePath $module
+
+                    $catUrl = $appCatalogSite.Url
+                    Write-Host "Scanning App Catalog {$catUrl}"
+                    $PartialContent = "        SPAppCatalog " + [System.Guid]::NewGuid().ToString() + "`r`n"
+                    $PartialContent += "        {`r`n"
+                    $params.SiteUrl = $catUrl
+                    $results = Get-TargetResource @params
+                    $results = Repair-Credentials -results $results
+                    $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+                    $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+                    $PartialContent += $currentBlock
+                    $PartialContent += "        }`r`n"
+                    $Content += $PartialContent
+                }
+            }
+        }
+        catch
+        {
+            $Global:ErrorLog += "[App Catalog]" + $webApp.Url + "`r`n"
+            $Global:ErrorLog += "$_`r`n`r`n"
+        }
+    }
+    return $Content
+}
+
 Export-ModuleMember -Function *-TargetResource

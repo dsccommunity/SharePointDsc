@@ -903,4 +903,97 @@ function Test-TargetResource
     return $result
 }
 
+function Export-TargetResource
+{
+    $VerbosePreference = "SilentlyContinue"
+    $ParentModuleBase = Get-Module "SharePointDsc" -ListAvailable | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPUserProfileProperty\MSFT_SPUserProfileProperty.psm1" -Resolve
+    $Content = ''
+    $params = Get-DSCFakeParameters -ModulePath $module
+    $caURL = (Get-SpWebApplication -IncludeCentralAdministration | Where-Object -FilterScript { $_.IsAdministrationWebApplication -eq $true }).Url
+    $context = Get-SPServiceContext -Site $caURL
+    try
+    {
+        $userProfileConfigManager = New-Object -TypeName "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" `
+            -ArgumentList $context
+        $properties = $userProfileConfigManager.GetPropertiesWithSection()
+        $properties = $properties | Where-Object { $_.IsSection -eq $false }
+
+        $userProfileServiceApp = Get-SPServiceApplication | Where-Object { $_.GetType().Name -eq "UserProfileApplication" }
+
+        <# WA - Bug in SPDSC 1.7.0.0 if there is a sync connection, then we need to skip the properties. #>
+        if ($null -ne $userProfileConfigManager.ConnectionManager.PropertyMapping)
+        {
+            $i = 1;
+            $total = $properties.Length;
+            foreach ($property in $properties)
+            {
+                try
+                {
+                    $params.Name = $property.Name
+                    Write-Host "    -> Scanning User Profile Property [$i/$total] {$($property.Name)}"
+                    $params.UserProfileService = $userProfileServiceApp[0].DisplayName
+                    $PartialContent = "        SPUserProfileProperty " + [System.Guid]::NewGuid().ToString() + "`r`n"
+                    $PartialContent += "        {`r`n"
+
+                    <# Cleanup empty properties #>
+                    try
+                    {
+                        foreach ($param in $params)
+                        {
+                            if ($param -eq "")
+                            {
+                                $params.Remove($param)
+                            }
+                        }
+                    }
+                    catch
+                    {
+                    }
+
+                    if ($params.MappingConnectionName -eq "*")
+                    {
+                        $params.Remove("MappingConnectionName")
+                    }
+                    $results = Get-TargetResource @params
+
+                    <# WA - Bug in SPDSC 1.7.0.0 where param returned is named UserProfileServiceAppName instead of
+                            just UserProfileService. #>
+                    if ($null -ne $results.Get_Item("UserProfileServiceAppName"))
+                    {
+                        $results.Add("UserProfileService", $results.UserProfileServiceAppName)
+                        $results.Remove("UserProfileServiceAppName")
+                    }
+
+                    if ($results.TermGroup -eq "" -or $results.TermSet -eq "" -or $results.TermStore -eq "")
+                    {
+                        $results.Remove("TermGroup")
+                        $results.Remove("TermStore")
+                        $results.Remove("TermSet")
+                    }
+
+                    $results = Repair-Credentials -results $results
+                    $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+                    $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+                    $PartialContent += $currentBlock
+                    $PartialContent += "        }`r`n"
+                    $Content += $PartialContent
+                }
+                catch
+                {
+                    $_
+                    $Global:ErrorLog += "[User Profile Property]" + $property.Name + "`r`n"
+                    $Global:ErrorLog += "$_`r`n`r`n"
+                }
+                $i++
+            }
+        }
+    }
+    catch
+    {
+        $_
+    }
+    return $Content
+}
+
 Export-ModuleMember -Function *-TargetResource

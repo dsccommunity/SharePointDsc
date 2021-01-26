@@ -1,4 +1,5 @@
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param
 (
     [Parameter()]
@@ -49,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
 
@@ -1231,6 +1232,82 @@ try
 
                 It "Should return true from the test method" {
                     Test-TargetResource @testParams | Should -Be $true
+                }
+            }
+
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Import-Module (Join-Path -Path (Split-Path -Path (Get-Module SharePointDsc -ListAvailable).Path -Parent) -ChildPath "Modules\SharePointDSC.Reverse\SharePointDSC.Reverse.psm1")
+
+                    Mock -CommandName Write-Host -MockWith { }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            ServiceAppName = "User Profile Service Application"
+                            SecurityType   = "Administrators"
+                            Members        = @(
+                                @{
+                                    Username     = "Domain\Account"
+                                    AccessLevels = "Full Control"
+                                }
+                            )
+                        }
+                    }
+
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        $spServiceApp = [PSCustomObject]@{
+                            DisplayName = "User Profile Service Application"
+                            Name        = "User Profile Service Application"
+                        }
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                            -Name GetType `
+                            -Value {
+                            return @{
+                                Name = "User Profile Service Application"
+                            }
+                        } -PassThru -Force
+                        return $spServiceApp
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
+
+                    $result = @'
+        \$members = \@\(\);
+        \$members \+= MSFT_SPServiceAppSecurityEntry
+        {
+            Username     = "Domain\\Account";
+            AccessLevels = \@\("Full Control"\);
+        };
+        SPServiceAppSecurity [0-9A-Fa-f]{8}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{12}
+        {
+            Members              = "\$members";
+            PsDscRunAsCredential = \$Credsspfarm;
+            SecurityType         = "Administrators";
+            ServiceAppName       = "User Profile Service Application";
+        }
+        \$members = \@\(\);
+        \$members \+= MSFT_SPServiceAppSecurityEntry
+        {
+            Username     = "Domain\\Account";
+            AccessLevels = \@\("Full Control"\);
+        };
+        SPServiceAppSecurity [0-9A-Fa-f]{8}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{12}
+        {
+            Members              = "\$members";
+            PsDscRunAsCredential = \$Credsspfarm;
+            SecurityType         = "Administrators";
+            ServiceAppName       = "User Profile Service Application";
+        }
+
+'@
+                }
+
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource | Should -Match $result
                 }
             }
         }

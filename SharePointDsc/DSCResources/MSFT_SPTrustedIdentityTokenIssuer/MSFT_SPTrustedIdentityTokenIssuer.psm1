@@ -505,4 +505,89 @@ function Test-TargetResource
     return $result
 }
 
+function Export-TargetResource
+{
+    $VerbosePreference = "SilentlyContinue"
+    $ParentModuleBase = Get-Module "SharePointDsc" -ListAvailable | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPTrustedIdentityTokenIssuer\MSFT_SPTrustedIdentityTokenIssuer.psm1" -Resolve
+    $Content = ''
+    $params = Get-DSCFakeParameters -ModulePath $module
+
+    $tips = Get-SPTrustedIdentityTokenIssuer
+
+    $i = 1
+    $total = $tips.Length
+    foreach ($tip in $tips)
+    {
+        try
+        {
+            $tokenName = $tip.Name
+            Write-Host "Scanning Trusted Identity Token Issuer [$i/$total] {$tokenName}"
+
+            $PartialContent = ''
+
+            $params.Name = $tokenName
+            $params.Description = $tip.Description
+
+            $property = @{
+                Handle = 0
+            }
+            $fake = New-CimInstance -ClassName Win32_Process -Property $property -Key Handle -ClientOnly
+
+            if (!$params.Contains("ClaimsMappings"))
+            {
+                $params.Add("ClaimsMappings", $fake)
+            }
+            $results = Get-TargetResource @params
+
+            $foundOne = $false
+            foreach ($ctm in $results.ClaimsMappings)
+            {
+                $ctmResult = Get-SPDscClaimTypeMapping -params $ctm
+                if ($null -ne $ctmResult)
+                {
+                    if (!$foundOne)
+                    {
+                        $PartialContent += "        `$members = @();`r`n"
+                        $foundOne = $true
+                    }
+                    $PartialContent += "        `$members += " + $ctmResult + ";`r`n"
+                }
+            }
+
+            if ($foundOne)
+            {
+                $results.ClaimsMappings = "`$members"
+            }
+
+            $PartialContent += "        SPTrustedIdentityTokenIssuer " + [System.Guid]::NewGuid().toString() + "`r`n"
+            $PartialContent += "        {`r`n"
+
+            if ($null -ne $results.Get_Item("SigningCertificateThumbprint") -and $results.Contains("SigningCertificateFilePath"))
+            {
+                $results.Remove("SigningCertificateFilePath")
+            }
+
+            if ($results.Contains("InstallAccount"))
+            {
+                $results.Remove("InstallAccount")
+            }
+            $results = Repair-Credentials -results $results
+            $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+            $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+            $PartialContent += $currentBlock
+            $PartialContent += "        }`r`n"
+            $Content += $PartialContent
+            $i++
+        }
+        catch
+        {
+            $_
+            $Global:ErrorLog += "[Trusted Identity Token Issuer]" + $tip.Name + "`r`n"
+            $Global:ErrorLog += "$_`r`n`r`n"
+        }
+    }
+    return $Content
+}
+
 Export-ModuleMember -Function *-TargetResource

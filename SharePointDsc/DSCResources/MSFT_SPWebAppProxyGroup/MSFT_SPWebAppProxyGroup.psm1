@@ -30,7 +30,6 @@ function Get-TargetResource
             return  @{
                 WebAppUrl            = $null
                 ServiceAppProxyGroup = $null
-                InstallAccount       = $InstallAccount
             }
         }
 
@@ -46,7 +45,6 @@ function Get-TargetResource
         return @{
             WebAppUrl            = $params.WebAppUrl
             ServiceAppProxyGroup = $ServiceAppProxyGroup
-            InstallAccount       = $InstallAccount
         }
     }
 
@@ -130,7 +128,7 @@ function Test-TargetResource
         else
         {
             $message = ("Current ServiceAppProxyGroup {$($CurrentValues.ServiceAppProxyGroup)} " + `
-                        "is not in the desired state {$ServiceAppProxyGroup}.")
+                    "is not in the desired state {$ServiceAppProxyGroup}.")
             Write-Verbose -Message $message
             Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
 
@@ -141,6 +139,48 @@ function Test-TargetResource
     Write-Verbose -Message "Test-TargetResource returned $result"
 
     return $result
+}
+
+function Export-TargetResource
+{
+    $VerbosePreference = "SilentlyContinue"
+    $ParentModuleBase = Get-Module "SharePointDsc" -ListAvailable | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPWebAppProxyGroup\MSFT_SPWebAppProxyGroup.psm1" -Resolve
+    $Content = ''
+    $params = Get-DSCFakeParameters -ModulePath $module
+
+    $webApps = Get-SPWebApplication
+    foreach ($wa in $webApps)
+    {
+        try
+        {
+            if ($null -ne $wa)
+            {
+                $params.WebAppUrl = $wa.Url
+                $params.ServiceAppProxyGroup = $wa.ServiceApplicationProxyGroup.FriendlyName
+                $PartialContent = "        SPWebAppProxyGroup " + [System.Guid]::NewGuid().toString() + "`r`n"
+                $PartialContent += "        {`r`n"
+                $results = Get-TargetResource @params
+
+                if ($results.Contains("InstallAccount"))
+                {
+                    $results.Remove("InstallAccount")
+                }
+                $results = Repair-Credentials -results $results
+                $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+                $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+                $PartialContent += $currentBlock
+                $PartialContent += "        }`r`n"
+                $Content += $PartialContent
+            }
+        }
+        catch
+        {
+            $Global:ErrorLog += "[Web Application Proxy Group]" + $wa.Url + "`r`n"
+            $Global:ErrorLog += "$_`r`n`r`n"
+        }
+    }
+    return $Content
 }
 
 Export-ModuleMember -Function *-TargetResource

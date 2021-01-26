@@ -1,4 +1,5 @@
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param
 (
     [Parameter()]
@@ -49,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
                 $getTypeFullName = "Microsoft.SharePoint.SPSubscriptionSettingsServiceApplication"
@@ -155,36 +156,38 @@ try
 
                         $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
                             New-Object -TypeName "Object" |
-                            Add-Member -MemberType NoteProperty `
-                                -Name FullName `
-                                -Value $getTypeFullName `
-                                -PassThru |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name GetProperties `
-                                -Value {
-                                param($x)
-                                return @(
-                                    (New-Object -TypeName "Object" |
-                                        Add-Member -MemberType NoteProperty `
-                                            -Name Name `
-                                            -Value "Database" `
-                                            -PassThru |
-                                        Add-Member -MemberType ScriptMethod `
-                                            -Name GetValue `
-                                            -Value {
-                                            param($x)
-                                            return (@{
-                                                    FullName             = $getTypeFullName
-                                                    Name                 = "Test_DB"
-                                                    NormalizedDataSource = "TestServer\Instance"
-                                                    FailoverServer       = @{
-                                                        Name = "DBServer_Failover"
-                                                    }
-                                                })
-                                        } -PassThru
-                                    )
-                                )
-                            } -PassThru
+                                Add-Member -MemberType NoteProperty `
+                                    -Name FullName `
+                                    -Value $getTypeFullName `
+                                    -PassThru |
+                                    Add-Member -MemberType ScriptMethod `
+                                        -Name GetProperties `
+                                        -Value {
+                                        param($x)
+                                        return @(
+                                            (New-Object -TypeName "Object" |
+                                                    Add-Member -MemberType NoteProperty `
+                                                        -Name Name `
+                                                        -Value "Database" `
+                                                        -PassThru |
+                                                    Add-Member -MemberType ScriptMethod `
+                                                        -Name GetValue `
+                                                        -Value {
+                                                        param($x)
+                                                        return (
+                                                            @{
+                                                                FullName             = $getTypeFullName
+                                                                Name                 = "Test_DB"
+                                                                NormalizedDataSource = "TestServer\Instance"
+                                                                FailoverServer       = @{
+                                                                    Name = "DBServer_Failover"
+                                                                }
+                                                            }
+                                                        )
+                                                    } -PassThru
+                                            )
+                                        )
+                                    } -PassThru
                         } -PassThru -Force
 
                         $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
@@ -241,36 +244,38 @@ try
 
                         $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
                             New-Object -TypeName "Object" |
-                            Add-Member -MemberType NoteProperty `
-                                -Name FullName `
-                                -Value $getTypeFullName `
-                                -PassThru |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name GetProperties `
-                                -Value {
-                                param($x)
-                                return @(
-                                    (New-Object -TypeName "Object" |
-                                        Add-Member -MemberType NoteProperty `
-                                            -Name Name `
-                                            -Value "Database" `
-                                            -PassThru |
-                                        Add-Member -MemberType ScriptMethod `
-                                            -Name GetValue `
-                                            -Value {
-                                            param($x)
-                                            return (@{
-                                                    FullName             = $getTypeFullName
-                                                    Name                 = "Test_DB"
-                                                    NormalizedDataSource = "TestServer\Instance"
-                                                    FailoverServer       = @{
-                                                        Name = "DBServer_Failover"
-                                                    }
-                                                })
-                                        } -PassThru
-                                    )
-                                )
-                            } -PassThru
+                                Add-Member -MemberType NoteProperty `
+                                    -Name FullName `
+                                    -Value $getTypeFullName `
+                                    -PassThru |
+                                    Add-Member -MemberType ScriptMethod `
+                                        -Name GetProperties `
+                                        -Value {
+                                        param($x)
+                                        return @(
+                                            (New-Object -TypeName "Object" |
+                                                    Add-Member -MemberType NoteProperty `
+                                                        -Name Name `
+                                                        -Value "Database" `
+                                                        -PassThru |
+                                                    Add-Member -MemberType ScriptMethod `
+                                                        -Name GetValue `
+                                                        -Value {
+                                                        param($x)
+                                                        return (
+                                                            @{
+                                                                FullName             = $getTypeFullName
+                                                                Name                 = "Test_DB"
+                                                                NormalizedDataSource = "TestServer\Instance"
+                                                                FailoverServer       = @{
+                                                                    Name = "DBServer_Failover"
+                                                                }
+                                                            }
+                                                        )
+                                                    } -PassThru
+                                            )
+                                        )
+                                    } -PassThru
                         } -PassThru -Force
 
                         return $spServiceApp
@@ -310,36 +315,38 @@ try
 
                         $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
                             New-Object -TypeName "Object" |
-                            Add-Member -MemberType NoteProperty `
-                                -Name FullName `
-                                -Value $getTypeFullName `
-                                -PassThru |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name GetProperties `
-                                -Value {
-                                param($x)
-                                return @(
-                                    (New-Object -TypeName "Object" |
-                                        Add-Member -MemberType NoteProperty `
-                                            -Name Name `
-                                            -Value "Database" `
-                                            -PassThru |
-                                        Add-Member -MemberType ScriptMethod `
-                                            -Name GetValue `
-                                            -Value {
-                                            param($x)
-                                            return (@{
-                                                    FullName             = $getTypeFullName
-                                                    Name                 = "Test_DB"
-                                                    NormalizedDataSource = "TestServer\Instance"
-                                                    FailoverServer       = @{
-                                                        Name = "DBServer_Failover"
-                                                    }
-                                                })
-                                        } -PassThru
-                                    )
-                                )
-                            } -PassThru
+                                Add-Member -MemberType NoteProperty `
+                                    -Name FullName `
+                                    -Value $getTypeFullName `
+                                    -PassThru |
+                                    Add-Member -MemberType ScriptMethod `
+                                        -Name GetProperties `
+                                        -Value {
+                                        param($x)
+                                        return @(
+                                            (New-Object -TypeName "Object" |
+                                                    Add-Member -MemberType NoteProperty `
+                                                        -Name Name `
+                                                        -Value "Database" `
+                                                        -PassThru |
+                                                    Add-Member -MemberType ScriptMethod `
+                                                        -Name GetValue `
+                                                        -Value {
+                                                        param($x)
+                                                        return (
+                                                            @{
+                                                                FullName             = $getTypeFullName
+                                                                Name                 = "Test_DB"
+                                                                NormalizedDataSource = "TestServer\Instance"
+                                                                FailoverServer       = @{
+                                                                    Name = "DBServer_Failover"
+                                                                }
+                                                            }
+                                                        )
+                                                    } -PassThru
+                                            )
+                                        )
+                                    } -PassThru
                         } -PassThru -Force
 
                         return $spServiceApp
@@ -402,36 +409,38 @@ try
                         }
                         $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
                             New-Object -TypeName "Object" |
-                            Add-Member -MemberType NoteProperty `
-                                -Name FullName `
-                                -Value $getTypeFullName `
-                                -PassThru |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name GetProperties `
-                                -Value {
-                                param($x)
-                                return @(
-                                    (New-Object -TypeName "Object" |
-                                        Add-Member -MemberType NoteProperty `
-                                            -Name Name `
-                                            -Value "Database" `
-                                            -PassThru |
-                                        Add-Member -MemberType ScriptMethod `
-                                            -Name GetValue `
-                                            -Value {
-                                            param($x)
-                                            return (@{
-                                                    FullName             = $getTypeFullName
-                                                    Name                 = "Test_DB"
-                                                    NormalizedDataSource = "TestServer\Instance"
-                                                    FailoverServer       = @{
-                                                        Name = "DBServer_Failover"
-                                                    }
-                                                })
-                                        } -PassThru
-                                    )
-                                )
-                            } -PassThru
+                                Add-Member -MemberType NoteProperty `
+                                    -Name FullName `
+                                    -Value $getTypeFullName `
+                                    -PassThru |
+                                    Add-Member -MemberType ScriptMethod `
+                                        -Name GetProperties `
+                                        -Value {
+                                        param($x)
+                                        return @(
+                                            (New-Object -TypeName "Object" |
+                                                    Add-Member -MemberType NoteProperty `
+                                                        -Name Name `
+                                                        -Value "Database" `
+                                                        -PassThru |
+                                                    Add-Member -MemberType ScriptMethod `
+                                                        -Name GetValue `
+                                                        -Value {
+                                                        param($x)
+                                                        return (
+                                                            @{
+                                                                FullName             = $getTypeFullName
+                                                                Name                 = "Test_DB"
+                                                                NormalizedDataSource = "TestServer\Instance"
+                                                                FailoverServer       = @{
+                                                                    Name = "DBServer_Failover"
+                                                                }
+                                                            }
+                                                        )
+                                                    } -PassThru
+                                            )
+                                        )
+                                    } -PassThru
                         } -PassThru -Force
                         return $spServiceApp
                     }
@@ -470,6 +479,60 @@ try
 
                 It "Should return false from the test method" {
                     Test-TargetResource @testParams | Should -Be $true
+                }
+            }
+
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Import-Module (Join-Path -Path (Split-Path -Path (Get-Module SharePointDsc -ListAvailable).Path -Parent) -ChildPath "Modules\SharePointDSC.Reverse\SharePointDSC.Reverse.psm1")
+
+                    Mock -CommandName Write-Host -MockWith { }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            Name            = "Subscription Settings Service Application"
+                            ApplicationPool = "Service App Pool"
+                            DatabaseServer  = "SQL01"
+                            DatabaseName    = "SP_SubscriptionSettings"
+                        }
+                    }
+
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        $spServiceApp = [PSCustomObject]@{
+                            DisplayName = "Subscription Settings Service Application"
+                            Name        = "Subscription Settings Service Application"
+                        }
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                            -Name GetType `
+                            -Value {
+                            return @{
+                                Name = "SPSubscriptionSettingsServiceApplication"
+                            }
+                        } -PassThru -Force
+                        return $spServiceApp
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
+
+                    $result = @'
+        SPSubscriptionSettingsServiceApp SubscriptionSettingsServiceApplication[0-9A-Fa-f]{8}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{12}
+        {
+            ApplicationPool      = "Service App Pool";
+            DatabaseName         = "SP_SubscriptionSettings";
+            DatabaseServer       = "SQL01";
+            Name                 = "Subscription Settings Service Application";
+            PsDscRunAsCredential = \$Credsspfarm;
+        }
+
+'@
+                }
+
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource | Should -Match $result
                 }
             }
         }

@@ -206,4 +206,25 @@ function Test-TargetResource
     return $result
 }
 
+function Export-TargetResource
+{
+    $VerbosePreference = "SilentlyContinue"
+    $ParentModuleBase = Get-Module "SharePointDsc" -ListAvailable | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPIrmSettings\MSFT_SPIrmSettings.psm1" -Resolve
+    $Content = ''
+    $params = Get-DSCFakeParameters -ModulePath $module
+    $PartialContent = "        SPIrmSettings " + [System.Guid]::NewGuid().ToString() + "`r`n"
+    $PartialContent += "        {`r`n"
+    $results = Get-TargetResource @params
+
+    $results = Repair-Credentials -results $results
+
+    $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+    $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+    $PartialContent += $currentBlock
+    $PartialContent += "        }`r`n"
+    $Content += $PartialContent
+    return $Content
+}
+
 Export-ModuleMember -Function *-TargetResource

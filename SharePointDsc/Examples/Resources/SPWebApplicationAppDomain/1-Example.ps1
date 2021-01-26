@@ -52,7 +52,7 @@ Updated author, copyright notice, and URLs.
             SPWebApplicationAppDomain Domain
             {
                 AppDomain = "contosointranetapps.com"
-                WebAppUrl ="http://portal.contoso.com";
+                WebAppUrl ="http://portal.contoso.com"
                 Zone = "Default";
                 Port = 80;
                 SSL = $false;

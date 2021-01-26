@@ -1,4 +1,5 @@
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param
 (
     [Parameter()]
@@ -49,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
                 try
                 {
                     # Initialize tests
@@ -147,7 +148,11 @@ try
                                 -Value {
                                 return @(
                                     @{
-                                        Name = "Test source"
+                                        Name           = "Test source"
+                                        ProviderId     = "f7a3db86-fb85-40e4-a178-7ad85c732ba6"
+                                        QueryTransform = @{
+                                            QueryTemplate = "{searchTerms}"
+                                        }
                                     }
                                 )
                             } `
@@ -418,6 +423,77 @@ try
 
                 It "Should create the result source in the set method" {
                     { Set-TargetResource @testParams } | Should -Throw "Unknown ProviderType"
+                }
+            }
+
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Import-Module (Join-Path -Path (Split-Path -Path (Get-Module SharePointDsc -ListAvailable).Path -Parent) -ChildPath "Modules\SharePointDSC.Reverse\SharePointDSC.Reverse.psm1")
+
+                    Mock -CommandName Write-Host -MockWith { }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            Name                 = "External SharePoint results"
+                            ScopeName            = "SPSite"
+                            ScopeUrl             = "https://SharePoint.contoso.com"
+                            SearchServiceAppName = "Search Service Application"
+                            Query                = "{searchTerms}"
+                            ProviderType         = "Remote SharePoint Provider"
+                        }
+                    }
+
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        $spServiceApp = [PSCustomObject]@{
+                            DisplayName = "Search Service Application"
+                            Name        = "Search Service Application"
+                        }
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                            -Name GetType `
+                            -Value {
+                            return @{
+                                FullName = "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
+                            }
+                        } -PassThru -Force
+                        return $spServiceApp
+                    }
+
+                    Mock -CommandName Get-SPEnterpriseSearchFileFormat -MockWith {
+                        return @(
+                            @{
+                                Identity = "pdf"
+                            }
+                        )
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'SkipSitesAndWebs' -ErrorAction SilentlyContinue))
+                    {
+                        $Global:SkipSitesAndWebs = $true
+                    }
+
+                    $result = @'
+        SPSearchResultSource [0-9A-Fa-f]{8}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{12}
+        {
+            Ensure               = "Present";
+            Name                 = "External SharePoint results";
+            PsDscRunAsCredential = \$Credsspfarm;
+            Query                = "{searchTerms}";
+            ScopeName            = "SPSite";
+            ScopeUrl             = "Global";
+            SearchServiceAppName = "Search Service Application";
+        }
+
+'@
+                }
+
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource | Should -Match $result
                 }
             }
         }

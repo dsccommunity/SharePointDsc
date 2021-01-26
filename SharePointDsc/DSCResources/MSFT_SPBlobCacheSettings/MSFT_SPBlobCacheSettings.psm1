@@ -46,6 +46,16 @@ function Get-TargetResource
         $params = $args[0]
         $eventSource = $args[1]
 
+        $nullReturn = @{
+            WebAppUrl       = $params.WebAppUrl
+            Zone            = $params.Zone
+            EnableCache     = $null
+            Location        = $null
+            MaxSizeInGB     = $null
+            MaxAgeInSeconds = $null
+            FileTypes       = $null
+        }
+
         $webappsi = Get-SPServiceInstance -Server $env:COMPUTERNAME `
             -ErrorAction SilentlyContinue `
         | Where-Object -FilterScript {
@@ -56,15 +66,7 @@ function Get-TargetResource
         if ($null -eq $webappsi)
         {
             Write-Verbose -Message "Server isn't running the Web Application role"
-            return @{
-                WebAppUrl       = $null
-                Zone            = $null
-                EnableCache     = $false
-                Location        = $null
-                MaxSizeInGB     = $null
-                MaxAgeInSeconds = $null
-                FileTypes       = $null
-            }
+            return $nullReturn
         }
 
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl `
@@ -73,19 +75,16 @@ function Get-TargetResource
         if ($null -eq $wa)
         {
             Write-Verbose -Message "Specified web application was not found."
-            return @{
-                WebAppUrl       = $null
-                Zone            = $null
-                EnableCache     = $false
-                Location        = $null
-                MaxSizeInGB     = $null
-                MaxAgeInSeconds = $null
-                FileTypes       = $null
-            }
+            return $nullReturn
         }
 
         $zone = [Microsoft.SharePoint.Administration.SPUrlZone]::$($params.Zone)
 
+        if ($null -eq $wa.IisSettings[$zone])
+        {
+            Write-Verbose -Message "Specified zone does not exist."
+            return $nullReturn
+        }
         $sitePath = $wa.IisSettings[$zone].Path
         $webconfiglocation = Join-Path -Path $sitePath -ChildPath "web.config"
 
@@ -279,6 +278,16 @@ function Set-TargetResource
 
             $zone = [Microsoft.SharePoint.Administration.SPUrlZone]::$($params.Zone)
 
+            if ($null -eq $wa.IisSettings[$zone])
+            {
+                $message = "Specified zone does not exist."
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $eventSource
+                throw $message
+            }
+
             $sitePath = $wa.IisSettings[$zone].Path
             $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
             $webconfiglocation = Join-Path -Path $sitePath -ChildPath "web.config"
@@ -419,6 +428,59 @@ function Test-TargetResource
     Write-Verbose -Message "Test-TargetResource returned $result"
 
     return $result
+}
+
+function Export-TargetResource
+{
+    $VerbosePreference = "SilentlyContinue"
+    $ParentModuleBase = Get-Module "SharePointDsc" -ListAvailable | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPBlobCacheSettings\MSFT_SPBlobCacheSettings.psm1" -Resolve
+    $Content = ''
+    $params = Get-DSCFakeParameters -ModulePath $module
+
+    $webApps = Get-SPWebApplication
+    foreach ($webApp in $webApps)
+    {
+        try
+        {
+            $alternateUrls = $webApp.AlternateUrls
+
+            $zones = @("Default")
+            if ($alternateUrls.Length -ge 1)
+            {
+                $zones = $alternateUrls | Select-Object -ExpandProperty 'Zone'
+            }
+            foreach ($zone in $zones)
+            {
+                $PartialContent = "        SPBlobCacheSettings " + [System.Guid]::NewGuid().ToString() + "`r`n"
+                $PartialContent += "        {`r`n"
+                $params.WebAppUrl = $webApp.Url
+                $params.Zone = $zone
+                $results = Get-TargetResource @params
+                $results = Repair-Credentials -results $results
+
+                # WA can exist with a configured zone, but no IIS Path available
+                if ($null -ne $results.EnableCache)
+                {
+                    Add-ConfigurationDataEntry -Node "NonNodeData" -Key "BlobCacheLocation" -Value $results.Location -Description "Path where the Blob Cache objects will be stored on the servers;"
+                    $results.Location = "`$ConfigurationData.NonNodeData.BlobCacheLocation"
+
+                    $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+                    $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+                    $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "Location"
+                    $PartialContent += $currentBlock
+                    $PartialContent += "        }`r`n"
+                    $Content += $PartialContent
+                }
+            }
+        }
+        catch
+        {
+            $Global:ErrorLog += "[Blob Cache Settings]" + $webApp.Url + "`r`n"
+            $Global:ErrorLog += "$_`r`n`r`n"
+        }
+    }
+    return $Content
 }
 
 Export-ModuleMember -Function *-TargetResource

@@ -557,4 +557,40 @@ function Test-TargetResource
     return $result
 }
 
+function Export-TargetResource
+{
+    $VerbosePreference = "SilentlyContinue"
+    $ParentModuleBase = Get-Module "SharePointDsc" -ListAvailable | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPDistributedCacheService\MSFT_SPDistributedCacheService.psm1" -Resolve
+    $Content = ''
+    $params = Get-DSCFakeParameters -ModulePath $module
+    $params.Name = "DistributedCache"
+    $results = Get-TargetResource @params
+    if ($results.Get_Item("Ensure").ToLower() -eq "present" -and $results.Contains("CacheSizeInMB"))
+    {
+        $PartialContent = "        SPDistributedCacheService " + [System.Guid]::NewGuid().ToString() + "`r`n"
+        $PartialContent += "        {`r`n"
+        $results = Repair-Credentials -results $results
+        $results.Remove("ServerProvisionOrder")
+
+        $serviceAccount = Get-Credentials -UserName $results.ServiceAccount
+        $convertToVariable = $false
+        if ($serviceAccount)
+        {
+            $convertToVariable = $true
+            $results.ServiceAccount = (Resolve-Credentials -UserName $results.ServiceAccount) + ".UserName"
+        }
+        $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+        $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+        if ($convertToVariable)
+        {
+            $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "ServiceAccount"
+        }
+        $PartialContent += $currentBlock
+        $PartialContent += "        }`r`n"
+        $Content += $PartialContent
+    }
+    return $Content
+}
+
 Export-ModuleMember -Function *-TargetResource

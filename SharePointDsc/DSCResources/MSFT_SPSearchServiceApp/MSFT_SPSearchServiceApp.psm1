@@ -324,9 +324,9 @@ function Set-TargetResource
                 {
                     Write-Verbose -Message "Setting SearchCenterUrl to $($params.SearchCenterUrl)"
                     $serviceApp = Get-SPServiceApplication -Name $params.Name | `
-                        Where-Object -FilterScript {
-                        $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
-                    }
+                            Where-Object -FilterScript {
+                            $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
+                        }
                     $serviceApp.SearchCenterUrl = $params.SearchCenterUrl
                     $serviceApp.Update()
                 }
@@ -335,9 +335,9 @@ function Set-TargetResource
                 {
                     Write-Verbose -Message "Setting AlertsEnabled to $($params.AlertsEnabled)"
                     $serviceApp = Get-SPServiceApplication -Name $params.Name | `
-                        Where-Object -FilterScript {
-                        $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
-                    }
+                            Where-Object -FilterScript {
+                            $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
+                        }
                     $serviceApp.AlertsEnabled = $params.AlertsEnabled
                     $serviceApp.Update()
                 }
@@ -356,9 +356,9 @@ function Set-TargetResource
             $result = $args[1]
 
             $serviceApp = Get-SPServiceApplication -Name $params.Name | `
-                Where-Object -FilterScript {
-                $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
-            }
+                    Where-Object -FilterScript {
+                    $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
+                }
 
             if ($null -eq $params.ProxyName)
             {
@@ -420,9 +420,9 @@ function Set-TargetResource
             {
                 Write-Verbose -Message "Updating SearchCenterUrl to $($params.SearchCenterUrl)"
                 $serviceApp = Get-SPServiceApplication -Name $params.Name | `
-                    Where-Object -FilterScript {
-                    $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
-                }
+                        Where-Object -FilterScript {
+                        $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
+                    }
                 $serviceApp.SearchCenterUrl = $params.SearchCenterUrl
                 $serviceApp.Update()
             }
@@ -432,9 +432,9 @@ function Set-TargetResource
             {
                 Write-Verbose -Message "Updating AlertsEnabled to $($params.AlertsEnabled)"
                 $serviceApp = Get-SPServiceApplication -Name $params.Name | `
-                    Where-Object -FilterScript {
-                    $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
-                }
+                        Where-Object -FilterScript {
+                        $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
+                    }
                 $serviceApp.AlertsEnabled = $params.AlertsEnabled
                 $serviceApp.Update()
             }
@@ -578,6 +578,91 @@ function Test-TargetResource
     Write-Verbose -Message "Test-TargetResource returned $result"
 
     return $result
+}
+
+function Export-TargetResource
+{
+    $VerbosePreference = "SilentlyContinue"
+    $searchSA = Get-SPServiceApplication | Where-Object { $_.GetType().Name -eq "SearchServiceApplication" }
+
+    $i = 1
+    $total = $searchSA.Length
+    $content = ''
+    $ParentModuleBase = Get-Module "SharePointDsc" -ListAvailable | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath "\DSCResources\MSFT_SPSearchServiceApp\MSFT_SPSearchServiceApp.psm1" -Resolve
+
+    foreach ($searchSAInstance in $searchSA)
+    {
+        try
+        {
+            if ($null -ne $searchSAInstance)
+            {
+                $serviceName = $searchSAInstance.Name
+                Write-Host "Scanning Search Service Application [$i/$total] {$serviceName}"
+                $params = Get-DSCFakeParameters -ModulePath $module
+
+                $partialContent = "        SPSearchServiceApp " + $searchSAInstance.Name.Replace(" ", "") + "`r`n"
+                $partialContent += "        {`r`n"
+                $params.Name = $serviceName
+                $params.ApplicationPool = $searchSAInstance.ApplicationPool.Name
+                $results = Get-TargetResource @params
+                if ($results.Get_Item("CloudIndex") -eq $false)
+                {
+                    $results.Remove("CloudIndex")
+                }
+
+                if ($results.Contains("InstallAccount"))
+                {
+                    $results.Remove("InstallAccount")
+                }
+
+                if ($null -eq $results.SearchCenterUrl)
+                {
+                    $results.Remove("SearchCenterUrl")
+                }
+
+                if ($null -eq $results["DefaultContentAccessAccount"])
+                {
+                    $results.Remove("DefaultContentAccessAccount")
+                }
+                else
+                {
+                    Save-Credentials -UserName $results["DefaultContentAccessAccount"].Username
+                    $results["DefaultContentAccessAccount"] = Resolve-Credentials -UserName $results["DefaultContentAccessAccount"].Username
+                }
+
+                $results = Repair-Credentials -results $results
+
+                Add-ConfigurationDataEntry -Node "NonNodeData" -Key "DatabaseServer" -Value $results.DatabaseServer -Description "Name of the Database Server associated with the destination SharePoint Farm;"
+                $results.DatabaseServer = "`$ConfigurationData.NonNodeData.DatabaseServer"
+
+                $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+                if ($results.ContainsKey("DefaultContentAccessAccount"))
+                {
+                    $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "DefaultContentAccessAccount"
+                }
+                $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "DatabaseServer"
+                $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+                $partialContent += $currentBlock
+                $partialContent += "        }`r`n"
+
+                $properties = @{
+                    searchSAName = $searchSAInstance.Name
+                    DependsOn    = "[SPSearchServiceApp]$($searchSAInstance.Name.Replace(' ', ''))"
+                }
+                $partialContent += Read-TargetResource -ResourceName 'SPSearchContentSource' -ExportParams $properties
+            }
+            $i++
+            $content += $partialContent
+        }
+        catch
+        {
+            $_
+            $Global:ErrorLog += "[Search Service Application]" + $searchSAInstance.Name + "`r`n"
+            $Global:ErrorLog += "$_`r`n`r`n"
+        }
+    }
+    return $content
 }
 
 Export-ModuleMember -Function *-TargetResource

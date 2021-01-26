@@ -1,4 +1,5 @@
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param
 (
     [Parameter()]
@@ -49,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
                 $fakeWebApp = [PSCustomObject]@{ }
@@ -352,6 +353,74 @@ try
                     $web.HasUniquePerm | Should -Be $false
 
                     Assert-MockCalled New-Object
+                }
+            }
+
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Import-Module (Join-Path -Path (Split-Path -Path (Get-Module SharePointDsc -ListAvailable).Path -Parent) -ChildPath "Modules\SharePointDSC.Reverse\SharePointDSC.Reverse.psm1")
+
+                    Mock -CommandName Write-Host -MockWith { }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            Url                = "http://sharepoint.contoso.com/sites/site/subweb"
+                            Name               = "Team Sites"
+                            Ensure             = "Present"
+                            Description        = "A place to share documents with your team."
+                            Template           = "STS#0"
+                            Language           = 1033
+                            AddToTopNav        = $true
+                            UniquePermissions  = $true
+                            UseParentTopNav    = $true
+                            RequestAccessEmail = "sample@contoso.com"
+                        }
+                    }
+
+                    Mock -CommandName Get-SPWeb -MockWith {
+                        $spWeb = [PSCustomObject]@{
+                            Url = "http://sharepoint.contoso.com/sites/site/subweb"
+                        }
+                        return $spWeb
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'ExtractionModeValue' -ErrorAction SilentlyContinue))
+                    {
+                        $Global:ExtractionModeValue = 1
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'ComponentsToExtract' -ErrorAction SilentlyContinue))
+                    {
+                        $Global:ComponentsToExtract = @()
+                    }
+
+                    $result = @'
+        SPWeb [0-9A-Fa-f]{8}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{12}
+        {
+            AddToTopNav          = \$True;
+            Description          = "A place to share documents with your team.";
+            Ensure               = "Present";
+            Language             = 1033;
+            Name                 = "Team Sites";
+            PsDscRunAsCredential = \$Credsspfarm;
+            RequestAccessEmail   = "sample\@contoso.com";
+            Template             = "STS\#0";
+            UniquePermissions    = \$True;
+            Url                  = "http://sharepoint.contoso.com/sites/site/subweb";
+            UseParentTopNav      = \$True;
+        }
+
+'@
+                }
+
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource | Should -Match $result
                 }
             }
         }

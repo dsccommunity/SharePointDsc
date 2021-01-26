@@ -473,4 +473,53 @@ function Test-TargetResource
     return $result
 }
 
+<# Nik20170106 - Read the Designer Settings of either the Site Collection or the Web Application #>
+function Export-TargetResource
+{
+    [CmdletBinding()]
+    [OutputType([System.String])]
+    param
+    (
+        [Parameter()]
+        [System.String]
+        $URL,
+
+        [Parameter()]
+        [System.String]
+        $Scope,
+
+        [Parameter()]
+        [System.String]
+        $WebAppName
+    )
+
+    $VerbosePreference = "SilentlyContinue"
+    $ParentModuleBase = Get-Module "SharePointDsc" -ListAvailable | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPDesignerSettings\MSFT_SPDesignerSettings.psm1" -Resolve
+    $Content = ''
+    $params = Get-DSCFakeParameters -ModulePath $module
+
+    $params.WebAppUrl = $URL
+    $params.SettingsScope = $Scope
+    $results = Get-TargetResource @params
+
+    <# Nik20170106 - The logic here differs from other Read functions due to a bug in the Designer Resource that doesn't properly obtains a reference to the Site Collection. #>
+    if ($null -ne $results)
+    {
+        $PartialContent = "        SPDesignerSettings " + $Scope + [System.Guid]::NewGuid().ToString() + "`r`n"
+        $PartialContent += "        {`r`n"
+        $results = Repair-Credentials -results $results
+        $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+        $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+        $PartialContent += $currentBlock
+        if ($webAppName)
+        {
+            $PartialContent += "            DependsOn = `"[SP" + $scope.Replace("Collection", "") + "]" + $WebAppName + "`";`r`n"
+        }
+        $PartialContent += "        }`r`n"
+        $Content += $PartialContent
+    }
+    return $Content
+}
+
 Export-ModuleMember -Function *-TargetResource

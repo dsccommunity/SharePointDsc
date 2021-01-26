@@ -319,3 +319,37 @@ function Test-TargetResource
 
     return $result
 }
+
+function Export-TargetResource
+{
+    $VerbosePreference = "SilentlyContinue"
+    $ParentModuleBase = Get-Module "SharePointDsc" -ListAvailable | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath "\DSCResources\MSFT_SPAlternateUrl\MSFT_SPAlternateUrl.psm1" -Resolve
+    $Content = ''
+    $params = Get-DSCFakeParameters -ModulePath $module
+
+    $webApps = Get-SPWebApplication
+    foreach ($webApp in $webApps)
+    {
+        $alternateUrls = Get-SPAlternateUrl -WebApplication $webApp
+
+        foreach ($alternateUrl in $alternateUrls)
+        {
+            $PartialContent = "        SPAlternateUrl " + [System.Guid]::NewGuid().toString() + "`r`n"
+            $PartialContent += "        {`r`n"
+            $params.WebAppName = $webApp.Name
+            $params.Zone = $alternateUrl.UrlZone
+            $params.Url = $alternateUrl.IncomingUrl
+            $results = Get-TargetResource @params
+            $results = Repair-Credentials -results $results
+            $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+            $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+            $PartialContent += $currentBlock
+            $PartialContent += "        }`r`n"
+            $Content += $PartialContent
+        }
+    }
+    return $Content
+}
+
+Export-ModuleMember -Function *-TargetResource

@@ -254,92 +254,92 @@ try
                     Mock -CommandName Get-SPServiceApplication -MockWith {
                         return @(
                             New-Object -TypeName "Object" |
-                            Add-Member -MemberType NoteProperty `
-                                -Name TypeName `
-                                -Value "User Profile Service Application" `
-                                -PassThru |
-                            Add-Member -MemberType NoteProperty `
-                                -Name DisplayName `
-                                -Value $testParams.Name `
-                                -PassThru |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name Update `
-                                -Value {
-                                $Global:SPDscUPSAUpdateCalled = $true
-                            } -PassThru |
-                            Add-Member -MemberType NoteProperty `
-                                -Name ApplicationPool `
-                                -Value @{
-                                Name = $testParams.ApplicationPool
-                            } -PassThru |
-                            Add-Member -MemberType NoteProperty `
-                                -Name ServiceApplicationProxyGroup `
-                                -Value $proxyGroup `
-                                -PassThru |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name IsConnected `
-                                -Value {
-                                return $true
-                            } -PassThru |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name GetType `
-                                -Value {
-                                New-Object -TypeName "Object" |
                                 Add-Member -MemberType NoteProperty `
-                                    -Name FullName `
-                                    -Value $getTypeFullName `
+                                    -Name TypeName `
+                                    -Value "User Profile Service Application" `
                                     -PassThru |
-                                Add-Member -MemberType ScriptMethod `
-                                    -Name GetProperties `
-                                    -Value {
-                                    param($x)
-                                    return @(
-                                        (New-Object -TypeName "Object" |
+                                    Add-Member -MemberType NoteProperty `
+                                        -Name DisplayName `
+                                        -Value $testParams.Name `
+                                        -PassThru |
+                                        Add-Member -MemberType ScriptMethod `
+                                            -Name Update `
+                                            -Value {
+                                            $Global:SPDscUPSAUpdateCalled = $true
+                                        } -PassThru |
                                             Add-Member -MemberType NoteProperty `
-                                                -Name Name `
-                                                -Value "SocialDatabase" `
-                                                -PassThru |
-                                            Add-Member -MemberType ScriptMethod `
-                                                -Name GetValue `
-                                                -Value {
-                                                param($x)
-                                                return @{
-                                                    Name                 = "SP_SocialDB"
-                                                    NormalizedDataSource = "SQL.domain.local"
-                                                }
-                                            } -PassThru
-                                        ),
-                                        (New-Object -TypeName "Object" |
-                                            Add-Member -MemberType NoteProperty `
-                                                -Name Name `
-                                                -Value "ProfileDatabase" `
-                                                -PassThru |
-                                            Add-Member -MemberType ScriptMethod `
-                                                -Name GetValue `
-                                                -Value {
-                                                return @{
-                                                    Name                 = "SP_ProfileDB"
-                                                    NormalizedDataSource = "SQL.domain.local"
-                                                }
-                                            } -PassThru
-                                        ),
-                                        (New-Object -TypeName "Object" |
-                                            Add-Member -MemberType NoteProperty `
-                                                -Name Name `
-                                                -Value "SynchronizationDatabase" `
-                                                -PassThru |
-                                            Add-Member -MemberType ScriptMethod `
-                                                -Name GetValue `
-                                                -Value {
-                                                return @{
-                                                    Name                 = "SP_ProfileSyncDB"
-                                                    NormalizedDataSource = "SQL.domain.local"
-                                                }
-                                            } -PassThru
-                                        )
-                                    )
-                                } -PassThru
-                            } -PassThru -Force
+                                                -Name ApplicationPool `
+                                                -Value @{
+                                                Name = $testParams.ApplicationPool
+                                            } -PassThru |
+                                                Add-Member -MemberType NoteProperty `
+                                                    -Name ServiceApplicationProxyGroup `
+                                                    -Value $proxyGroup `
+                                                    -PassThru |
+                                                    Add-Member -MemberType ScriptMethod `
+                                                        -Name IsConnected `
+                                                        -Value {
+                                                        return $true
+                                                    } -PassThru |
+                                                        Add-Member -MemberType ScriptMethod `
+                                                            -Name GetType `
+                                                            -Value {
+                                                            New-Object -TypeName "Object" |
+                                                                Add-Member -MemberType NoteProperty `
+                                                                    -Name FullName `
+                                                                    -Value $getTypeFullName `
+                                                                    -PassThru |
+                                                                    Add-Member -MemberType ScriptMethod `
+                                                                        -Name GetProperties `
+                                                                        -Value {
+                                                                        param($x)
+                                                                        return @(
+                                                                            (New-Object -TypeName "Object" |
+                                                                                    Add-Member -MemberType NoteProperty `
+                                                                                        -Name Name `
+                                                                                        -Value "SocialDatabase" `
+                                                                                        -PassThru |
+                                                                                        Add-Member -MemberType ScriptMethod `
+                                                                                            -Name GetValue `
+                                                                                            -Value {
+                                                                                            param($x)
+                                                                                            return @{
+                                                                                                Name                 = "SP_SocialDB"
+                                                                                                NormalizedDataSource = "SQL.domain.local"
+                                                                                            }
+                                                                                        } -PassThru
+                                                                                    ),
+                                                                                    (New-Object -TypeName "Object" |
+                                                                                            Add-Member -MemberType NoteProperty `
+                                                                                                -Name Name `
+                                                                                                -Value "ProfileDatabase" `
+                                                                                                -PassThru |
+                                                                                                Add-Member -MemberType ScriptMethod `
+                                                                                                    -Name GetValue `
+                                                                                                    -Value {
+                                                                                                    return @{
+                                                                                                        Name                 = "SP_ProfileDB"
+                                                                                                        NormalizedDataSource = "SQL.domain.local"
+                                                                                                    }
+                                                                                                } -PassThru
+                                                                                            ),
+                                                                                            (New-Object -TypeName "Object" |
+                                                                                                    Add-Member -MemberType NoteProperty `
+                                                                                                        -Name Name `
+                                                                                                        -Value "SynchronizationDatabase" `
+                                                                                                        -PassThru |
+                                                                                                        Add-Member -MemberType ScriptMethod `
+                                                                                                            -Name GetValue `
+                                                                                                            -Value {
+                                                                                                            return @{
+                                                                                                                Name                 = "SP_ProfileSyncDB"
+                                                                                                                NormalizedDataSource = "SQL.domain.local"
+                                                                                                            }
+                                                                                                        } -PassThru
+                                                                                                    )
+                                                                                                )
+                                                                                            } -PassThru
+                                                                                        } -PassThru -Force
                         )
                     }
 
@@ -419,19 +419,19 @@ try
                         {
                             return @(
                                 New-Object -TypeName "Object" |
-                                Add-Member -MemberType NoteProperty `
-                                    -Name DisplayName `
-                                    -Value $testParams.Name `
-                                    -PassThru |
-                                Add-Member -MemberType NoteProperty `
-                                    -Name ServiceApplicationProxyGroup `
-                                    -Value $proxyGroup `
-                                    -PassThru |
-                                Add-Member -MemberType ScriptMethod `
-                                    -Name IsConnected `
-                                    -Value {
-                                    return $true
-                                } -PassThru
+                                    Add-Member -MemberType NoteProperty `
+                                        -Name DisplayName `
+                                        -Value $testParams.Name `
+                                        -PassThru |
+                                        Add-Member -MemberType NoteProperty `
+                                            -Name ServiceApplicationProxyGroup `
+                                            -Value $proxyGroup `
+                                            -PassThru |
+                                            Add-Member -MemberType ScriptMethod `
+                                                -Name IsConnected `
+                                                -Value {
+                                                return $true
+                                            } -PassThru
                             )
                         }
                     }
@@ -523,96 +523,96 @@ try
                     Mock -CommandName Get-SPServiceApplication -MockWith {
                         return @(
                             New-Object -TypeName "Object" |
-                            Add-Member -MemberType NoteProperty `
-                                -Name TypeName `
-                                -Value "User Profile Service Application" `
-                                -PassThru |
-                            Add-Member -MemberType NoteProperty `
-                                -Name DisplayName `
-                                -Value $testParams.Name `
-                                -PassThru |
-                            Add-Member -MemberType NoteProperty `
-                                -Name "NetBIOSDomainNamesEnabled" `
-                                -Value $false `
-                                -PassThru |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name Update `
-                                -Value {
-                                $Global:SPDscUPSAUpdateCalled = $true
-                            } -PassThru |
-                            Add-Member -MemberType NoteProperty `
-                                -Name ApplicationPool `
-                                -Value @{
-                                Name = $testParams.ApplicationPool
-                            } -PassThru |
-                            Add-Member -MemberType NoteProperty `
-                                -Name ServiceApplicationProxyGroup `
-                                -Value $proxyGroup `
-                                -PassThru |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name IsConnected `
-                                -Value {
-                                return $true
-                            } -PassThru |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name GetType `
-                                -Value {
-                                New-Object -TypeName "Object" |
                                 Add-Member -MemberType NoteProperty `
-                                    -Name FullName `
-                                    -Value $getTypeFullName `
+                                    -Name TypeName `
+                                    -Value "User Profile Service Application" `
                                     -PassThru |
-                                Add-Member -MemberType ScriptMethod `
-                                    -Name GetProperties `
-                                    -Value {
-                                    param($x)
-                                    return @(
-                                        (New-Object -TypeName "Object" |
-                                            Add-Member -MemberType NoteProperty `
-                                                -Name Name `
-                                                -Value "SocialDatabase" `
-                                                -PassThru |
+                                    Add-Member -MemberType NoteProperty `
+                                        -Name DisplayName `
+                                        -Value $testParams.Name `
+                                        -PassThru |
+                                        Add-Member -MemberType NoteProperty `
+                                            -Name "NetBIOSDomainNamesEnabled" `
+                                            -Value $false `
+                                            -PassThru |
                                             Add-Member -MemberType ScriptMethod `
-                                                -Name GetValue `
+                                                -Name Update `
                                                 -Value {
-                                                param($x)
-                                                return @{
-                                                    Name                 = "SP_SocialDB"
-                                                    NormalizedDataSource = "SQL.domain.local"
-                                                }
-                                            } -PassThru
-                                        ),
-                                        (New-Object -TypeName "Object" |
-                                            Add-Member -MemberType NoteProperty `
-                                                -Name Name `
-                                                -Value "ProfileDatabase" `
-                                                -PassThru |
-                                            Add-Member -MemberType ScriptMethod `
-                                                -Name GetValue `
-                                                -Value {
-                                                return @{
-                                                    Name                 = "SP_ProfileDB"
-                                                    NormalizedDataSource = "SQL.domain.local"
-                                                }
-                                            } -PassThru
-                                        ),
-                                        (New-Object -TypeName "Object" |
-                                            Add-Member -MemberType NoteProperty `
-                                                -Name Name `
-                                                -Value "SynchronizationDatabase" `
-                                                -PassThru |
-                                            Add-Member -MemberType ScriptMethod `
-                                                -Name GetValue `
-                                                -Value {
-                                                return @{
-                                                    Name                 = "SP_ProfileSyncDB"
-                                                    NormalizedDataSource = "SQL.domain.local"
-                                                }
-                                            } -PassThru
-                                        )
-                                    )
-                                } -PassThru
-                            } -PassThru -Force
+                                                $Global:SPDscUPSAUpdateCalled = $true
+                                            } -PassThru |
+                                                Add-Member -MemberType NoteProperty `
+                                                    -Name ApplicationPool `
+                                                    -Value @{
+                                                    Name = $testParams.ApplicationPool
+                                                } -PassThru |
+                                                    Add-Member -MemberType NoteProperty `
+                                                        -Name ServiceApplicationProxyGroup `
+                                                        -Value $proxyGroup `
+                                                        -PassThru |
+                                                        Add-Member -MemberType ScriptMethod `
+                                                            -Name IsConnected `
+                                                            -Value {
+                                                            return $true
+                                                        } -PassThru |
+                                                            Add-Member -MemberType ScriptMethod `
+                                                                -Name GetType `
+                                                                -Value {
+                                                                New-Object -TypeName "Object" |
+                                                                    Add-Member -MemberType NoteProperty `
+                                                                        -Name FullName `
+                                                                        -Value $getTypeFullName `
+                                                                        -PassThru |
+                                                                        Add-Member -MemberType ScriptMethod `
+                                                                            -Name GetProperties `
+                                                                            -Value {
+                                                                            param($x)
+                                                                            return @(
+                                                                                (New-Object -TypeName "Object" |
+                                                                                        Add-Member -MemberType NoteProperty `
+                                                                                            -Name Name `
+                                                                                            -Value "SocialDatabase" `
+                                                                                            -PassThru |
+                                                                                            Add-Member -MemberType ScriptMethod `
+                                                                                                -Name GetValue `
+                                                                                                -Value {
+                                                                                                param($x)
+                                                                                                return @{
+                                                                                                    Name                 = "SP_SocialDB"
+                                                                                                    NormalizedDataSource = "SQL.domain.local"
+                                                                                                }
+                                                                                            } -PassThru
+                                                                                        ),
+                                                                                        (New-Object -TypeName "Object" |
+                                                                                                Add-Member -MemberType NoteProperty `
+                                                                                                    -Name Name `
+                                                                                                    -Value "ProfileDatabase" `
+                                                                                                    -PassThru |
+                                                                                                    Add-Member -MemberType ScriptMethod `
+                                                                                                        -Name GetValue `
+                                                                                                        -Value {
+                                                                                                        return @{
+                                                                                                            Name                 = "SP_ProfileDB"
+                                                                                                            NormalizedDataSource = "SQL.domain.local"
+                                                                                                        }
+                                                                                                    } -PassThru
+                                                                                                ),
+                                                                                                (New-Object -TypeName "Object" |
+                                                                                                        Add-Member -MemberType NoteProperty `
+                                                                                                            -Name Name `
+                                                                                                            -Value "SynchronizationDatabase" `
+                                                                                                            -PassThru |
+                                                                                                            Add-Member -MemberType ScriptMethod `
+                                                                                                                -Name GetValue `
+                                                                                                                -Value {
+                                                                                                                return @{
+                                                                                                                    Name                 = "SP_ProfileSyncDB"
+                                                                                                                    NormalizedDataSource = "SQL.domain.local"
+                                                                                                                }
+                                                                                                            } -PassThru
+                                                                                                        )
+                                                                                                    )
+                                                                                                } -PassThru
+                                                                                            } -PassThru -Force
                         )
                     }
 
@@ -666,96 +666,96 @@ try
                     Mock -CommandName Get-SPServiceApplication -MockWith {
                         return @(
                             New-Object -TypeName "Object" |
-                            Add-Member -MemberType NoteProperty `
-                                -Name TypeName `
-                                -Value "User Profile Service Application" `
-                                -PassThru |
-                            Add-Member -MemberType NoteProperty `
-                                -Name DisplayName `
-                                -Value $testParams.Name `
-                                -PassThru |
-                            Add-Member -MemberType NoteProperty `
-                                -Name "NoILMUsed" `
-                                -Value $false `
-                                -PassThru |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name Update `
-                                -Value {
-                                $Global:SPDscUPSAUpdateCalled = $true
-                            } -PassThru |
-                            Add-Member -MemberType NoteProperty `
-                                -Name ApplicationPool `
-                                -Value @{
-                                Name = $testParams.ApplicationPool
-                            } -PassThru |
-                            Add-Member -MemberType NoteProperty `
-                                -Name ServiceApplicationProxyGroup `
-                                -Value $proxyGroup `
-                                -PassThru |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name IsConnected `
-                                -Value {
-                                return $true
-                            } -PassThru |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name GetType `
-                                -Value {
-                                New-Object -TypeName "Object" |
                                 Add-Member -MemberType NoteProperty `
-                                    -Name FullName `
-                                    -Value $getTypeFullName `
+                                    -Name TypeName `
+                                    -Value "User Profile Service Application" `
                                     -PassThru |
-                                Add-Member -MemberType ScriptMethod `
-                                    -Name GetProperties `
-                                    -Value {
-                                    param($x)
-                                    return @(
-                                        (New-Object -TypeName "Object" |
-                                            Add-Member -MemberType NoteProperty `
-                                                -Name Name `
-                                                -Value "SocialDatabase" `
-                                                -PassThru |
+                                    Add-Member -MemberType NoteProperty `
+                                        -Name DisplayName `
+                                        -Value $testParams.Name `
+                                        -PassThru |
+                                        Add-Member -MemberType NoteProperty `
+                                            -Name "NoILMUsed" `
+                                            -Value $false `
+                                            -PassThru |
                                             Add-Member -MemberType ScriptMethod `
-                                                -Name GetValue `
+                                                -Name Update `
                                                 -Value {
-                                                param($x)
-                                                return @{
-                                                    Name                 = "SP_SocialDB"
-                                                    NormalizedDataSource = "SQL.domain.local"
-                                                }
-                                            } -PassThru
-                                        ),
-                                        (New-Object -TypeName "Object" |
-                                            Add-Member -MemberType NoteProperty `
-                                                -Name Name `
-                                                -Value "ProfileDatabase" `
-                                                -PassThru |
-                                            Add-Member -MemberType ScriptMethod `
-                                                -Name GetValue `
-                                                -Value {
-                                                return @{
-                                                    Name                 = "SP_ProfileDB"
-                                                    NormalizedDataSource = "SQL.domain.local"
-                                                }
-                                            } -PassThru
-                                        ),
-                                        (New-Object -TypeName "Object" |
-                                            Add-Member -MemberType NoteProperty `
-                                                -Name Name `
-                                                -Value "SynchronizationDatabase" `
-                                                -PassThru |
-                                            Add-Member -MemberType ScriptMethod `
-                                                -Name GetValue `
-                                                -Value {
-                                                return @{
-                                                    Name                 = "SP_ProfileSyncDB"
-                                                    NormalizedDataSource = "SQL.domain.local"
-                                                }
-                                            } -PassThru
-                                        )
-                                    )
-                                } -PassThru
-                            } -PassThru -Force
+                                                $Global:SPDscUPSAUpdateCalled = $true
+                                            } -PassThru |
+                                                Add-Member -MemberType NoteProperty `
+                                                    -Name ApplicationPool `
+                                                    -Value @{
+                                                    Name = $testParams.ApplicationPool
+                                                } -PassThru |
+                                                    Add-Member -MemberType NoteProperty `
+                                                        -Name ServiceApplicationProxyGroup `
+                                                        -Value $proxyGroup `
+                                                        -PassThru |
+                                                        Add-Member -MemberType ScriptMethod `
+                                                            -Name IsConnected `
+                                                            -Value {
+                                                            return $true
+                                                        } -PassThru |
+                                                            Add-Member -MemberType ScriptMethod `
+                                                                -Name GetType `
+                                                                -Value {
+                                                                New-Object -TypeName "Object" |
+                                                                    Add-Member -MemberType NoteProperty `
+                                                                        -Name FullName `
+                                                                        -Value $getTypeFullName `
+                                                                        -PassThru |
+                                                                        Add-Member -MemberType ScriptMethod `
+                                                                            -Name GetProperties `
+                                                                            -Value {
+                                                                            param($x)
+                                                                            return @(
+                                                                                (New-Object -TypeName "Object" |
+                                                                                        Add-Member -MemberType NoteProperty `
+                                                                                            -Name Name `
+                                                                                            -Value "SocialDatabase" `
+                                                                                            -PassThru |
+                                                                                            Add-Member -MemberType ScriptMethod `
+                                                                                                -Name GetValue `
+                                                                                                -Value {
+                                                                                                param($x)
+                                                                                                return @{
+                                                                                                    Name                 = "SP_SocialDB"
+                                                                                                    NormalizedDataSource = "SQL.domain.local"
+                                                                                                }
+                                                                                            } -PassThru
+                                                                                        ),
+                                                                                        (New-Object -TypeName "Object" |
+                                                                                                Add-Member -MemberType NoteProperty `
+                                                                                                    -Name Name `
+                                                                                                    -Value "ProfileDatabase" `
+                                                                                                    -PassThru |
+                                                                                                    Add-Member -MemberType ScriptMethod `
+                                                                                                        -Name GetValue `
+                                                                                                        -Value {
+                                                                                                        return @{
+                                                                                                            Name                 = "SP_ProfileDB"
+                                                                                                            NormalizedDataSource = "SQL.domain.local"
+                                                                                                        }
+                                                                                                    } -PassThru
+                                                                                                ),
+                                                                                                (New-Object -TypeName "Object" |
+                                                                                                        Add-Member -MemberType NoteProperty `
+                                                                                                            -Name Name `
+                                                                                                            -Value "SynchronizationDatabase" `
+                                                                                                            -PassThru |
+                                                                                                            Add-Member -MemberType ScriptMethod `
+                                                                                                                -Name GetValue `
+                                                                                                                -Value {
+                                                                                                                return @{
+                                                                                                                    Name                 = "SP_ProfileSyncDB"
+                                                                                                                    NormalizedDataSource = "SQL.domain.local"
+                                                                                                                }
+                                                                                                            } -PassThru
+                                                                                                        )
+                                                                                                    )
+                                                                                                } -PassThru
+                                                                                            } -PassThru -Force
                         )
                     }
 
@@ -809,96 +809,96 @@ try
                     Mock -CommandName Get-SPServiceApplication -MockWith {
                         return @(
                             New-Object -TypeName "Object" |
-                            Add-Member -MemberType NoteProperty `
-                                -Name TypeName `
-                                -Value "User Profile Service Application" `
-                                -PassThru |
-                            Add-Member -MemberType NoteProperty `
-                                -Name DisplayName `
-                                -Value $testParams.Name `
-                                -PassThru |
-                            Add-Member -MemberType NoteProperty `
-                                -Name "NoILMUsed" `
-                                -Value $false `
-                                -PassThru |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name Update `
-                                -Value {
-                                $Global:SPDscUPSAUpdateCalled = $true
-                            } -PassThru |
-                            Add-Member -MemberType NoteProperty `
-                                -Name ApplicationPool `
-                                -Value @{
-                                Name = $testParams.ApplicationPool
-                            } -PassThru |
-                            Add-Member -MemberType NoteProperty `
-                                -Name ServiceApplicationProxyGroup `
-                                -Value $proxyGroup `
-                                -PassThru |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name IsConnected `
-                                -Value {
-                                return $true
-                            } -PassThru |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name GetType `
-                                -Value {
-                                New-Object -TypeName "Object" |
                                 Add-Member -MemberType NoteProperty `
-                                    -Name FullName `
-                                    -Value $getTypeFullName `
+                                    -Name TypeName `
+                                    -Value "User Profile Service Application" `
                                     -PassThru |
-                                Add-Member -MemberType ScriptMethod `
-                                    -Name GetProperties `
-                                    -Value {
-                                    param($x)
-                                    return @(
-                                        (New-Object -TypeName "Object" |
-                                            Add-Member -MemberType NoteProperty `
-                                                -Name Name `
-                                                -Value "SocialDatabase" `
-                                                -PassThru |
+                                    Add-Member -MemberType NoteProperty `
+                                        -Name DisplayName `
+                                        -Value $testParams.Name `
+                                        -PassThru |
+                                        Add-Member -MemberType NoteProperty `
+                                            -Name "NoILMUsed" `
+                                            -Value $false `
+                                            -PassThru |
                                             Add-Member -MemberType ScriptMethod `
-                                                -Name GetValue `
+                                                -Name Update `
                                                 -Value {
-                                                param($x)
-                                                return @{
-                                                    Name                 = "SP_SocialDB"
-                                                    NormalizedDataSource = "SQL.domain.local"
-                                                }
-                                            } -PassThru
-                                        ),
-                                        (New-Object -TypeName "Object" |
-                                            Add-Member -MemberType NoteProperty `
-                                                -Name Name `
-                                                -Value "ProfileDatabase" `
-                                                -PassThru |
-                                            Add-Member -MemberType ScriptMethod `
-                                                -Name GetValue `
-                                                -Value {
-                                                return @{
-                                                    Name                 = "SP_ProfileDB"
-                                                    NormalizedDataSource = "SQL.domain.local"
-                                                }
-                                            } -PassThru
-                                        ),
-                                        (New-Object -TypeName "Object" |
-                                            Add-Member -MemberType NoteProperty `
-                                                -Name Name `
-                                                -Value "SynchronizationDatabase" `
-                                                -PassThru |
-                                            Add-Member -MemberType ScriptMethod `
-                                                -Name GetValue `
-                                                -Value {
-                                                return @{
-                                                    Name                 = "SP_ProfileSyncDB"
-                                                    NormalizedDataSource = "SQL.domain.local"
-                                                }
-                                            } -PassThru
-                                        )
-                                    )
-                                } -PassThru
-                            } -PassThru -Force
+                                                $Global:SPDscUPSAUpdateCalled = $true
+                                            } -PassThru |
+                                                Add-Member -MemberType NoteProperty `
+                                                    -Name ApplicationPool `
+                                                    -Value @{
+                                                    Name = $testParams.ApplicationPool
+                                                } -PassThru |
+                                                    Add-Member -MemberType NoteProperty `
+                                                        -Name ServiceApplicationProxyGroup `
+                                                        -Value $proxyGroup `
+                                                        -PassThru |
+                                                        Add-Member -MemberType ScriptMethod `
+                                                            -Name IsConnected `
+                                                            -Value {
+                                                            return $true
+                                                        } -PassThru |
+                                                            Add-Member -MemberType ScriptMethod `
+                                                                -Name GetType `
+                                                                -Value {
+                                                                New-Object -TypeName "Object" |
+                                                                    Add-Member -MemberType NoteProperty `
+                                                                        -Name FullName `
+                                                                        -Value $getTypeFullName `
+                                                                        -PassThru |
+                                                                        Add-Member -MemberType ScriptMethod `
+                                                                            -Name GetProperties `
+                                                                            -Value {
+                                                                            param($x)
+                                                                            return @(
+                                                                                (New-Object -TypeName "Object" |
+                                                                                        Add-Member -MemberType NoteProperty `
+                                                                                            -Name Name `
+                                                                                            -Value "SocialDatabase" `
+                                                                                            -PassThru |
+                                                                                            Add-Member -MemberType ScriptMethod `
+                                                                                                -Name GetValue `
+                                                                                                -Value {
+                                                                                                param($x)
+                                                                                                return @{
+                                                                                                    Name                 = "SP_SocialDB"
+                                                                                                    NormalizedDataSource = "SQL.domain.local"
+                                                                                                }
+                                                                                            } -PassThru
+                                                                                        ),
+                                                                                        (New-Object -TypeName "Object" |
+                                                                                                Add-Member -MemberType NoteProperty `
+                                                                                                    -Name Name `
+                                                                                                    -Value "ProfileDatabase" `
+                                                                                                    -PassThru |
+                                                                                                    Add-Member -MemberType ScriptMethod `
+                                                                                                        -Name GetValue `
+                                                                                                        -Value {
+                                                                                                        return @{
+                                                                                                            Name                 = "SP_ProfileDB"
+                                                                                                            NormalizedDataSource = "SQL.domain.local"
+                                                                                                        }
+                                                                                                    } -PassThru
+                                                                                                ),
+                                                                                                (New-Object -TypeName "Object" |
+                                                                                                        Add-Member -MemberType NoteProperty `
+                                                                                                            -Name Name `
+                                                                                                            -Value "SynchronizationDatabase" `
+                                                                                                            -PassThru |
+                                                                                                            Add-Member -MemberType ScriptMethod `
+                                                                                                                -Name GetValue `
+                                                                                                                -Value {
+                                                                                                                return @{
+                                                                                                                    Name                 = "SP_ProfileSyncDB"
+                                                                                                                    NormalizedDataSource = "SQL.domain.local"
+                                                                                                                }
+                                                                                                            } -PassThru
+                                                                                                        )
+                                                                                                    )
+                                                                                                } -PassThru
+                                                                                            } -PassThru -Force
                         )
                     }
 
@@ -956,96 +956,96 @@ try
                     Mock -CommandName Get-SPServiceApplication -MockWith {
                         return @(
                             New-Object -TypeName "Object" |
-                            Add-Member -MemberType NoteProperty `
-                                -Name TypeName `
-                                -Value "User Profile Service Application" `
-                                -PassThru |
-                            Add-Member -MemberType NoteProperty `
-                                -Name DisplayName `
-                                -Value $testParams.Name `
-                                -PassThru |
-                            Add-Member -MemberType NoteProperty `
-                                -Name "NoILMUsed" `
-                                -Value $false `
-                                -PassThru |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name Update `
-                                -Value {
-                                $Global:SPDscUPSAUpdateCalled = $true
-                            } -PassThru |
-                            Add-Member -MemberType NoteProperty `
-                                -Name ApplicationPool `
-                                -Value @{
-                                Name = $testParams.ApplicationPool
-                            } -PassThru |
-                            Add-Member -MemberType NoteProperty `
-                                -Name ServiceApplicationProxyGroup `
-                                -Value $incorrectProxyGroup `
-                                -PassThru |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name IsConnected `
-                                -Value {
-                                return $true
-                            } -PassThru |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name GetType `
-                                -Value {
-                                New-Object -TypeName "Object" |
                                 Add-Member -MemberType NoteProperty `
-                                    -Name FullName `
-                                    -Value $getTypeFullName `
+                                    -Name TypeName `
+                                    -Value "User Profile Service Application" `
                                     -PassThru |
-                                Add-Member -MemberType ScriptMethod `
-                                    -Name GetProperties `
-                                    -Value {
-                                    param($x)
-                                    return @(
-                                        (New-Object -TypeName "Object" |
-                                            Add-Member -MemberType NoteProperty `
-                                                -Name Name `
-                                                -Value "SocialDatabase" `
-                                                -PassThru |
+                                    Add-Member -MemberType NoteProperty `
+                                        -Name DisplayName `
+                                        -Value $testParams.Name `
+                                        -PassThru |
+                                        Add-Member -MemberType NoteProperty `
+                                            -Name "NoILMUsed" `
+                                            -Value $false `
+                                            -PassThru |
                                             Add-Member -MemberType ScriptMethod `
-                                                -Name GetValue `
+                                                -Name Update `
                                                 -Value {
-                                                param($x)
-                                                return @{
-                                                    Name                 = "SP_SocialDB"
-                                                    NormalizedDataSource = "SQL.domain.local"
-                                                }
-                                            } -PassThru
-                                        ),
-                                        (New-Object -TypeName "Object" |
-                                            Add-Member -MemberType NoteProperty `
-                                                -Name Name `
-                                                -Value "ProfileDatabase" `
-                                                -PassThru |
-                                            Add-Member -MemberType ScriptMethod `
-                                                -Name GetValue `
-                                                -Value {
-                                                return @{
-                                                    Name                 = "SP_ProfileDB"
-                                                    NormalizedDataSource = "SQL.domain.local"
-                                                }
-                                            } -PassThru
-                                        ),
-                                        (New-Object -TypeName "Object" |
-                                            Add-Member -MemberType NoteProperty `
-                                                -Name Name `
-                                                -Value "SynchronizationDatabase" `
-                                                -PassThru |
-                                            Add-Member -MemberType ScriptMethod `
-                                                -Name GetValue `
-                                                -Value {
-                                                return @{
-                                                    Name                 = "SP_ProfileSyncDB"
-                                                    NormalizedDataSource = "SQL.domain.local"
-                                                }
-                                            } -PassThru
-                                        )
-                                    )
-                                } -PassThru
-                            } -PassThru -Force
+                                                $Global:SPDscUPSAUpdateCalled = $true
+                                            } -PassThru |
+                                                Add-Member -MemberType NoteProperty `
+                                                    -Name ApplicationPool `
+                                                    -Value @{
+                                                    Name = $testParams.ApplicationPool
+                                                } -PassThru |
+                                                    Add-Member -MemberType NoteProperty `
+                                                        -Name ServiceApplicationProxyGroup `
+                                                        -Value $incorrectProxyGroup `
+                                                        -PassThru |
+                                                        Add-Member -MemberType ScriptMethod `
+                                                            -Name IsConnected `
+                                                            -Value {
+                                                            return $true
+                                                        } -PassThru |
+                                                            Add-Member -MemberType ScriptMethod `
+                                                                -Name GetType `
+                                                                -Value {
+                                                                New-Object -TypeName "Object" |
+                                                                    Add-Member -MemberType NoteProperty `
+                                                                        -Name FullName `
+                                                                        -Value $getTypeFullName `
+                                                                        -PassThru |
+                                                                        Add-Member -MemberType ScriptMethod `
+                                                                            -Name GetProperties `
+                                                                            -Value {
+                                                                            param($x)
+                                                                            return @(
+                                                                                (New-Object -TypeName "Object" |
+                                                                                        Add-Member -MemberType NoteProperty `
+                                                                                            -Name Name `
+                                                                                            -Value "SocialDatabase" `
+                                                                                            -PassThru |
+                                                                                            Add-Member -MemberType ScriptMethod `
+                                                                                                -Name GetValue `
+                                                                                                -Value {
+                                                                                                param($x)
+                                                                                                return @{
+                                                                                                    Name                 = "SP_SocialDB"
+                                                                                                    NormalizedDataSource = "SQL.domain.local"
+                                                                                                }
+                                                                                            } -PassThru
+                                                                                        ),
+                                                                                        (New-Object -TypeName "Object" |
+                                                                                                Add-Member -MemberType NoteProperty `
+                                                                                                    -Name Name `
+                                                                                                    -Value "ProfileDatabase" `
+                                                                                                    -PassThru |
+                                                                                                    Add-Member -MemberType ScriptMethod `
+                                                                                                        -Name GetValue `
+                                                                                                        -Value {
+                                                                                                        return @{
+                                                                                                            Name                 = "SP_ProfileDB"
+                                                                                                            NormalizedDataSource = "SQL.domain.local"
+                                                                                                        }
+                                                                                                    } -PassThru
+                                                                                                ),
+                                                                                                (New-Object -TypeName "Object" |
+                                                                                                        Add-Member -MemberType NoteProperty `
+                                                                                                            -Name Name `
+                                                                                                            -Value "SynchronizationDatabase" `
+                                                                                                            -PassThru |
+                                                                                                            Add-Member -MemberType ScriptMethod `
+                                                                                                                -Name GetValue `
+                                                                                                                -Value {
+                                                                                                                return @{
+                                                                                                                    Name                 = "SP_ProfileSyncDB"
+                                                                                                                    NormalizedDataSource = "SQL.domain.local"
+                                                                                                                }
+                                                                                                            } -PassThru
+                                                                                                        )
+                                                                                                    )
+                                                                                                } -PassThru
+                                                                                            } -PassThru -Force
                         )
                     }
 
@@ -1094,96 +1094,96 @@ try
                     Mock -CommandName Get-SPServiceApplication -MockWith {
                         return @(
                             New-Object -TypeName "Object" |
-                            Add-Member -MemberType NoteProperty `
-                                -Name TypeName `
-                                -Value "User Profile Service Application" `
-                                -PassThru |
-                            Add-Member -MemberType NoteProperty `
-                                -Name DisplayName `
-                                -Value $testParams.Name `
-                                -PassThru |
-                            Add-Member -MemberType NoteProperty `
-                                -Name "NoILMUsed" `
-                                -Value $false `
-                                -PassThru |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name Update `
-                                -Value {
-                                $Global:SPDscUPSAUpdateCalled = $true
-                            } -PassThru |
-                            Add-Member -MemberType NoteProperty `
-                                -Name ApplicationPool `
-                                -Value @{
-                                Name = $testParams.ApplicationPool
-                            } -PassThru |
-                            Add-Member -MemberType NoteProperty `
-                                -Name ServiceApplicationProxyGroup `
-                                -Value $proxyGroup `
-                                -PassThru |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name IsConnected `
-                                -Value {
-                                return $true
-                            } -PassThru |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name GetType `
-                                -Value {
-                                New-Object -TypeName "Object" |
                                 Add-Member -MemberType NoteProperty `
-                                    -Name FullName `
-                                    -Value $getTypeFullName `
+                                    -Name TypeName `
+                                    -Value "User Profile Service Application" `
                                     -PassThru |
-                                Add-Member -MemberType ScriptMethod `
-                                    -Name GetProperties `
-                                    -Value {
-                                    param($x)
-                                    return @(
-                                        (New-Object -TypeName "Object" |
-                                            Add-Member -MemberType NoteProperty `
-                                                -Name Name `
-                                                -Value "SocialDatabase" `
-                                                -PassThru |
+                                    Add-Member -MemberType NoteProperty `
+                                        -Name DisplayName `
+                                        -Value $testParams.Name `
+                                        -PassThru |
+                                        Add-Member -MemberType NoteProperty `
+                                            -Name "NoILMUsed" `
+                                            -Value $false `
+                                            -PassThru |
                                             Add-Member -MemberType ScriptMethod `
-                                                -Name GetValue `
+                                                -Name Update `
                                                 -Value {
-                                                param($x)
-                                                return @{
-                                                    Name                 = "SP_SocialDB"
-                                                    NormalizedDataSource = "SQL.domain.local"
-                                                }
-                                            } -PassThru
-                                        ),
-                                        (New-Object -TypeName "Object" |
-                                            Add-Member -MemberType NoteProperty `
-                                                -Name Name `
-                                                -Value "ProfileDatabase" `
-                                                -PassThru |
-                                            Add-Member -MemberType ScriptMethod `
-                                                -Name GetValue `
-                                                -Value {
-                                                return @{
-                                                    Name                 = "SP_ProfileDB"
-                                                    NormalizedDataSource = "SQL.domain.local"
-                                                }
-                                            } -PassThru
-                                        ),
-                                        (New-Object -TypeName "Object" |
-                                            Add-Member -MemberType NoteProperty `
-                                                -Name Name `
-                                                -Value "SynchronizationDatabase" `
-                                                -PassThru |
-                                            Add-Member -MemberType ScriptMethod `
-                                                -Name GetValue `
-                                                -Value {
-                                                return @{
-                                                    Name                 = "SP_ProfileSyncDB"
-                                                    NormalizedDataSource = "SQL.domain.local"
-                                                }
-                                            } -PassThru
-                                        )
-                                    )
-                                } -PassThru
-                            } -PassThru -Force
+                                                $Global:SPDscUPSAUpdateCalled = $true
+                                            } -PassThru |
+                                                Add-Member -MemberType NoteProperty `
+                                                    -Name ApplicationPool `
+                                                    -Value @{
+                                                    Name = $testParams.ApplicationPool
+                                                } -PassThru |
+                                                    Add-Member -MemberType NoteProperty `
+                                                        -Name ServiceApplicationProxyGroup `
+                                                        -Value $proxyGroup `
+                                                        -PassThru |
+                                                        Add-Member -MemberType ScriptMethod `
+                                                            -Name IsConnected `
+                                                            -Value {
+                                                            return $true
+                                                        } -PassThru |
+                                                            Add-Member -MemberType ScriptMethod `
+                                                                -Name GetType `
+                                                                -Value {
+                                                                New-Object -TypeName "Object" |
+                                                                    Add-Member -MemberType NoteProperty `
+                                                                        -Name FullName `
+                                                                        -Value $getTypeFullName `
+                                                                        -PassThru |
+                                                                        Add-Member -MemberType ScriptMethod `
+                                                                            -Name GetProperties `
+                                                                            -Value {
+                                                                            param($x)
+                                                                            return @(
+                                                                                (New-Object -TypeName "Object" |
+                                                                                        Add-Member -MemberType NoteProperty `
+                                                                                            -Name Name `
+                                                                                            -Value "SocialDatabase" `
+                                                                                            -PassThru |
+                                                                                            Add-Member -MemberType ScriptMethod `
+                                                                                                -Name GetValue `
+                                                                                                -Value {
+                                                                                                param($x)
+                                                                                                return @{
+                                                                                                    Name                 = "SP_SocialDB"
+                                                                                                    NormalizedDataSource = "SQL.domain.local"
+                                                                                                }
+                                                                                            } -PassThru
+                                                                                        ),
+                                                                                        (New-Object -TypeName "Object" |
+                                                                                                Add-Member -MemberType NoteProperty `
+                                                                                                    -Name Name `
+                                                                                                    -Value "ProfileDatabase" `
+                                                                                                    -PassThru |
+                                                                                                    Add-Member -MemberType ScriptMethod `
+                                                                                                        -Name GetValue `
+                                                                                                        -Value {
+                                                                                                        return @{
+                                                                                                            Name                 = "SP_ProfileDB"
+                                                                                                            NormalizedDataSource = "SQL.domain.local"
+                                                                                                        }
+                                                                                                    } -PassThru
+                                                                                                ),
+                                                                                                (New-Object -TypeName "Object" |
+                                                                                                        Add-Member -MemberType NoteProperty `
+                                                                                                            -Name Name `
+                                                                                                            -Value "SynchronizationDatabase" `
+                                                                                                            -PassThru |
+                                                                                                            Add-Member -MemberType ScriptMethod `
+                                                                                                                -Name GetValue `
+                                                                                                                -Value {
+                                                                                                                return @{
+                                                                                                                    Name                 = "SP_ProfileSyncDB"
+                                                                                                                    NormalizedDataSource = "SQL.domain.local"
+                                                                                                                }
+                                                                                                            } -PassThru
+                                                                                                        )
+                                                                                                    )
+                                                                                                } -PassThru
+                                                                                            } -PassThru -Force
                         )
                     }
 
@@ -1234,96 +1234,96 @@ try
                     Mock -CommandName Get-SPServiceApplication -MockWith {
                         return @(
                             New-Object -TypeName "Object" |
-                            Add-Member -MemberType NoteProperty `
-                                -Name TypeName `
-                                -Value "User Profile Service Application" `
-                                -PassThru |
-                            Add-Member -MemberType NoteProperty `
-                                -Name DisplayName `
-                                -Value $testParams.Name `
-                                -PassThru |
-                            Add-Member -MemberType NoteProperty `
-                                -Name "NetBIOSDomainNamesEnabled" `
-                                -Value $false `
-                                -PassThru |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name Update `
-                                -Value {
-                                $Global:SPDscUPSAUpdateCalled = $true
-                            } -PassThru |
-                            Add-Member -MemberType NoteProperty `
-                                -Name ApplicationPool `
-                                -Value @{
-                                Name = $testParams.ApplicationPool
-                            } -PassThru |
-                            Add-Member -MemberType NoteProperty `
-                                -Name ServiceApplicationProxyGroup `
-                                -Value $proxyGroup `
-                                -PassThru |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name IsConnected `
-                                -Value {
-                                return $true
-                            } -PassThru |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name GetType `
-                                -Value {
-                                New-Object -TypeName "Object" |
                                 Add-Member -MemberType NoteProperty `
-                                    -Name FullName `
-                                    -Value $getTypeFullName `
+                                    -Name TypeName `
+                                    -Value "User Profile Service Application" `
                                     -PassThru |
-                                Add-Member -MemberType ScriptMethod `
-                                    -Name GetProperties `
-                                    -Value {
-                                    param($x)
-                                    return @(
-                                        (New-Object -TypeName "Object" |
-                                            Add-Member -MemberType NoteProperty `
-                                                -Name Name `
-                                                -Value "SocialDatabase" `
-                                                -PassThru |
+                                    Add-Member -MemberType NoteProperty `
+                                        -Name DisplayName `
+                                        -Value $testParams.Name `
+                                        -PassThru |
+                                        Add-Member -MemberType NoteProperty `
+                                            -Name "NetBIOSDomainNamesEnabled" `
+                                            -Value $false `
+                                            -PassThru |
                                             Add-Member -MemberType ScriptMethod `
-                                                -Name GetValue `
+                                                -Name Update `
                                                 -Value {
-                                                param($x)
-                                                return @{
-                                                    Name                 = "SP_SocialDB"
-                                                    NormalizedDataSource = "SQL.domain.local"
-                                                }
-                                            } -PassThru
-                                        ),
-                                        (New-Object -TypeName "Object" |
-                                            Add-Member -MemberType NoteProperty `
-                                                -Name Name `
-                                                -Value "ProfileDatabase" `
-                                                -PassThru |
-                                            Add-Member -MemberType ScriptMethod `
-                                                -Name GetValue `
-                                                -Value {
-                                                return @{
-                                                    Name                 = "SP_ProfileDB"
-                                                    NormalizedDataSource = "SQL.domain.local"
-                                                }
-                                            } -PassThru
-                                        ),
-                                        (New-Object -TypeName "Object" |
-                                            Add-Member -MemberType NoteProperty `
-                                                -Name Name `
-                                                -Value "SynchronizationDatabase" `
-                                                -PassThru |
-                                            Add-Member -MemberType ScriptMethod `
-                                                -Name GetValue `
-                                                -Value {
-                                                return @{
-                                                    Name                 = "SP_ProfileSyncDB"
-                                                    NormalizedDataSource = "SQL.domain.local"
-                                                }
-                                            } -PassThru
-                                        )
-                                    )
-                                } -PassThru
-                            } -PassThru -Force
+                                                $Global:SPDscUPSAUpdateCalled = $true
+                                            } -PassThru |
+                                                Add-Member -MemberType NoteProperty `
+                                                    -Name ApplicationPool `
+                                                    -Value @{
+                                                    Name = $testParams.ApplicationPool
+                                                } -PassThru |
+                                                    Add-Member -MemberType NoteProperty `
+                                                        -Name ServiceApplicationProxyGroup `
+                                                        -Value $proxyGroup `
+                                                        -PassThru |
+                                                        Add-Member -MemberType ScriptMethod `
+                                                            -Name IsConnected `
+                                                            -Value {
+                                                            return $true
+                                                        } -PassThru |
+                                                            Add-Member -MemberType ScriptMethod `
+                                                                -Name GetType `
+                                                                -Value {
+                                                                New-Object -TypeName "Object" |
+                                                                    Add-Member -MemberType NoteProperty `
+                                                                        -Name FullName `
+                                                                        -Value $getTypeFullName `
+                                                                        -PassThru |
+                                                                        Add-Member -MemberType ScriptMethod `
+                                                                            -Name GetProperties `
+                                                                            -Value {
+                                                                            param($x)
+                                                                            return @(
+                                                                                (New-Object -TypeName "Object" |
+                                                                                        Add-Member -MemberType NoteProperty `
+                                                                                            -Name Name `
+                                                                                            -Value "SocialDatabase" `
+                                                                                            -PassThru |
+                                                                                            Add-Member -MemberType ScriptMethod `
+                                                                                                -Name GetValue `
+                                                                                                -Value {
+                                                                                                param($x)
+                                                                                                return @{
+                                                                                                    Name                 = "SP_SocialDB"
+                                                                                                    NormalizedDataSource = "SQL.domain.local"
+                                                                                                }
+                                                                                            } -PassThru
+                                                                                        ),
+                                                                                        (New-Object -TypeName "Object" |
+                                                                                                Add-Member -MemberType NoteProperty `
+                                                                                                    -Name Name `
+                                                                                                    -Value "ProfileDatabase" `
+                                                                                                    -PassThru |
+                                                                                                    Add-Member -MemberType ScriptMethod `
+                                                                                                        -Name GetValue `
+                                                                                                        -Value {
+                                                                                                        return @{
+                                                                                                            Name                 = "SP_ProfileDB"
+                                                                                                            NormalizedDataSource = "SQL.domain.local"
+                                                                                                        }
+                                                                                                    } -PassThru
+                                                                                                ),
+                                                                                                (New-Object -TypeName "Object" |
+                                                                                                        Add-Member -MemberType NoteProperty `
+                                                                                                            -Name Name `
+                                                                                                            -Value "SynchronizationDatabase" `
+                                                                                                            -PassThru |
+                                                                                                            Add-Member -MemberType ScriptMethod `
+                                                                                                                -Name GetValue `
+                                                                                                                -Value {
+                                                                                                                return @{
+                                                                                                                    Name                 = "SP_ProfileSyncDB"
+                                                                                                                    NormalizedDataSource = "SQL.domain.local"
+                                                                                                                }
+                                                                                                            } -PassThru
+                                                                                                        )
+                                                                                                    )
+                                                                                                } -PassThru
+                                                                                            } -PassThru -Force
                         )
                     }
 
@@ -1364,96 +1364,96 @@ try
                     Mock -CommandName Get-SPServiceApplication -MockWith {
                         return @(
                             New-Object -TypeName "Object" |
-                            Add-Member -MemberType NoteProperty `
-                                -Name TypeName `
-                                -Value "User Profile Service Application" `
-                                -PassThru |
-                            Add-Member -MemberType NoteProperty `
-                                -Name DisplayName `
-                                -Value $testParams.Name `
-                                -PassThru |
-                            Add-Member -MemberType NoteProperty `
-                                -Name "NetBIOSDomainNamesEnabled" `
-                                -Value $false `
-                                -PassThru |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name Update `
-                                -Value {
-                                $Global:SPDscUPSAUpdateCalled = $true
-                            } -PassThru |
-                            Add-Member -MemberType NoteProperty `
-                                -Name ApplicationPool `
-                                -Value @{
-                                Name = $testParams.ApplicationPool
-                            } -PassThru |
-                            Add-Member -MemberType NoteProperty `
-                                -Name ServiceApplicationProxyGroup `
-                                -Value $proxyGroup `
-                                -PassThru |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name IsConnected `
-                                -Value {
-                                return $true
-                            } -PassThru |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name GetType `
-                                -Value {
-                                New-Object -TypeName "Object" |
                                 Add-Member -MemberType NoteProperty `
-                                    -Name FullName `
-                                    -Value $getTypeFullName `
+                                    -Name TypeName `
+                                    -Value "User Profile Service Application" `
                                     -PassThru |
-                                Add-Member -MemberType ScriptMethod `
-                                    -Name GetProperties `
-                                    -Value {
-                                    param($x)
-                                    return @(
-                                        (New-Object -TypeName "Object" |
-                                            Add-Member -MemberType NoteProperty `
-                                                -Name Name `
-                                                -Value "SocialDatabase" `
-                                                -PassThru |
+                                    Add-Member -MemberType NoteProperty `
+                                        -Name DisplayName `
+                                        -Value $testParams.Name `
+                                        -PassThru |
+                                        Add-Member -MemberType NoteProperty `
+                                            -Name "NetBIOSDomainNamesEnabled" `
+                                            -Value $false `
+                                            -PassThru |
                                             Add-Member -MemberType ScriptMethod `
-                                                -Name GetValue `
+                                                -Name Update `
                                                 -Value {
-                                                param($x)
-                                                return @{
-                                                    Name                 = "SP_SocialDB"
-                                                    NormalizedDataSource = "SQL.domain.local"
-                                                }
-                                            } -PassThru
-                                        ),
-                                        (New-Object -TypeName "Object" |
-                                            Add-Member -MemberType NoteProperty `
-                                                -Name Name `
-                                                -Value "ProfileDatabase" `
-                                                -PassThru |
-                                            Add-Member -MemberType ScriptMethod `
-                                                -Name GetValue `
-                                                -Value {
-                                                return @{
-                                                    Name                 = "SP_ProfileDB"
-                                                    NormalizedDataSource = "SQL.domain.local"
-                                                }
-                                            } -PassThru
-                                        ),
-                                        (New-Object -TypeName "Object" |
-                                            Add-Member -MemberType NoteProperty `
-                                                -Name Name `
-                                                -Value "SynchronizationDatabase" `
-                                                -PassThru |
-                                            Add-Member -MemberType ScriptMethod `
-                                                -Name GetValue `
-                                                -Value {
-                                                return @{
-                                                    Name                 = "SP_ProfileSyncDB"
-                                                    NormalizedDataSource = "SQL.domain.local"
-                                                }
-                                            } -PassThru
-                                        )
-                                    )
-                                } -PassThru
-                            } -PassThru -Force
+                                                $Global:SPDscUPSAUpdateCalled = $true
+                                            } -PassThru |
+                                                Add-Member -MemberType NoteProperty `
+                                                    -Name ApplicationPool `
+                                                    -Value @{
+                                                    Name = $testParams.ApplicationPool
+                                                } -PassThru |
+                                                    Add-Member -MemberType NoteProperty `
+                                                        -Name ServiceApplicationProxyGroup `
+                                                        -Value $proxyGroup `
+                                                        -PassThru |
+                                                        Add-Member -MemberType ScriptMethod `
+                                                            -Name IsConnected `
+                                                            -Value {
+                                                            return $true
+                                                        } -PassThru |
+                                                            Add-Member -MemberType ScriptMethod `
+                                                                -Name GetType `
+                                                                -Value {
+                                                                New-Object -TypeName "Object" |
+                                                                    Add-Member -MemberType NoteProperty `
+                                                                        -Name FullName `
+                                                                        -Value $getTypeFullName `
+                                                                        -PassThru |
+                                                                        Add-Member -MemberType ScriptMethod `
+                                                                            -Name GetProperties `
+                                                                            -Value {
+                                                                            param($x)
+                                                                            return @(
+                                                                                (New-Object -TypeName "Object" |
+                                                                                        Add-Member -MemberType NoteProperty `
+                                                                                            -Name Name `
+                                                                                            -Value "SocialDatabase" `
+                                                                                            -PassThru |
+                                                                                            Add-Member -MemberType ScriptMethod `
+                                                                                                -Name GetValue `
+                                                                                                -Value {
+                                                                                                param($x)
+                                                                                                return @{
+                                                                                                    Name                 = "SP_SocialDB"
+                                                                                                    NormalizedDataSource = "SQL.domain.local"
+                                                                                                }
+                                                                                            } -PassThru
+                                                                                        ),
+                                                                                        (New-Object -TypeName "Object" |
+                                                                                                Add-Member -MemberType NoteProperty `
+                                                                                                    -Name Name `
+                                                                                                    -Value "ProfileDatabase" `
+                                                                                                    -PassThru |
+                                                                                                    Add-Member -MemberType ScriptMethod `
+                                                                                                        -Name GetValue `
+                                                                                                        -Value {
+                                                                                                        return @{
+                                                                                                            Name                 = "SP_ProfileDB"
+                                                                                                            NormalizedDataSource = "SQL.domain.local"
+                                                                                                        }
+                                                                                                    } -PassThru
+                                                                                                ),
+                                                                                                (New-Object -TypeName "Object" |
+                                                                                                        Add-Member -MemberType NoteProperty `
+                                                                                                            -Name Name `
+                                                                                                            -Value "SynchronizationDatabase" `
+                                                                                                            -PassThru |
+                                                                                                            Add-Member -MemberType ScriptMethod `
+                                                                                                                -Name GetValue `
+                                                                                                                -Value {
+                                                                                                                return @{
+                                                                                                                    Name                 = "SP_ProfileSyncDB"
+                                                                                                                    NormalizedDataSource = "SQL.domain.local"
+                                                                                                                }
+                                                                                                            } -PassThru
+                                                                                                        )
+                                                                                                    )
+                                                                                                } -PassThru
+                                                                                            } -PassThru -Force
                         )
                     }
 
@@ -1512,6 +1512,96 @@ try
 
                 It "Should return false from the test method" {
                     Test-TargetResource @testParams | Should -Be $true
+                }
+            }
+
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Import-Module (Join-Path -Path (Split-Path -Path (Get-Module SharePointDsc -ListAvailable).Path -Parent) -ChildPath "Modules\SharePointDSC.Reverse\SharePointDSC.Reverse.psm1")
+
+                    Mock -CommandName Write-Host -MockWith { }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            Name                         = "User Profile Service Application"
+                            ApplicationPool              = "SharePoint Service Applications"
+                            MySiteHostLocation           = "http://my.sharepoint.contoso.local"
+                            MySiteManagedPath            = "personal"
+                            ProfileDBName                = "SP_UserProfiles"
+                            ProfileDBServer              = "SQL01"
+                            SocialDBName                 = "SP_Social"
+                            SocialDBServer               = "SQL01"
+                            SyncDBName                   = "SP_ProfileSync"
+                            SyncDBServer                 = "SQL01"
+                            EnableNetBIOS                = $false
+                            NoILMUsed                    = $true
+                            SiteNamingConflictResolution = "Domain_Username"
+                            Ensure                       = "Present"
+                        }
+                    }
+
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        $spServiceApp = [PSCustomObject]@{
+                            TypeName    = "User Profile Service Application"
+                            DisplayName = "User Profile Service Application"
+                            Name        = "User Profile Service Application"
+                        }
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                            -Name GetType `
+                            -Value {
+                            return @{
+                                Name = 'UserProfileApplication'
+                            }
+                        } -PassThru -Force
+                        return $spServiceApp
+                    }
+
+                    Mock -CommandName Get-SPSite -MockWith {
+                        return @(
+                            @{
+                                Url = 'http://sharepoint.contoso.com'
+                            },
+                            @{
+                                Url = 'http://portal.contoso.com'
+                            }
+                        )
+                    }
+
+                    Mock -CommandName Get-SPServiceContext -MockWith { return " " }
+
+                    Mock -CommandName New-Object -MockWith { return " " }
+
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
+
+                    $result = @'
+        SPUserProfileServiceApp UserProfileServiceApplication
+        {
+            ApplicationPool              = "SharePoint Service Applications";
+            EnableNetBIOS                = $False;
+            Ensure                       = "Present";
+            MySiteHostLocation           = "http://my.sharepoint.contoso.local";
+            MySiteManagedPath            = "personal";
+            Name                         = "User Profile Service Application";
+            NoILMUsed                    = $True;
+            ProfileDBName                = "SP_UserProfiles";
+            ProfileDBServer              = $ConfigurationData.NonNodeData.ProfileDBServer;
+            PsDscRunAsCredential         = $Credsinstallaccount;
+            SiteNamingConflictResolution = "Domain_Username";
+            SocialDBName                 = "SP_Social";
+            SocialDBServer               = $ConfigurationData.NonNodeData.SocialDBServer;
+            SyncDBName                   = "SP_ProfileSync";
+            SyncDBServer                 = $ConfigurationData.NonNodeData.SyncDBServer;
+        }
+
+'@
+                }
+
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource | Should -Be $result
                 }
             }
         }

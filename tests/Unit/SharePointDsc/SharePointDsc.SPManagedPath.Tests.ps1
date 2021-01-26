@@ -1,4 +1,5 @@
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param
 (
     [Parameter()]
@@ -49,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Mocks for all contexts
                 Mock -CommandName New-SPManagedPath -MockWith { }
@@ -195,6 +196,71 @@ try
 
                 It "Should return true from the test method" {
                     Test-TargetResource @testParams | Should -Be $true
+                }
+            }
+
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Import-Module (Join-Path -Path (Split-Path -Path (Get-Module SharePointDsc -ListAvailable).Path -Parent) -ChildPath "Modules\SharePointDSC.Reverse\SharePointDSC.Reverse.psm1")
+
+                    Mock -CommandName Write-Host -MockWith { }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            WebAppUrl   = "http://sharepoint.contoso.com"
+                            RelativeUrl = "teams"
+                            Explicit    = $false
+                            HostHeader  = $true
+                            Ensure      = "Present"
+                        }
+                    }
+
+                    Mock -CommandName Get-SPWebApplication -MockWith {
+                        $spWebApp = [PSCustomObject]@{
+                            Url = "http://sharepoint.contoso.com"
+                        }
+                        return $spWebApp
+                    }
+
+                    Mock -CommandName Get-SPManagedPath -MockWith {
+                        $spManagedPath = [PSCustomObject]@{
+                            Name = "teams"
+                            Type = "WildcardInclusion"
+                        }
+                        return $spManagedPath
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
+
+                    $result = @'
+        SPManagedPath [0-9A-Fa-f]{8}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{12}
+        {
+            Ensure               = "Present";
+            Explicit             = \$False;
+            HostHeader           = \$True;
+            PsDscRunAsCredential = \$Credsspfarm;
+            RelativeUrl          = "teams";
+            WebAppUrl            = "http://sharepoint.contoso.com";
+        }
+        SPManagedPath [0-9A-Fa-f]{8}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{12}
+        {
+            Ensure               = "Present";
+            Explicit             = \$False;
+            HostHeader           = \$True;
+            PsDscRunAsCredential = \$Credsspfarm;
+            RelativeUrl          = "teams";
+            WebAppUrl            = "http://sharepoint.contoso.com";
+        }
+
+'@
+                }
+
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource | Should -Match $result
                 }
             }
         }

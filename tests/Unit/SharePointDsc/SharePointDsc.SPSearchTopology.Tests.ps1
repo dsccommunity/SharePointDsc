@@ -1,4 +1,5 @@
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param
 (
     [Parameter()]
@@ -49,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
                 $mockPath = Join-Path -Path $Global:SPDscHelper.RepoRoot `
@@ -574,6 +575,68 @@ try
                     Set-TargetResource @testParams
                     Assert-MockCalled Remove-SPEnterpriseSearchComponent -Times 5
                     Assert-MockCalled Set-SPEnterpriseSearchTopology
+                }
+            }
+
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Import-Module (Join-Path -Path (Split-Path -Path (Get-Module SharePointDsc -ListAvailable).Path -Parent) -ChildPath "Modules\SharePointDSC.Reverse\SharePointDSC.Reverse.psm1")
+
+                    Mock -CommandName Write-Host -MockWith { }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            ServiceAppName          = "Search Service Application"
+                            Admin                   = @("Server1", "Server2")
+                            Crawler                 = @("Server1", "Server2")
+                            ContentProcessing       = @("Server1", "Server2")
+                            AnalyticsProcessing     = @("Server1", "Server2")
+                            QueryProcessing         = @("Server3", "Server4")
+                            FirstPartitionDirectory = "I:\SearchIndexes\0"
+                            IndexPartition          = @("Server3", "Server4")
+                        }
+                    }
+
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        $spServiceApp = [PSCustomObject]@{
+                            DisplayName = "Search Service Application"
+                            Name        = "Search Service Application"
+                        }
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                            -Name GetType `
+                            -Value {
+                            return @{
+                                FullName = "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
+                            }
+                        } -PassThru -Force
+                        return $spServiceApp
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
+
+                    $result = @'
+        SPSearchTopology [0-9A-Fa-f]{8}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{12}
+        {
+            Admin                   = "\$ConfigurationData.NonNodeData.SearchAdminServers";
+            AnalyticsProcessing     = "\$ConfigurationData.NonNodeData.SearchAnalyticsProcessingServers";
+            ContentProcessing       = "\$ConfigurationData.NonNodeData.SearchContentProcessingServers";
+            Crawler                 = "\$ConfigurationData.NonNodeData.SearchCrawlerServers";
+            FirstPartitionDirectory = "I:\\SearchIndexes\\0";
+            IndexPartition          = "\$ConfigurationData.NonNodeData.SearchIndexPartitionServers";
+            PsDscRunAsCredential    = \$Credsspfarm;
+            QueryProcessing         = "\$ConfigurationData.NonNodeData.QueryProcessingServers";
+            ServiceAppName          = "Search Service Application";
+        }
+
+'@
+                }
+
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource | Should -Match $result
                 }
             }
         }

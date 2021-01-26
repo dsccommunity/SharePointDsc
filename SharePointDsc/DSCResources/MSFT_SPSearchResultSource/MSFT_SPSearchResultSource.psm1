@@ -333,4 +333,174 @@ function Test-TargetResource
     return $result
 }
 
+function Export-TargetResource
+{
+    $VerbosePreference = "SilentlyContinue"
+    $content = ''
+    $ParentModuleBase = Get-Module "SharePointDsc" -ListAvailable | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath "\DSCResources\MSFT_SPSearchResultSource\MSFT_SPSearchResultSource.psm1" -Resolve
+    $params = Get-DSCFakeParameters -ModulePath $module
+
+    $ssas = Get-SPServiceApplication | Where-Object -FilterScript { $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication" }
+
+    $Content = ''
+
+    $i = 1
+    $total = $ssas.Length
+    foreach ($ssa in $ssas)
+    {
+        try
+        {
+            if ($ssa)
+            {
+                $serviceName = $ssa.DisplayName
+                Write-Host "Scanning Results Sources for Search Service Application [$i/$total] {$serviceName}"
+                $fedman = New-Object Microsoft.Office.Server.Search.Administration.Query.FederationManager($ssa)
+                $searchOwner = Get-SPEnterpriseSearchOwner -Level SSA
+                $filter = New-Object Microsoft.Office.Server.Search.Administration.SearchObjectFilter($searchOwner)
+                $resultSources = $fedman.ListSources($filter, $true)
+
+                $j = 1
+                $totalRS = $resultSources.Count
+                foreach ($resultSource in $resultSources)
+                {
+                    <# Filter out the hidden Local SharePoint Graph provider since it is not supported by SharePointDSC. #>
+                    if ($resultSource.Name -ne "Local SharePoint Graph")
+                    {
+                        try
+                        {
+                            $rsName = $resultSource.Name
+                            Write-Host "    -> Scanning Results Source [$j/$totalRS] {$rsName}"
+                            $partialContent = "        SPSearchResultSource " + [System.Guid]::NewGuid().ToString() + "`r`n"
+                            $partialContent += "        {`r`n"
+                            $params.SearchServiceAppName = $serviceName
+                            $params.Name = $rsName
+                            $params.ScopeUrl = "Global"
+                            $results = Get-TargetResource @params
+
+                            $providers = $fedman.ListProviders()
+                            $provider = $providers.Values | Where-Object -FilterScript {
+                                $_.Id -eq $resultSource.ProviderId
+                            }
+
+                            if ($null -eq $results.Get_Item("ConnectionUrl") -or $results.ConnectionUrl -eq "")
+                            {
+                                $results.Remove("ConnectionUrl")
+                            }
+                            $results.Query = $resultSource.QueryTransform.QueryTemplate.Replace("`"", "'")
+                            $results.ProviderType = $provider.Name
+                            $results.Ensure = "Present"
+                            $results.ScopeUrl = "Global"
+                            if ($resultSource.ConnectionUrlTemplate)
+                            {
+                                $results.ConnectionUrl = $resultSource.ConnectionUrlTemplate
+                            }
+
+                            $results = Repair-Credentials -results $results
+                            $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+                            $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+                            $partialContent += $currentBlock
+                            $partialContent += "        }`r`n"
+                            $Content += $partialContent
+                        }
+                        catch
+                        {
+                            $_
+                        }
+                    }
+                    $j++
+                }
+
+                <# Include Web Level Content Sources #>
+                if (!$SkipSitesAndWebs)
+                {
+                    $webApplications = Get-SPWebApplication
+                    foreach ($webApp in $webApplications)
+                    {
+                        foreach ($site in $webApp.Sites)
+                        {
+                            try
+                            {
+                                foreach ($web in $site.AllWebs)
+                                {
+                                    # If the site is a subsite, then the SPWeb option had to be selected for extraction
+                                    if ($site.RootWeb.Url -eq $web.Url -or $chckSPWeb.Checked)
+                                    {
+                                        Write-Host "Scanning Results Sources for {$($web.Url)}"
+                                        $fedman = New-Object Microsoft.Office.Server.Search.Administration.Query.FederationManager($ssa)
+                                        $searchOwner = Get-SPEnterpriseSearchOwner -Level SPWeb -SPWeb $web
+                                        $filter = New-Object Microsoft.Office.Server.Search.Administration.SearchObjectFilter($searchOwner)
+                                        # Filtering Higher Sources from each Web as they will be exported with the Service App
+                                        $filter.IncludeHigherLevel = $false
+                                        $sources = $fedman.ListSources($filter, $true)
+
+                                        foreach ($source in $sources)
+                                        {
+                                            try
+                                            {
+                                                if (!$source.BuiltIn)
+                                                {
+                                                    $partialContent = "        SPSearchResultSource " + [System.Guid]::NewGuid().ToString() + "`r`n"
+                                                    $partialContent += "        {`r`n"
+                                                    $params.SearchServiceAppName = $serviceName
+                                                    $params.Name = $source.Name
+                                                    $params.ScopeName = "SPWeb"
+                                                    $params.ScopeUrl = $web.Url
+                                                    $results = Get-TargetResource @params
+                                                    $results.ScopeUrl = $web.Url
+
+                                                    $providers = $fedman.ListProviders()
+                                                    $provider = $providers.Values | Where-Object -FilterScript {
+                                                        $_.Id -eq $source.ProviderId
+                                                    }
+
+                                                    if ($null -eq $results.Get_Item("ConnectionUrl"))
+                                                    {
+                                                        $results.Remove("ConnectionUrl")
+                                                    }
+                                                    $results.Query = $source.QueryTransform.QueryTemplate.Replace("`"", "'")
+                                                    $results.ProviderType = $provider.Name
+                                                    $results.Ensure = "Present"
+                                                    if ($source.ConnectionUrlTemplate)
+                                                    {
+                                                        $results.ConnectionUrl = $source.ConnectionUrlTemplate
+                                                    }
+
+                                                    $results = Repair-Credentials -results $results
+                                                    $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+                                                    $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+                                                    $partialContent += $currentBlock
+                                                    $partialContent += "        }`r`n"
+                                                    $Content += $partialContent
+                                                }
+                                            }
+                                            catch
+                                            {
+                                                $_
+                                            }
+                                        }
+                                    }
+                                    $web.Dispose()
+                                }
+                            }
+                            catch
+                            {
+                                $_
+                            }
+                            $site.Dispose()
+                        }
+                    }
+                }
+            }
+        }
+        catch
+        {
+            $_
+            $Global:ErrorLog += "[Search Result Source]" + $ssa.DisplayName + "`r`n"
+            $Global:ErrorLog += "$_`r`n`r`n"
+        }
+    }
+    return $content
+}
+
 Export-ModuleMember -Function *-TargetResource

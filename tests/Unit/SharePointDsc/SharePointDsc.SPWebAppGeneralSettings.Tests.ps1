@@ -1,4 +1,5 @@
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param
 (
     [Parameter()]
@@ -49,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
 
@@ -381,6 +382,86 @@ try
                 It "Should throw an exception" {
                     $Global:SPDscWebApplicationUpdateCalled = $false
                     { Set-TargetResource @testParams } | Should -Throw "Quota template NotExist was not found"
+                }
+            }
+
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Import-Module (Join-Path -Path (Split-Path -Path (Get-Module SharePointDsc -ListAvailable).Path -Parent) -ChildPath "Modules\SharePointDSC.Reverse\SharePointDSC.Reverse.psm1")
+
+                    Mock -CommandName Write-Host -MockWith { }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            WebAppUrl                        = "http://example.contoso.local"
+                            TimeZone                         = 76
+                            Alerts                           = $true
+                            RSS                              = $false
+                            AlertsLimit                      = 20
+                            BlogAPI                          = $true
+                            BlogAPIAuthenticated             = $true
+                            BrowserFileHandling              = "Strict"
+                            SecurityValidation               = $true
+                            SecurityValidationExpires        = $true
+                            SecurityValidationTimeoutMinutes = 15
+                            RecycleBinEnabled                = $true
+                            RecycleBinCleanupEnabled         = $true
+                            RecycleBinRetentionPeriod        = 30
+                            SecondStageRecycleBinQuota       = 50
+                            MaximumUploadSize                = 100
+                            CustomerExperienceProgram        = $false
+                            PresenceEnabled                  = $true
+                            AllowOnlineWebPartCatalog        = $false
+                            SelfServiceSiteCreationEnabled   = $true
+                            DefaultQuotaTemplate             = "Teamsite"
+                        }
+                    }
+
+                    Mock -CommandName Get-SPWebApplication -MockWith {
+                        $spWebApp = [PSCustomObject]@{
+                            Url = "http://example.contoso.local"
+                        }
+                        return $spWebApp
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
+
+                    $result = @'
+        SPWebAppGeneralSettings [0-9A-Fa-f]{8}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{12}
+        {
+            Alerts                           = \$True;
+            AlertsLimit                      = 20;
+            AllowOnlineWebPartCatalog        = \$False;
+            BlogAPI                          = \$True;
+            BlogAPIAuthenticated             = \$True;
+            BrowserFileHandling              = "Strict";
+            CustomerExperienceProgram        = \$False;
+            DefaultQuotaTemplate             = "Teamsite";
+            MaximumUploadSize                = 100;
+            PresenceEnabled                  = \$True;
+            PsDscRunAsCredential             = \$Credsspfarm;
+            RecycleBinCleanupEnabled         = \$True;
+            RecycleBinEnabled                = \$True;
+            RecycleBinRetentionPeriod        = 30;
+            RSS                              = \$False;
+            SecondStageRecycleBinQuota       = 50;
+            SecurityValidation               = \$True;
+            SecurityValidationExpires        = \$True;
+            SecurityValidationTimeoutMinutes = 15;
+            SelfServiceSiteCreationEnabled   = \$True;
+            TimeZone                         = 76;
+            WebAppUrl                        = "http://example.contoso.local";
+        }
+
+'@
+                }
+
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource | Should -Match $result
                 }
             }
         }

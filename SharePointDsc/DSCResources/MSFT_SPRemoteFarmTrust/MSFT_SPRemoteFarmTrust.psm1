@@ -223,4 +223,40 @@ function Test-TargetResource()
     return $result
 }
 
+function Export-TargetResource
+{
+    $VerbosePreference = "SilentlyContinue"
+    $ParentModuleBase = Get-Module "SharePointDsc" -ListAvailable | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPRemoteFarmTrust\MSFT_SPRemoteFarmTrust.psm1" -Resolve
+    $Content = ''
+    $params = Get-DSCFakeParameters -ModulePath $module
+    $tips = Get-SPTrustedSecurityTokenIssuer
+    foreach ($tip in $tips)
+    {
+        $params.Name = $tip.Id
+        $was = Get-SPWebApplication
+        foreach ($wa in $was)
+        {
+            $site = Get-SPSite $wa.Url -ErrorAction SilentlyContinue
+            if ($null -ne $site)
+            {
+                $params.LocalWebAppUrl = $wa.Url
+                $results = Get-TargetResource @params
+                if ($results.Ensure -eq "Present")
+                {
+                    $PartialContent = "        SPRemoteFarmTrust " + [System.Guid]::NewGuid().ToString() + "`r`n"
+                    $PartialContent += "        {`r`n"
+                    $results = Repair-Credentials -results $results
+                    $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+                    $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+                    $PartialContent += $currentBlock
+                    $PartialContent += "        }`r`n"
+                    $Content += $PartialContent
+                }
+            }
+        }
+    }
+    return $Content
+}
+
 Export-ModuleMember -Function *-TargetResource

@@ -1,4 +1,5 @@
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param
 (
     [Parameter()]
@@ -49,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
                 {
@@ -447,6 +448,85 @@ try
                 Default
                 {
                     throw [Exception] "A supported version of SharePoint was not used in testing"
+                }
+            }
+
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Import-Module (Join-Path -Path (Split-Path -Path (Get-Module SharePointDsc -ListAvailable).Path -Parent) -ChildPath "Modules\SharePointDSC.Reverse\SharePointDSC.Reverse.psm1")
+
+                    Mock -CommandName Write-Host -MockWith { }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            Name                                      = "Excel Service Application"
+                            ApplicationPool                           = "Service App Pool"
+                            Ensure                                    = "Present"
+                            TrustedFileLocations                      = @("http://sharepoint.contoso.com/lib")
+                            CachingOfUnusedFilesEnable                = $true
+                            CrossDomainAccessAllowed                  = $false
+                            EncryptedUserConnectionRequired           = 'Connection'
+                            ExternalDataConnectionLifetime            = 5
+                            FileAccessMethod                          = 'UseFileAccessAccount'
+                            LoadBalancingScheme                       = 'RoundRobin'
+                            MemoryCacheThreshold                      = 4096
+                            PrivateBytesMax                           = 4096
+                            SessionsPerUserMax                        = 5
+                            SiteCollectionAnonymousSessionsMax        = 5
+                            TerminateProcessOnAccessViolation         = $true
+                            ThrottleAccessViolationsPerSiteCollection = 5
+                            UnattendedAccountApplicationId            = "domain\account"
+                            UnusedObjectAgeMax                        = 5
+                            WorkbookCache                             = "test"
+                            WorkbookCacheSizeMax                      = 5
+                        }
+                    }
+
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        $spServiceApp = [PSCustomObject]@{
+                            TypeName    = "Excel Services Application Web Service Application"
+                            DisplayName = "Excel Services Application Web Service Application"
+                            Name        = "Excel Services Application Web Service Application"
+                        }
+                        return $spServiceApp
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
+
+                    $result = @'
+        SPExcelServiceApp [0-9A-Fa-f]{8}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{12}
+        {
+            ApplicationPool                           = "Service App Pool";
+            CachingOfUnusedFilesEnable                = \$True;
+            CrossDomainAccessAllowed                  = \$False;
+            EncryptedUserConnectionRequired           = "Connection";
+            Ensure                                    = "Present";
+            ExternalDataConnectionLifetime            = 5;
+            FileAccessMethod                          = "UseFileAccessAccount";
+            LoadBalancingScheme                       = "RoundRobin";
+            MemoryCacheThreshold                      = 4096;
+            Name                                      = "Excel Service Application";
+            PrivateBytesMax                           = 4096;
+            PsDscRunAsCredential                      = \$Credsspfarm;
+            SessionsPerUserMax                        = 5;
+            SiteCollectionAnonymousSessionsMax        = 5;
+            TerminateProcessOnAccessViolation         = \$True;
+            ThrottleAccessViolationsPerSiteCollection = 5;
+            UnattendedAccountApplicationId            = "domain\\account";
+            UnusedObjectAgeMax                        = 5;
+            WorkbookCache                             = "test";
+            WorkbookCacheSizeMax                      = 5;
+        }
+
+'@
+                }
+
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource | Should -Match $result
                 }
             }
         }

@@ -1,4 +1,5 @@
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param
 (
     [Parameter()]
@@ -49,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 function Add-SPDscEvent
                 {
@@ -115,16 +116,16 @@ try
                         return @{
                             AssociatedOwnerGroup = "Farm Administrators"
                             SiteGroups           = New-Object -TypeName "Object" |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name GetByName `
-                                -Value {
-                                return @{
-                                    Users = @(
-                                        @{ UserLogin = "Demo\User1" },
-                                        @{ UserLogin = "Demo\User2" }
-                                    )
-                                }
-                            } -PassThru
+                                Add-Member -MemberType ScriptMethod `
+                                    -Name GetByName `
+                                    -Value {
+                                    return @{
+                                        Users = @(
+                                            @{ UserLogin = "Demo\User1" },
+                                            @{ UserLogin = "Demo\User2" }
+                                        )
+                                    }
+                                } -PassThru
                         }
                     }
                 }
@@ -156,28 +157,28 @@ try
                         $web = @{
                             AssociatedOwnerGroup = "Farm Administrators"
                             SiteGroups           = New-Object -TypeName "Object" |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name GetByName `
-                                -Value {
-                                return New-Object -TypeName "Object" |
-                                Add-Member -MemberType ScriptProperty `
-                                    -Name Users `
+                                Add-Member -MemberType ScriptMethod `
+                                    -Name GetByName `
                                     -Value {
-                                    return @(
-                                        @{
-                                            UserLogin = "Demo\User1"
-                                        }
-                                    )
-                                } -PassThru |
-                                Add-Member -MemberType ScriptMethod `
-                                    -Name AddUser `
-                                    -Value { } `
-                                    -PassThru |
-                                Add-Member -MemberType ScriptMethod `
-                                    -Name RemoveUser `
-                                    -Value { } `
-                                    -PassThru
-                            } -PassThru
+                                    return New-Object -TypeName "Object" |
+                                        Add-Member -MemberType ScriptProperty `
+                                            -Name Users `
+                                            -Value {
+                                            return @(
+                                                @{
+                                                    UserLogin = "Demo\User1"
+                                                }
+                                            )
+                                        } -PassThru |
+                                            Add-Member -MemberType ScriptMethod `
+                                                -Name AddUser `
+                                                -Value { } `
+                                                -PassThru |
+                                                Add-Member -MemberType ScriptMethod `
+                                                    -Name RemoveUser `
+                                                    -Value { } `
+                                                    -PassThru
+                                            } -PassThru
                         }
                         return $web
                     }
@@ -218,31 +219,31 @@ try
                         return @{
                             AssociatedOwnerGroup = "Farm Administrators"
                             SiteGroups           = New-Object -TypeName "Object" |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name GetByName `
-                                -Value {
-                                return New-Object "Object" |
-                                Add-Member -MemberType ScriptProperty `
-                                    -Name Users `
+                                Add-Member -MemberType ScriptMethod `
+                                    -Name GetByName `
                                     -Value {
-                                    return @(
-                                        @{
-                                            UserLogin = "Demo\User1"
-                                        },
-                                        @{
-                                            UserLogin = "Demo\User2"
-                                        }
-                                    )
-                                } -PassThru |
-                                Add-Member -MemberType ScriptMethod `
-                                    -Name AddUser `
-                                    -Value { } `
-                                    -PassThru |
-                                Add-Member -MemberType ScriptMethod `
-                                    -Name RemoveUser `
-                                    -Value { } `
-                                    -PassThru
-                            } -PassThru
+                                    return New-Object "Object" |
+                                        Add-Member -MemberType ScriptProperty `
+                                            -Name Users `
+                                            -Value {
+                                            return @(
+                                                @{
+                                                    UserLogin = "Demo\User1"
+                                                },
+                                                @{
+                                                    UserLogin = "Demo\User2"
+                                                }
+                                            )
+                                        } -PassThru |
+                                            Add-Member -MemberType ScriptMethod `
+                                                -Name AddUser `
+                                                -Value { } `
+                                                -PassThru |
+                                                Add-Member -MemberType ScriptMethod `
+                                                    -Name RemoveUser `
+                                                    -Value { } `
+                                                    -PassThru
+                                            } -PassThru
                         }
                     }
                 }
@@ -274,28 +275,28 @@ try
                         return @{
                             AssociatedOwnerGroup = "Farm Administrators"
                             SiteGroups           = New-Object -TypeName "Object" |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name GetByName `
-                                -Value {
-                                return New-Object "Object" |
-                                Add-Member -MemberType ScriptProperty `
-                                    -Name Users `
+                                Add-Member -MemberType ScriptMethod `
+                                    -Name GetByName `
                                     -Value {
-                                    return @(
-                                        @{
-                                            UserLogin = "Demo\User1"
-                                        }
-                                    )
-                                } -PassThru |
-                                Add-Member -MemberType ScriptMethod `
-                                    -Name AddUser `
-                                    -Value { } `
-                                    -PassThru |
-                                Add-Member -MemberType ScriptMethod `
-                                    -Name RemoveUser `
-                                    -Value { } `
-                                    -PassThru
-                            } -PassThru
+                                    return New-Object "Object" |
+                                        Add-Member -MemberType ScriptProperty `
+                                            -Name Users `
+                                            -Value {
+                                            return @(
+                                                @{
+                                                    UserLogin = "Demo\User1"
+                                                }
+                                            )
+                                        } -PassThru |
+                                            Add-Member -MemberType ScriptMethod `
+                                                -Name AddUser `
+                                                -Value { } `
+                                                -PassThru |
+                                                Add-Member -MemberType ScriptMethod `
+                                                    -Name RemoveUser `
+                                                    -Value { } `
+                                                    -PassThru
+                                            } -PassThru
                         }
                     }
                 }
@@ -331,31 +332,31 @@ try
                         return @{
                             AssociatedOwnerGroup = "Farm Administrators"
                             SiteGroups           = New-Object -TypeName "Object" |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name GetByName `
-                                -Value {
-                                return New-Object "Object" |
-                                Add-Member -MemberType ScriptProperty `
-                                    -Name Users `
+                                Add-Member -MemberType ScriptMethod `
+                                    -Name GetByName `
                                     -Value {
-                                    return @(
-                                        @{
-                                            UserLogin = "Demo\User1"
-                                        },
-                                        @{
-                                            UserLogin = "Demo\User2"
-                                        }
-                                    )
-                                } -PassThru |
-                                Add-Member -MemberType ScriptMethod `
-                                    -Name AddUser `
-                                    -Value { } `
-                                    -PassThru |
-                                Add-Member -MemberType ScriptMethod `
-                                    -Name RemoveUser `
-                                    -Value { } `
-                                    -PassThru
-                            } -PassThru
+                                    return New-Object "Object" |
+                                        Add-Member -MemberType ScriptProperty `
+                                            -Name Users `
+                                            -Value {
+                                            return @(
+                                                @{
+                                                    UserLogin = "Demo\User1"
+                                                },
+                                                @{
+                                                    UserLogin = "Demo\User2"
+                                                }
+                                            )
+                                        } -PassThru |
+                                            Add-Member -MemberType ScriptMethod `
+                                                -Name AddUser `
+                                                -Value { } `
+                                                -PassThru |
+                                                Add-Member -MemberType ScriptMethod `
+                                                    -Name RemoveUser `
+                                                    -Value { } `
+                                                    -PassThru
+                                            } -PassThru
                         }
                     }
                 }
@@ -388,28 +389,28 @@ try
                         return @{
                             AssociatedOwnerGroup = "Farm Administrators"
                             SiteGroups           = New-Object -TypeName "Object" |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name GetByName `
-                                -Value {
-                                return New-Object "Object" |
-                                Add-Member -MemberType ScriptProperty `
-                                    -Name Users `
+                                Add-Member -MemberType ScriptMethod `
+                                    -Name GetByName `
                                     -Value {
-                                    return @(
-                                        @{
-                                            UserLogin = "Demo\User2"
-                                        }
-                                    )
-                                } -PassThru |
-                                Add-Member -MemberType ScriptMethod `
-                                    -Name AddUser `
-                                    -Value { } `
-                                    -PassThru |
-                                Add-Member -MemberType ScriptMethod `
-                                    -Name RemoveUser `
-                                    -Value { } `
-                                    -PassThru
-                            } -PassThru
+                                    return New-Object "Object" |
+                                        Add-Member -MemberType ScriptProperty `
+                                            -Name Users `
+                                            -Value {
+                                            return @(
+                                                @{
+                                                    UserLogin = "Demo\User2"
+                                                }
+                                            )
+                                        } -PassThru |
+                                            Add-Member -MemberType ScriptMethod `
+                                                -Name AddUser `
+                                                -Value { } `
+                                                -PassThru |
+                                                Add-Member -MemberType ScriptMethod `
+                                                    -Name RemoveUser `
+                                                    -Value { } `
+                                                    -PassThru
+                                            } -PassThru
                         }
                     }
                 }
@@ -442,28 +443,28 @@ try
                         return @{
                             AssociatedOwnerGroup = "Farm Administrators"
                             SiteGroups           = New-Object -TypeName "Object" |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name GetByName `
-                                -Value {
-                                return New-Object "Object" |
-                                Add-Member -MemberType ScriptProperty `
-                                    -Name Users `
+                                Add-Member -MemberType ScriptMethod `
+                                    -Name GetByName `
                                     -Value {
-                                    return @(
-                                        @{
-                                            UserLogin = "Demo\User2"
-                                        }
-                                    )
-                                } -PassThru |
-                                Add-Member -MemberType ScriptMethod `
-                                    -Name AddUser `
-                                    -Value { } `
-                                    -PassThru |
-                                Add-Member -MemberType ScriptMethod `
-                                    -Name RemoveUser `
-                                    -Value { } `
-                                    -PassThru
-                            } -PassThru
+                                    return New-Object "Object" |
+                                        Add-Member -MemberType ScriptProperty `
+                                            -Name Users `
+                                            -Value {
+                                            return @(
+                                                @{
+                                                    UserLogin = "Demo\User2"
+                                                }
+                                            )
+                                        } -PassThru |
+                                            Add-Member -MemberType ScriptMethod `
+                                                -Name AddUser `
+                                                -Value { } `
+                                                -PassThru |
+                                                Add-Member -MemberType ScriptMethod `
+                                                    -Name RemoveUser `
+                                                    -Value { } `
+                                                    -PassThru
+                                            } -PassThru
                         }
                     }
                 }
@@ -498,28 +499,28 @@ try
                         return @{
                             AssociatedOwnerGroup = "Farm Administrators"
                             SiteGroups           = New-Object -TypeName "Object" |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name GetByName `
-                                -Value {
-                                return New-Object "Object" |
-                                Add-Member -MemberType ScriptProperty `
-                                    -Name Users `
+                                Add-Member -MemberType ScriptMethod `
+                                    -Name GetByName `
                                     -Value {
-                                    return @(
-                                        @{
-                                            UserLogin = "Demo\User2"
-                                        }
-                                    )
-                                } -PassThru |
-                                Add-Member -MemberType ScriptMethod `
-                                    -Name AddUser `
-                                    -Value { } `
-                                    -PassThru |
-                                Add-Member -MemberType ScriptMethod `
-                                    -Name RemoveUser `
-                                    -Value { } `
-                                    -PassThru
-                            } -PassThru
+                                    return New-Object "Object" |
+                                        Add-Member -MemberType ScriptProperty `
+                                            -Name Users `
+                                            -Value {
+                                            return @(
+                                                @{
+                                                    UserLogin = "Demo\User2"
+                                                }
+                                            )
+                                        } -PassThru |
+                                            Add-Member -MemberType ScriptMethod `
+                                                -Name AddUser `
+                                                -Value { } `
+                                                -PassThru |
+                                                Add-Member -MemberType ScriptMethod `
+                                                    -Name RemoveUser `
+                                                    -Value { } `
+                                                    -PassThru
+                                            } -PassThru
                         }
                     }
                 }
@@ -534,6 +535,43 @@ try
 
                 It "Should throw in the set method" {
                     { Set-TargetResource @testParams } | Should -Throw
+                }
+            }
+
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Import-Module (Join-Path -Path (Split-Path -Path (Get-Module SharePointDsc -ListAvailable).Path -Parent) -ChildPath "Modules\SharePointDSC.Reverse\SharePointDSC.Reverse.psm1")
+
+                    Mock -CommandName Write-Host -MockWith { }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            IsSingleInstance = "Yes"
+                            Members          = @("domain\account", "domain\account2")
+                            MembersToInclude = @()
+                            MembersToExclude = @()
+                        }
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
+
+                    $result = @'
+        SPFarmAdministrators [0-9A-Fa-f]{8}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{12}
+        {
+            IsSingleInstance     = "Yes";
+            Members              = \@\("domain\\account", "domain\\account2"\);
+            PsDscRunAsCredential = \$Credsspfarm;
+        }
+
+'@
+                }
+
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource | Should -Match $result
                 }
             }
         }

@@ -1,4 +1,5 @@
 ﻿[CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param
 (
     [Parameter()]
@@ -49,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Mocks for all contexts
                 Mock -CommandName Add-DatabaseToAvailabilityGroup -MockWith { }
@@ -568,6 +569,53 @@ try
                     It "Should throw when an unsupported version is installed and set is called" {
                         { Set-TargetResource @testParams } | Should -Throw "Adding databases to SQL Always-On Availability Groups require the SharePoint 2013 April 2014 CU to be installed"
                     }
+                }
+            }
+
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Import-Module (Join-Path -Path (Split-Path -Path (Get-Module SharePointDsc -ListAvailable).Path -Parent) -ChildPath "Modules\SharePointDSC.Reverse\SharePointDSC.Reverse.psm1")
+
+                    Mock -CommandName Write-Host -MockWith { }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            DatabaseName = "Content01DB"
+                            AGName       = "AAG01"
+                            FileShare    = "\\server\share"
+                            Ensure       = "Present"
+                        }
+                    }
+
+                    Mock -CommandName Get-SPDatabase -MockWith {
+                        $spDatabase = [PSCustomObject]@{
+                            AvailabilityGroup = "AAG01"
+                            Name              = "Content01DB"
+                        }
+                        return $spDatabase
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
+
+                    $result = @'
+        SPDatabaseAAG [0-9A-Fa-f]{8}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{12}
+        {
+            AGName               = "AAG01";
+            DatabaseName         = "Content01DB";
+            Ensure               = "Present";
+            FileShare            = "\\\\server\\share";
+            PsDscRunAsCredential = \$Credsspfarm;
+        }
+
+'@
+                }
+
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource | Should -Match $result
                 }
             }
         }

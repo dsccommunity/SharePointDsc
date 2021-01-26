@@ -397,4 +397,92 @@ function Test-TargetResource
     return $result
 }
 
+function Export-TargetResource
+{
+    $VerbosePreference = "SilentlyContinue"
+    $content = ''
+    $ParentModuleBase = Get-Module "SharePointDsc" -ListAvailable | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath "\DSCResources\MSFT_SPWebApplication\MSFT_SPWebApplication.psm1" -Resolve
+
+    $spWebApplications = Get-SPWebApplication | Sort-Object -Property Name
+
+    $i = 1;
+    $total = $spWebApplications.Length
+    foreach ($spWebApp in $spWebApplications)
+    {
+        try
+        {
+            Write-Host "Scanning SPWebApplication [$i/$total] {$webAppName}"
+            $partialContent = "        SPWebApplication " + $spWebApp.Name.Replace(" ", "") + "`r`n        {`r`n"
+
+            $params = Get-DSCFakeParameters -ModulePath $module
+            $params.Name = $spWebApp.name
+
+            $results = Get-TargetResource @params
+
+            $results = Repair-Credentials -results $results
+
+            $appPoolAccount = Get-Credentials $results.ApplicationPoolAccount
+            $convertToVariable = $false
+            if ($appPoolAccount)
+            {
+                $convertToVariable = $true
+                $results.ApplicationPoolAccount = (Resolve-Credentials -UserName $results.ApplicationPoolAccount) + ".UserName"
+            }
+
+            if ($null -eq $results.Get_Item("AllowAnonymous"))
+            {
+                $results.Remove("AllowAnonymous")
+            }
+
+            Add-ConfigurationDataEntry -Node "NonNodeData" -Key "DatabaseServer" -Value $results.DatabaseServer -Description "Name of the Database Server associated with the destination SharePoint Farm;"
+            $results.DatabaseServer = "`$ConfigurationData.NonNodeData.DatabaseServer"
+            $results["Path"] = $results["Path"].ToString()
+            $currentDSCBlock = Get-DSCBlock -Params $results -ModulePath $PSScriptRoot
+            if ($convertToVariable)
+            {
+                $currentDSCBlock = Convert-DSCStringParamToVariable -DSCBlock $currentDSCBlock -ParameterName "ApplicationPoolAccount"
+            }
+            $currentDSCBlock = Convert-DSCStringParamToVariable -DSCBlock $currentDSCBlock -ParameterName "DatabaseServer"
+            $currentDSCBlock = Convert-DSCStringParamToVariable -DSCBlock $currentDSCBlock -ParameterName "PsDscRunAsCredential"
+            $partialContent += $currentDSCBlock
+            $partialContent += "        }`r`n"
+
+            if ($Global:ExtractionModeValue -ge 2)
+            {
+                Write-Host "    -> Scanning SharePoint Designer Settings"
+                #Read-SPDesignerSettings -WebAppUrl $results.WebAppUrl.ToString() -Scope "WebApplication" -WebAppName $spWebApp.Name.Replace(" ", "")
+            }
+
+            <# SPWebApplication Feature Section #>
+            if (($Global:ExtractionModeValue -eq 3 -and $Quiet) -or $Global:ComponentsToExtract.Contains("SPFeature"))
+            {
+                $properties = @{
+                    Scope     = "WebApplication"
+                    Url       = $SpWebApp.Url
+                    DependsOn = "[SPWebApplication]$($spWebApp.Name.Replace(' ', ''))"
+                }
+                $partialContent += Read-TargetResource -ResourceName 'SPFeature' `
+                    -ExportParams $properties
+            }
+            $properties = @{
+                WebAppUrl = $spWebApp.Url
+                DependsOn = "[SPWebApplication]$($spWebApp.Name.Replace(' ', ''))"
+            }
+            $partialContent += Read-TargetResource -ResourceName 'SPOutgoingEmailSettings' `
+                -ExportParams $properties
+            $i++
+        }
+        catch
+        {
+            $_
+            $Global:ErrorLog += "[Web Application]" + $spWebApp.Name + "`r`n"
+            $Global:ErrorLog += "$_`r`n`r`n"
+        }
+
+        $content += $partialContent
+    }
+    return $content
+}
+
 Export-ModuleMember -Function *-TargetResource
