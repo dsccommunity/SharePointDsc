@@ -22,7 +22,7 @@ stages:
       - job: Package_Module
         displayName: 'Package Module'
         pool:
-          vmImage: 'windows-2019'
+          vmImage: 'ubuntu 16.04'
         steps:
           - task: GitVersion@5
             name: gitVersion
@@ -37,7 +37,7 @@ stages:
             inputs:
               filePath: './build.ps1'
               arguments: '-ResolveDependency -tasks pack'
-              pwsh: false
+              pwsh: true
             env:
               ModuleVersion: $(gitVersion.NuGetVersionV2)
 
@@ -202,7 +202,7 @@ stages:
         - 'Test_Unit_2016'
         - 'Test_Unit_2019'
         pool:
-          vmImage: 'windows-2019'
+          vmImage: 'ubuntu 16.04'
         timeoutInMinutes: 0
         steps:
           - pwsh: |
