@@ -10,6 +10,7 @@ function Get-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
+        [ValidateScript( { $_ -match "^\w*$" })]
         [String]
         $FileType,
 
@@ -98,6 +99,7 @@ function Set-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
+        [ValidateScript( { $_ -match "^\w*$" })]
         [String]
         $FileType,
 
@@ -264,6 +266,7 @@ function Test-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
+        [ValidateScript( { $_ -match "^\w*$" })]
         [String]
         $FileType,
 
@@ -343,45 +346,30 @@ function Export-TargetResource
     $xmlDoc = New-Object -TypeName 'System.Xml.XmlDocument'
     $xmlDoc.Load($docIconFilePath)
 
-    $defaultIcons = @("accdb", "accdc", "accde", "accdr", "accdt", "asax", "ascx", "asmx", "asp", "aspx", "bmp", `
-            "cat", "chm", "cmp", "config", "css", "csv", "db", "dib", "disc", "doc", "docm", "docx", "dot", "dotm", `
-            "dotx", "dvd", "dwp", "dwt", "eml", "est", "fwp", "gif", "hdp", "hlp", "hta", "htm", "html", "htt", "inf", `
-            "ini", "jfif", "jpe", "jpeg", "jpg", "js", "jse", "log", "master", "mht", "mhtml", "mpd", "mpp", "mps", `
-            "mpt", "mpw", "mpx", "msg", "msi", "msp", "ocx", "odc", "odp", "ods", "odt", "one", "onepkg", "onetoc2", `
-            "png", "pot", "potm", "potx", "ppa", "ppam", "pps", "ppsdc", "ppsm", "ppsx", "ppt", "pptm", "pptx", "psd", `
-            "psp", "ptm", "ptt", "pub", "rdl", "rsapplication", "rsc", "rsd", "rsds", "rtf", "smdl", "stp", "stt", `
-            "thmx", "tif", "tiff", "txt", "vbe", "vbs", "vdw", "vdx", "vsd", "vsdm", "vsdx", "vsl", "vss", "vssm", `
-            "vssx", "vst", "vstm", "vstx", "vsu", "vsw", "vsx", "vtx", "wdp", "webpart", "wm", "wma", "wmd", "wmp", `
-            "wms", "wmv", "wmx", "wmz", "wsf", "xla", "xlam", "xls", "xlsb", "xlsm", "xlsx", "xlt", "xltb", "xltm", `
-            "xltx", "xml", "xps", "xsd", "xsl", "xslt", "xsn", "zip")
-
     $dociconSourcePath = "C:\Install\Icons"
     foreach ($mapping in $xmlDoc.DocIcons.ByExtension.Mapping)
     {
-        if ($mapping.Key -notin $defaultIcons)
-        {
-            $PartialContent = "        SPDocIcon DocIcon" + $mapping.Key + "`r`n"
-            $PartialContent += "        {`r`n"
-            $params.FileType = $mapping.Key
-            $params.Ensure = "Present"
-            $results = Get-TargetResource @params
+        $PartialContent = "        SPDocIcon DocIcon" + $mapping.Key + "`r`n"
+        $PartialContent += "        {`r`n"
+        $params.FileType = $mapping.Key
+        $params.Ensure = "Present"
+        $results = Get-TargetResource @params
 
-            $results = Repair-Credentials -results $results
+        $results = Repair-Credentials -results $results
 
-            # Parameterize IconFile parameter
-            Add-ConfigurationDataEntry -Node "NonNodeData" `
-                -Key "DocIcon$($mapping.Key)" `
-                -Value (Join-Path -Path $dociconSourcePath -ChildPath $results.IconFile) `
-                -Description "Path to the icon file of the file type;"
-            $results.IconFile = "`$ConfigurationData.NonNodeData.DocIcon$($mapping.Key)"
+        # Parameterize IconFile parameter
+        Add-ConfigurationDataEntry -Node "NonNodeData" `
+            -Key "DocIcon$($mapping.Key)" `
+            -Value (Join-Path -Path $dociconSourcePath -ChildPath $results.IconFile) `
+            -Description "Path to the icon file of the file type;"
+        $results.IconFile = "`$ConfigurationData.NonNodeData.DocIcon$($mapping.Key)"
 
-            $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
-            $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+        $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+        $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
 
-            $PartialContent += $currentBlock
-            $PartialContent += "        }`r`n"
-            $Content += $PartialContent
-        }
+        $PartialContent += $currentBlock
+        $PartialContent += "        }`r`n"
+        $Content += $PartialContent
     }
 
     return $Content

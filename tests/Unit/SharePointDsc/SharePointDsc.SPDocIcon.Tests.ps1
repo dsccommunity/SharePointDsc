@@ -588,7 +588,6 @@ try
 <?xml version="1.0" encoding="utf-8"?>
 <DocIcons>
     <ByExtension>
-    <Mapping Key="zip" Value="iczip.gif" OpenControl="" />
     <Mapping Key="pdf" Value="icpdf.png" EditText="Adobe Acrobat or Reader X" OpenControl="AdobeAcrobat.OpenDocuments" />
     </ByExtension>
     <Default>
