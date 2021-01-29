@@ -55,9 +55,10 @@ BuildWorkflow:
 
   merge:
     - Merge_CodeCoverage_Files
-  publish:
-    - publish_module_to_gallery
 
+  publish:
+    - Publish_Release_To_GitHub
+    - Publish_Module_To_Gallery
 
 ####################################################
 #       PESTER  Configuration                      #

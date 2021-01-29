@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - SharePointDsc
   - Added native support for ReverseDsc
+- SPDocIcon
+  - New resource
 - SPUserProfileSyncConnection
   - Added ability to update UseSSL and UseDisabledFilter parameters
 - SPWordAutomationServiceApp
