@@ -1,3 +1,6 @@
+$script:SPDscUtilModulePath = Join-Path -Path $PSScriptRoot -ChildPath '..\..\Modules\SharePointDsc.Util'
+Import-Module -Name $script:SPDscUtilModulePath
+
 function Assert-SPDscPolicyUser()
 {
     param
@@ -11,7 +14,7 @@ function Assert-SPDscPolicyUser()
         $UsernameToCheck
     )
 
-    $diffcol = $CurrentDifferences | Where { $_.Username -eq $UsernameToCheck }
+    $diffcol = $CurrentDifferences | Where-Object { $_.Username -eq $UsernameToCheck }
     if ($diffcol.Count -gt 0)
     {
         return $true
