@@ -1,3 +1,6 @@
+$script:SPDscUtilModulePath = Join-Path -Path $PSScriptRoot -ChildPath '..\..\Modules\SharePointDsc.Util'
+Import-Module -Name $script:SPDscUtilModulePath
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -224,10 +227,10 @@ function Set-TargetResource
     {
         Write-Verbose -Message "Adding SPTrustedRootAuthority '$Name'"
         $null = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
-        -ScriptBlock {
-        $params = $args[0]
-        $eventSource = $args[1]
+            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+            -ScriptBlock {
+            $params = $args[0]
+            $eventSource = $args[1]
 
             if ($params.ContainsKey("CertificateFilePath"))
             {

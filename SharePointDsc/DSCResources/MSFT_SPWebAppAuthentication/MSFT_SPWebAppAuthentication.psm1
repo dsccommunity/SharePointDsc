@@ -1,3 +1,6 @@
+$script:SPDscUtilModulePath = Join-Path -Path $PSScriptRoot -ChildPath '..\..\Modules\SharePointDsc.Util'
+Import-Module -Name $script:SPDscUtilModulePath
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -1050,46 +1053,46 @@ function Test-ZoneConfiguration()
             "Classic"
             {
                 $configuredMethod = $CurrentConfig | `
-                    Where-Object -FilterScript {
-                    $_.AuthenticationMethod -eq $zoneConfig.AuthenticationMethod
-                }
+                        Where-Object -FilterScript {
+                        $_.AuthenticationMethod -eq $zoneConfig.AuthenticationMethod
+                    }
             }
             "WindowsAuthentication"
             {
                 if ($null -eq $zoneConfig.UseBasicAuth)
                 {
                     $configuredMethod = $CurrentConfig | `
-                        Where-Object -FilterScript {
-                        $_.AuthenticationMethod -eq $zoneConfig.AuthenticationMethod -and `
-                            $_.WindowsAuthMethod -eq $zoneConfig.WindowsAuthMethod
-                    }
+                            Where-Object -FilterScript {
+                            $_.AuthenticationMethod -eq $zoneConfig.AuthenticationMethod -and `
+                                $_.WindowsAuthMethod -eq $zoneConfig.WindowsAuthMethod
+                        }
                 }
                 else
                 {
                     $configuredMethod = $CurrentConfig | `
-                        Where-Object -FilterScript {
-                        $_.AuthenticationMethod -eq $zoneConfig.AuthenticationMethod -and `
-                            $_.WindowsAuthMethod -eq $zoneConfig.WindowsAuthMethod -and `
-                            $_.UseBasicAuth -eq $zoneConfig.UseBasicAuth
-                    }
+                            Where-Object -FilterScript {
+                            $_.AuthenticationMethod -eq $zoneConfig.AuthenticationMethod -and `
+                                $_.WindowsAuthMethod -eq $zoneConfig.WindowsAuthMethod -and `
+                                $_.UseBasicAuth -eq $zoneConfig.UseBasicAuth
+                        }
                 }
             }
             "FBA"
             {
                 $configuredMethod = $CurrentConfig | `
-                    Where-Object -FilterScript {
-                    $_.AuthenticationMethod -eq $zoneConfig.AuthenticationMethod -and `
-                        $_.MembershipProvider -eq $zoneConfig.MembershipProvider -and `
-                        $_.RoleProvider -eq $zoneConfig.RoleProvider
-                }
+                        Where-Object -FilterScript {
+                        $_.AuthenticationMethod -eq $zoneConfig.AuthenticationMethod -and `
+                            $_.MembershipProvider -eq $zoneConfig.MembershipProvider -and `
+                            $_.RoleProvider -eq $zoneConfig.RoleProvider
+                    }
             }
             "Federated"
             {
                 $configuredMethod = $CurrentConfig | `
-                    Where-Object -FilterScript {
-                    $_.AuthenticationMethod -eq $zoneConfig.AuthenticationMethod -and `
-                        $_.AuthenticationProvider -eq $zoneConfig.AuthenticationProvider
-                }
+                        Where-Object -FilterScript {
+                        $_.AuthenticationMethod -eq $zoneConfig.AuthenticationMethod -and `
+                            $_.AuthenticationProvider -eq $zoneConfig.AuthenticationProvider
+                    }
             }
         }
 
@@ -1149,42 +1152,42 @@ function Test-ZoneConfiguration()
             "Classic"
             {
                 $specifiedMethod = $DesiredConfig | `
-                    Where-Object -FilterScript {
-                    $_.AuthenticationMethod -eq $zoneConfig.AuthenticationMethod
-                }
+                        Where-Object -FilterScript {
+                        $_.AuthenticationMethod -eq $zoneConfig.AuthenticationMethod
+                    }
             }
             "WindowsAuthentication"
             {
                 $specifiedMethod = $DesiredConfig | `
-                    Where-Object -FilterScript {
-                    $_.AuthenticationMethod -eq $zoneConfig.AuthenticationMethod -and `
-                        $_.WindowsAuthMethod -eq $zoneConfig.WindowsAuthMethod
-                }
+                        Where-Object -FilterScript {
+                        $_.AuthenticationMethod -eq $zoneConfig.AuthenticationMethod -and `
+                            $_.WindowsAuthMethod -eq $zoneConfig.WindowsAuthMethod
+                    }
 
                 if ($null -ne $specifiedMethod.UseBasicAuth)
                 {
                     $specifiedMethod = $specifiedMethod | `
-                        Where-Object -FilterScript {
-                        $_.UseBasicAuth -eq $zoneConfig.UseBasicAuth
-                    }
+                            Where-Object -FilterScript {
+                            $_.UseBasicAuth -eq $zoneConfig.UseBasicAuth
+                        }
                 }
             }
             "FBA"
             {
                 $specifiedMethod = $DesiredConfig | `
-                    Where-Object -FilterScript {
-                    $_.AuthenticationMethod -eq $zoneConfig.AuthenticationMethod -and `
-                        $_.MembershipProvider -eq $zoneConfig.MembershipProvider -and `
-                        $_.RoleProvider -eq $zoneConfig.RoleProvider
-                }
+                        Where-Object -FilterScript {
+                        $_.AuthenticationMethod -eq $zoneConfig.AuthenticationMethod -and `
+                            $_.MembershipProvider -eq $zoneConfig.MembershipProvider -and `
+                            $_.RoleProvider -eq $zoneConfig.RoleProvider
+                    }
             }
             "Federated"
             {
                 $specifiedMethod = $DesiredConfig | `
-                    Where-Object -FilterScript {
-                    $_.AuthenticationMethod -eq $zoneConfig.AuthenticationMethod -and `
-                        $_.AuthenticationProvider -eq $zoneConfig.AuthenticationProvider
-                }
+                        Where-Object -FilterScript {
+                        $_.AuthenticationMethod -eq $zoneConfig.AuthenticationMethod -and `
+                            $_.AuthenticationProvider -eq $zoneConfig.AuthenticationProvider
+                    }
             }
         }
 

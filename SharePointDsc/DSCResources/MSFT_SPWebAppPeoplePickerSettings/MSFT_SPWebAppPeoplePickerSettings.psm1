@@ -1,3 +1,6 @@
+$script:SPDscUtilModulePath = Join-Path -Path $PSScriptRoot -ChildPath '..\..\Modules\SharePointDsc.Util'
+Import-Module -Name $script:SPDscUtilModulePath
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -170,10 +173,10 @@ function Set-TargetResource
             foreach ($searchADDomain in $params.SearchActiveDirectoryDomains)
             {
                 $configuredDomain = $wa.PeoplePickerSettings.SearchActiveDirectoryDomains | `
-                    Where-Object -FilterScript {
-                    $_.DomainName -eq $searchADDomain.FQDN -and `
-                        $_.IsForest -eq $searchADDomain.IsForest
-                }
+                        Where-Object -FilterScript {
+                        $_.DomainName -eq $searchADDomain.FQDN -and `
+                            $_.IsForest -eq $searchADDomain.IsForest
+                    }
                 if ($null -eq $configuredDomain)
                 {
                     # Add domain
@@ -280,10 +283,10 @@ function Test-TargetResource
     foreach ($searchADDomain in $SearchActiveDirectoryDomains)
     {
         $configuredDomain = $CurrentValues.SearchActiveDirectoryDomains | `
-            Where-Object -FilterScript {
-            $_.FQDN -eq $searchADDomain.FQDN -and `
-                $_.IsForest -eq $searchADDomain.IsForest
-        }
+                Where-Object -FilterScript {
+                $_.FQDN -eq $searchADDomain.FQDN -and `
+                    $_.IsForest -eq $searchADDomain.IsForest
+            }
         if ($null -eq $configuredDomain)
         {
             $message = "Current SearchActiveDirectoryDomains does not match the desired state."
