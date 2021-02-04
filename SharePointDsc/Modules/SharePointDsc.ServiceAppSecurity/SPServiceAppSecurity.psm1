@@ -1,3 +1,6 @@
+$script:SPDscUtilModulePath = Join-Path -Path $PSScriptRoot -ChildPath '..\..\Modules\SharePointDsc.Util'
+Import-Module -Name $script:SPDscUtilModulePath
+
 function Expand-AccessLevel
 {
     [OutputType([System.String[]])]

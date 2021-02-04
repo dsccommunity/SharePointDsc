@@ -1665,5 +1665,3 @@ function Start-SharePointDSCExtract
         Write-Host -Object "    - We couldn't detect a SharePoint installation on this machine. Please execute the SharePoint ReverseDSC script on an existing SharePoint server." -BackgroundColor Red -ForegroundColor Black
     }
 }
-
-Export-ModuleMember -Function *

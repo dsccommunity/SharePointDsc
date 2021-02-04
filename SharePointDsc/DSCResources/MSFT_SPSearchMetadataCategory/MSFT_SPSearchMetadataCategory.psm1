@@ -1,3 +1,6 @@
+$script:SPDscUtilModulePath = Join-Path -Path $PSScriptRoot -ChildPath '..\..\Modules\SharePointDsc.Util'
+Import-Module -Name $script:SPDscUtilModulePath
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -54,7 +57,7 @@ function Get-TargetResource
             throw $message
         }
         $category = Get-SPEnterpriseSearchMetadataCategory -SearchApplication $ssa | `
-            Where-Object { $_.Name -eq $params.Name }
+                Where-Object { $_.Name -eq $params.Name }
         if ($null -eq $category)
         {
             return @{

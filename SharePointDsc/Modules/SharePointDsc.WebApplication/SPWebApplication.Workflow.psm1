@@ -1,3 +1,6 @@
+$script:SPDscUtilModulePath = Join-Path -Path $PSScriptRoot -ChildPath '..\..\Modules\SharePointDsc.Util'
+Import-Module -Name $script:SPDscUtilModulePath
+
 function Get-SPDscWebApplicationWorkflowConfig
 {
     [CmdletBinding()]
@@ -8,9 +11,9 @@ function Get-SPDscWebApplicationWorkflowConfig
         $WebApplication
     )
     return @{
-        ExternalWorkflowParticipantsEnabled = `
+        ExternalWorkflowParticipantsEnabled           = `
             $WebApplication.ExternalWorkflowParticipantsEnabled
-        UserDefinedWorkflowsEnabled = `
+        UserDefinedWorkflowsEnabled                   = `
             $WebApplication.UserDefinedWorkflowsEnabled
         EmailToNoPermissionWorkflowParticipantsEnable = `
             $WebApplication.EmailToNoPermissionWorkflowParticipantsEnabled
@@ -66,12 +69,11 @@ function Test-SPDscWebApplicationWorkflowConfig
     $relPath = "..\..\Modules\SharePointDsc.Util\SharePointDsc.Util.psm1"
     Import-Module (Join-Path $PSScriptRoot $relPath -Resolve)
     $valuesTocheck = @("UserDefinedWorkflowsEnabled",
-                       "EmailToNoPermissionWorkflowParticipantsEnable",
-                       "ExternalWorkflowParticipantsEnabled")
+        "EmailToNoPermissionWorkflowParticipantsEnable",
+        "ExternalWorkflowParticipantsEnabled")
     $testReturn = Test-SPDscParameterState -CurrentValues $CurrentSettings `
-                                           -DesiredValues $DesiredSettings `
-                                           -ValuesToCheck $valuesTocheck `
-                                           -Source $Source
+        -DesiredValues $DesiredSettings `
+        -ValuesToCheck $valuesTocheck `
+        -Source $Source
     return $testReturn
 }
-

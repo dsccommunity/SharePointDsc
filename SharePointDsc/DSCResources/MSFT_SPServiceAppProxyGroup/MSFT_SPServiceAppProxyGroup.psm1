@@ -1,3 +1,6 @@
+$script:SPDscUtilModulePath = Join-Path -Path $PSScriptRoot -ChildPath '..\..\Modules\SharePointDsc.Util'
+Import-Module -Name $script:SPDscUtilModulePath
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -205,9 +208,9 @@ function Set-TargetResource
                             {
                                 $ServiceProxyName = $difference.InputObject
                                 $ServiceProxy = Get-SPServiceApplicationProxy | `
-                                    Where-Object -FilterScript {
-                                    $_.DisplayName -eq $ServiceProxyName
-                                }
+                                        Where-Object -FilterScript {
+                                        $_.DisplayName -eq $ServiceProxyName
+                                    }
 
                                 if (!$ServiceProxy)
                                 {
@@ -227,9 +230,9 @@ function Set-TargetResource
                             {
                                 $ServiceProxyName = $difference.InputObject
                                 $ServiceProxy = Get-SPServiceApplicationProxy | `
-                                    Where-Object -FilterScript {
-                                    $_.DisplayName -eq $ServiceProxyName
-                                }
+                                        Where-Object -FilterScript {
+                                        $_.DisplayName -eq $ServiceProxyName
+                                    }
 
                                 if (!$ServiceProxy)
                                 {
@@ -290,9 +293,9 @@ function Set-TargetResource
                             {
                                 $ServiceProxyName = $difference.InputObject
                                 $ServiceProxy = Get-SPServiceApplicationProxy | `
-                                    Where-Object -FilterScript {
-                                    $_.DisplayName -eq $ServiceProxyName
-                                }
+                                        Where-Object -FilterScript {
+                                        $_.DisplayName -eq $ServiceProxyName
+                                    }
 
                                 if (!$ServiceProxy)
                                 {
@@ -316,9 +319,9 @@ function Set-TargetResource
                     foreach ($ServiceProxyName in $params.ServiceAppProxies)
                     {
                         $ServiceProxy = Get-SPServiceApplicationProxy | `
-                            Where-Object -FilterScript {
-                            $_.DisplayName -eq $ServiceProxyName
-                        }
+                                Where-Object -FilterScript {
+                                $_.DisplayName -eq $ServiceProxyName
+                            }
 
                         if (!$ServiceProxy)
                         {

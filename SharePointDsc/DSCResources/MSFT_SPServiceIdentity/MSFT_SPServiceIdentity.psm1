@@ -1,3 +1,6 @@
+$script:SPDscUtilModulePath = Join-Path -Path $PSScriptRoot -ChildPath '..\..\Modules\SharePointDsc.Util'
+Import-Module -Name $script:SPDscUtilModulePath
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -43,16 +46,20 @@ function Get-TargetResource
         switch ($processIdentity.CurrentIdentityType)
         {
             "LocalSystem"
-            { $ManagedAccount = "LocalSystem"
+            {
+                $ManagedAccount = "LocalSystem"
             }
             "NetworkService"
-            { $ManagedAccount = "NetworkService"
+            {
+                $ManagedAccount = "NetworkService"
             }
             "LocalService"
-            { $ManagedAccount = "LocalService"
+            {
+                $ManagedAccount = "LocalService"
             }
             Default
-            { $ManagedAccount = $processIdentity.Username
+            {
+                $ManagedAccount = $processIdentity.Username
             }
         }
 

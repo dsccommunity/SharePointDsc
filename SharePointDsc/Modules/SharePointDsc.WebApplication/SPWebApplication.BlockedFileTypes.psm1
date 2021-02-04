@@ -1,3 +1,6 @@
+$script:SPDscUtilModulePath = Join-Path -Path $PSScriptRoot -ChildPath '..\..\Modules\SharePointDsc.Util'
+Import-Module -Name $script:SPDscUtilModulePath
+
 function Get-SPDscWebApplicationBlockedFileTypeConfig
 {
     [CmdletBinding()]
@@ -184,4 +187,3 @@ function Test-SPDscWebApplicationBlockedFileTypeConfig
     }
     return $true
 }
-

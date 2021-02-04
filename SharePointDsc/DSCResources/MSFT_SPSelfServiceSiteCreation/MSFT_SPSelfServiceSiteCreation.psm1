@@ -1,3 +1,6 @@
+$script:SPDscUtilModulePath = Join-Path -Path $PSScriptRoot -ChildPath '..\..\Modules\SharePointDsc.Util'
+Import-Module -Name $script:SPDscUtilModulePath
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -155,13 +158,16 @@ function Get-TargetResource
             switch ($webApplication.SiteCreationUserExperienceVersion)
             {
                 "Version1"
-                { $userExperienceVersion = "Classic"
+                {
+                    $userExperienceVersion = "Classic"
                 }
                 "Version2"
-                { $userExperienceVersion = "Modern"
+                {
+                    $userExperienceVersion = "Modern"
                 }
                 "Latest"
-                { $userExperienceVersion = "Latest"
+                {
+                    $userExperienceVersion = "Latest"
                 }
             }
         }
@@ -438,13 +444,16 @@ function Set-TargetResource
             switch ($params.UserExperienceVersion)
             {
                 "Modern"
-                { $newValue = [Microsoft.SharePoint.Administration.SiteCreationUserExperienceVersion]::Version2
+                {
+                    $newValue = [Microsoft.SharePoint.Administration.SiteCreationUserExperienceVersion]::Version2
                 }
                 "Classic"
-                { $newValue = [Microsoft.SharePoint.Administration.SiteCreationUserExperienceVersion]::Version1
+                {
+                    $newValue = [Microsoft.SharePoint.Administration.SiteCreationUserExperienceVersion]::Version1
                 }
                 "Latest"
-                { $newValue = [Microsoft.SharePoint.Administration.SiteCreationUserExperienceVersion]::Latest
+                {
+                    $newValue = [Microsoft.SharePoint.Administration.SiteCreationUserExperienceVersion]::Latest
                 }
             }
 

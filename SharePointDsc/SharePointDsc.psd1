@@ -68,7 +68,7 @@
     # FormatsToProcess = @()
 
     # Modules to import as nested modules of the module specified in RootModule/ModuleToProcess
-    NestedModules        = @("Modules\SharePointDsc.Util\SharePointDsc.Util.psm1")
+    NestedModules        = @("Modules\SharePointDsc.Util\SharePointDsc.Util.psd1")
 
     # Functions to export from this module
     FunctionsToExport    = @(
@@ -144,6 +144,7 @@
         'SPAppManagementServiceApp',
         'SPAppStoreSettings',
         'SPAuthenticationRealm',
+        'SPAzureAccessControlServiceAppProxy',
         'SPBCSServiceApp',
         'SPBlobCacheSettings',
         'SPCacheAccounts',
@@ -155,6 +156,7 @@
         'SPDiagnosticsProvider',
         'SPDistributedCacheClientSettings',
         'SPDistributedCacheService',
+        'SPDocIcon',
         'SPExcelServiceApp',
         'SPFarm',
         'SPFarmAdministrators',
@@ -175,6 +177,7 @@
         'SPManagedMetadataServiceAppDefault',
         'SPManagedPath',
         'SPMinRoleCompliance',
+        'SPOAppPrincipalMgmtServiceAppProxy',
         'SPOfficeOnlineServerBinding',
         'SPOutgoingEmailSettings',
         'SPPasswordChangeSettings',

@@ -1,3 +1,6 @@
+$script:SPDscUtilModulePath = Join-Path -Path $PSScriptRoot -ChildPath '..\..\Modules\SharePointDsc.Util'
+Import-Module -Name $script:SPDscUtilModulePath
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -329,4 +332,3 @@ function Test-TargetResource
 }
 
 Export-ModuleMember -Function *-TargetResource
-
