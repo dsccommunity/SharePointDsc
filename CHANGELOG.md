@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - SharePointDsc
   - Fixed regression in v4.5
+  - Added Export-SPDscDiagnosticData cmdlet to create a diagnostic package which can
+    easily be shared for troubleshooting
 
 ## [4.5.0] - 2021-01-30
 

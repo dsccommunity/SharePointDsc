@@ -42,6 +42,7 @@
         'Convert-SPDscHashtableToString',
         'ConvertTo-ReverseString',
         'ConvertTo-TwoDigitFlipString',
+        'Export-SPDscDiagnosticData',
         'Format-OfficePatchGUID',
         'Get-SPDscAssemblyVersion',
         'Get-SPDscBuildVersion',
