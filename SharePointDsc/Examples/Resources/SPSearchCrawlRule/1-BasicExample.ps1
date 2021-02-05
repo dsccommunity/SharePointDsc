@@ -39,25 +39,28 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
-    {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
 
-        node localhost {
-            SPSearchCrawlRule IntranetCrawlAccount
-            {
-                Path = "https://intranet.sharepoint.contoso.com"
-                ServiceAppName = "Search Service Application"
-                Ensure = "Present"
-                RuleType = "InclusionRule"
-                CrawlConfigurationRules = "FollowLinksNoPageCrawl","CrawlComplexUrls", "CrawlAsHTTP"
-                AuthenticationType = "DefaultRuleAccess"
-                PsDscRunAsCredential = $SetupAccount
-            }
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
+    {
+        SPSearchCrawlRule IntranetCrawlAccount
+        {
+            Path                    = "https://intranet.sharepoint.contoso.com"
+            ServiceAppName          = "Search Service Application"
+            Ensure                  = "Present"
+            RuleType                = "InclusionRule"
+            CrawlConfigurationRules = "FollowLinksNoPageCrawl", "CrawlComplexUrls", "CrawlAsHTTP"
+            AuthenticationType      = "DefaultRuleAccess"
+            PsDscRunAsCredential    = $SetupAccount
         }
     }
+}

@@ -40,22 +40,25 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
-    {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
 
-        node localhost {
-            SPDatabaseAAG ConfigDBAAG
-            {
-                DatabaseName         = "SP_Config"
-                AGName               = "MyAvailabilityGroup"
-                FileShare            = "\\SQL\Backups"
-                PsDscRunAsCredential = $SetupAccount
-            }
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
+    {
+        SPDatabaseAAG ConfigDBAAG
+        {
+            DatabaseName         = "SP_Config"
+            AGName               = "MyAvailabilityGroup"
+            FileShare            = "\\SQL\Backups"
+            PsDscRunAsCredential = $SetupAccount
         }
     }
+}

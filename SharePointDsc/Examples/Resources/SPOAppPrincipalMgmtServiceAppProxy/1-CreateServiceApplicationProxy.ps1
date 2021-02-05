@@ -41,14 +41,17 @@ in the farm connecting to the contoso tenant.
 
 Configuration Example
 {
-    param(
+    param
+    (
         [Parameter(Mandatory = $true)]
         [PSCredential]
         $SetupAccount
     )
+
     Import-DscResource -ModuleName SharePointDsc
 
-    node localhost {
+    node localhost
+    {
         SPOAppPrincipalMgmtServiceAppProxy SPOAddInManagementProxy
         {
             Name                 = "SPO Add-in Management Proxy"

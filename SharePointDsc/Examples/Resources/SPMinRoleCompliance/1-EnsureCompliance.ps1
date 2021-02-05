@@ -39,21 +39,24 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
-    {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
 
-        node localhost {
-            SPMinRoleCompliance MinRoleCompliance
-            {
-                IsSingleInstance     = "Yes"
-                State                = "Compliant"
-                PSDscRunAsCredential = $SetupAccount
-            }
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
+    {
+        SPMinRoleCompliance MinRoleCompliance
+        {
+            IsSingleInstance     = "Yes"
+            State                = "Compliant"
+            PSDscRunAsCredential = $SetupAccount
         }
     }
+}

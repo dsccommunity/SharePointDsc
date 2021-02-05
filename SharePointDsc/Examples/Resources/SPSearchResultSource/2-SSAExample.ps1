@@ -50,7 +50,8 @@ Configuration Example
     )
     Import-DscResource -ModuleName SharePointDsc
 
-    node localhost {
+    node localhost
+    {
         SPSearchResultSource Intranet
         {
             Name                 = "Intranet"

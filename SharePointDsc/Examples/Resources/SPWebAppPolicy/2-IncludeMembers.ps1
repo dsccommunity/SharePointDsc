@@ -40,36 +40,39 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
-    {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
 
-        node localhost {
-            SPWebAppPolicy WebAppPolicy
-            {
-                WebAppUrl            = "http://sharepoint.contoso.com"
-                MembersToInclude = @(
-                    @(MSFT_SPWebPolicyPermissions {
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
+    {
+        SPWebAppPolicy WebAppPolicy
+        {
+            WebAppUrl              = "http://sharepoint.contoso.com"
+            MembersToInclude       = @(
+                @(MSFT_SPWebPolicyPermissions {
                         Username        = "contoso\user1"
                         PermissionLevel = "Full Control"
                     })
-                    @(MSFT_SPWebPolicyPermissions {
+                @(MSFT_SPWebPolicyPermissions {
                         Username        = "contoso\user2"
                         PermissionLevel = "Full Read"
                     })
-                )
-                MembersToExclude = @(
-                    @(MSFT_SPWebPolicyPermissions {
+            )
+            MembersToExclude       = @(
+                @(MSFT_SPWebPolicyPermissions {
                         Username = "contoso\user3"
                     })
-                )
-                SetCacheAccountsPolicy = $true
-                PsDscRunAsCredential   = $SetupAccount
-            }
+            )
+            SetCacheAccountsPolicy = $true
+            PsDscRunAsCredential   = $SetupAccount
         }
     }
+}

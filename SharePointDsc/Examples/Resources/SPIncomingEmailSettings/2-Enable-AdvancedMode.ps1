@@ -41,23 +41,26 @@ Updated author, copyright notice, and URLs.
 
 Configuration Example
 {
-    param(
+    param
+    (
         [Parameter(Mandatory = $true)]
         [PSCredential]
         $SetupAccount
     )
+
     Import-DscResource -ModuleName SharePointDsc
 
-    node localhost {
+    node localhost
+    {
         SPIncomingEmailSettings AutomaticEmail
         {
-            IsSingleInstance     = "Yes"
-            Ensure               = "Present"
-            UseAutomaticSettings = $false
+            IsSingleInstance              = "Yes"
+            Ensure                        = "Present"
+            UseAutomaticSettings          = $false
             UseDirectoryManagementService = "No"
-            ServerDisplayAddress = "contoso.com"
-            DropFolder           = "\\MailServer\Pickup"
-            PsDscRunAsCredential = $SetupAccount
+            ServerDisplayAddress          = "contoso.com"
+            DropFolder                    = "\\MailServer\Pickup"
+            PsDscRunAsCredential          = $SetupAccount
         }
     }
 }

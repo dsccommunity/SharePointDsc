@@ -40,23 +40,26 @@ Updated author, copyright notice, and URLs.
 #>
 Configuration Example
 {
-    param(
+    param
+    (
         [Parameter(Mandatory = $true)]
         [PSCredential]
         $SetupAccount
     )
+
     Import-DscResource -ModuleName SharePointDsc
 
-    node localhost {
+    node localhost
+    {
         SPLogLevel SetAllSPServerToDefault
         {
-            Name = "SPServer_defaults"
-            SPLogLevelSetting = @(
+            Name                 = "SPServer_defaults"
+            SPLogLevelSetting    = @(
                 MSFT_SPLogLevelItem {
-                    Area           = "SharePoint Server"
-                    Name           = "*"
-                    TraceLevel     = "Default"
-                    EventLevel     = "Default"
+                    Area       = "SharePoint Server"
+                    Name       = "*"
+                    TraceLevel = "Default"
+                    EventLevel = "Default"
                 }
             )
             PsDscRunAsCredential = $SetupAccount

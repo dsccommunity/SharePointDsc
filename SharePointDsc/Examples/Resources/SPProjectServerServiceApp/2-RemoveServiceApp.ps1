@@ -41,22 +41,25 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
-    {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
 
-        node localhost {
-            SPProjectServerServiceApp ProjectServiceApp
-            {
-                Name                 = "Project Server Service Application"
-                ApplicationPool      = "n/a"
-                Ensure               = "Absent"
-                PsDscRunAsCredential = $SetupAccount
-            }
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
+    {
+        SPProjectServerServiceApp ProjectServiceApp
+        {
+            Name                 = "Project Server Service Application"
+            ApplicationPool      = "n/a"
+            Ensure               = "Absent"
+            PsDscRunAsCredential = $SetupAccount
         }
     }
+}

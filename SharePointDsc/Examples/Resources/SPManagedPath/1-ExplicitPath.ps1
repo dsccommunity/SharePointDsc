@@ -41,14 +41,17 @@ Updated author, copyright notice, and URLs.
 
     Configuration Example
     {
-        param(
+        param
+        (
             [Parameter(Mandatory = $true)]
             [PSCredential]
             $SetupAccount
         )
+
         Import-DscResource -ModuleName SharePointDsc
 
-        node localhost {
+        node localhost
+        {
             SPManagedPath TestManagedPath
             {
                 WebAppUrl            = "http://sharepoint.contoso.com"

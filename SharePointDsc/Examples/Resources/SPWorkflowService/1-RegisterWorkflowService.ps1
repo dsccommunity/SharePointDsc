@@ -39,22 +39,25 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
-    {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
 
-        node localhost {
-            SPWorkflowService WorkflowService
-            {
-                WorkflowHostUri      = "http://workflow.sharepoint.contoso.com"
-                SPSiteUrl            = "http://sites.sharepoint.com"
-                AllowOAuthHttp       = $true
-                PsDscRunAsCredential = $SetupAccount
-            }
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
+    {
+        SPWorkflowService WorkflowService
+        {
+            WorkflowHostUri      = "http://workflow.sharepoint.contoso.com"
+            SPSiteUrl            = "http://sites.sharepoint.com"
+            AllowOAuthHttp       = $true
+            PsDscRunAsCredential = $SetupAccount
         }
     }
+}

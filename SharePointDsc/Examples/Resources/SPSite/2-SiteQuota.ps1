@@ -39,25 +39,28 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
-    {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
 
-        node localhost {
-            SPSite TeamSite
-            {
-                Url                      = "http://sharepoint.contoso.com"
-                OwnerAlias               = "CONTOSO\ExampleUser"
-                HostHeaderWebApplication = "http://spsites.contoso.com"
-                Name                     = "Team Sites"
-                Template                 = "STS#0"
-                QuotaTemplate            = "Teamsite"
-                PsDscRunAsCredential     = $SetupAccount
-            }
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
+    {
+        SPSite TeamSite
+        {
+            Url                      = "http://sharepoint.contoso.com"
+            OwnerAlias               = "CONTOSO\ExampleUser"
+            HostHeaderWebApplication = "http://spsites.contoso.com"
+            Name                     = "Team Sites"
+            Template                 = "STS#0"
+            QuotaTemplate            = "Teamsite"
+            PsDscRunAsCredential     = $SetupAccount
         }
     }
+}

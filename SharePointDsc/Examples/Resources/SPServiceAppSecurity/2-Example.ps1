@@ -41,27 +41,30 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
-    {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
 
-        node localhost {
-            $members = @()
-            $members += MSFT_SPServiceAppSecurityEntry {
-                                    Username     = "{LocalFarm}"
-                                    AccessLevels = @("Full Control")
-                                }
-            SPServiceAppSecurity UserProfileServiceSecurity
-            {
-                ServiceAppName       = "User Profile Service Application"
-                SecurityType         = "SharingPermissions"
-                Members              = $members
-                PsDscRunAsCredential = $SetupAccount
-            }
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
+    {
+        $members = @()
+        $members += MSFT_SPServiceAppSecurityEntry {
+            Username     = "{LocalFarm}"
+            AccessLevels = @("Full Control")
+        }
+        SPServiceAppSecurity UserProfileServiceSecurity
+        {
+            ServiceAppName       = "User Profile Service Application"
+            SecurityType         = "SharingPermissions"
+            Members              = $members
+            PsDscRunAsCredential = $SetupAccount
         }
     }
+}

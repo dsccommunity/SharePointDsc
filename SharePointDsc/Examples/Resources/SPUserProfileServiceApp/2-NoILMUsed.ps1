@@ -39,31 +39,34 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
-    {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
 
-        node localhost {
-            SPUserProfileServiceApp UserProfileServiceApp
-            {
-                Name                 = "User Profile Service Application"
-                ApplicationPool      = "SharePoint Service Applications"
-                MySiteHostLocation   = "http://my.sharepoint.contoso.local"
-                MySiteManagedPath    = "personal"
-                ProfileDBName        = "SP_UserProfiles"
-                ProfileDBServer      = "SQL.contoso.local\SQLINSTANCE"
-                SocialDBName         = "SP_Social"
-                SocialDBServer       = "SQL.contoso.local\SQLINSTANCE"
-                SyncDBName           = "SP_ProfileSync"
-                SyncDBServer         = "SQL.contoso.local\SQLINSTANCE"
-                EnableNetBIOS        = $false
-                NoILMUsed            = $true
-                PsDscRunAsCredential = $SetupAccount
-            }
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
+    {
+        SPUserProfileServiceApp UserProfileServiceApp
+        {
+            Name                 = "User Profile Service Application"
+            ApplicationPool      = "SharePoint Service Applications"
+            MySiteHostLocation   = "http://my.sharepoint.contoso.local"
+            MySiteManagedPath    = "personal"
+            ProfileDBName        = "SP_UserProfiles"
+            ProfileDBServer      = "SQL.contoso.local\SQLINSTANCE"
+            SocialDBName         = "SP_Social"
+            SocialDBServer       = "SQL.contoso.local\SQLINSTANCE"
+            SyncDBName           = "SP_ProfileSync"
+            SyncDBServer         = "SQL.contoso.local\SQLINSTANCE"
+            EnableNetBIOS        = $false
+            NoILMUsed            = $true
+            PsDscRunAsCredential = $SetupAccount
         }
     }
+}

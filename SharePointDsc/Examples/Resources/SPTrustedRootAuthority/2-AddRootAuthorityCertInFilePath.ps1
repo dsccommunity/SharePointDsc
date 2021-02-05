@@ -39,22 +39,25 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
-    {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
 
-        node localhost {
-            SPTrustedRootAuthority SampleRootAuthority
-            {
-                Name                 = "Contoso"
-                CertificateFilePath  = "C:\Certificates\RootAuthority.cer"
-                Ensure               = "Present"
-                PsDscRunAsCredential = $SetupAccount
-            }
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
+    {
+        SPTrustedRootAuthority SampleRootAuthority
+        {
+            Name                 = "Contoso"
+            CertificateFilePath  = "C:\Certificates\RootAuthority.cer"
+            Ensure               = "Present"
+            PsDscRunAsCredential = $SetupAccount
         }
     }
+}

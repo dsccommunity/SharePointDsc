@@ -42,31 +42,34 @@ Updated author, copyright notice, and URLs.
 
 Configuration Example
 {
-    param(
+    param
+    (
         [Parameter(Mandatory = $true)]
         [PSCredential]
         $SetupAccount
     )
+
     Import-DscResource -ModuleName SharePointDsc
 
-    node localhost {
+    node localhost
+    {
         $ProviderRealms = @()
         $ProviderRealms += MSFT_SPProviderRealm {
-                                RealmUrl = "https://search.contoso.com"
-                                RealmUrn = "urn:sharepoint:contoso:search"
-                            }
+            RealmUrl = "https://search.contoso.com"
+            RealmUrn = "urn:sharepoint:contoso:search"
+        }
 
         $ProviderRealms += MSFT_SPProviderRealm {
-                                RealmUrl = "https://intranet.contoso.com"
-                                RealmUrn = "urn:sharepoint:contoso:intranet"
-                                }
+            RealmUrl = "https://intranet.contoso.com"
+            RealmUrn = "urn:sharepoint:contoso:intranet"
+        }
 
         SPTrustedIdentityTokenIssuerProviderRealms Farm1OverwriteExample
         {
-            IssuerName               = "Contoso"
-            ProviderRealms           = $ProviderRealms
-            Ensure                   = "Present"
-            PsDscRunAsCredential     = $SetupAccount
+            IssuerName           = "Contoso"
+            ProviderRealms       = $ProviderRealms
+            Ensure               = "Present"
+            PsDscRunAsCredential = $SetupAccount
         }
     }
 }

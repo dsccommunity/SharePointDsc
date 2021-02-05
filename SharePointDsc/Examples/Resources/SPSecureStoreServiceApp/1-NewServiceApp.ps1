@@ -39,24 +39,27 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
-    {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
 
-        node localhost {
-            SPSecureStoreServiceApp SecureStoreServiceApp
-            {
-                Name                 = "Secure Store Service Application"
-                ApplicationPool      = "SharePoint Service Applications"
-                AuditingEnabled      = $true
-                AuditlogMaxSize      = 30
-                DatabaseName         = "SP_SecureStore"
-                PsDscRunAsCredential = $SetupAccount
-            }
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
+    {
+        SPSecureStoreServiceApp SecureStoreServiceApp
+        {
+            Name                 = "Secure Store Service Application"
+            ApplicationPool      = "SharePoint Service Applications"
+            AuditingEnabled      = $true
+            AuditlogMaxSize      = 30
+            DatabaseName         = "SP_SecureStore"
+            PsDscRunAsCredential = $SetupAccount
         }
     }
+}

@@ -42,14 +42,17 @@ in the farm connecting to the contoso tenant.
 
 Configuration Example
 {
-    param(
+    param
+    (
         [Parameter(Mandatory = $true)]
         [PSCredential]
         $SetupAccount
     )
+
     Import-DscResource -ModuleName SharePointDsc
 
-    node localhost {
+    node localhost
+    {
         SPAzureAccessControlServiceAppProxy SPOACS
         {
             Name                       = "SPO ACS"
@@ -58,4 +61,3 @@ Configuration Example
         }
     }
 }
-

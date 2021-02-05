@@ -42,22 +42,25 @@ Updated author, copyright notice, and URLs.
 
 Configuration Example
 {
-    param(
+    param
+    (
         [Parameter(Mandatory = $true)]
         [PSCredential]
         $SetupAccount
     )
+
     Import-DscResource -ModuleName SharePointDsc
 
-    node localhost {
+    node localhost
+    {
         SPManagedMetaDataServiceApp ManagedMetadataServiceApp
         {
             Name                 = "Managed Metadata Service Application"
-            PSDscRunAsCredential = $SetupAccount
             ApplicationPool      = "SharePoint Service Applications"
             DatabaseServer       = "SQL.contoso.local"
             DatabaseName         = "SP_ManagedMetadata"
             ContentTypeHubUrl    = "http://contoso.sharepoint.com/sites/ct"
+            PSDscRunAsCredential = $SetupAccount
         }
     }
 }

@@ -45,35 +45,38 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $FarmAccount,
+
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount,
+
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $Passphrase
+    )
+
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
     {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $FarmAccount,
-
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount,
-
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $Passphrase
-        )
-        Import-DscResource -ModuleName SharePointDsc
-
-        node localhost {
-            SPFarm SharePointFarm
-            {
-                IsSingleInstance          = "Yes"
-                DatabaseServer            = "SQL.contoso.local\SQLINSTANCE"
-                FarmConfigDatabaseName    = "SP_Config"
-                AdminContentDatabaseName  = "SP_AdminContent"
-                ServerRole                = "Application"
-                Passphrase                = $Passphrase
-                FarmAccount               = $FarmAccount
-                RunCentralAdmin           = $true
-                PsDscRunAsCredential      = $SetupAccount
-            }
+        SPFarm SharePointFarm
+        {
+            IsSingleInstance         = "Yes"
+            DatabaseServer           = "SQL.contoso.local\SQLINSTANCE"
+            FarmConfigDatabaseName   = "SP_Config"
+            AdminContentDatabaseName = "SP_AdminContent"
+            ServerRole               = "Application"
+            Passphrase               = $Passphrase
+            FarmAccount              = $FarmAccount
+            RunCentralAdmin          = $true
+            PsDscRunAsCredential     = $SetupAccount
         }
     }
+}

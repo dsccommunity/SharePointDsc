@@ -39,21 +39,24 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
-    {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
 
-        node localhost {
-            SPAppDomain LocalFarmAppUrls
-            {
-                AppDomain            = "contosointranetapps.com"
-                Prefix               = "app"
-                PsDscRunAsCredential = $SetupAccount
-            }
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
+    {
+        SPAppDomain LocalFarmAppUrls
+        {
+            AppDomain            = "contosointranetapps.com"
+            Prefix               = "app"
+            PsDscRunAsCredential = $SetupAccount
         }
     }
+}

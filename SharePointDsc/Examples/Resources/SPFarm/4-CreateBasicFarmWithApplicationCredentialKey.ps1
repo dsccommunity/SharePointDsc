@@ -45,7 +45,8 @@ admin site in this example is provisioned to port 9999 using NTLM authentication
 
 Configuration Example
 {
-    param(
+    param
+    (
         [Parameter(Mandatory = $true)]
         [PSCredential]
         $FarmAccount,
@@ -62,25 +63,22 @@ Configuration Example
         [PSCredential]
         $ApplicationCredentialKey
     )
+
     Import-DscResource -ModuleName SharePointDsc
 
-    node localhost {
+    node localhost
+    {
         SPFarm SharePointFarm
         {
-            IsSingleInstance          = "Yes"
-            DatabaseServer            = "SQL.contoso.local\SQLINSTANCE"
-            FarmConfigDatabaseName    = "SP_Config"
-            AdminContentDatabaseName  = "SP_AdminContent"
-            Passphrase                = $Passphrase
-            FarmAccount               = $FarmAccount
-            ApplicationCredentialKey  = $ApplicationCredentialKey
-            RunCentralAdmin           = $true
-            PsDscRunAsCredential      = $SetupAccount
+            IsSingleInstance         = "Yes"
+            DatabaseServer           = "SQL.contoso.local\SQLINSTANCE"
+            FarmConfigDatabaseName   = "SP_Config"
+            AdminContentDatabaseName = "SP_AdminContent"
+            Passphrase               = $Passphrase
+            FarmAccount              = $FarmAccount
+            ApplicationCredentialKey = $ApplicationCredentialKey
+            RunCentralAdmin          = $true
+            PsDscRunAsCredential     = $SetupAccount
         }
     }
 }
-
-<#
-.EXAMPLE
-#>
-

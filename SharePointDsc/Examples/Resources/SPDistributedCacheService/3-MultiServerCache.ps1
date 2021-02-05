@@ -46,69 +46,71 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    $ConfigurationData = @{
-        AllNodes = @(
-            @{
-                NodeName = 'Server1'
-                PSDscAllowPlainTextPassword = $true
-            },
-            @{
-                NodeName = 'Server2'
-                PSDscAllowPlainTextPassword = $true
-            },
-            @{
-                NodeName = 'Server3'
-                PSDscAllowPlainTextPassword = $true
-            }
-        )
-    }
+$ConfigurationData = @{
+    AllNodes = @(
+        @{
+            NodeName                    = 'Server1'
+            PSDscAllowPlainTextPassword = $true
+        },
+        @{
+            NodeName                    = 'Server2'
+            PSDscAllowPlainTextPassword = $true
+        },
+        @{
+            NodeName                    = 'Server3'
+            PSDscAllowPlainTextPassword = $true
+        }
+    )
+}
 
-    Configuration Example
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
+
+    Import-DscResource -ModuleName SharePointDsc
+
+    node "Server1"
     {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
-
-        node "Server1"
+        SPDistributedCacheService EnableDistributedCache
         {
-            SPDistributedCacheService EnableDistributedCache
-            {
-                Name                 = "AppFabricCachingService"
-                CacheSizeInMB        = 8192
-                ServiceAccount       = "DEMO\ServiceAccount"
-                ServerProvisionOrder = @("Server1","Server2")
-                CreateFirewallRules  = $true
-                PsDscRunAsCredential = $SetupAccount
-            }
-        }
-
-        node "Server2"
-        {
-            SPDistributedCacheService EnableDistributedCache
-            {
-                Name                 = "AppFabricCachingService"
-                CacheSizeInMB        = 8192
-                ServiceAccount       = "DEMO\ServiceAccount"
-                ServerProvisionOrder = @("Server1","Server2")
-                CreateFirewallRules  = $true
-                PsDscRunAsCredential = $SetupAccount
-            }
-        }
-
-        node "Server3"
-        {
-            SPDistributedCacheService EnableDistributedCache
-            {
-                Name                 = "AppFabricCachingService"
-                CacheSizeInMB        = 8192
-                ServiceAccount       = "DEMO\ServiceAccount"
-                ServerProvisionOrder = @("Server1","Server2")
-                CreateFirewallRules  = $true
-                Ensure               = 'Absent'
-                PsDscRunAsCredential = $SetupAccount
-            }
+            Name                 = "AppFabricCachingService"
+            CacheSizeInMB        = 8192
+            ServiceAccount       = "DEMO\ServiceAccount"
+            ServerProvisionOrder = @("Server1", "Server2")
+            CreateFirewallRules  = $true
+            PsDscRunAsCredential = $SetupAccount
         }
     }
+
+    node "Server2"
+    {
+        SPDistributedCacheService EnableDistributedCache
+        {
+            Name                 = "AppFabricCachingService"
+            CacheSizeInMB        = 8192
+            ServiceAccount       = "DEMO\ServiceAccount"
+            ServerProvisionOrder = @("Server1", "Server2")
+            CreateFirewallRules  = $true
+            PsDscRunAsCredential = $SetupAccount
+        }
+    }
+
+    node "Server3"
+    {
+        SPDistributedCacheService EnableDistributedCache
+        {
+            Name                 = "AppFabricCachingService"
+            CacheSizeInMB        = 8192
+            ServiceAccount       = "DEMO\ServiceAccount"
+            ServerProvisionOrder = @("Server1", "Server2")
+            CreateFirewallRules  = $true
+            Ensure               = 'Absent'
+            PsDscRunAsCredential = $SetupAccount
+        }
+    }
+}

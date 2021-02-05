@@ -39,24 +39,27 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
-    {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
 
-        node localhost {
-            SPSearchFileType PDF
-            {
-                FileType = "pdf"
-                ServiceAppName = "Search Service Application"
-                Description = "PDF"
-                MimeType = "application/pdf"
-                Ensure = "Present"
-                PsDscRunAsCredential = $SetupAccount
-            }
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
+    {
+        SPSearchFileType PDF
+        {
+            FileType             = "pdf"
+            ServiceAppName       = "Search Service Application"
+            Description          = "PDF"
+            MimeType             = "application/pdf"
+            Ensure               = "Present"
+            PsDscRunAsCredential = $SetupAccount
         }
     }
+}

@@ -41,22 +41,25 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
-    {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
 
-        node localhost {
-            SPWebAppBlockedFileTypes PrimaryWebAppBlockedFileTypes
-            {
-                WebAppUrl              = "http://example.contoso.local"
-                EnsureBlocked          = @("exe", "dll", "msi")
-                EnsureAllowed          = @("pdf", "docx", "xlsx")
-                PsDscRunAsCredential   = $SetupAccount
-            }
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
+    {
+        SPWebAppBlockedFileTypes PrimaryWebAppBlockedFileTypes
+        {
+            WebAppUrl            = "http://example.contoso.local"
+            EnsureBlocked        = @("exe", "dll", "msi")
+            EnsureAllowed        = @("pdf", "docx", "xlsx")
+            PsDscRunAsCredential = $SetupAccount
         }
     }
+}

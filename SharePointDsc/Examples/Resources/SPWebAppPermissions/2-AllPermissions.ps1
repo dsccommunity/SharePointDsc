@@ -39,21 +39,24 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
-    {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
 
-        node localhost {
-            SPWebAppPermissions WebApplicationPermissions
-            {
-                WebAppUrl            = "https://portal.sharepoint.contoso.com"
-                AllPermissions       = $true
-                PsDscRunAsCredential = $SetupAccount
-            }
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
+    {
+        SPWebAppPermissions WebApplicationPermissions
+        {
+            WebAppUrl            = "https://portal.sharepoint.contoso.com"
+            AllPermissions       = $true
+            PsDscRunAsCredential = $SetupAccount
         }
     }
+}

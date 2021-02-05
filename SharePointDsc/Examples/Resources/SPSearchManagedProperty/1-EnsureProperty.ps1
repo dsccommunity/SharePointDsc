@@ -39,25 +39,28 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
-    {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
 
-        node localhost {
-            SPSearchManagedProperty MyProperty
-            {
-                Name = "MyProperty"
-                ServiceAppName = "Search Service Application"
-                PropertyType = "Text"
-                Searchable = $true
-                IncludeAllCrawledProperties = $false
-                CrawledProperties = @("OWS_Notes, Personal:AboutMe")
-                PsDscRunAsCredential = $SetupAccount
-            }
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
+    {
+        SPSearchManagedProperty MyProperty
+        {
+            Name                        = "MyProperty"
+            ServiceAppName              = "Search Service Application"
+            PropertyType                = "Text"
+            Searchable                  = $true
+            IncludeAllCrawledProperties = $false
+            CrawledProperties           = @("OWS_Notes, Personal:AboutMe")
+            PsDscRunAsCredential        = $SetupAccount
         }
     }
+}

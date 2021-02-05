@@ -41,20 +41,22 @@ Updated author, copyright notice, and URLs.
 
 Configuration Example
 {
-    param(
+    param
+    (
         [Parameter(Mandatory = $true)]
         [PSCredential]
         $SetupAccount
     )
+
     Import-DscResource -ModuleName SharePointDsc
 
     node localhost
     {
         SPProjectServerGroup Group
         {
-            Url = "http://projects.contoso.com"
-            Name = "My group"
-            Members = @(
+            Url                  = "http://projects.contoso.com"
+            Name                 = "My group"
+            Members              = @(
                 "Domain\User1"
                 "Domain\User2"
             )

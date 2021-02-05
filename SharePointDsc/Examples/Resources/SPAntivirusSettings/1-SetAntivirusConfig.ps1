@@ -39,26 +39,27 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
+
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
     {
-        param
-        (
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-
-        Import-DscResource -ModuleName SharePointDsc
-
-        node localhost {
-            SPAntivirusSettings AVSettings
-            {
-                IsSingleInstance      = "Yes"
-                ScanOnDownload        = $true
-                ScanOnUpload          = $true
-                AllowDownloadInfected = $false
-                AttemptToClean        = $false
-                PsDscRunAsCredential = $SetupAccount
-            }
+        SPAntivirusSettings AVSettings
+        {
+            IsSingleInstance      = "Yes"
+            ScanOnDownload        = $true
+            ScanOnUpload          = $true
+            AllowDownloadInfected = $false
+            AttemptToClean        = $false
+            PsDscRunAsCredential  = $SetupAccount
         }
     }
+}

@@ -39,28 +39,31 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
-    {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
 
-        node localhost {
-            SPWebAppThrottlingSettings PrimaryWebAppThrottlingSettings
-            {
-                WebAppUrl                = "http://example.contoso.local"
-                ListViewThreshold        = 5000
-                AllowObjectModelOverride = $false
-                HappyHourEnabled         = $true
-                HappyHour                = MSFT_SPWebApplicationHappyHour {
-                    Hour     = 3
-                    Minute   = 0
-                    Duration = 1
-                }
-                PsDscRunAsCredential     = $SetupAccount
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
+    {
+        SPWebAppThrottlingSettings PrimaryWebAppThrottlingSettings
+        {
+            WebAppUrl                = "http://example.contoso.local"
+            ListViewThreshold        = 5000
+            AllowObjectModelOverride = $false
+            HappyHourEnabled         = $true
+            HappyHour                = MSFT_SPWebApplicationHappyHour {
+                Hour     = 3
+                Minute   = 0
+                Duration = 1
             }
+            PsDscRunAsCredential     = $SetupAccount
         }
     }
+}

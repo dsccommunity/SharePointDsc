@@ -41,23 +41,26 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
-    {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
 
-        node localhost {
-            SPContentDatabase ContentDB
-            {
-                Name                 = "SharePoint_Content_01"
-                DatabaseServer       = "SQL.contoso.local\SQLINSTANCE"
-                WebAppUrl            = "http://sharepoint.contoso.com"
-                Ensure               = "Absent"
-                PsDscRunAsCredential = $SetupAccount
-            }
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
+    {
+        SPContentDatabase ContentDB
+        {
+            Name                 = "SharePoint_Content_01"
+            DatabaseServer       = "SQL.contoso.local\SQLINSTANCE"
+            WebAppUrl            = "http://sharepoint.contoso.com"
+            Ensure               = "Absent"
+            PsDscRunAsCredential = $SetupAccount
         }
     }
+}

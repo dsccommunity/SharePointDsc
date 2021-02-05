@@ -43,14 +43,17 @@ Updated author, copyright notice, and URLs.
 
 Configuration Example
 {
-    param(
+    param
+    (
         [Parameter(Mandatory = $true)]
         [PSCredential]
         $SetupAccount
     )
+
     Import-DscResource -ModuleName SharePointDsc
 
-    node localhost {
+    node localhost
+    {
         $ProviderRealmsToInclude = @()
         $ProviderRealmsToInclude += MSFT_SPProviderRealm {
                                 RealmUrl = "https://search.contoso.com"

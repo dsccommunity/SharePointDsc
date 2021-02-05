@@ -41,20 +41,23 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
-    {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
 
-        node localhost {
-            SPInstallLanguagePack InstallLPBinaries
-            {
-                BinaryDir  = "C:\SPInstall"
-                Ensure     = "Present"
-            }
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
+    {
+        SPInstallLanguagePack InstallLPBinaries
+        {
+            BinaryDir = "C:\SPInstall"
+            Ensure    = "Present"
         }
     }
+}

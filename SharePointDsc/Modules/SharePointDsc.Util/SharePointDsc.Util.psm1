@@ -1697,7 +1697,8 @@ function Export-SPDscDiagnosticData
     )
     Write-Host 'Exporting logging information' -ForegroundColor Yellow
 
-    if (([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator") -eq $false)
+    $currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
+    if ($currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator) -eq $false)
     {
         Write-Host -Object "[ERROR] You need to run this cmdlet with Administrator privileges!" -ForegroundColor Red
         return

@@ -40,24 +40,27 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
-    {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
 
-        node localhost {
-            SPOutgoingEmailSettings FarmWideEmailSettings
-            {
-                WebAppUrl             = "http://sharepoint1:2013"
-                SMTPServer            = "smtp.contoso.com"
-                FromAddress           = "sharepoint`@contoso.com"
-                ReplyToAddress        = "noreply`@contoso.com"
-                CharacterSet          = "65001"
-                PsDscRunAsCredential  = $SetupAccount
-            }
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
+    {
+        SPOutgoingEmailSettings FarmWideEmailSettings
+        {
+            WebAppUrl            = "http://sharepoint1:2013"
+            SMTPServer           = "smtp.contoso.com"
+            FromAddress          = "sharepoint`@contoso.com"
+            ReplyToAddress       = "noreply`@contoso.com"
+            CharacterSet         = "65001"
+            PsDscRunAsCredential = $SetupAccount
         }
     }
+}

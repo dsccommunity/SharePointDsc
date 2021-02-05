@@ -40,23 +40,26 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
-    {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
 
-        node localhost {
-            SPUserProfileServiceAppPermissions UPAPermissions
-            {
-                ProxyName            = "User Profile Service Application Proxy"
-                CreatePersonalSite   = @("DEMO\Group", "DEMO\User1")
-                FollowAndEditProfile = @("Everyone")
-                UseTagsAndNotes      = @("None")
-                PsDscRunAsCredential = $SetupAccount
-            }
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
+    {
+        SPUserProfileServiceAppPermissions UPAPermissions
+        {
+            ProxyName            = "User Profile Service Application Proxy"
+            CreatePersonalSite   = @("DEMO\Group", "DEMO\User1")
+            FollowAndEditProfile = @("Everyone")
+            UseTagsAndNotes      = @("None")
+            PsDscRunAsCredential = $SetupAccount
         }
     }
+}

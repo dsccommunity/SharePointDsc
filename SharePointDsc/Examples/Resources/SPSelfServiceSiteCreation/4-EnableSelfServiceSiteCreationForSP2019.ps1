@@ -39,23 +39,26 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
-    {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
 
-        node localhost {
-            SPSelfServiceSiteCreation SSC
-            {
-                WebAppUrl             = "http://example.contoso.local"
-                Enabled               = $true
-                ManagedPath           = "sites"
-                UserExperienceVersion = "Modern"
-                PsDscRunAsCredential  = $SetupAccount
-            }
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
+    {
+        SPSelfServiceSiteCreation SSC
+        {
+            WebAppUrl             = "http://example.contoso.local"
+            Enabled               = $true
+            ManagedPath           = "sites"
+            UserExperienceVersion = "Modern"
+            PsDscRunAsCredential  = $SetupAccount
         }
     }
+}

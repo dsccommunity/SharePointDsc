@@ -39,25 +39,28 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
-    {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
 
-        node localhost {
-            SPSearchMetadataCategory NewCategory
-            {
-                Name                           = "My New category"
-                ServiceAppName                 = "Search Service Application"
-                AutoCreateNewManagedProperties = $true
-                DiscoverNewProperties          = $true
-                MapToContents                  = $true
-                Ensure                         = "Present"
-                PsDscRunAsCredential           = $SetupAccount
-            }
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
+    {
+        SPSearchMetadataCategory NewCategory
+        {
+            Name                           = "My New category"
+            ServiceAppName                 = "Search Service Application"
+            AutoCreateNewManagedProperties = $true
+            DiscoverNewProperties          = $true
+            MapToContents                  = $true
+            Ensure                         = "Present"
+            PsDscRunAsCredential           = $SetupAccount
         }
     }
+}

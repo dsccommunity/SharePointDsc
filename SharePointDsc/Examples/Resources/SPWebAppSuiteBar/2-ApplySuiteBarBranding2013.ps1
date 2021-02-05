@@ -40,21 +40,24 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
-    {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
 
-        node localhost {
-            SPWebAppSuiteBar SP2013Branding
-            {
-                WebAppUrl                               = "https://intranet.sharepoint.contoso.com"
-                SuiteBarBrandingElementHtml             = "<div>SharePointDSC WebApp</div>"
-                PsDscRunAsCredential                    = $SetupAccount
-            }
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
+    {
+        SPWebAppSuiteBar SP2013Branding
+        {
+            WebAppUrl                   = "https://intranet.sharepoint.contoso.com"
+            SuiteBarBrandingElementHtml = "<div>SharePointDSC WebApp</div>"
+            PsDscRunAsCredential        = $SetupAccount
         }
     }
+}

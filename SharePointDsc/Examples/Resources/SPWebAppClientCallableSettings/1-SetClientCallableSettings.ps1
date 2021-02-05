@@ -39,29 +39,32 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
-    {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
 
-        node localhost {
-            SPWebAppClientCallableSettings DefaultClientCallableSettings
-            {
-                WebAppUrl                          = "http://example.contoso.local"
-                MaxResourcesPerRequest             = 16
-                MaxObjectPaths                     = 256
-                ExecutionTimeout                   = 90
-                RequestXmlMaxDepth                 = 32
-                EnableXsdValidation                = $true
-                EnableStackTrace                   = $false
-                RequestUsageExecutionTimeThreshold = 800
-                EnableRequestUsage                 = $true
-                LogActionsIfHasRequestException    = $true
-                PsDscRunAsCredential               = $SetupAccount
-            }
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
+    {
+        SPWebAppClientCallableSettings DefaultClientCallableSettings
+        {
+            WebAppUrl                          = "http://example.contoso.local"
+            MaxResourcesPerRequest             = 16
+            MaxObjectPaths                     = 256
+            ExecutionTimeout                   = 90
+            RequestXmlMaxDepth                 = 32
+            EnableXsdValidation                = $true
+            EnableStackTrace                   = $false
+            RequestUsageExecutionTimeThreshold = 800
+            EnableRequestUsage                 = $true
+            LogActionsIfHasRequestException    = $true
+            PsDscRunAsCredential               = $SetupAccount
         }
     }
+}

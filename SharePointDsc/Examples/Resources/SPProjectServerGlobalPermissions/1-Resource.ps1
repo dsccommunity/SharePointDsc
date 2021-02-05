@@ -41,21 +41,23 @@ Updated author, copyright notice, and URLs.
 
 Configuration Example
 {
-    param(
+    param
+    (
         [Parameter(Mandatory = $true)]
         [PSCredential]
         $SetupAccount
     )
+
     Import-DscResource -ModuleName SharePointDsc
 
     node localhost
     {
         SPProjectServerGlobalPermissions Permissions
         {
-            Url = "http://projects.contoso.com"
-            EntityName = "Domain\user"
-            EntityType = "User"
-            AllowPermissions = @(
+            Url                  = "http://projects.contoso.com"
+            EntityName           = "Domain\user"
+            EntityType           = "User"
+            AllowPermissions     = @(
                 "LogOn",
                 "NewTaskAssignment",
                 "AccessProjectDataService",
@@ -86,7 +88,7 @@ Configuration Example
                 "ManageSiteWideExchangeSync",
                 "ManageListsInProjectWebAccess"
             )
-            DenyPermissions = @(
+            DenyPermissions      = @(
                 "NewProject"
             )
             PSDscRunAsCredential = $SetupAccount

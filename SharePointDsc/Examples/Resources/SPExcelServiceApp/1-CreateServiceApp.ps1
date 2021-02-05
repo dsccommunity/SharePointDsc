@@ -39,21 +39,24 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
-    {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
 
-        node localhost {
-            SPExcelServiceApp ExcelServices
-            {
-                Name                 = "Excel Services Service Application"
-                ApplicationPool      = "SharePoint Service Applications"
-                PsDscRunAsCredential = $SetupAccount
-            }
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
+    {
+        SPExcelServiceApp ExcelServices
+        {
+            Name                 = "Excel Services Service Application"
+            ApplicationPool      = "SharePoint Service Applications"
+            PsDscRunAsCredential = $SetupAccount
         }
     }
+}

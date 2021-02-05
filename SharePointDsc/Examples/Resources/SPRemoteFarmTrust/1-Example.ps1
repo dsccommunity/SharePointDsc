@@ -40,21 +40,24 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
-    {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
 
-        node localhost {
-            SPRemoteFarmTrust TrustRemoteFarmForSearch
-            {
-                Name = "CentralSearchFarm"
-                RemoteWebAppUrl = "https://search.sharepoint.contoso.com"
-                LocalWebAppUrl = "https://local.sharepoint2.contoso.com"
-            }
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
+    {
+        SPRemoteFarmTrust TrustRemoteFarmForSearch
+        {
+            Name            = "CentralSearchFarm"
+            RemoteWebAppUrl = "https://search.sharepoint.contoso.com"
+            LocalWebAppUrl  = "https://local.sharepoint2.contoso.com"
         }
     }
+}

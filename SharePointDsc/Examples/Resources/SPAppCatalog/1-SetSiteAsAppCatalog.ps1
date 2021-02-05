@@ -39,22 +39,23 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
+
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
     {
-        param
-        (
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-
-        Import-DscResource -ModuleName SharePointDsc
-
-        node localhost {
-            SPAppCatalog MainAppCatalog
-            {
-                SiteUrl              = "https://content.sharepoint.contoso.com/sites/AppCatalog"
-                PsDscRunAsCredential = $SetupAccount
-            }
+        SPAppCatalog MainAppCatalog
+        {
+            SiteUrl              = "https://content.sharepoint.contoso.com/sites/AppCatalog"
+            PsDscRunAsCredential = $SetupAccount
         }
     }
+}
