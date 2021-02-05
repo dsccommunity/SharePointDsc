@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Fixed regression in v4.5
   - Added Export-SPDscDiagnosticData cmdlet to create a diagnostic package which can
     easily be shared for troubleshooting
+- SPSearchResultSource
+  - Clarified the use of ScopeName and ScopeUrl with SSA as ScopeName and added examples
 
 ## [4.5.0] - 2021-01-30
 
