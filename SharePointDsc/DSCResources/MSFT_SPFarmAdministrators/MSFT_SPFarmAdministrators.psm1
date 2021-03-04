@@ -72,10 +72,18 @@ function Get-TargetResource
 
         if ($null -eq $caWebapp)
         {
-            Write-Verbose "Unable to locate central administration website"
+            Write-Verbose "Unable to locate central administration web application"
             return $nullReturn
         }
-        $caWeb = Get-SPWeb($caWebapp.Url)
+
+        $caWeb = Get-SPWeb -Identity $caWebapp.Url -ErrorAction SilentlyContinue
+
+        if ($null -eq $caWeb)
+        {
+            Write-Verbose "Unable to locate central administration site"
+            return $nullReturn
+        }
+
         $farmAdminGroup = $caWeb.AssociatedOwnerGroup
         $farmAdministratorsGroup = $caWeb.SiteGroups.GetByName($farmAdminGroup)
 
@@ -423,16 +431,29 @@ function Merge-SPDscFarmAdminList
         $caWebapp = $webApps | Where-Object -FilterScript {
             $_.IsAdministrationWebApplication
         }
+
         if ($null -eq $caWebapp)
         {
-            $message = "Unable to locate central administration website"
+            $message = "Unable to locate central administration application"
             Add-SPDscEvent -Message $message `
                 -EntryType 'Error' `
                 -EventID 100 `
                 -Source $eventSource
             throw $message
         }
-        $caWeb = Get-SPWeb($caWebapp.Url)
+
+        $caWeb = Get-SPWeb -Identity $caWebapp.Url -ErrorAction SilentlyContinue
+
+        if ($null -eq $caWeb)
+        {
+            $message = "Unable to locate central administration site"
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
+        }
+
         $farmAdminGroup = $caWeb.AssociatedOwnerGroup
 
         if ($changeUsers.ContainsKey("Add"))
