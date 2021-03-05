@@ -6,8 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Export-SPDscDiagnosticData cmdlet to create a diagnostic package which can
+- SharePointDsc
+  - Export-SPDscDiagnosticData cmdlet to create a diagnostic package which can
     easily be shared for troubleshooting
+- ReverseDsc
+  - Added a check in Export-SPConfiguration/Start-SharePointDSCExtract to check if
+    ReverseDsc is present or not. Show instructions if it isn't
+  - Added DocIcon to export GUI
+  - Renamed export cmdlet to Export-SPConfiguration, to match Microsoft365DSC naming.
+    Added old Start-SharePointDSCExtract as alias
 
 ### Changed
 
@@ -22,6 +29,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - SPSearchResultSource
   - Clarified the use of ScopeName and ScopeUrl with SSA as ScopeName and added examples
+- SPUserProfileServiceApp
+  - Fixed issue where MySiteHostLocation was return from Get method including port number,
+    which causes the Test method to fail
+- SPWordAutomation
+  - Fixed issue where the resource never went into desired state when using AddToDefault
+
+### Removed
+
+### Added
+- SharePointDsc
+  - Removed the ReverseDsc dependency for the SharePointDsc module since the module
+    is only required when performing an export
 
 ## [4.5.1] - 2021-02-05
 

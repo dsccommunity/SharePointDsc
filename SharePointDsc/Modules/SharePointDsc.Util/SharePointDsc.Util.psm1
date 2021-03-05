@@ -1538,7 +1538,7 @@ function ConvertTo-ReverseString
     return $reverseString
 }
 
-function Start-SharePointDSCExtract
+function Export-SPConfiguration
 {
     param
     (
@@ -1595,6 +1595,19 @@ function Start-SharePointDSCExtract
         [String]
         $BinaryLocation
     )
+
+    $reverseDSCVersion = [Version]"2.0.0.7"
+    $reverseDSCModule = Get-Module ReverseDsc -ListAvailable | Where-Object -FilterScript { $_.Version -eq $reverseDSCVersion }
+    if ($null -eq $reverseDSCModule)
+    {
+        Write-Host "[ERROR} ReverseDsc v$($reverseDSCVersion.ToString()) could not be found. Make sure you have this module installed before running this cmdlet!" -ForegroundColor Red
+        Write-Host "Install via:" -ForegroundColor Red
+        Write-Host "    Install-Module ReverseDsc -RequiredVersion $($reverseDSCVersion.ToString())" -ForegroundColor Red
+        Write-Host "or" -ForegroundColor Red
+        Write-Host "    Copy the module from a different machine to C:\Program Files\WindowsPowerShell\Modules" -ForegroundColor Red
+        Write-Host " "
+        return
+    }
 
     $spDscModule = (Get-Module "SharePointDSC")
     $spDscModulePath = Split-Path -Path $spDscModule.Path -Parent
@@ -1821,3 +1834,5 @@ function Export-SPDscDiagnosticData
 
     Write-Host ('Completed with export. Information exported to {0}' -f $exportFilename) -ForegroundColor Yellow
 }
+
+New-Alias -Name Start-SharePointDSCExtract -Value Export-SPConfiguration

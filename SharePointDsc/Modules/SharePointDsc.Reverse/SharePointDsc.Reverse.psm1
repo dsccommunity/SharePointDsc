@@ -448,6 +448,12 @@ function Orchestrator
                 Write-Host -Object "[$($spServer.Name)] Scanning Distributed Cache Settings(s)..." -BackgroundColor DarkGreen -ForegroundColor White
                 $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPDistributedCacheService'
 
+                if ($Global:ExtractionModeValue -ge 2)
+                {
+                    Write-Host -Object "[$($spServer.Name)] Scanning Doc Icon(s)..." -BackgroundColor DarkGreen -ForegroundColor White
+                    $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPDocIcon'
+                }
+
                 Write-Host -Object "[$($spServer.Name)] Scanning Excel Services Application Settings(s)..." -BackgroundColor DarkGreen -ForegroundColor White
                 $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPExcelServiceApp'
 
@@ -1707,8 +1713,16 @@ function DisplayGUI()
     $chckDistributedCache.Text = "Distributed Cache Service"
     $panelConfig.Controls.Add($chckDistributedCache);
 
+    $chckDocIcon = New-Object System.Windows.Forms.CheckBox
+    $chckDocIcon.Top = 120
+    $chckDocIcon.AutoSize = $true;
+    $chckDocIcon.Name = "SPDocIcon"
+    $chckDocIcon.Checked = $true
+    $chckDocIcon.Text = "Doc Icons"
+    $panelConfig.Controls.Add($chckDocIcon);
+
     $chckFarmConfig = New-Object System.Windows.Forms.CheckBox
-    $chckFarmConfig.Top = 120
+    $chckFarmConfig.Top = 140
     $chckFarmConfig.AutoSize = $true;
     $chckFarmConfig.Name = "SPFarm"
     $chckFarmConfig.Checked = $true
@@ -1716,7 +1730,7 @@ function DisplayGUI()
     $panelConfig.Controls.Add($chckFarmConfig);
 
     $chckFarmPropBag = New-Object System.Windows.Forms.CheckBox
-    $chckFarmPropBag.Top = 140
+    $chckFarmPropBag.Top = 160
     $chckFarmPropBag.AutoSize = $true;
     $chckFarmPropBag.Name = "SPFarmPropertyBag"
     $chckFarmPropBag.Checked = $true
@@ -1724,7 +1738,7 @@ function DisplayGUI()
     $panelConfig.Controls.Add($chckFarmPropBag);
 
     $chckFeature = New-Object System.Windows.Forms.CheckBox
-    $chckFeature.Top = 160
+    $chckFeature.Top = 180
     $chckFeature.AutoSize = $true;
     $chckFeature.Name = "SPFeature"
     $chckFeature.Checked = $false
@@ -1732,7 +1746,7 @@ function DisplayGUI()
     $panelConfig.Controls.Add($chckFeature);
 
     $chckHealth = New-Object System.Windows.Forms.CheckBox
-    $chckHealth.Top = 180
+    $chckHealth.Top = 200
     $chckHealth.AutoSize = $true;
     $chckHealth.Name = "SPHealthAnalyzerRuleState"
     $chckHealth.Checked = $false
@@ -1740,7 +1754,7 @@ function DisplayGUI()
     $panelConfig.Controls.Add($chckHealth);
 
     $chckIRM = New-Object System.Windows.Forms.CheckBox
-    $chckIRM.Top = 200
+    $chckIRM.Top = 220
     $chckIRM.AutoSize = $true;
     $chckIRM.Name = "SPIrmSettings"
     $chckIRM.Checked = $true
@@ -1748,7 +1762,7 @@ function DisplayGUI()
     $panelConfig.Controls.Add($chckIRM);
 
     $chckManagedPaths = New-Object System.Windows.Forms.CheckBox
-    $chckManagedPaths.Top = 220
+    $chckManagedPaths.Top = 240
     $chckManagedPaths.AutoSize = $true;
     $chckManagedPaths.Name = "SPManagedPath"
     $chckManagedPaths.Checked = $true
@@ -1756,7 +1770,7 @@ function DisplayGUI()
     $panelConfig.Controls.Add($chckManagedPaths);
 
     $chckOOS = New-Object System.Windows.Forms.CheckBox
-    $chckOOS.Top = 240
+    $chckOOS.Top = 260
     $chckOOS.AutoSize = $true;
     $chckOOS.Name = "SPOfficeOnlineServerBinding"
     $chckOOS.Checked = $true
@@ -1764,7 +1778,7 @@ function DisplayGUI()
     $panelConfig.Controls.Add($chckOOS);
 
     $chckOutgoingEmail = New-Object System.Windows.Forms.CheckBox
-    $chckOutgoingEmail.Top = 260
+    $chckOutgoingEmail.Top = 280
     $chckOutgoingEmail.AutoSize = $true;
     $chckOutgoingEmail.Name = "SPOutgoingEmailSettings"
     $chckOutgoingEmail.Checked = $true
@@ -1772,7 +1786,7 @@ function DisplayGUI()
     $panelConfig.Controls.Add($chckOutgoingEmail);
 
     $chckServiceAppPool = New-Object System.Windows.Forms.CheckBox
-    $chckServiceAppPool.Top = 280
+    $chckServiceAppPool.Top = 300
     $chckServiceAppPool.AutoSize = $true;
     $chckServiceAppPool.Name = "SPServiceAppPool"
     $chckServiceAppPool.Checked = $true
@@ -1780,7 +1794,7 @@ function DisplayGUI()
     $panelConfig.Controls.Add($chckServiceAppPool);
 
     $chckServiceInstance = New-Object System.Windows.Forms.CheckBox
-    $chckServiceInstance.Top = 300
+    $chckServiceInstance.Top = 320
     $chckServiceInstance.AutoSize = $true;
     $chckServiceInstance.Name = "SPServiceInstance"
     $chckServiceInstance.Checked = $true
@@ -1788,7 +1802,7 @@ function DisplayGUI()
     $panelConfig.Controls.Add($chckServiceInstance);
 
     $chckSessionState = New-Object System.Windows.Forms.CheckBox
-    $chckSessionState.Top = 320
+    $chckSessionState.Top = 340
     $chckSessionState.AutoSize = $true;
     $chckSessionState.Name = "SPSessionStateService"
     $chckSessionState.Checked = $true
@@ -1796,7 +1810,7 @@ function DisplayGUI()
     $panelConfig.Controls.Add($chckSessionState);
 
     $chckDatabaseAAG = New-Object System.Windows.Forms.CheckBox
-    $chckDatabaseAAG.Top = 340
+    $chckDatabaseAAG.Top = 360
     $chckDatabaseAAG.AutoSize = $true;
     $chckDatabaseAAG.Name = "SPDatabaseAAG"
     $chckDatabaseAAG.Checked = $false
@@ -1804,7 +1818,7 @@ function DisplayGUI()
     $panelConfig.Controls.Add($chckDatabaseAAG);
 
     $chckTimerJob = New-Object System.Windows.Forms.CheckBox
-    $chckTimerJob.Top = 360
+    $chckTimerJob.Top = 380
     $chckTimerJob.AutoSize = $true;
     $chckTimerJob.Name = "SPTimerJobState"
     $chckTimerJob.Checked = $false
@@ -1875,7 +1889,7 @@ function DisplayGUI()
 
     #region Extraction Modes
     $Global:liteComponents = @($chckSAAccess, $chckSAAccess2010, $chckAlternateURL, $chckAntivirus, $chckAppCatalog, $chckAppDomain, $chckSAAppMan, $chckAppStore, $chckSABCS, $chckBlobCache, $chckCacheAccounts, $chckContentDB, $chckDiagLogging, $chckDistributedCache, $chckSAExcel, $chckFarmConfig, $chckFarmAdmin, $chckFarmPropBag, $chckFarmSolution, $chckIRM, $chckSAMachine, $chckManagedAccount, $chckSAMMS, $chckManagedPaths, $chckOutgoingEmail, $chckSAPerformance, $chckSAPublish, $chckQuotaTemplates, $chckSearchContentSource, $chckSearchIndexPart, $chckSearchSA, $chckSearchTopo, $chckSASecureStore, $chckServiceAppPool, $chckWAProxyGroup, $chckServiceInstance, $chckSAState, $chckSiteCollection, $chckSessionState, $chckSASub, $chckUPSA, $chckSAVisio, $chckWebApp, $chckWebAppPerm, $chckWebAppPolicy, $chckSAWord, $chckSAWork, $chckSearchIndexPart, $chckWAAppDomain, $chckSessionState, $chckSAUsage)
-    $Global:defaultComponents = @($chckSAAccess, $chckSAAccess2010, $chckAlternateURL, $chckAntivirus, $chckAppCatalog, $chckAppDomain, $chckSAAppMan, $chckAppStore, $chckSABCS, $chckBlobCache, $chckCacheAccounts, $chckContentDB, $chckDiagLogging, $chckDistributedCache, $chckSAExcel, $chckFarmConfig, $chckFarmAdmin, $chckFarmPropBag, $chckFarmSolution, $chckIRM, $chckSAMachine, $chckManagedAccount, $chckSAMMS, $chckManagedPaths, $chckOutgoingEmail, $chckSAPerformance, $chckSAPublish, $chckQuotaTemplates, $chckSearchContentSource, $chckSearchIndexPart, $chckSearchSA, $chckSearchTopo, $chckSASecureStore, $chckServiceAppPool, $chckWAProxyGroup, $chckServiceInstance, $chckSAState, $chckSiteCollection, $chckSessionState, $chckSASub, $chckUPSA, $chckSAVisio, $chckWebApp, $chckWebAppPerm, $chckWebAppPolicy, $chckSAWord, $chckSAWork, $chckOOS, $chckPasswordChange, $chckRemoteTrust, $chckSearchCrawlerImpact, $chckSearchCrawlRule, $chckSearchResultSources, $chckSASecurity, $chckTrustedIdentity, $chckUPSPermissions, $chckUPSSync, $chckWABlockedFiles, $chckWAGeneral, $chckWAProxyGroup, $chckWADeletion, $chckWAThrottling, $chckWAWorkflow, $chckSearchIndexPart, $chckWAAppDomain, $chckWAExtension, $chckSessionState, $chckSAUsage)
+    $Global:defaultComponents = @($chckSAAccess, $chckSAAccess2010, $chckAlternateURL, $chckAntivirus, $chckAppCatalog, $chckAppDomain, $chckSAAppMan, $chckAppStore, $chckSABCS, $chckBlobCache, $chckCacheAccounts, $chckContentDB, $chckDiagLogging, $chckDistributedCache, $chckDocIcon, $chckSAExcel, $chckFarmConfig, $chckFarmAdmin, $chckFarmPropBag, $chckFarmSolution, $chckIRM, $chckSAMachine, $chckManagedAccount, $chckSAMMS, $chckManagedPaths, $chckOutgoingEmail, $chckSAPerformance, $chckSAPublish, $chckQuotaTemplates, $chckSearchContentSource, $chckSearchIndexPart, $chckSearchSA, $chckSearchTopo, $chckSASecureStore, $chckServiceAppPool, $chckWAProxyGroup, $chckServiceInstance, $chckSAState, $chckSiteCollection, $chckSessionState, $chckSASub, $chckUPSA, $chckSAVisio, $chckWebApp, $chckWebAppPerm, $chckWebAppPolicy, $chckSAWord, $chckSAWork, $chckOOS, $chckPasswordChange, $chckRemoteTrust, $chckSearchCrawlerImpact, $chckSearchCrawlRule, $chckSearchResultSources, $chckSASecurity, $chckTrustedIdentity, $chckUPSPermissions, $chckUPSSync, $chckWABlockedFiles, $chckWAGeneral, $chckWAProxyGroup, $chckWADeletion, $chckWAThrottling, $chckWAWorkflow, $chckSearchIndexPart, $chckWAAppDomain, $chckWAExtension, $chckSessionState, $chckSAUsage)
     #endregion
 
     #region Top Menu
@@ -2034,9 +2048,11 @@ function DisplayGUI()
     $panelMain.Controls.Add($panelMenu);
     #endregion
 
+    $spDscModule = (Get-Module "SharePointDSC")
+
     $panelMain.AutoScroll = $true
     $form.Controls.Add($panelMain)
-    $form.Text = "ReverseDSC for SharePoint - v" + $Script:version
+    $form.Text = "ReverseDSC for SharePoint - v" + $spDscModule.Version.ToString()
     $form.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
     $form.ShowDialog() | Out-Null
 }
