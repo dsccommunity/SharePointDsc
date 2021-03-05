@@ -1601,6 +1601,7 @@ function Export-SPConfiguration
     if ($null -eq $reverseDSCModule)
     {
         Write-Host "[ERROR} ReverseDsc v$($reverseDSCVersion.ToString()) could not be found. Make sure you have this module installed before running this cmdlet!" -ForegroundColor Red
+        Write-Host " "
         Write-Host "Install via:" -ForegroundColor Red
         Write-Host "    Install-Module ReverseDsc -RequiredVersion $($reverseDSCVersion.ToString())" -ForegroundColor Red
         Write-Host "or" -ForegroundColor Red

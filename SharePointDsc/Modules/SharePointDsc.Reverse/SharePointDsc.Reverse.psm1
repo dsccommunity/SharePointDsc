@@ -130,7 +130,7 @@ function Get-SPReverseDSC
     $outputDSCFile = Join-Path -Path $OutputDSCPath -ChildPath $fileName
     if (Test-Path -Path $outputDSCFile)
     {
-        Remove-Item -Path $outputDSCFile -Force -Confirm $false
+        Remove-Item -Path $outputDSCFile -Force -Confirm:$false
     }
     $Script:dscConfigContent | Out-File -FilePath $outputDSCFile
 
@@ -155,7 +155,7 @@ function Get-SPReverseDSC
         $outputConfigurationData = Join-Path -Path $OutputDSCPath -ChildPath "ConfigurationData.psd1"
         if (Test-Path -Path $outputConfigurationData)
         {
-            Remove-Item -Path $outputConfigurationData -Force -Confirm $false
+            Remove-Item -Path $outputConfigurationData -Force -Confirm:$false
         }
         New-ConfigurationDataDocument -Path $outputConfigurationData
     }
@@ -448,11 +448,8 @@ function Orchestrator
                 Write-Host -Object "[$($spServer.Name)] Scanning Distributed Cache Settings(s)..." -BackgroundColor DarkGreen -ForegroundColor White
                 $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPDistributedCacheService'
 
-                if ($Global:ExtractionModeValue -ge 2)
-                {
-                    Write-Host -Object "[$($spServer.Name)] Scanning Doc Icon(s)..." -BackgroundColor DarkGreen -ForegroundColor White
-                    $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPDocIcon'
-                }
+                Write-Host -Object "[$($spServer.Name)] Scanning Doc Icon(s)..." -BackgroundColor DarkGreen -ForegroundColor White
+                $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPDocIcon'
 
                 Write-Host -Object "[$($spServer.Name)] Scanning Excel Services Application Settings(s)..." -BackgroundColor DarkGreen -ForegroundColor White
                 $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPExcelServiceApp'
@@ -655,6 +652,7 @@ function Orchestrator
     Set-ObtainRequiredCredentials
 
     $Script:dscConfigContent += "$configName -ConfigurationData .\ConfigurationData.psd1"
+    $Script:dscConfigContent += "`r`n`r`n"
 }
 
 function Repair-Credentials
@@ -1087,13 +1085,16 @@ function Select-ComponentsForMode
             {
                 try
                 {
-                    if ($mode -ne 3)
+                    if ($control.Name -NotIn @("chckRequiredUsers", "chckAzure", "chckStandAlone"))
                     {
-                        $control.Checked = $false
-                    }
-                    else
-                    {
-                        $control.Checked = $true
+                        if ($mode -ne 3)
+                        {
+                            $control.Checked = $false
+                        }
+                        else
+                        {
+                            $control.Checked = $true
+                        }
                     }
                 }
                 catch
@@ -1116,6 +1117,100 @@ function Select-ComponentsForMode
 
 function DisplayGUI()
 {
+    $components = @{
+        InformationArchitecture = @(
+            @{ Name = "SPContentDatabase"; Text = "Content Database"         ; ExtractionMode = 1 },
+            @{ Name = "SPQuotaTemplate"  ; Text = "Quota Templates"          ; ExtractionMode = 1 },
+            @{ Name = "SPSite"           ; Text = "Site Collections (SPSite)"; ExtractionMode = 1 },
+            @{ Name = "SPWeb"            ; Text = "Subsites (SPWeb)"         ; ExtractionMode = 3 }
+        )
+        Security                = @(
+            @{ Name = "SPFarmAdministrators"        ; Text = "Farm Administrators"           ; ExtractionMode = 1 },
+            @{ Name = "SPManagedAccount"            ; Text = "Managed Accounts"              ; ExtractionMode = 1 },
+            @{ Name = "SPPasswordChangeSettings"    ; Text = "Password Change Settings"      ; ExtractionMode = 2 },
+            @{ Name = "SPRemoteFarmTrust"           ; Text = "Remote Farm Trusts"            ; ExtractionMode = 2 },
+            @{ Name = "SPServiceAppSecurity"        ; Text = "Service App Security"          ; ExtractionMode = 2 },
+            @{ Name = "SPTrustedIdentityTokenIssuer"; Text = "Trusted Identity Token Issuers"; ExtractionMode = 2 }
+        )
+        ServiceApplications     = @(
+            @{ Name = "SPAccessServiceApp"               ; Text = "Access Services"               ; ExtractionMode = 1 },
+            @{ Name = "SPAccessServices2010"             ; Text = "Access Services 2010"          ; ExtractionMode = 1 },
+            @{ Name = "SPAppManagementServiceApp"        ; Text = "App Management"                ; ExtractionMode = 1 },
+            @{ Name = "SPBCSServiceApp"                  ; Text = "Business Connectivity Services"; ExtractionMode = 1 },
+            @{ Name = "SPExcelServiceApp"                ; Text = "Excel Services"                ; ExtractionMode = 1 },
+            @{ Name = "SPMachineTranslationServiceApp"   ; Text = "Machine Translation"           ; ExtractionMode = 1 },
+            @{ Name = "SPManagedMetadataServiceApp"      ; Text = "Managed Metadata"              ; ExtractionMode = 1 },
+            @{ Name = "SPPerformancePointServiceApp"     ; Text = "PerformancePoint Services"     ; ExtractionMode = 1 },
+            @{ Name = "SPPublishServiceApplication"      ; Text = "Publish"                       ; ExtractionMode = 1 },
+            @{ Name = "SPSecureStoreServiceApp"          ; Text = "Secure Store"                  ; ExtractionMode = 1 },
+            @{ Name = "SPStateServiceApp"                ; Text = "State Service Application"     ; ExtractionMode = 1 },
+            @{ Name = "SPSubscriptionSettingsServiceApp" ; Text = "Subscription Settings"         ; ExtractionMode = 1 },
+            @{ Name = "SPUsageApplication"               ; Text = "Usage Service Applications"    ; ExtractionMode = 1 },
+            @{ Name = "SPVisioServiceApp"                ; Text = "Visio Graphics"                ; ExtractionMode = 1 },
+            @{ Name = "SPWordAutomationServiceApp"       ; Text = "Word Automation"               ; ExtractionMode = 1 },
+            @{ Name = "SPWorkManagementServiceApp"       ; Text = "Work Management"               ; ExtractionMode = 1 }
+        )
+        Search                  = @(
+            @{ Name = "SPSearchContentSource"    ; Text = "Content Sources"            ; ExtractionMode = 1 },
+            @{ Name = "SPSearchCrawlRule"        ; Text = "Crawl Rule"                 ; ExtractionMode = 2 },
+            @{ Name = "SPSearchCrawlerImpactRule"; Text = "Crawler Impact Rules"       ; ExtractionMode = 2 },
+            @{ Name = "SPSearchFileType"         ; Text = "File Types"                 ; ExtractionMode = 3 },
+            @{ Name = "SPSearchIndexPartition"   ; Text = "Index Partitions"           ; ExtractionMode = 1 },
+            @{ Name = "SPSearchManagedProperty"  ; Text = "Managed Properties"         ; ExtractionMode = 3 },
+            @{ Name = "SPSearchResultSource"     ; Text = "Result Sources"             ; ExtractionMode = 2 },
+            @{ Name = "SPSearchServiceApp"       ; Text = "Search Service Applications"; ExtractionMode = 1 },
+            @{ Name = "SPSearchTopology"         ; Text = "Topologies"                 ; ExtractionMode = 1 }
+        )
+        WebApplications         = @(
+            @{ Name = "SPWebApplicationAppDomain" ; Text = "App Domain"           ; ExtractionMode = 1 },
+            @{ Name = "SPWebAppBlockedFileTypes"  ; Text = "Blocked File Types"   ; ExtractionMode = 2 },
+            @{ Name = "SPWebApplicationExtension" ; Text = "Extensions"           ; ExtractionMode = 2 },
+            @{ Name = "SPWebAppGeneralSettings"   ; Text = "General Settings"     ; ExtractionMode = 2 },
+            @{ Name = "SPWebAppPermissions"       ; Text = "Permissions"          ; ExtractionMode = 1 },
+            @{ Name = "SPWebAppPolicy"            ; Text = "Policies"             ; ExtractionMode = 1 },
+            @{ Name = "SPWebAppProxyGroup"        ; Text = "Proxy Groups"         ; ExtractionMode = 1 },
+            @{ Name = "SPWebAppSiteUseAndDeletion"; Text = "Site Use And Deletion"; ExtractionMode = 2 },
+            @{ Name = "SPWebAppThrottlingSettings"; Text = "Throttling Settings"  ; ExtractionMode = 2 },
+            @{ Name = "SPWebApplication"          ; Text = "Web Applications"     ; ExtractionMode = 1 },
+            @{ Name = "SPWebAppWorkflowSettings"  ; Text = "Workflow Settings"    ; ExtractionMode = 2 }
+        )
+        Customization           = @(
+            @{ Name = "SPAppCatalog"      ; Text = "App Catalog"       ; ExtractionMode = 1 },
+            @{ Name = "SPAppDomain"       ; Text = "App Domain"        ; ExtractionMode = 1 },
+            @{ Name = "SPAppStoreSettings"; Text = "App Store Settings"; ExtractionMode = 1 },
+            @{ Name = "SPFarmSolution"    ; Text = "Farm Solutions"    ; ExtractionMode = 1 }
+        )
+        Configuration           = @(
+            @{ Name = "SPAlternateUrl"             ; Text = "Alternate Url"                         ; ExtractionMode = 1 },
+            @{ Name = "SPAntivirusSettings"        ; Text = "Antivirus Settings"                    ; ExtractionMode = 1 },
+            @{ Name = "SPBlobCacheSettings"        ; Text = "Blob Cache Settings"                   ; ExtractionMode = 1 },
+            @{ Name = "SPCacheAccounts"            ; Text = "Cache Accounts"                        ; ExtractionMode = 1 },
+            @{ Name = "SPDiagnosticLoggingSettings"; Text = "Diagnostic Logging Settings"           ; ExtractionMode = 1 },
+            @{ Name = "SPDistributedCacheService"  ; Text = "Distributed Cache Services"            ; ExtractionMode = 1 },
+            @{ Name = "SPDocIcon"                  ; Text = "Doc Icons"                             ; ExtractionMode = 2 },
+            @{ Name = "SPFarm"                     ; Text = "Farm Configuration"                    ; ExtractionMode = 1 },
+            @{ Name = "SPFarmPropertyBag"          ; Text = "Farm Property Bag"                     ; ExtractionMode = 1 },
+            @{ Name = "SPFeature"                  ; Text = "Features"                              ; ExtractionMode = 3 },
+            @{ Name = "SPHealthAnalyzerRuleState"  ; Text = "Health Analyzer Rule States"           ; ExtractionMode = 3 },
+            @{ Name = "SPIrmSettings"              ; Text = "Information Rights Management Settings"; ExtractionMode = 1 },
+            @{ Name = "SPManagedPath"              ; Text = "Managed Paths"                         ; ExtractionMode = 1 },
+            @{ Name = "SPOfficeOnlineServerBinding"; Text = "Office Online Server Bindings"         ; ExtractionMode = 2 },
+            @{ Name = "SPOutgoingEmailSettings"    ; Text = "Outgoing Email Settings"               ; ExtractionMode = 1 },
+            @{ Name = "SPServiceAppPool"           ; Text = "Service Application Pools"             ; ExtractionMode = 1 },
+            @{ Name = "SPServiceInstance"          ; Text = "Service Instances"                     ; ExtractionMode = 1 },
+            @{ Name = "SPSessionStateService"      ; Text = "Session State Services"                ; ExtractionMode = 1 },
+            @{ Name = "SPDatabaseAAG"              ; Text = "SQL Always On Availability Groups"     ; ExtractionMode = 3 },
+            @{ Name = "SPTimerJobState"            ; Text = "Timer Job States"                      ; ExtractionMode = 3 }
+        )
+        UserProfile             = @(
+            @{ Name = "SPUserProfileProperty"             ; Text = "Profile Properties"               ; ExtractionMode = 3 },
+            @{ Name = "SPUserProfileSection"              ; Text = "Profile Sections"                 ; ExtractionMode = 3 },
+            @{ Name = "SPUserProfileSyncConnection"       ; Text = "Synchronization Connections"      ; ExtractionMode = 2 },
+            @{ Name = "SPUserProfileServiceApp"           ; Text = "User Profile Service Applications"; ExtractionMode = 1 },
+            @{ Name = "SPUserProfileServiceAppPermissions"; Text = "User Profile Service Permissions" ; ExtractionMode = 2 }
+        )
+    }
+
     #region Global
     $firstColumnLeft = 10
     $secondColumnLeft = 280
@@ -1123,12 +1218,14 @@ function DisplayGUI()
     $topBannerHeight = 70
     #endregion
 
+    $Global:liteComponents = @()
+    $Global:defaultComponents = @()
 
     $form = New-Object System.Windows.Forms.Form
     $screens = [System.Windows.Forms.Screen]::AllScreens
-    $form.Width = $screens[0].Bounds.Width
-    $form.Height = $screens[0].Bounds.Height - 60
-    $form.WindowState = [System.Windows.Forms.FormWindowState]::Maximized
+    $form.Width = ($screens[0].Bounds.Width) / 2
+    $form.Height = ($screens[0].Bounds.Height) / 2
+    #$form.WindowState = [System.Windows.Forms.FormWindowState]::Maximized
 
     $panelMain = New-Object System.Windows.Forms.Panel
     $panelMain.Width = $form.Width
@@ -1147,258 +1244,128 @@ function DisplayGUI()
     $panelInformationArchitecture = New-Object System.Windows.Forms.Panel
     $panelInformationArchitecture.Top = 30 + $topBannerHeight
     $panelInformationArchitecture.Left = $firstColumnLeft
+    $panelInformationArchitecture.AutoSize = $true
     $panelInformationArchitecture.Height = 80
     $panelInformationArchitecture.Width = 220
     $panelInformationArchitecture.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
 
-    $chckContentDB = New-Object System.Windows.Forms.CheckBox
-    $chckContentDB.Top = 0
-    $chckContentDB.AutoSize = $true;
-    $chckContentDB.Name = "SPContentDatabase"
-    $chckContentDB.Checked = $true
-    $chckContentDB.Text = "Content Databases"
-    $panelInformationArchitecture.Controls.Add($chckContentDB)
+    $align = 0
+    foreach ($resource in $components.InformationArchitecture)
+    {
+        $checkbox = New-Object System.Windows.Forms.CheckBox
+        $checkbox.Top = $align
+        $checkbox.AutoSize = $true;
+        $checkbox.Name = $resource.Name
+        $checkbox.Text = $resource.Text
 
-    $chckQuotaTemplates = New-Object System.Windows.Forms.CheckBox
-    $chckQuotaTemplates.Top = 20
-    $chckQuotaTemplates.AutoSize = $true;
-    $chckQuotaTemplates.Name = "SPQuotaTemplate"
-    $chckQuotaTemplates.Checked = $true
-    $chckQuotaTemplates.Text = "Quota Templates"
-    $panelInformationArchitecture.Controls.Add($chckQuotaTemplates);
+        $checked = $false
+        if ($resource.ExtractionMode -le 1)
+        {
+            $Global:liteComponents += $checkbox
+        }
 
-    $chckSiteCollection = New-Object System.Windows.Forms.CheckBox
-    $chckSiteCollection.Top = 40
-    $chckSiteCollection.AutoSize = $true;
-    $chckSiteCollection.Name = "SPSite"
-    $chckSiteCollection.Checked = $true
-    $chckSiteCollection.Text = "Site Collections (SPSite)"
-    $panelInformationArchitecture.Controls.Add($chckSiteCollection)
+        if ($resource.ExtractionMode -le 2)
+        {
+            $Global:defaultComponents += $checkbox
+            $checked = $true
+        }
+        $checkbox.Checked = $checked
 
-    $chckSPWeb = New-Object System.Windows.Forms.CheckBox
-    $chckSPWeb.Top = 60
-    $chckSPWeb.AutoSize = $true;
-    $chckSPWeb.Name = "SPWeb"
-    $chckSPWeb.Checked = $false
-    $chckSPWeb.Text = "Subsites (SPWeb)"
-    $panelInformationArchitecture.Controls.Add($chckSPWeb)
-
+        $panelInformationArchitecture.Controls.Add($checkbox)
+        $align += 20
+    }
     $panelMain.Controls.Add($panelInformationArchitecture)
-    #endregion
+    #endregion Information Architecture
 
     #region Security
     $labelSecurity = New-Object System.Windows.Forms.Label
     $labelSecurity.Text = "Security:"
     $labelSecurity.AutoSize = $true
-    $labelSecurity.Top = 120 + $topBannerHeight
+    $labelSecurity.Top = $panelInformationArchitecture.Top + $panelInformationArchitecture.Height + 10
     $labelSecurity.Left = $firstColumnLeft
     $labelSecurity.Font = [System.Drawing.Font]::new($labelSecurity.Font.Name, 14, [System.Drawing.FontStyle]::Bold)
     $panelMain.Controls.Add($labelSecurity)
 
     $panelSecurity = New-Object System.Windows.Forms.Panel
-    $panelSecurity.Top = 150 + $topBannerHeight
+    $panelSecurity.Top = $panelInformationArchitecture.Top + $panelInformationArchitecture.Height + 40
     $panelSecurity.Left = $firstColumnLeft
     $panelSecurity.AutoSize = $true
     $panelSecurity.Width = 220
     $panelSecurity.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
 
-    $chckFarmAdmin = New-Object System.Windows.Forms.CheckBox
-    $chckFarmAdmin.Top = 0
-    $chckFarmAdmin.AutoSize = $true;
-    $chckFarmAdmin.Name = "SPFarmAdministrators"
-    $chckFarmAdmin.Checked = $true
-    $chckFarmAdmin.Text = "Farm Administrators"
-    $panelSecurity.Controls.Add($chckFarmAdmin);
+    $align = 0
+    foreach ($resource in $components.Security)
+    {
+        $checkbox = New-Object System.Windows.Forms.CheckBox
+        $checkbox.Top = $align
+        $checkbox.AutoSize = $true;
+        $checkbox.Name = $resource.Name
+        $checkbox.Text = $resource.Text
 
-    $chckManagedAccount = New-Object System.Windows.Forms.CheckBox
-    $chckManagedAccount.Top = 20
-    $chckManagedAccount.AutoSize = $true;
-    $chckManagedAccount.Name = "SPManagedAccount"
-    $chckManagedAccount.Checked = $true
-    $chckManagedAccount.Text = "Managed Accounts"
-    $panelSecurity.Controls.Add($chckManagedAccount);
+        $checked = $false
+        if ($resource.ExtractionMode -le 1)
+        {
+            $Global:liteComponents += $checkbox
+        }
 
-    $chckPasswordChange = New-Object System.Windows.Forms.CheckBox
-    $chckPasswordChange.Top = 40
-    $chckPasswordChange.AutoSize = $true;
-    $chckPasswordChange.Name = "SPPasswordChangeSettings"
-    $chckPasswordChange.Checked = $true
-    $chckPasswordChange.Text = "Password Change Settings"
-    $panelSecurity.Controls.Add($chckPasswordChange);
+        if ($resource.ExtractionMode -le 2)
+        {
+            $Global:defaultComponents += $checkbox
+            $checked = $true
+        }
+        $checkbox.Checked = $checked
 
-    $chckRemoteTrust = New-Object System.Windows.Forms.CheckBox
-    $chckRemoteTrust.Top = 60
-    $chckRemoteTrust.AutoSize = $true;
-    $chckRemoteTrust.Name = "SPRemoteFarmTrust"
-    $chckRemoteTrust.Checked = $true
-    $chckRemoteTrust.Text = "Remote Farm Trust"
-    $panelSecurity.Controls.Add($chckRemoteTrust);
-
-    $chckSASecurity = New-Object System.Windows.Forms.CheckBox
-    $chckSASecurity.Top = 80
-    $chckSASecurity.AutoSize = $true;
-    $chckSASecurity.Name = "SPServiceAppSecurity"
-    $chckSASecurity.Checked = $true
-    $chckSASecurity.Text = "Service Applications Security"
-    $panelSecurity.Controls.Add($chckSASecurity)
-
-    $chckTrustedIdentity = New-Object System.Windows.Forms.CheckBox
-    $chckTrustedIdentity.Top = 100
-    $chckTrustedIdentity.AutoSize = $true;
-    $chckTrustedIdentity.Name = "SPTrustedIdentityTokenIssuer"
-    $chckTrustedIdentity.Checked = $true
-    $chckTrustedIdentity.Text = "Trusted Identity Token Issuer"
-    $panelSecurity.Controls.Add($chckTrustedIdentity);
+        $panelSecurity.Controls.Add($checkbox)
+        $align += 20
+    }
 
     $panelMain.Controls.Add($panelSecurity)
-    #endregion
+    #endregion Security
 
     #region Service Applications
     $labelSA = New-Object System.Windows.Forms.Label
     $labelSA.Text = "Service Applications:"
     $labelSA.AutoSize = $true
-    $labelSA.Top = 285 + $topBannerHeight
+    $labelSA.Top = $panelSecurity.Top + $panelSecurity.Height + 10
     $labelSA.Left = $firstColumnLeft
     $labelSA.Font = [System.Drawing.Font]::new($labelSA.Font.Name, 14, [System.Drawing.FontStyle]::Bold)
     $panelMain.Controls.Add($labelSA)
 
     $panelSA = New-Object System.Windows.Forms.Panel
-    $panelSA.Top = 315 + $topBannerHeight
+    $panelSA.Top = $panelSecurity.Top + $panelSecurity.Height + 40
     $panelSA.Left = $firstColumnLeft
     $panelSA.AutoSize = $true
     $panelSA.Width = 220
     $panelSA.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
 
-    $chckSAAccess = New-Object System.Windows.Forms.CheckBox
-    $chckSAAccess.Top = 0
-    $chckSAAccess.AutoSize = $true;
-    $chckSAAccess.Name = "SPAccessServiceApp"
-    $chckSAAccess.Checked = $true
-    $chckSAAccess.Text = "Access Services"
-    $panelSA.Controls.Add($chckSAAccess);
+    $align = 0
+    foreach ($resource in $components.ServiceApplications)
+    {
+        $checkbox = New-Object System.Windows.Forms.CheckBox
+        $checkbox.Top = $align
+        $checkbox.AutoSize = $true;
+        $checkbox.Name = $resource.Name
+        $checkbox.Text = $resource.Text
 
-    $chckSAAccess2010 = New-Object System.Windows.Forms.CheckBox
-    $chckSAAccess2010.Top = 20
-    $chckSAAccess2010.AutoSize = $true;
-    $chckSAAccess2010.Name = "SPAccessServices2010"
-    $chckSAAccess2010.Checked = $true
-    $chckSAAccess2010.Text = "Access Services 2010"
-    $panelSA.Controls.Add($chckSAAccess2010);
+        $checked = $false
+        if ($resource.ExtractionMode -le 1)
+        {
+            $Global:liteComponents += $checkbox
+        }
 
-    $chckSAAppMan = New-Object System.Windows.Forms.CheckBox
-    $chckSAAppMan.Top = 40
-    $chckSAAppMan.AutoSize = $true;
-    $chckSAAppMan.Name = "SPAppManagementServiceApp"
-    $chckSAAppMan.Checked = $true
-    $chckSAAppMan.Text = "App Management"
-    $panelSA.Controls.Add($chckSAAppMan);
+        if ($resource.ExtractionMode -le 2)
+        {
+            $Global:defaultComponents += $checkbox
+            $checked = $true
+        }
+        $checkbox.Checked = $checked
 
-    $chckSABCS = New-Object System.Windows.Forms.CheckBox
-    $chckSABCS.Top = 60
-    $chckSABCS.AutoSize = $true;
-    $chckSABCS.Name = "SPBCSServiceApp"
-    $chckSABCS.Checked = $true
-    $chckSABCS.Text = "Business Connectivity Services"
-    $panelSA.Controls.Add($chckSABCS);
-
-    $chckSAExcel = New-Object System.Windows.Forms.CheckBox
-    $chckSAExcel.Top = 80
-    $chckSAExcel.AutoSize = $true;
-    $chckSAExcel.Name = "SPExcelServiceApp"
-    $chckSAExcel.Checked = $true
-    $chckSAExcel.Text = "Excel Services"
-    $panelSA.Controls.Add($chckSAExcel);
-
-    $chckSAMachine = New-Object System.Windows.Forms.CheckBox
-    $chckSAMachine.Top = 100
-    $chckSAMachine.AutoSize = $true;
-    $chckSAMachine.Name = "SPMachineTranslationServiceApp"
-    $chckSAMachine.Checked = $true
-    $chckSAMachine.Text = "Machine Translation"
-    $panelSA.Controls.Add($chckSAMachine);
-
-    $chckSAMMS = New-Object System.Windows.Forms.CheckBox
-    $chckSAMMS.Top = 120
-    $chckSAMMS.AutoSize = $true;
-    $chckSAMMS.Name = "SPManagedMetadataServiceApp"
-    $chckSAMMS.Checked = $true
-    $chckSAMMS.Text = "Managed Metadata"
-    $panelSA.Controls.Add($chckSAMMS);
-
-    $chckSAPerformance = New-Object System.Windows.Forms.CheckBox
-    $chckSAPerformance.Top = 140
-    $chckSAPerformance.AutoSize = $true;
-    $chckSAPerformance.Name = "SPPerformancePointServiceApp"
-    $chckSAPerformance.Checked = $true
-    $chckSAPerformance.Text = "PerformancePoint"
-    $panelSA.Controls.Add($chckSAPerformance);
-
-    $chckSAPublish = New-Object System.Windows.Forms.CheckBox
-    $chckSAPublish.Top = 160
-    $chckSAPublish.AutoSize = $true;
-    $chckSAPublish.Name = "SPPublishServiceApplication"
-    $chckSAPublish.Checked = $true
-    $chckSAPublish.Text = "Publish"
-    $panelSA.Controls.Add($chckSAPublish);
-
-    $chckSASecureStore = New-Object System.Windows.Forms.CheckBox
-    $chckSASecureStore.Top = 180
-    $chckSASecureStore.AutoSize = $true;
-    $chckSASecureStore.Name = "SPSecureStoreServiceApp"
-    $chckSASecureStore.Checked = $true
-    $chckSASecureStore.Text = "Secure Store"
-    $panelSA.Controls.Add($chckSASecureStore);
-
-    $chckSAState = New-Object System.Windows.Forms.CheckBox
-    $chckSAState.Top = 200
-    $chckSAState.AutoSize = $true;
-    $chckSAState.Name = "SPStateServiceApp"
-    $chckSAState.Checked = $true
-    $chckSAState.Text = "State Service Application"
-    $panelSA.Controls.Add($chckSAState);
-
-    $chckSASub = New-Object System.Windows.Forms.CheckBox
-    $chckSASub.Top = 220
-    $chckSASub.AutoSize = $true;
-    $chckSASub.Name = "SPSubscriptionSettingsServiceApp"
-    $chckSASub.Checked = $true
-    $chckSASub.Text = "Subscription settings"
-    $panelSA.Controls.Add($chckSASub);
-
-    $chckSAUsage = New-Object System.Windows.Forms.CheckBox
-    $chckSAUsage.AutoSize = $true;
-    $chckSAUsage.Top = 240;
-    $chckSAUsage.Name = "SPUsageApplication"
-    $chckSAUsage.Checked = $true
-    $chckSAUsage.Text = "Usage Service Application"
-    $panelSA.Controls.Add($chckSAUsage);
-
-    $chckSAVisio = New-Object System.Windows.Forms.CheckBox
-    $chckSAVisio.Top = 260
-    $chckSAVisio.AutoSize = $true;
-    $chckSAVisio.Name = "SPVisioServiceApp"
-    $chckSAVisio.Checked = $true
-    $chckSAVisio.Text = "Visio Graphics"
-    $panelSA.Controls.Add($chckSAVisio);
-
-    $chckSAWord = New-Object System.Windows.Forms.CheckBox
-    $chckSAWord.Top = 280
-    $chckSAWord.AutoSize = $true;
-    $chckSAWord.Name = "SPWordAutomationServiceApp"
-    $chckSAWord.Checked = $true
-    $chckSAWord.Text = "Word Automation"
-    $panelSA.Controls.Add($chckSAWord);
-
-    $chckSAWork = New-Object System.Windows.Forms.CheckBox
-    $chckSAWork.Top = 300
-    $chckSAWork.AutoSize = $true;
-    $chckSAWork.Name = "SPWorkManagementServiceApp"
-    $chckSAWork.Checked = $true
-    $chckSAWork.Text = "Work Management"
-    $panelSA.Controls.Add($chckSAWork);
+        $panelSA.Controls.Add($checkbox)
+        $align += 20
+    }
 
     $panelMain.Controls.Add($panelSA)
-    #endregion
+    #endregion Service Applications
 
     #region Search
     $labelSearch = New-Object System.Windows.Forms.Label
@@ -1416,187 +1383,79 @@ function DisplayGUI()
     $panelSearch.Width = 220
     $panelSearch.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
 
-    $chckSearchContentSource = New-Object System.Windows.Forms.CheckBox
-    $chckSearchContentSource.Top = 0
-    $chckSearchContentSource.AutoSize = $true;
-    $chckSearchContentSource.Name = "SPSearchContentSource"
-    $chckSearchContentSource.Checked = $true
-    $chckSearchContentSource.Text = "Content Sources"
-    $panelSearch.Controls.Add($chckSearchContentSource);
+    $align = 0
+    foreach ($resource in $components.Search)
+    {
+        $checkbox = New-Object System.Windows.Forms.CheckBox
+        $checkbox.Top = $align
+        $checkbox.AutoSize = $true;
+        $checkbox.Name = $resource.Name
+        $checkbox.Text = $resource.Text
 
-    $chckSearchCrawlRule = New-Object System.Windows.Forms.CheckBox
-    $chckSearchCrawlRule.Top = 20
-    $chckSearchCrawlRule.AutoSize = $true;
-    $chckSearchCrawlRule.Name = "SPSearchCrawlRule"
-    $chckSearchCrawlRule.Checked = $true
-    $chckSearchCrawlRule.Text = "Crawl Rules"
-    $panelSearch.Controls.Add($chckSearchCrawlRule);
+        $checked = $false
+        if ($resource.ExtractionMode -le 1)
+        {
+            $Global:liteComponents += $checkbox
+        }
 
-    $chckSearchCrawlerImpact = New-Object System.Windows.Forms.CheckBox
-    $chckSearchCrawlerImpact.Top = 40
-    $chckSearchCrawlerImpact.AutoSize = $true;
-    $chckSearchCrawlerImpact.Name = "SPSearchCrawlerImpactRule"
-    $chckSearchCrawlerImpact.Checked = $true
-    $chckSearchCrawlerImpact.Text = "Crawler Impact Rules"
-    $panelSearch.Controls.Add($chckSearchCrawlerImpact);
+        if ($resource.ExtractionMode -le 2)
+        {
+            $Global:defaultComponents += $checkbox
+            $checked = $true
+        }
+        $checkbox.Checked = $checked
 
-    $chckSearchFileTypes = New-Object System.Windows.Forms.CheckBox
-    $chckSearchFileTypes.Top = 60
-    $chckSearchFileTypes.AutoSize = $true;
-    $chckSearchFileTypes.Name = "SPSearchFileType"
-    $chckSearchFileTypes.Checked = $false
-    $chckSearchFileTypes.Text = "File Types"
-    $panelSearch.Controls.Add($chckSearchFileTypes);
-
-    $chckSearchIndexPart = New-Object System.Windows.Forms.CheckBox
-    $chckSearchIndexPart.Top = 80
-    $chckSearchIndexPart.AutoSize = $true;
-    $chckSearchIndexPart.Name = "SPSearchIndexPartition"
-    $chckSearchIndexPart.Checked = $true
-    $chckSearchIndexPart.Text = "Index Partitions"
-    $panelSearch.Controls.Add($chckSearchIndexPart);
-
-    $chckManagedProp = New-Object System.Windows.Forms.CheckBox
-    $chckManagedProp.Top = 100
-    $chckManagedProp.AutoSize = $true;
-    $chckManagedProp.Name = "SPSearchManagedProperty"
-    $chckManagedProp.Checked = $false
-    $chckManagedProp.Text = "Managed Properties"
-    $panelSearch.Controls.Add($chckManagedProp);
-
-    $chckSearchResultSources = New-Object System.Windows.Forms.CheckBox
-    $chckSearchResultSources.Top = 120
-    $chckSearchResultSources.AutoSize = $true;
-    $chckSearchResultSources.Name = "SPSearchResultSource"
-    $chckSearchResultSources.Checked = $true
-    $chckSearchResultSources.Text = "Result Sources"
-    $panelSearch.Controls.Add($chckSearchResultSources);
-
-    $chckSearchSA = New-Object System.Windows.Forms.CheckBox
-    $chckSearchSA.Top = 140
-    $chckSearchSA.AutoSize = $true;
-    $chckSearchSA.Name = "SPSearchServiceApp"
-    $chckSearchSA.Checked = $true
-    $chckSearchSA.Text = "Search Service Applications"
-    $panelSearch.Controls.Add($chckSearchSA);
-
-    $chckSearchTopo = New-Object System.Windows.Forms.CheckBox
-    $chckSearchTopo.Top = 160
-    $chckSearchTopo.AutoSize = $true
-    $chckSearchTopo.Name = "SPSearchTopology"
-    $chckSearchTopo.Checked = $true
-    $chckSearchTopo.Text = "Topology"
-    $panelSearch.Controls.Add($chckSearchTopo);
+        $panelSearch.Controls.Add($checkbox)
+        $align += 20
+    }
 
     $panelMain.Controls.Add($panelSearch)
-    #endregion
+    #endregion Search
 
     #region Web Applications
     $labelWebApplications = New-Object System.Windows.Forms.Label
     $labelWebApplications.Text = "Web Applications:"
     $labelWebApplications.AutoSize = $true
-    $labelWebApplications.Top = $panelSearch.Height + $topBannerHeight + 40
+    $labelWebApplications.Top = $panelSearch.Top + $panelSearch.Height + 10
     $labelWebApplications.Left = $secondColumnLeft
     $labelWebApplications.Font = [System.Drawing.Font]::new($labelWebApplications.Font.Name, 14, [System.Drawing.FontStyle]::Bold)
     $panelMain.Controls.Add($labelWebApplications)
 
     $panelWebApp = New-Object System.Windows.Forms.Panel
-    $panelWebApp.Top = $panelSearch.Height + $topBannerHeight + 70
+    $panelWebApp.Top = $panelSearch.Top + $panelSearch.Height + 40
     $panelWebApp.Left = $secondColumnLeft
     $panelWebApp.AutoSize = $true
-    $panelWebApp.Width = 220
+    #$panelWebApp.Width = 220
     $panelWebApp.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
 
-    $chckWAAppDomain = New-Object System.Windows.Forms.CheckBox
-    $chckWAAppDomain.Top = 0
-    $chckWAAppDomain.AutoSize = $true;
-    $chckWAAppDomain.Name = "SPWebApplicationAppDomain"
-    $chckWAAppDomain.Checked = $true
-    $chckWAAppDomain.Text = "App Domain"
-    $panelWebApp.Controls.Add($chckWAAppDomain);
+    $align = 0
+    foreach ($resource in $components.WebApplications)
+    {
+        $checkbox = New-Object System.Windows.Forms.CheckBox
+        $checkbox.Top = $align
+        $checkbox.AutoSize = $true;
+        $checkbox.Name = $resource.Name
+        $checkbox.Text = $resource.Text
 
-    $chckWABlockedFiles = New-Object System.Windows.Forms.CheckBox
-    $chckWABlockedFiles.Top = 20
-    $chckWABlockedFiles.AutoSize = $true;
-    $chckWABlockedFiles.Name = "SPWebAppBlockedFileTypes"
-    $chckWABlockedFiles.Checked = $true
-    $chckWABlockedFiles.Text = "Blocked File Types"
-    $panelWebApp.Controls.Add($chckWABlockedFiles);
+        $checked = $false
+        if ($resource.ExtractionMode -le 1)
+        {
+            $Global:liteComponents += $checkbox
+        }
 
-    $chckWAExtension = New-Object System.Windows.Forms.CheckBox
-    $chckWAExtension.Top = 40
-    $chckWAExtension.AutoSize = $true;
-    $chckWAExtension.Name = "SPWebApplicationExtension"
-    $chckWAExtension.Checked = $true
-    $chckWAExtension.Text = "Extensions"
-    $panelWebApp.Controls.Add($chckWAExtension);
+        if ($resource.ExtractionMode -le 2)
+        {
+            $Global:defaultComponents += $checkbox
+            $checked = $true
+        }
+        $checkbox.Checked = $checked
 
-    $chckWAGeneral = New-Object System.Windows.Forms.CheckBox
-    $chckWAGeneral.Top = 60
-    $chckWAGeneral.AutoSize = $true;
-    $chckWAGeneral.Name = "SPWebAppGeneralSettings"
-    $chckWAGeneral.Checked = $true
-    $chckWAGeneral.Text = "General Settings"
-    $panelWebApp.Controls.Add($chckWAGeneral);
-
-    $chckWebAppPerm = New-Object System.Windows.Forms.CheckBox
-    $chckWebAppPerm.Top = 80
-    $chckWebAppPerm.AutoSize = $true
-    $chckWebAppPerm.Name = "SPWebAppPermissions"
-    $chckWebAppPerm.Checked = $true
-    $chckWebAppPerm.Text = "Permissions"
-    $panelWebApp.Controls.Add($chckWebAppPerm);
-
-    $chckWebAppPolicy = New-Object System.Windows.Forms.CheckBox
-    $chckWebAppPolicy.Top = 100
-    $chckWebAppPolicy.AutoSize = $true;
-    $chckWebAppPolicy.Name = "SPWebAppPolicy"
-    $chckWebAppPolicy.Checked = $true
-    $chckWebAppPolicy.Text = "Policies"
-    $panelWebApp.Controls.Add($chckWebAppPolicy);
-
-    $chckWAProxyGroup = New-Object System.Windows.Forms.CheckBox
-    $chckWAProxyGroup.Top = 120
-    $chckWAProxyGroup.AutoSize = $true;
-    $chckWAProxyGroup.Name = "SPWebAppProxyGroup"
-    $chckWAProxyGroup.Checked = $true
-    $chckWAProxyGroup.Text = "Proxy Groups"
-    $panelWebApp.Controls.Add($chckWAProxyGroup);
-
-    $chckWADeletion = New-Object System.Windows.Forms.CheckBox
-    $chckWADeletion.Top = 140
-    $chckWADeletion.AutoSize = $true;
-    $chckWADeletion.Name = "SPWebAppSiteUseAndDeletion"
-    $chckWADeletion.Checked = $true
-    $chckWADeletion.Text = "Site Usage and Deletion"
-    $panelWebApp.Controls.Add($chckWADeletion);
-
-    $chckWAThrottling = New-Object System.Windows.Forms.CheckBox
-    $chckWAThrottling.Top = 160
-    $chckWAThrottling.AutoSize = $true;
-    $chckWAThrottling.Name = "SPWebAppThrottlingSettings"
-    $chckWAThrottling.Checked = $true
-    $chckWAThrottling.Text = "Throttling Settings"
-    $panelWebApp.Controls.Add($chckWAThrottling);
-
-    $chckWebApp = New-Object System.Windows.Forms.CheckBox
-    $chckWebApp.Top = 180
-    $chckWebApp.AutoSize = $true;
-    $chckWebApp.Name = "SPWebApplication"
-    $chckWebApp.Checked = $true
-    $chckWebApp.Text = "Web Applications"
-    $panelWebApp.Controls.Add($chckWebApp);
-
-    $chckWAWorkflow = New-Object System.Windows.Forms.CheckBox
-    $chckWAWorkflow.Top = 200
-    $chckWAWorkflow.AutoSize = $true;
-    $chckWAWorkflow.Name = "SPWebAppWorkflowSettings"
-    $chckWAWorkflow.Checked = $true
-    $chckWAWorkflow.Text = "Workflow Settings"
-    $panelWebApp.Controls.Add($chckWAWorkflow);
+        $panelWebApp.Controls.Add($checkbox)
+        $align += 20
+    }
 
     $panelMain.Controls.Add($panelWebApp)
-    #endregion
+    #endregion Web Applications
 
     #region Customization
     $labelCustomization = New-Object System.Windows.Forms.Label
@@ -1610,44 +1469,39 @@ function DisplayGUI()
     $panelCustomization = New-Object System.Windows.Forms.Panel
     $panelCustomization.Top = $panelWebApp.Top + $panelWebApp.Height + 40
     $panelCustomization.Left = $secondColumnLeft
+    $panelCustomization.AutoSize = $true
     $panelCustomization.Height = 80
     $panelCustomization.Width = 220
     $panelCustomization.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
 
-    $chckAppCatalog = New-Object System.Windows.Forms.CheckBox
-    $chckAppCatalog.Top = 0
-    $chckAppCatalog.AutoSize = $true;
-    $chckAppCatalog.Name = "SPAppCatalog"
-    $chckAppCatalog.Checked = $true
-    $chckAppCatalog.Text = "App Catalog"
-    $panelCustomization.Controls.Add($chckAppCatalog);
+    $align = 0
+    foreach ($resource in $components.Customization)
+    {
+        $checkbox = New-Object System.Windows.Forms.CheckBox
+        $checkbox.Top = $align
+        $checkbox.AutoSize = $true;
+        $checkbox.Name = $resource.Name
+        $checkbox.Text = $resource.Text
 
-    $chckAppDomain = New-Object System.Windows.Forms.CheckBox
-    $chckAppDomain.Top = 20
-    $chckAppDomain.AutoSize = $true;
-    $chckAppDomain.Name = "SPAppDomain"
-    $chckAppDomain.Checked = $true
-    $chckAppDomain.Text = "App Domain"
-    $panelCustomization.Controls.Add($chckAppDomain);
+        $checked = $false
+        if ($resource.ExtractionMode -le 1)
+        {
+            $Global:liteComponents += $checkbox
+        }
 
-    $chckAppStore = New-Object System.Windows.Forms.CheckBox
-    $chckAppStore.Top = 40
-    $chckAppStore.AutoSize = $true
-    $chckAppStore.Name = "SPAppStoreSettings"
-    $chckAppStore.Checked = $true
-    $chckAppStore.Text = "App Store Settings"
-    $panelCustomization.Controls.Add($chckAppStore);
+        if ($resource.ExtractionMode -le 2)
+        {
+            $Global:defaultComponents += $checkbox
+            $checked = $true
+        }
+        $checkbox.Checked = $checked
 
-    $chckFarmSolution = New-Object System.Windows.Forms.CheckBox
-    $chckFarmSolution.Top = 60
-    $chckFarmSolution.AutoSize = $true;
-    $chckFarmSolution.Name = "SPFarmSolution"
-    $chckFarmSolution.Checked = $true
-    $chckFarmSolution.Text = "Farm Solutions"
-    $panelCustomization.Controls.Add($chckFarmSolution);
+        $panelCustomization.Controls.Add($checkbox)
+        $align += 20
+    }
 
     $panelMain.Controls.Add($panelCustomization)
-    #endregion
+    #endregion Customization
 
     #region Configuration
     $labelConfiguration = New-Object System.Windows.Forms.Label
@@ -1665,172 +1519,38 @@ function DisplayGUI()
     $panelConfig.Width = 400
     $panelConfig.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
 
-    $chckAlternateUrl = New-Object System.Windows.Forms.CheckBox
-    $chckAlternateUrl.Top = 0
-    $chckAlternateUrl.AutoSize = $true;
-    $chckAlternateUrl.Name = "SPAlternateUrl"
-    $chckAlternateUrl.Checked = $true
-    $chckAlternateUrl.Text = "Alternate URL"
-    $panelConfig.Controls.Add($chckAlternateUrl);
+    $align = 0
+    foreach ($resource in $components.Configuration)
+    {
+        $checkbox = New-Object System.Windows.Forms.CheckBox
+        $checkbox.Top = $align
+        $checkbox.AutoSize = $true;
+        $checkbox.Name = $resource.Name
+        $checkbox.Text = $resource.Text
 
-    $chckAntivirus = New-Object System.Windows.Forms.CheckBox
-    $chckAntivirus.Top = 20
-    $chckAntivirus.AutoSize = $true;
-    $chckAntivirus.Name = "SPAntivirusSettings"
-    $chckAntivirus.Checked = $true
-    $chckAntivirus.Text = "Antivirus Settings"
-    $panelConfig.Controls.Add($chckAntivirus);
+        $checked = $false
+        if ($resource.ExtractionMode -le 1)
+        {
+            $Global:liteComponents += $checkbox
+        }
 
-    $chckBlobCache = New-Object System.Windows.Forms.CheckBox
-    $chckBlobCache.Top = 40
-    $chckBlobCache.AutoSize = $true;
-    $chckBlobCache.Name = "SPBlobCacheSettings"
-    $chckBlobCache.Checked = $true
-    $chckBlobCache.Text = "Blob Cache Settings"
-    $panelConfig.Controls.Add($chckBlobCache);
+        if ($resource.ExtractionMode -le 2)
+        {
+            $Global:defaultComponents += $checkbox
+            $checked = $true
+        }
+        $checkbox.Checked = $checked
 
-    $chckCacheAccounts = New-Object System.Windows.Forms.CheckBox
-    $chckCacheAccounts.Top = 60
-    $chckCacheAccounts.AutoSize = $true;
-    $chckCacheAccounts.Name = "SPCacheAccounts"
-    $chckCacheAccounts.Checked = $true
-    $chckCacheAccounts.Text = "Cache Accounts"
-    $panelConfig.Controls.Add($chckCacheAccounts);
-
-    $chckDiagLogging = New-Object System.Windows.Forms.CheckBox
-    $chckDiagLogging.Top = 80
-    $chckDiagLogging.AutoSize = $true;
-    $chckDiagLogging.Name = "SPDiagnosticLoggingSettings"
-    $chckDiagLogging.Checked = $true
-    $chckDiagLogging.Text = "Diagnostic Logging Settings"
-    $panelConfig.Controls.Add($chckDiagLogging);
-
-    $chckDistributedCache = New-Object System.Windows.Forms.CheckBox
-    $chckDistributedCache.Top = 100
-    $chckDistributedCache.AutoSize = $true;
-    $chckDistributedCache.Name = "SPDistributedCacheService"
-    $chckDistributedCache.Checked = $true
-    $chckDistributedCache.Text = "Distributed Cache Service"
-    $panelConfig.Controls.Add($chckDistributedCache);
-
-    $chckDocIcon = New-Object System.Windows.Forms.CheckBox
-    $chckDocIcon.Top = 120
-    $chckDocIcon.AutoSize = $true;
-    $chckDocIcon.Name = "SPDocIcon"
-    $chckDocIcon.Checked = $true
-    $chckDocIcon.Text = "Doc Icons"
-    $panelConfig.Controls.Add($chckDocIcon);
-
-    $chckFarmConfig = New-Object System.Windows.Forms.CheckBox
-    $chckFarmConfig.Top = 140
-    $chckFarmConfig.AutoSize = $true;
-    $chckFarmConfig.Name = "SPFarm"
-    $chckFarmConfig.Checked = $true
-    $chckFarmConfig.Text = "Farm Configuration"
-    $panelConfig.Controls.Add($chckFarmConfig);
-
-    $chckFarmPropBag = New-Object System.Windows.Forms.CheckBox
-    $chckFarmPropBag.Top = 160
-    $chckFarmPropBag.AutoSize = $true;
-    $chckFarmPropBag.Name = "SPFarmPropertyBag"
-    $chckFarmPropBag.Checked = $true
-    $chckFarmPropBag.Text = "Farm Property Bag"
-    $panelConfig.Controls.Add($chckFarmPropBag);
-
-    $chckFeature = New-Object System.Windows.Forms.CheckBox
-    $chckFeature.Top = 180
-    $chckFeature.AutoSize = $true;
-    $chckFeature.Name = "SPFeature"
-    $chckFeature.Checked = $false
-    $chckFeature.Text = "Features"
-    $panelConfig.Controls.Add($chckFeature);
-
-    $chckHealth = New-Object System.Windows.Forms.CheckBox
-    $chckHealth.Top = 200
-    $chckHealth.AutoSize = $true;
-    $chckHealth.Name = "SPHealthAnalyzerRuleState"
-    $chckHealth.Checked = $false
-    $chckHealth.Text = "Health Analyzer Rule States"
-    $panelConfig.Controls.Add($chckHealth);
-
-    $chckIRM = New-Object System.Windows.Forms.CheckBox
-    $chckIRM.Top = 220
-    $chckIRM.AutoSize = $true;
-    $chckIRM.Name = "SPIrmSettings"
-    $chckIRM.Checked = $true
-    $chckIRM.Text = "Information Rights Management Settings"
-    $panelConfig.Controls.Add($chckIRM);
-
-    $chckManagedPaths = New-Object System.Windows.Forms.CheckBox
-    $chckManagedPaths.Top = 240
-    $chckManagedPaths.AutoSize = $true;
-    $chckManagedPaths.Name = "SPManagedPath"
-    $chckManagedPaths.Checked = $true
-    $chckManagedPaths.Text = "Managed Paths"
-    $panelConfig.Controls.Add($chckManagedPaths);
-
-    $chckOOS = New-Object System.Windows.Forms.CheckBox
-    $chckOOS.Top = 260
-    $chckOOS.AutoSize = $true;
-    $chckOOS.Name = "SPOfficeOnlineServerBinding"
-    $chckOOS.Checked = $true
-    $chckOOS.Text = "Office Online Server Bindings"
-    $panelConfig.Controls.Add($chckOOS);
-
-    $chckOutgoingEmail = New-Object System.Windows.Forms.CheckBox
-    $chckOutgoingEmail.Top = 280
-    $chckOutgoingEmail.AutoSize = $true;
-    $chckOutgoingEmail.Name = "SPOutgoingEmailSettings"
-    $chckOutgoingEmail.Checked = $true
-    $chckOutgoingEmail.Text = "Outgoing Email Settings"
-    $panelConfig.Controls.Add($chckOutgoingEmail);
-
-    $chckServiceAppPool = New-Object System.Windows.Forms.CheckBox
-    $chckServiceAppPool.Top = 300
-    $chckServiceAppPool.AutoSize = $true;
-    $chckServiceAppPool.Name = "SPServiceAppPool"
-    $chckServiceAppPool.Checked = $true
-    $chckServiceAppPool.Text = "Service Application Pools"
-    $panelConfig.Controls.Add($chckServiceAppPool);
-
-    $chckServiceInstance = New-Object System.Windows.Forms.CheckBox
-    $chckServiceInstance.Top = 320
-    $chckServiceInstance.AutoSize = $true;
-    $chckServiceInstance.Name = "SPServiceInstance"
-    $chckServiceInstance.Checked = $true
-    $chckServiceInstance.Text = "Service Instances"
-    $panelConfig.Controls.Add($chckServiceInstance);
-
-    $chckSessionState = New-Object System.Windows.Forms.CheckBox
-    $chckSessionState.Top = 340
-    $chckSessionState.AutoSize = $true;
-    $chckSessionState.Name = "SPSessionStateService"
-    $chckSessionState.Checked = $true
-    $chckSessionState.Text = "Session State Service"
-    $panelConfig.Controls.Add($chckSessionState);
-
-    $chckDatabaseAAG = New-Object System.Windows.Forms.CheckBox
-    $chckDatabaseAAG.Top = 360
-    $chckDatabaseAAG.AutoSize = $true;
-    $chckDatabaseAAG.Name = "SPDatabaseAAG"
-    $chckDatabaseAAG.Checked = $false
-    $chckDatabaseAAG.Text = "SQL Always On Availability Groups"
-    $panelConfig.Controls.Add($chckDatabaseAAG);
-
-    $chckTimerJob = New-Object System.Windows.Forms.CheckBox
-    $chckTimerJob.Top = 380
-    $chckTimerJob.AutoSize = $true;
-    $chckTimerJob.Name = "SPTimerJobState"
-    $chckTimerJob.Checked = $false
-    $chckTimerJob.Text = "Timer Job States"
-    $panelConfig.Controls.Add($chckTimerJob);
+        $panelConfig.Controls.Add($checkbox)
+        $align += 20
+    }
 
     $panelMain.Controls.Add($panelConfig)
-    #endregion
+    #endregion Configuration
 
     #region User Profile Service
     $lblUPS = New-Object System.Windows.Forms.Label
-    $lblUPS.Top = $panelConfig.Height + $topBannerHeight + 40
+    $lblUPS.Top = $panelConfig.Top + $panelConfig.Height + 10
     $lblUPS.Text = "User Profile:"
     $lblUPS.AutoSize = $true
     $lblUPS.Left = $thirdColumnLeft
@@ -1838,59 +1558,40 @@ function DisplayGUI()
     $panelMain.Controls.Add($lblUPS)
 
     $panelUPS = New-Object System.Windows.Forms.Panel
-    $panelUPS.Top = $panelConfig.Height + $topBannerHeight + 70
+    $panelUPS.Top = $panelConfig.Top + $panelConfig.Height + 40
     $panelUPS.Left = $thirdColumnLeft
     $panelUPS.AutoSize = $true
     $panelUPS.Width = 400
     $panelUPS.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
 
-    $chckUPSProp = New-Object System.Windows.Forms.CheckBox
-    $chckUPSProp.Top = 0
-    $chckUPSProp.AutoSize = $true;
-    $chckUPSProp.Name = "SPUserProfileProperty"
-    $chckUPSProp.Checked = $false
-    $chckUPSProp.Text = "Profile Properties"
-    $panelUPS.Controls.Add($chckUPSProp);
+    $align = 0
+    foreach ($resource in $components.UserProfile)
+    {
+        $checkbox = New-Object System.Windows.Forms.CheckBox
+        $checkbox.Top = $align
+        $checkbox.AutoSize = $true;
+        $checkbox.Name = $resource.Name
+        $checkbox.Text = $resource.Text
 
-    $chckUPSSection = New-Object System.Windows.Forms.CheckBox
-    $chckUPSSection.Top = 20
-    $chckUPSSection.AutoSize = $true
-    $chckUPSSection.Name = "SPUserProfileSection"
-    $chckUPSSection.Checked = $false
-    $chckUPSSection.Text = "Profile Sections"
-    $panelUPS.Controls.Add($chckUPSSection);
+        $checked = $false
+        if ($resource.ExtractionMode -le 1)
+        {
+            $Global:liteComponents += $checkbox
+        }
 
-    $chckUPSSync = New-Object System.Windows.Forms.CheckBox
-    $chckUPSSync.Top = 40
-    $chckUPSSync.AutoSize = $true;
-    $chckUPSSync.Name = "SPUserProfileSyncConnection"
-    $chckUPSSync.Checked = $true
-    $chckUPSSync.Text = "Synchronization Connections"
-    $panelUPS.Controls.Add($chckUPSSync);
+        if ($resource.ExtractionMode -le 2)
+        {
+            $Global:defaultComponents += $checkbox
+            $checked = $true
+        }
+        $checkbox.Checked = $checked
 
-    $chckUPSA = New-Object System.Windows.Forms.CheckBox
-    $chckUPSA.Top = 60
-    $chckUPSA.AutoSize = $true;
-    $chckUPSA.Name = "SPUserProfileServiceApp"
-    $chckUPSA.Checked = $true
-    $chckUPSA.Text = "User Profile Service Applications"
-    $panelUPS.Controls.Add($chckUPSA);
-
-    $chckUPSPermissions = New-Object System.Windows.Forms.CheckBox
-    $chckUPSPermissions.Top = 80
-    $chckUPSPermissions.AutoSize = $true;
-    $chckUPSPermissions.Name = "SPUserProfileServiceAppPermissions"
-    $chckUPSPermissions.Checked = $true
-    $chckUPSPermissions.Text = "User Profile Service Permissions"
-    $panelUPS.Controls.Add($chckUPSPermissions);
+        $panelUPS.Controls.Add($checkbox)
+        $align += 20
+    }
 
     $panelMain.Controls.Add($panelUPS)
-    #endregion
-
-    #region Extraction Modes
-    $Global:liteComponents = @($chckSAAccess, $chckSAAccess2010, $chckAlternateURL, $chckAntivirus, $chckAppCatalog, $chckAppDomain, $chckSAAppMan, $chckAppStore, $chckSABCS, $chckBlobCache, $chckCacheAccounts, $chckContentDB, $chckDiagLogging, $chckDistributedCache, $chckSAExcel, $chckFarmConfig, $chckFarmAdmin, $chckFarmPropBag, $chckFarmSolution, $chckIRM, $chckSAMachine, $chckManagedAccount, $chckSAMMS, $chckManagedPaths, $chckOutgoingEmail, $chckSAPerformance, $chckSAPublish, $chckQuotaTemplates, $chckSearchContentSource, $chckSearchIndexPart, $chckSearchSA, $chckSearchTopo, $chckSASecureStore, $chckServiceAppPool, $chckWAProxyGroup, $chckServiceInstance, $chckSAState, $chckSiteCollection, $chckSessionState, $chckSASub, $chckUPSA, $chckSAVisio, $chckWebApp, $chckWebAppPerm, $chckWebAppPolicy, $chckSAWord, $chckSAWork, $chckSearchIndexPart, $chckWAAppDomain, $chckSessionState, $chckSAUsage)
-    $Global:defaultComponents = @($chckSAAccess, $chckSAAccess2010, $chckAlternateURL, $chckAntivirus, $chckAppCatalog, $chckAppDomain, $chckSAAppMan, $chckAppStore, $chckSABCS, $chckBlobCache, $chckCacheAccounts, $chckContentDB, $chckDiagLogging, $chckDistributedCache, $chckDocIcon, $chckSAExcel, $chckFarmConfig, $chckFarmAdmin, $chckFarmPropBag, $chckFarmSolution, $chckIRM, $chckSAMachine, $chckManagedAccount, $chckSAMMS, $chckManagedPaths, $chckOutgoingEmail, $chckSAPerformance, $chckSAPublish, $chckQuotaTemplates, $chckSearchContentSource, $chckSearchIndexPart, $chckSearchSA, $chckSearchTopo, $chckSASecureStore, $chckServiceAppPool, $chckWAProxyGroup, $chckServiceInstance, $chckSAState, $chckSiteCollection, $chckSessionState, $chckSASub, $chckUPSA, $chckSAVisio, $chckWebApp, $chckWebAppPerm, $chckWebAppPolicy, $chckSAWord, $chckSAWork, $chckOOS, $chckPasswordChange, $chckRemoteTrust, $chckSearchCrawlerImpact, $chckSearchCrawlRule, $chckSearchResultSources, $chckSASecurity, $chckTrustedIdentity, $chckUPSPermissions, $chckUPSSync, $chckWABlockedFiles, $chckWAGeneral, $chckWAProxyGroup, $chckWADeletion, $chckWAThrottling, $chckWAWorkflow, $chckSearchIndexPart, $chckWAAppDomain, $chckWAExtension, $chckSessionState, $chckSAUsage)
-    #endregion
+    #endregion User Profile Service
 
     #region Top Menu
     $panelMenu = New-Object System.Windows.Forms.Panel
@@ -2023,7 +1724,7 @@ function DisplayGUI()
                 {
                     foreach ($checkbox in ($panel.Controls | Where-Object { $_.GetType().Name -eq "Checkbox" }))
                     {
-                        if ($checkbox.Checked -and $checkbox.Name -NotIn @("chckRequiredUsers", "chckAzure", "chckRequiredUsers"))
+                        if ($checkbox.Checked -and $checkbox.Name -NotIn @("chckRequiredUsers", "chckAzure", "chckStandAlone"))
                         {
                             $SelectedComponents += $checkbox.Name
                         }
@@ -2032,7 +1733,7 @@ function DisplayGUI()
                 $form.Hide()
                 $componentsToString = "@(`"$($SelectedComponents -join "`",`"")`")"
                 Write-Host -Object "To execute the same extraction process unattended, run the following command:" -BackgroundColor DarkGreen -ForegroundColor White
-                Write-Host -Object "Start-SharePointDSCExtract -ComponentsToExtract $componentsToString -Credentials (Get-Credential)"
+                Write-Host -Object "Export-SPConfiguration -ComponentsToExtract $componentsToString -Credentials (Get-Credential)"
 
                 $password = ConvertTo-SecureString $txtPassword.Text -AsPlainText -Force
                 $credentials = New-Object System.Management.Automation.PSCredential ($txtFarmAccount.Text, $password)

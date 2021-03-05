@@ -24,6 +24,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added check to see if a central admin site is returned and stop if it isn't
 - SPSite
   - Added check to see if a central admin site is returned and stop if it isn't
+- ReverseDsc
+  - Made the export GUI logic more dynamic
 
 ### Fixed
 
@@ -37,7 +39,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
-### Added
 - SharePointDsc
   - Removed the ReverseDsc dependency for the SharePointDsc module since the module
     is only required when performing an export
