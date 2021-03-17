@@ -1119,95 +1119,395 @@ function DisplayGUI()
 {
     $components = @{
         InformationArchitecture = @(
-            @{ Name = "SPContentDatabase"; Text = "Content Database"         ; ExtractionMode = 1 },
-            @{ Name = "SPQuotaTemplate"  ; Text = "Quota Templates"          ; ExtractionMode = 1 },
-            @{ Name = "SPSite"           ; Text = "Site Collections (SPSite)"; ExtractionMode = 1 },
-            @{ Name = "SPWeb"            ; Text = "Subsites (SPWeb)"         ; ExtractionMode = 3 }
+            @{
+                Name           = "SPContentDatabase"
+                Text           = "Content Database"
+                ExtractionMode = 1
+            },
+            @{
+                Name           = "SPQuotaTemplate"
+                Text           = "Quota Templates"
+                ExtractionMode = 1
+            },
+            @{
+                Name           = "SPSite"
+                Text           = "Site Collections (SPSite)"
+                ExtractionMode = 1
+            },
+            @{
+                Name           = "SPWeb"
+                Text           = "Subsites (SPWeb)"
+                ExtractionMode = 3
+            }
         )
         Security                = @(
-            @{ Name = "SPFarmAdministrators"        ; Text = "Farm Administrators"           ; ExtractionMode = 1 },
-            @{ Name = "SPManagedAccount"            ; Text = "Managed Accounts"              ; ExtractionMode = 1 },
-            @{ Name = "SPPasswordChangeSettings"    ; Text = "Password Change Settings"      ; ExtractionMode = 2 },
-            @{ Name = "SPRemoteFarmTrust"           ; Text = "Remote Farm Trusts"            ; ExtractionMode = 2 },
-            @{ Name = "SPServiceAppSecurity"        ; Text = "Service App Security"          ; ExtractionMode = 2 },
-            @{ Name = "SPTrustedIdentityTokenIssuer"; Text = "Trusted Identity Token Issuers"; ExtractionMode = 2 }
+            @{
+                Name           = "SPFarmAdministrators"
+                Text           = "Farm Administrators"
+                ExtractionMode = 1
+            },
+            @{
+                Name           = "SPManagedAccount"
+                Text           = "Managed Accounts"
+                ExtractionMode = 1 
+            },
+            @{
+                Name           = "SPPasswordChangeSettings"
+                Text           = "Password Change Settings"
+                ExtractionMode = 2 
+            },
+            @{
+                Name           = "SPRemoteFarmTrust"
+                Text           = "Remote Farm Trusts"
+                ExtractionMode = 2 
+            },
+            @{
+                Name           = "SPServiceAppSecurity"
+                Text           = "Service App Security"
+                ExtractionMode = 2 
+            },
+            @{
+                Name           = "SPTrustedIdentityTokenIssuer"
+                Text           = "Trusted Identity Token Issuers"
+                ExtractionMode = 2 
+            }
         )
         ServiceApplications     = @(
-            @{ Name = "SPAccessServiceApp"               ; Text = "Access Services"               ; ExtractionMode = 1 },
-            @{ Name = "SPAccessServices2010"             ; Text = "Access Services 2010"          ; ExtractionMode = 1 },
-            @{ Name = "SPAppManagementServiceApp"        ; Text = "App Management"                ; ExtractionMode = 1 },
-            @{ Name = "SPBCSServiceApp"                  ; Text = "Business Connectivity Services"; ExtractionMode = 1 },
-            @{ Name = "SPExcelServiceApp"                ; Text = "Excel Services"                ; ExtractionMode = 1 },
-            @{ Name = "SPMachineTranslationServiceApp"   ; Text = "Machine Translation"           ; ExtractionMode = 1 },
-            @{ Name = "SPManagedMetadataServiceApp"      ; Text = "Managed Metadata"              ; ExtractionMode = 1 },
-            @{ Name = "SPPerformancePointServiceApp"     ; Text = "PerformancePoint Services"     ; ExtractionMode = 1 },
-            @{ Name = "SPPublishServiceApplication"      ; Text = "Publish"                       ; ExtractionMode = 1 },
-            @{ Name = "SPSecureStoreServiceApp"          ; Text = "Secure Store"                  ; ExtractionMode = 1 },
-            @{ Name = "SPStateServiceApp"                ; Text = "State Service Application"     ; ExtractionMode = 1 },
-            @{ Name = "SPSubscriptionSettingsServiceApp" ; Text = "Subscription Settings"         ; ExtractionMode = 1 },
-            @{ Name = "SPUsageApplication"               ; Text = "Usage Service Applications"    ; ExtractionMode = 1 },
-            @{ Name = "SPVisioServiceApp"                ; Text = "Visio Graphics"                ; ExtractionMode = 1 },
-            @{ Name = "SPWordAutomationServiceApp"       ; Text = "Word Automation"               ; ExtractionMode = 1 },
-            @{ Name = "SPWorkManagementServiceApp"       ; Text = "Work Management"               ; ExtractionMode = 1 }
+            @{
+                Name           = "SPAccessServiceApp"
+                Text           = "Access Services"
+                ExtractionMode = 1
+            },
+            @{
+                Name           = "SPAccessServices2010"
+                Text           = "Access Services 2010"
+                ExtractionMode = 1
+            },
+            @{
+                Name           = "SPAppManagementServiceApp"
+                Text           = "App Management"
+                ExtractionMode = 1
+            },
+            @{
+                Name           = "SPBCSServiceApp"
+                Text           = "Business Connectivity Services"
+                ExtractionMode = 1
+            },
+            @{
+                Name           = "SPExcelServiceApp"
+                Text           = "Excel Services"
+                ExtractionMode = 1
+            },
+            @{
+                Name           = "SPMachineTranslationServiceApp"
+                Text           = "Machine Translation"
+                ExtractionMode = 1
+            },
+            @{
+                Name           = "SPManagedMetadataServiceApp"
+                Text           = "Managed Metadata"
+                ExtractionMode = 1
+            },
+            @{
+                Name           = "SPPerformancePointServiceApp"
+                Text           = "PerformancePoint Services"
+                ExtractionMode = 1
+            },
+            @{
+                Name           = "SPPublishServiceApplication"
+                Text           = "Publish"
+                ExtractionMode = 1
+            },
+            @{
+                Name           = "SPSecureStoreServiceApp"
+                Text           = "Secure Store"
+                ExtractionMode = 1
+            },
+            @{
+                Name           = "SPStateServiceApp"
+                Text           = "State Service Application"
+                ExtractionMode = 1
+            },
+            @{
+                Name           = "SPSubscriptionSettingsServiceApp"
+                Text           = "Subscription Settings"
+                ExtractionMode = 1
+            },
+            @{
+                Name           = "SPUsageApplication"
+                Text           = "Usage Service Applications"
+                ExtractionMode = 1
+            },
+            @{
+                Name           = "SPVisioServiceApp"
+                Text           = "Visio Graphics"
+                ExtractionMode = 1
+            },
+            @{
+                Name           = "SPWordAutomationServiceApp"
+                Text           = "Word Automation"
+                ExtractionMode = 1
+            },
+            @{
+                Name           = "SPWorkManagementServiceApp"
+                Text           = "Work Management"
+                ExtractionMode = 1
+            }
         )
         Search                  = @(
-            @{ Name = "SPSearchContentSource"    ; Text = "Content Sources"            ; ExtractionMode = 1 },
-            @{ Name = "SPSearchCrawlRule"        ; Text = "Crawl Rule"                 ; ExtractionMode = 2 },
-            @{ Name = "SPSearchCrawlerImpactRule"; Text = "Crawler Impact Rules"       ; ExtractionMode = 2 },
-            @{ Name = "SPSearchFileType"         ; Text = "File Types"                 ; ExtractionMode = 3 },
-            @{ Name = "SPSearchIndexPartition"   ; Text = "Index Partitions"           ; ExtractionMode = 1 },
-            @{ Name = "SPSearchManagedProperty"  ; Text = "Managed Properties"         ; ExtractionMode = 3 },
-            @{ Name = "SPSearchResultSource"     ; Text = "Result Sources"             ; ExtractionMode = 2 },
-            @{ Name = "SPSearchServiceApp"       ; Text = "Search Service Applications"; ExtractionMode = 1 },
-            @{ Name = "SPSearchTopology"         ; Text = "Topologies"                 ; ExtractionMode = 1 }
+            @{
+                Name           = "SPSearchContentSource"
+                Text           = "Content Sources"
+                ExtractionMode = 1
+            },
+            @{
+                Name           = "SPSearchCrawlRule"
+                Text           = "Crawl Rule"
+                ExtractionMode = 2
+            },
+            @{
+                Name           = "SPSearchCrawlerImpactRule";
+                Text           = "Crawler Impact Rules"
+                ExtractionMode = 2
+            },
+            @{
+                Name           = "SPSearchFileType"
+                Text           = "File Types"
+                ExtractionMode = 3
+            },
+            @{
+                Name           = "SPSearchIndexPartition"
+                Text           = "Index Partitions"
+                ExtractionMode = 1
+            },
+            @{
+                Name           = "SPSearchManagedProperty"
+                Text           = "Managed Properties"
+                ExtractionMode = 3
+            },
+            @{
+                Name           = "SPSearchResultSource"
+                Text           = "Result Sources"
+                ExtractionMode = 2
+            },
+            @{
+                Name           = "SPSearchServiceApp"
+                Text           = "Search Service Applications"
+                ExtractionMode = 1
+            },
+            @{
+                Name           = "SPSearchTopology"
+                Text           = "Topologies"
+                ExtractionMode = 1
+            }
         )
         WebApplications         = @(
-            @{ Name = "SPWebApplicationAppDomain" ; Text = "App Domain"           ; ExtractionMode = 1 },
-            @{ Name = "SPWebAppBlockedFileTypes"  ; Text = "Blocked File Types"   ; ExtractionMode = 2 },
-            @{ Name = "SPWebApplicationExtension" ; Text = "Extensions"           ; ExtractionMode = 2 },
-            @{ Name = "SPWebAppGeneralSettings"   ; Text = "General Settings"     ; ExtractionMode = 2 },
-            @{ Name = "SPWebAppPermissions"       ; Text = "Permissions"          ; ExtractionMode = 1 },
-            @{ Name = "SPWebAppPolicy"            ; Text = "Policies"             ; ExtractionMode = 1 },
-            @{ Name = "SPWebAppProxyGroup"        ; Text = "Proxy Groups"         ; ExtractionMode = 1 },
-            @{ Name = "SPWebAppSiteUseAndDeletion"; Text = "Site Use And Deletion"; ExtractionMode = 2 },
-            @{ Name = "SPWebAppThrottlingSettings"; Text = "Throttling Settings"  ; ExtractionMode = 2 },
-            @{ Name = "SPWebApplication"          ; Text = "Web Applications"     ; ExtractionMode = 1 },
-            @{ Name = "SPWebAppWorkflowSettings"  ; Text = "Workflow Settings"    ; ExtractionMode = 2 }
+            @{
+                Name           = "SPWebApplicationAppDomain"
+                Text           = "App Domain"
+                ExtractionMode = 1
+            },
+            @{
+                Name           = "SPWebAppBlockedFileTypes"
+                Text           = "Blocked File Types"
+                ExtractionMode = 2
+            },
+            @{
+                Name           = "SPWebApplicationExtension"
+                Text           = "Extensions"
+                ExtractionMode = 2
+            },
+            @{
+                Name           = "SPWebAppGeneralSettings"
+                Text           = "General Settings"
+                ExtractionMode = 2
+            },
+            @{
+                Name           = "SPWebAppPermissions"
+                Text           = "Permissions"
+                ExtractionMode = 1
+            },
+            @{
+                Name           = "SPWebAppPolicy"
+                Text           = "Policies"
+                ExtractionMode = 1
+            },
+            @{
+                Name           = "SPWebAppProxyGroup"
+                Text           = "Proxy Groups"
+                ExtractionMode = 1
+            },
+            @{
+                Name           = "SPWebAppSiteUseAndDeletion";
+                Text           = "Site Use And Deletion";
+                ExtractionMode = 2
+            },
+            @{
+                Name           = "SPWebAppThrottlingSettings";
+                Text           = "Throttling Settings"
+                ExtractionMode = 2
+            },
+            @{
+                Name           = "SPWebApplication"
+                Text           = "Web Applications"
+                ExtractionMode = 1
+            },
+            @{
+                Name           = "SPWebAppWorkflowSettings"
+                Text           = "Workflow Settings"
+                ExtractionMode = 2
+            }
         )
         Customization           = @(
-            @{ Name = "SPAppCatalog"      ; Text = "App Catalog"       ; ExtractionMode = 1 },
-            @{ Name = "SPAppDomain"       ; Text = "App Domain"        ; ExtractionMode = 1 },
-            @{ Name = "SPAppStoreSettings"; Text = "App Store Settings"; ExtractionMode = 1 },
-            @{ Name = "SPFarmSolution"    ; Text = "Farm Solutions"    ; ExtractionMode = 1 }
+            @{
+                Name           = "SPAppCatalog"
+                Text           = "App Catalog"
+                ExtractionMode = 1
+            },
+            @{
+                Name           = "SPAppDomain"
+                Text           = "App Domain"
+                ExtractionMode = 1
+            },
+            @{
+                Name           = "SPAppStoreSettings"
+                Text           = "App Store Settings"
+                ExtractionMode = 1
+            },
+            @{
+                Name           = "SPFarmSolution"
+                Text           = "Farm Solutions"
+                ExtractionMode = 1
+            }
         )
         Configuration           = @(
-            @{ Name = "SPAlternateUrl"             ; Text = "Alternate Url"                         ; ExtractionMode = 1 },
-            @{ Name = "SPAntivirusSettings"        ; Text = "Antivirus Settings"                    ; ExtractionMode = 1 },
-            @{ Name = "SPBlobCacheSettings"        ; Text = "Blob Cache Settings"                   ; ExtractionMode = 1 },
-            @{ Name = "SPCacheAccounts"            ; Text = "Cache Accounts"                        ; ExtractionMode = 1 },
-            @{ Name = "SPDiagnosticLoggingSettings"; Text = "Diagnostic Logging Settings"           ; ExtractionMode = 1 },
-            @{ Name = "SPDistributedCacheService"  ; Text = "Distributed Cache Services"            ; ExtractionMode = 1 },
-            @{ Name = "SPDocIcon"                  ; Text = "Doc Icons"                             ; ExtractionMode = 2 },
-            @{ Name = "SPFarm"                     ; Text = "Farm Configuration"                    ; ExtractionMode = 1 },
-            @{ Name = "SPFarmPropertyBag"          ; Text = "Farm Property Bag"                     ; ExtractionMode = 1 },
-            @{ Name = "SPFeature"                  ; Text = "Features"                              ; ExtractionMode = 3 },
-            @{ Name = "SPHealthAnalyzerRuleState"  ; Text = "Health Analyzer Rule States"           ; ExtractionMode = 3 },
-            @{ Name = "SPIrmSettings"              ; Text = "Information Rights Management Settings"; ExtractionMode = 1 },
-            @{ Name = "SPManagedPath"              ; Text = "Managed Paths"                         ; ExtractionMode = 1 },
-            @{ Name = "SPOfficeOnlineServerBinding"; Text = "Office Online Server Bindings"         ; ExtractionMode = 2 },
-            @{ Name = "SPOutgoingEmailSettings"    ; Text = "Outgoing Email Settings"               ; ExtractionMode = 1 },
-            @{ Name = "SPServiceAppPool"           ; Text = "Service Application Pools"             ; ExtractionMode = 1 },
-            @{ Name = "SPServiceInstance"          ; Text = "Service Instances"                     ; ExtractionMode = 1 },
-            @{ Name = "SPSessionStateService"      ; Text = "Session State Services"                ; ExtractionMode = 1 },
-            @{ Name = "SPDatabaseAAG"              ; Text = "SQL Always On Availability Groups"     ; ExtractionMode = 3 },
-            @{ Name = "SPTimerJobState"            ; Text = "Timer Job States"                      ; ExtractionMode = 3 }
+            @{
+                Name           = "SPAlternateUrl"
+                Text           = "Alternate Url"
+                ExtractionMode = 1
+            },
+            @{
+                Name           = "SPAntivirusSettings"
+                Text           = "Antivirus Settings"
+                ExtractionMode = 1
+            },
+            @{
+                Name           = "SPBlobCacheSettings"
+                Text           = "Blob Cache Settings"
+                ExtractionMode = 1
+            },
+            @{
+                Name           = "SPCacheAccounts"
+                Text           = "Cache Accounts"
+                ExtractionMode = 1
+            },
+            @{
+                Name           = "SPDiagnosticLoggingSettings";
+                Text           = "Diagnostic Logging Settings"
+                ExtractionMode = 1
+            },
+            @{
+                Name           = "SPDistributedCacheService"  ;
+                Text           = "Distributed Cache Services"
+                ExtractionMode = 1
+            },
+            @{
+                Name           = "SPDocIcon"
+                Text           = "Doc Icons"
+                ExtractionMode = 2
+            },
+            @{
+                Name           = "SPFarm"
+                Text           = "Farm Configuration"
+                ExtractionMode = 1
+            },
+            @{
+                Name           = "SPFarmPropertyBag"
+                Text           = "Farm Property Bag"
+                ExtractionMode = 1
+            },
+            @{
+                Name           = "SPFeature"
+                Text           = "Features"
+                ExtractionMode = 3
+            },
+            @{
+                Name           = "SPHealthAnalyzerRuleState"
+                Text           = "Health Analyzer Rule States"
+                ExtractionMode = 3
+            },
+            @{
+                Name           = "SPIrmSettings"
+                Text           = "Information Rights Management Settings"
+                ExtractionMode = 1
+            },
+            @{
+                Name           = "SPManagedPath"
+                Text           = "Managed Paths"
+                ExtractionMode = 1
+            },
+            @{
+                Name           = "SPOfficeOnlineServerBinding";
+                Text           = "Office Online Server Bindings"
+                ExtractionMode = 2
+            },
+            @{
+                Name           = "SPOutgoingEmailSettings"
+                Text           = "Outgoing Email Settings"
+                ExtractionMode = 1
+            },
+            @{
+                Name           = "SPServiceAppPool"
+                Text           = "Service Application Pools"
+                ExtractionMode = 1
+            },
+            @{
+                Name           = "SPServiceInstance"
+                Text           = "Service Instances"
+                ExtractionMode = 1
+            },
+            @{
+                Name           = "SPSessionStateService"
+                Text           = "Session State Services"
+                ExtractionMode = 1
+            },
+            @{
+                Name           = "SPDatabaseAAG"
+                Text           = "SQL Always On Availability Groups"
+                ExtractionMode = 3
+            },
+            @{
+                Name           = "SPTimerJobState"
+                Text           = "Timer Job States"
+                ExtractionMode = 3
+            }
         )
         UserProfile             = @(
-            @{ Name = "SPUserProfileProperty"             ; Text = "Profile Properties"               ; ExtractionMode = 3 },
-            @{ Name = "SPUserProfileSection"              ; Text = "Profile Sections"                 ; ExtractionMode = 3 },
-            @{ Name = "SPUserProfileSyncConnection"       ; Text = "Synchronization Connections"      ; ExtractionMode = 2 },
-            @{ Name = "SPUserProfileServiceApp"           ; Text = "User Profile Service Applications"; ExtractionMode = 1 },
-            @{ Name = "SPUserProfileServiceAppPermissions"; Text = "User Profile Service Permissions" ; ExtractionMode = 2 }
+            @{
+                Name           = "SPUserProfileProperty"
+                Text           = "Profile Properties"
+                ExtractionMode = 3
+            },
+            @{
+                Name           = "SPUserProfileSection"
+                Text           = "Profile Sections"
+                ExtractionMode = 3
+            },
+            @{
+                Name           = "SPUserProfileSyncConnection"
+                Text           = "Synchronization Connections"
+                ExtractionMode = 2
+            },
+            @{
+                Name           = "SPUserProfileServiceApp"
+                Text           = "User Profile Service Applications"
+                ExtractionMode = 1
+            },
+            @{
+                Name           = "SPUserProfileServiceAppPermissions"
+                Text           = "User Profile Service Permissions"
+                ExtractionMode = 2
+            }
         )
     }
 
