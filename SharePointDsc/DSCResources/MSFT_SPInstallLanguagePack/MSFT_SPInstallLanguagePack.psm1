@@ -174,6 +174,7 @@ function Get-TargetResource
                 $languageEN = $parsedENProduct[0]
             }
         }
+        Write-Verbose "Installed Language Pack: $languageEN"
         $englishProducts += $languageEN
     }
 
