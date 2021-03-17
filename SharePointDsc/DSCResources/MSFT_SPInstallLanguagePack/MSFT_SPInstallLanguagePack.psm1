@@ -219,7 +219,7 @@ function Get-TargetResource
         throw $message
     }
 
-    Write-Verbose -Message "Extract English name of the language code"
+    Write-Verbose -Message "Extract English name of the language code: $($cultureInfo.EnglishName)"
     switch ($cultureInfo.EnglishName)
     {
         "Dari (Afghanistan)"
