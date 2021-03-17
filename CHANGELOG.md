@@ -29,6 +29,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- SPSearchManagedProperty
+  - Fixed issue where setting Searchable=True resulted in an error
 - SPSearchResultSource
   - Clarified the use of ScopeName and ScopeUrl with SSA as ScopeName and added examples
 - SPUserProfileServiceApp
