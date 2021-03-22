@@ -1836,4 +1836,4 @@ function Export-SPDscDiagnosticData
     Write-Host ('Completed with export. Information exported to {0}' -f $exportFilename) -ForegroundColor Yellow
 }
 
-New-Alias -Name Start-SharePointDSCExtract -Value Export-SPConfiguration
+New-Alias -Name Start-SharePointDSCExtract -Value Export-SPConfiguration -Force
