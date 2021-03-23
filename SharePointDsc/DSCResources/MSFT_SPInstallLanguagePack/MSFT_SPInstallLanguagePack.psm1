@@ -250,7 +250,10 @@ function Get-TargetResource
         {
             $languageEnglish = "Serbian (Latin)"
         }
-        "Norwegian Bokmål (Norway)"
+        # If VS Code shows a strange character in Bokmål, this is correct.
+        # PowerShell encodes files in Windows-1252 and VSCode uses UTF8.
+        # This characters is therefore stored in Windows-1252.
+        "Norwegian Bokm�l (Norway)"
         {
             $languageEnglish = "Norwegian"
         }
