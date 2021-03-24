@@ -15,10 +15,12 @@ $script:projectPath = "$PSScriptRoot\..\..\.." | Convert-Path
 $script:projectName = (Get-ChildItem -Path "$script:projectPath\*\*.psd1" | Where-Object -FilterScript {
         ($_.Directory.Name -match 'source|src' -or $_.Directory.Name -eq $_.BaseName) -and
         $(try
-            { Test-ModuleManifest -Path $_.FullName -ErrorAction Stop
+            {
+                Test-ModuleManifest -Path $_.FullName -ErrorAction Stop
             }
             catch
-            { $false
+            {
+                $false
             })
     }).BaseName
 
@@ -66,7 +68,7 @@ try
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 Mock -CommandName Add-SPDscEvent -MockWith {}
             }
@@ -295,7 +297,7 @@ try
                             PropertiesToLoad = (New-Object -TypeName "System.Collections.Generic.List[System.String]")
                         }
                         $searcher = $searcher | Add-Member -MemberType ScriptMethod `
-                            -name FindOne `
+                            -Name FindOne `
                             -Value {
                             return $null
                         } -PassThru -Force
@@ -379,6 +381,118 @@ try
                     $global:SPDscSidsToReturn = @("example SID")
                     $global:SPDscSidCount = 0
                     Convert-SPDscADGroupIDToName -GroupId (New-Guid) | Should -Not -BeNullOrEmpty
+                }
+            }
+
+            Context -Name "Validate Export-SPDscDiagnosticData" -Fixture {
+                BeforeAll {
+                    Mock -CommandName "New-Object" `
+                        -ParameterFilter {
+                        $TypeName -eq "Security.Principal.WindowsPrincipal"
+                    } -MockWith {
+                        $returnval = "Test"
+                        $returnval = $returnval | Add-Member -MemberType ScriptMethod `
+                            -Name IsInRole `
+                            -Value {
+                            return $true
+                        } -PassThru -Force
+
+                        return $returnval
+                    }
+
+                    Mock -CommandName Write-Host -MockWith {}
+
+                    Mock -CommandName Copy-Item -MockWith {
+                        Set-Content -Path (Join-Path -Path $Destination -ChildPath "test.json") -Value @"
+URL = http://sharepoint.contoso.com"
+Server = SERVER1
+"@
+                    }
+
+                    Mock -CommandName Get-EventLog -MockWith {
+                        $returnval = @()
+                        $returnval += [pscustomobject]@{
+                            Index          = 10202
+                            EntryType      = 'Error'
+                            InstanceId     = 1
+                            Message        = 'Message'
+                            Category       = '(1)'
+                            CategoryNumber = 1
+                            MachineName    = 'SERVER1'
+                            Source         = 'MSFT_SPWorkManagementServiceApp'
+                            TimeGenerated  = Get-Date
+                            TimeWritten    = Get-Date
+                            UserName       = ""
+                        }
+                        $returnval += [pscustomobject]@{
+                            Index          = 10201
+                            EntryType      = 'Warning'
+                            InstanceId     = 1
+                            Message        = 'Message'
+                            Category       = '(1)'
+                            CategoryNumber = 1
+                            MachineName    = 'SERVER1'
+                            Source         = 'MSFT_SPWorkManagementServiceApp'
+                            TimeGenerated  = Get-Date
+                            TimeWritten    = Get-Date
+                            UserName       = ""
+                        }
+                        return $returnval
+                    }
+
+                    Mock -CommandName Get-ComputerInfo -MockWith {
+                        return @"
+            OsName               : Microsoft Windows 10 Enterprise
+            OsOperatingSystemSKU : EnterpriseEdition
+            OsArchitecture       : 64-bit
+            WindowsVersion       : 2009
+            WindowsBuildLabEx    : 19041.1.amd64fre.vb_release.191206-1406
+            OsLanguage           : en-US
+            OsMuiLanguages       : {en-US, en-GB, nl-NL}
+"@
+                    }
+
+                    Mock -CommandName Get-DscLocalConfigurationManager -MockWith {
+                        return @"
+ActionAfterReboot              : ContinueConfiguration
+AgentId                        : 43C51C89-F9FA-11EA-94E5-2816A80571C0
+AllowModuleOverWrite           : False
+CertificateID                  :
+ConfigurationDownloadManagers  : {}
+ConfigurationID                :
+ConfigurationMode              : ApplyAndMonitor
+ConfigurationModeFrequencyMins : 15
+Credential                     :
+DebugMode                      : {}
+DownloadManagerCustomData      :
+DownloadManagerName            :
+LCMCompatibleVersions          : {1.0, 2.0}
+LCMState                       : Idle
+LCMStateDetail                 :
+LCMVersion                     : 2.0
+StatusRetentionTimeInDays      : 10
+SignatureValidationPolicy      : NONE
+SignatureValidations           : {}
+MaximumDownloadSizeMB          : 500
+PartialConfigurations          :
+RebootNodeIfNeeded             : False
+RefreshFrequencyMins           : 30
+RefreshMode                    : PUSH
+ReportManagers                 : {}
+ResourceModuleManagers         : {}
+PSComputerName                 :
+"@
+                    }
+
+                    Mock -CommandName Compress-Archive -MockWith {}
+                }
+
+                It "should export and anonymize diagnostic data" {
+                    Export-SPDscDiagnosticData -ExportFilePath 'C:\Temp\SPDsc.zip' -Anonymize -Server 'SERVER1' -Domain 'CONTOSO' -URL 'contoso.com'
+                    Assert-MockCalled -CommandName Get-EventLog -Times 1
+                    Assert-MockCalled -CommandName Get-ComputerInfo -Times 1
+                    Assert-MockCalled -CommandName Get-DscLocalConfigurationManager -Times 1
+                    Assert-MockCalled -CommandName Compress-Archive -Times 1
                 }
             }
         }

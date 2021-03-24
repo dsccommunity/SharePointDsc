@@ -39,28 +39,31 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
-    {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
 
-        node localhost {
-            SPSearchContentSource LocalSharePointSites
-            {
-                Name                 = "Local SharePoint Sites"
-                ServiceAppName       = "Search Service Application"
-                ContentSourceType    = "SharePoint"
-                Addresses            = @("http://sharepointsite1.contoso.com", "http://sharepointsite2.contoso.com")
-                CrawlSetting         = "CrawlSites"
-                ContinuousCrawl      = $true
-                FullSchedule         = $null
-                Priority             = "Normal"
-                Ensure               = "Present"
-                PsDscRunAsCredential = $SetupAccount
-            }
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
+    {
+        SPSearchContentSource LocalSharePointSites
+        {
+            Name                 = "Local SharePoint Sites"
+            ServiceAppName       = "Search Service Application"
+            ContentSourceType    = "SharePoint"
+            Addresses            = @("http://sharepointsite1.contoso.com", "http://sharepointsite2.contoso.com")
+            CrawlSetting         = "CrawlSites"
+            ContinuousCrawl      = $true
+            FullSchedule         = $null
+            Priority             = "Normal"
+            Ensure               = "Present"
+            PsDscRunAsCredential = $SetupAccount
         }
     }
+}

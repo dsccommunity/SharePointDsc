@@ -39,24 +39,27 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
-    {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
 
-        node localhost {
-            SPDiagnosticsProvider BlockingQueryProvider
-            {
-                Ensure               = "Present"
-                Name                 = "job-diagnostics-blocking-query-provider"
-                MaxTotalSizeInBytes  = 10000000000000
-                Retention            = 14
-                Enabled              = $true
-                PSDscRunAsCredential = $SetupAccount
-            }
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
+    {
+        SPDiagnosticsProvider BlockingQueryProvider
+        {
+            Ensure               = "Present"
+            Name                 = "job-diagnostics-blocking-query-provider"
+            MaxTotalSizeInBytes  = 10000000000000
+            Retention            = 14
+            Enabled              = $true
+            PSDscRunAsCredential = $SetupAccount
         }
     }
+}

@@ -39,23 +39,26 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
-    {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
 
-        node localhost {
-            SPFeature EnableViewFormsLockDown
-            {
-                Name                 = "ViewFormPagesLockDown"
-                Url                  = "http://www.contoso.com"
-                FeatureScope         = "Site"
-                PsDscRunAsCredential = $SetupAccount
-                Version              = "1.0.0.0"
-            }
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
+    {
+        SPFeature EnableViewFormsLockDown
+        {
+            Name                 = "ViewFormPagesLockDown"
+            Url                  = "http://www.contoso.com"
+            FeatureScope         = "Site"
+            Version              = "1.0.0.0"
+            PsDscRunAsCredential = $SetupAccount
         }
     }
+}

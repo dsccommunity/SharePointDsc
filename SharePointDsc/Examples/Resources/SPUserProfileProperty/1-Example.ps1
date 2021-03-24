@@ -42,22 +42,24 @@ Updated author, copyright notice, and URLs.
 
 Configuration Example
 {
-    param(
+    param
+    (
         [Parameter(Mandatory = $true)]
         [PSCredential]
         $SetupAccount
     )
+
     Import-DscResource -ModuleName SharePointDsc
 
-    node localhost {
-
+    node localhost
+    {
         SPUserProfileProperty WorkEmailProperty
         {
             Name                 = "WorkEmail2"
             Ensure               = "Present"
             UserProfileService   = "User Profile Service Application"
             DisplayName          = "Work Email"
-            Type                 = "Email"
+            type                 = "Email"
             Description          = "" #implementation isn't using it yet
             PolicySetting        = "Mandatory"
             PrivacySetting       = "Public"

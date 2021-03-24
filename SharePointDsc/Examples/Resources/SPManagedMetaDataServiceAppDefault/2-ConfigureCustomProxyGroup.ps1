@@ -1,60 +1,63 @@
+
+<#PSScriptInfo
+
+.VERSION 1.0.0
+
+.GUID 80d306fa-8bd4-4a8d-9f7a-bf40df95e661
+
+.AUTHOR DSC Community
+
+.COMPANYNAME DSC Community
+
+.COPYRIGHT DSC Community contributors. All rights reserved.
+
+.TAGS
+
+.LICENSEURI https://github.com/dsccommunity/SharePointDsc/blob/master/LICENSE
+
+.PROJECTURI https://github.com/dsccommunity/SharePointDsc
+
+.ICONURI https://dsccommunity.org/images/DSC_Logo_300p.png
+
+.EXTERNALMODULEDEPENDENCIES
+
+.REQUIREDSCRIPTS
+
+.EXTERNALSCRIPTDEPENDENCIES
+
+.RELEASENOTES
+Updated author, copyright notice, and URLs.
+
+.PRIVATEDATA
+
+#>
+
 <#
-.EXAMPLE
-    This example shows how to configure a custom proxy group and specify its default Managed
-    Metadata service app.
+
+.DESCRIPTION
+This example shows how to configure a custom proxy group and specify its default Managed
+Metadata service app.
+
 #>
 
 Configuration Example
 {
-    param(
+    param
+    (
         [Parameter(Mandatory = $true)]
         [PSCredential]
         $SetupAccount
     )
+
     Import-DscResource -ModuleName SharePointDsc
 
-    node localhost {
+    node localhost
+    {
         SPServiceAppProxyGroup ProxyGroup1
         {
             Name                 = "Proxy Group 1"
             Ensure               = "Present"
             ServiceAppProxies    = @("User Profile Service Application", "MMS Service Application", "State Service Application")
-            PsDscRunAsCredential = $SetupAccount
-        }
-
-        SPManagedMetaDataServiceAppDefault ManagedMetadataServiceAppDefault
-        {
-            ServiceAppProxyGroup           = "Proxy Group 1"
-            DefaultSiteCollectionProxyName = "MMS Service Application Proxy"
-            DefaultKeywordProxyName        = "MMS Service Application Proxy"
-            PsDscRunAsCredential           = $SetupAccount
-        }
-    }
-}
-
-<#
-
-.DESCRIPTION
- This example shows how to configure a custom proxy group and specify its default Managed
- Metadata service app.
-
-#>
-
-Configuration Example
-{
-    param(
-        [Parameter(Mandatory = $true)]
-        [PSCredential]
-        $SetupAccount
-    )
-    Import-DscResource -ModuleName SharePointDsc
-
-    node localhost {
-        SPServiceAppProxyGroup ProxyGroup1
-        {
-            Name                 = "Proxy Group 1"
-            Ensure               = "Present"
-            ServiceAppProxies    = @("User Profile Service Application","MMS Service Application","State Service Application")
             PsDscRunAsCredential = $SetupAccount
         }
 

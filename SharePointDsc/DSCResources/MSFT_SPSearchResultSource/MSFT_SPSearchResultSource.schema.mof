@@ -3,7 +3,7 @@ class MSFT_SPSearchResultSource : OMI_BaseResource
 {
     [Key, Description("The name of the result source")] String Name;
     [Key, Description("The scope at which the Result Source will be created. Options are SSA, SPSite or SPWeb"), ValueMap{"SSA","SPSite","SPWeb"}, Values{"SSA","SPSite","SPWeb"}] String ScopeName;
-    [Key, Description("The URI of the site where to create the result source. Leave empty to have it created globally")] String ScopeUrl;
+    [Key, Description("The URI of the site where to create the result source. Use 'Global' if ScopeName is SSA")] String ScopeUrl;
     [Required, Description("The name of the search service application to associate this result source with")] String SearchServiceAppName;
     [Required, Description("The query to pass to the provider source")] String Query;
     [Required, Description("The provider type to use for the result source")] String ProviderType;

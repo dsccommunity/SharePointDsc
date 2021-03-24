@@ -40,21 +40,24 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
-    {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
 
-        node localhost {
-            SPServiceInstance StopBCSServiceInstance
-            {
-                Name                 = "Business Data Connectivity Service"
-                Ensure               = "Absent"
-                PsDscRunAsCredential = $SetupAccount
-            }
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
+    {
+        SPServiceInstance StopBCSServiceInstance
+        {
+            Name                 = "Business Data Connectivity Service"
+            Ensure               = "Absent"
+            PsDscRunAsCredential = $SetupAccount
         }
     }
+}

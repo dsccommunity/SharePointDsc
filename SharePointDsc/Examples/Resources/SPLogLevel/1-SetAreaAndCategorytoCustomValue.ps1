@@ -40,23 +40,26 @@ Updated author, copyright notice, and URLs.
 #>
 Configuration Example
 {
-    param(
+    param
+    (
         [Parameter(Mandatory = $true)]
         [PSCredential]
         $SetupAccount
     )
+
     Import-DscResource -ModuleName SharePointDsc
 
-    node localhost {
+    node localhost
+    {
         SPLogLevel SetUserProfileLogingtoVerbose
         {
-            Name = "SP_Database-Verbose"
-            SPLogLevelSetting = @(
+            Name                 = "SP_Database-Verbose"
+            SPLogLevelSetting    = @(
                 MSFT_SPLogLevelItem {
-                    Area           = "SharePoint Server"
-                    Name           = "Database"
-                    TraceLevel     = "Verbose"
-                    EventLevel     = "Verbose"
+                    Area       = "SharePoint Server"
+                    Name       = "Database"
+                    TraceLevel = "Verbose"
+                    EventLevel = "Verbose"
                 }
             )
             PsDscRunAsCredential = $SetupAccount

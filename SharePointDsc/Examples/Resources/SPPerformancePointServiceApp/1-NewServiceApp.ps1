@@ -39,21 +39,24 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
-    {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
 
-        node localhost {
-            SPPerformancePointServiceApp PerformancePoint
-            {
-                Name                 = "Performance Point Service Application"
-                ApplicationPool      = "SharePoint Web Services"
-                PsDscRunAsCredential = $SetupAccount
-            }
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
+    {
+        SPPerformancePointServiceApp PerformancePoint
+        {
+            Name                 = "Performance Point Service Application"
+            ApplicationPool      = "SharePoint Web Services"
+            PsDscRunAsCredential = $SetupAccount
         }
     }
+}

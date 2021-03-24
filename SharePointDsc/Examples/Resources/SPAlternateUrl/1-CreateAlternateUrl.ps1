@@ -39,24 +39,27 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
-    {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
 
-        node localhost {
-            SPAlternateUrl CentralAdminAAM
-            {
-                WebAppName           = "SharePoint - www.domain.com80"
-                Zone                 = "Intranet"
-                Url                  = "https://admin.sharepoint.contoso.com"
-                Internal             = $false
-                Ensure               = "Present"
-                PsDscRunAsCredential = $SetupAccount
-            }
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
+    {
+        SPAlternateUrl CentralAdminAAM
+        {
+            WebAppName           = "SharePoint - www.domain.com80"
+            Zone                 = "Intranet"
+            Url                  = "https://admin.sharepoint.contoso.com"
+            Internal             = $false
+            Ensure               = "Present"
+            PsDscRunAsCredential = $SetupAccount
         }
     }
+}

@@ -41,11 +41,13 @@ Updated author, copyright notice, and URLs.
 
 Configuration Example
 {
-    param(
+    param
+    (
         [Parameter(Mandatory = $true)]
         [PSCredential]
         $SetupAccount
     )
+
     Import-DscResource -ModuleName SharePointDsc
 
     node localhost

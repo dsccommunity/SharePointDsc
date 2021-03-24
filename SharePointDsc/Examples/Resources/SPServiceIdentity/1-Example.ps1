@@ -41,22 +41,23 @@ Updated author, copyright notice, and URLs.
 #>
 
 Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
+
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
     {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-
- Import-DscResource -ModuleName SharePointDsc
-
-        node localhost {
-
-            SPServiceIdentity SandBoxUserAccount
-            {
-                Name           = "Microsoft SharePoint Foundation Sandboxed Code Service"
-                ManagedAccount = "CONTOSO\SPUserCode"
-                PsDscRunAsCredential = $SetupAccount
-            }
+        SPServiceIdentity SandBoxUserAccount
+        {
+            Name                 = "Microsoft SharePoint Foundation Sandboxed Code Service"
+            ManagedAccount       = "CONTOSO\SPUserCode"
+            PsDscRunAsCredential = $SetupAccount
         }
     }
+}

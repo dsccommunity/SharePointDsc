@@ -40,28 +40,31 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
-    {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
 
-        node localhost {
-            SPDesignerSettings MainWebAppSPDSettings
-            {
-                WebAppUrl                               = "https://intranet.sharepoint.contoso.com"
-                SettingsScope                           = "WebApplication"
-                AllowSharePointDesigner                 = $false
-                AllowDetachPagesFromDefinition          = $false
-                AllowCustomiseMasterPage                = $false
-                AllowManageSiteURLStructure             = $false
-                AllowCreateDeclarativeWorkflow          = $false
-                AllowSavePublishDeclarativeWorkflow     = $false
-                AllowSaveDeclarativeWorkflowAsTemplate  = $false
-                PsDscRunAsCredential                    = $SetupAccount
-            }
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
+    {
+        SPDesignerSettings MainWebAppSPDSettings
+        {
+            WebAppUrl                              = "https://intranet.sharepoint.contoso.com"
+            SettingsScope                          = "WebApplication"
+            AllowSharePointDesigner                = $false
+            AllowDetachPagesFromDefinition         = $false
+            AllowCustomiseMasterPage               = $false
+            AllowManageSiteURLStructure            = $false
+            AllowCreateDeclarativeWorkflow         = $false
+            AllowSavePublishDeclarativeWorkflow    = $false
+            AllowSaveDeclarativeWorkflowAsTemplate = $false
+            PsDscRunAsCredential                   = $SetupAccount
         }
     }
+}

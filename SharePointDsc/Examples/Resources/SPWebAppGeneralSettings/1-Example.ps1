@@ -40,23 +40,26 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
-    {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
 
-        node localhost {
-            SPWebAppGeneralSettings PrimaryWebAppGeneralSettings
-            {
-                WebAppUrl              = "http://example.contoso.local"
-                TimeZone               = 76
-                Alerts                 = $true
-                RSS                    = $false
-                PsDscRunAsCredential   = $SetupAccount
-            }
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
+    {
+        SPWebAppGeneralSettings PrimaryWebAppGeneralSettings
+        {
+            WebAppUrl            = "http://example.contoso.local"
+            TimeZone             = 76
+            Alerts               = $true
+            RSS                  = $false
+            PsDscRunAsCredential = $SetupAccount
         }
     }
+}

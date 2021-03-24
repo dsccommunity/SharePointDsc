@@ -41,22 +41,25 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
-    {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
 
-        node localhost {
-            SPSubscriptionSettingsServiceApp SubscriptionSettingsServiceApp
-            {
-                Name                 = "Subscription Settings Service Application"
-                ApplicationPool      = "n/a"
-                PsDscRunAsCredential = $SetupAccount
-                Ensure               = "Absent"
-            }
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
+    {
+        SPSubscriptionSettingsServiceApp SubscriptionSettingsServiceApp
+        {
+            Name                 = "Subscription Settings Service Application"
+            ApplicationPool      = "n/a"
+            Ensure               = "Absent"
+            PsDscRunAsCredential = $SetupAccount
         }
     }
+}

@@ -39,22 +39,25 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
-    {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
 
-        node localhost {
-            SPAppStoreSettings DisableAppStores
-            {
-                WebAppUrl            = "https://sharepoint.contoso.com"
-                AllowAppPurchases    = $false
-                AllowAppsForOffice   = $false
-                PsDscRunAsCredential = $SetupAccount
-            }
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
+    {
+        SPAppStoreSettings DisableAppStores
+        {
+            WebAppUrl            = "https://sharepoint.contoso.com"
+            AllowAppPurchases    = $false
+            AllowAppsForOffice   = $false
+            PsDscRunAsCredential = $SetupAccount
         }
     }
+}

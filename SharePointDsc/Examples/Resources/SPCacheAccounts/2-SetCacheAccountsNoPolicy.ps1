@@ -41,23 +41,26 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
-    {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
 
-        node localhost {
-            SPCacheAccounts SetCacheAccounts
-            {
-                WebAppUrl            = "http://sharepoint.contoso.com"
-                SuperUserAlias       = "DEMO\svcSPSuperUser"
-                SuperReaderAlias     = "DEMO\svcSPReader"
-                SetWebAppPolicy      = $false
-                PsDscRunAsCredential = $SetupAccount
-            }
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
+    {
+        SPCacheAccounts SetCacheAccounts
+        {
+            WebAppUrl            = "http://sharepoint.contoso.com"
+            SuperUserAlias       = "DEMO\svcSPSuperUser"
+            SuperReaderAlias     = "DEMO\svcSPReader"
+            SetWebAppPolicy      = $false
+            PsDscRunAsCredential = $SetupAccount
         }
     }
+}

@@ -40,27 +40,30 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
-    {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
 
-        node localhost {
-            SPManagedMetaDataServiceApp ManagedMetadataServiceApp
-            {
-                Name                    = "Managed Metadata Service Application"
-                PsDscRunAsCredential    = $SetupAccount
-                ApplicationPool         = "SharePoint Service Applications"
-                DatabaseServer          = "SQL.contoso.local"
-                DatabaseName            = "SP_ManagedMetadata"
-                TermStoreAdministrators = @(
-                    "CONTOSO\user1",
-                    "CONTOSO\user2"
-                )
-            }
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
+    {
+        SPManagedMetaDataServiceApp ManagedMetadataServiceApp
+        {
+            Name                    = "Managed Metadata Service Application"
+            PsDscRunAsCredential    = $SetupAccount
+            ApplicationPool         = "SharePoint Service Applications"
+            DatabaseServer          = "SQL.contoso.local"
+            DatabaseName            = "SP_ManagedMetadata"
+            TermStoreAdministrators = @(
+                "CONTOSO\user1",
+                "CONTOSO\user2"
+            )
         }
     }
+}

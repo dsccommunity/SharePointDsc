@@ -40,21 +40,24 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
-    {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
 
-        node localhost {
-            SPInstallPrereqs InstallPrerequisites
-            {
-                IsSingleInstance  = "Yes"
-                InstallerPath     = "C:\SPInstall\Prerequisiteinstaller.exe"
-                OnlineMode        = $true
-            }
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
+    {
+        SPInstallPrereqs InstallPrerequisites
+        {
+            IsSingleInstance = "Yes"
+            InstallerPath    = "C:\SPInstall\Prerequisiteinstaller.exe"
+            OnlineMode       = $true
         }
     }
+}

@@ -35,7 +35,8 @@ Updated author, copyright notice, and URLs.
 <#
 
 .DESCRIPTION
- This example shows how to apply workflow settings to the specific web application
+ This example shows how to create a Search Service Application scoped
+ sharepoint search result source
 
 #>
 
@@ -47,17 +48,20 @@ Configuration Example
         [PSCredential]
         $SetupAccount
     )
-
     Import-DscResource -ModuleName SharePointDsc
 
     node localhost
     {
-        SPWebAppWorkflowSettings PrimaryWebAppWorkflowSettings
+        SPSearchResultSource Intranet
         {
-            WebAppUrl                                     = "Shttp://example.contoso.local"
-            ExternalWorkflowParticipantsEnabled           = $false
-            EmailToNoPermissionWorkflowParticipantsEnable = $false
-            PsDscRunAsCredential                          = $SetupAccount
+            Name                 = "Intranet"
+            ScopeName            = "SSA"
+            ScopeUrl             = "Global"
+            SearchServiceAppName = "Search Service Application"
+            Query                = '{searchTerms}'
+            ProviderType         = "Local SharePoint Provider"
+            Ensure               = "Present"
+            PsDscRunAsCredential = $SetupAccount
         }
     }
 }

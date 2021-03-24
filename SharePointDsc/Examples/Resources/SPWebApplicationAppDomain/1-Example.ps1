@@ -39,24 +39,27 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
-    {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
 
-        node localhost {
-            SPWebApplicationAppDomain Domain
-            {
-                AppDomain = "contosointranetapps.com"
-                WebAppUrl ="http://portal.contoso.com"
-                Zone = "Default";
-                Port = 80;
-                SSL = $false;
-                PsDscRunAsCredential = $SetupAccount
-            }
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
+    {
+        SPWebApplicationAppDomain Domain
+        {
+            AppDomain            = "contosointranetapps.com"
+            WebAppUrl            = "http://portal.contoso.com"
+            Zone                 = "Default"
+            Port                 = 80
+            SSL                  = $false
+            PsDscRunAsCredential = $SetupAccount
         }
     }
+}

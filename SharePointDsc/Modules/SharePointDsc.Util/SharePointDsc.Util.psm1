@@ -1538,7 +1538,7 @@ function ConvertTo-ReverseString
     return $reverseString
 }
 
-function Start-SharePointDSCExtract
+function Export-SPConfiguration
 {
     param
     (
@@ -1595,6 +1595,20 @@ function Start-SharePointDSCExtract
         [String]
         $BinaryLocation
     )
+
+    $reverseDSCVersion = [Version]"2.0.0.7"
+    $reverseDSCModule = Get-Module ReverseDsc -ListAvailable | Where-Object -FilterScript { $_.Version -eq $reverseDSCVersion }
+    if ($null -eq $reverseDSCModule)
+    {
+        Write-Host "[ERROR} ReverseDsc v$($reverseDSCVersion.ToString()) could not be found. Make sure you have this module installed before running this cmdlet!" -ForegroundColor Red
+        Write-Host " "
+        Write-Host "Install via:" -ForegroundColor Red
+        Write-Host "    Install-Module ReverseDsc -RequiredVersion $($reverseDSCVersion.ToString())" -ForegroundColor Red
+        Write-Host "or" -ForegroundColor Red
+        Write-Host "    Copy the module from a different machine to C:\Program Files\WindowsPowerShell\Modules" -ForegroundColor Red
+        Write-Host " "
+        return
+    }
 
     $spDscModule = (Get-Module "SharePointDSC")
     $spDscModulePath = Split-Path -Path $spDscModule.Path -Parent
@@ -1665,3 +1679,165 @@ function Start-SharePointDSCExtract
         Write-Host -Object "    - We couldn't detect a SharePoint installation on this machine. Please execute the SharePoint ReverseDSC script on an existing SharePoint server." -BackgroundColor Red -ForegroundColor Black
     }
 }
+
+function Export-SPDscDiagnosticData
+{
+    [CmdletBinding(DefaultParametersetName = 'None')]
+    param
+    (
+        [Parameter(Mandatory = $true, Position = 0)]
+        [System.String]
+        $ExportFilePath,
+
+        [Parameter()]
+        [System.UInt32]
+        $NumberOfDays = 7,
+
+        [Parameter(ParameterSetName = 'Anon')]
+        [Switch]
+        $Anonymize,
+
+        [Parameter(ParameterSetName = 'Anon', Mandatory = $true)]
+        [System.String]
+        $Server,
+
+        [Parameter(ParameterSetName = 'Anon', Mandatory = $true)]
+        [System.String]
+        $Domain,
+
+        [Parameter(ParameterSetName = 'Anon', Mandatory = $true)]
+        [System.String]
+        $Url
+    )
+    Write-Host 'Exporting logging information' -ForegroundColor Yellow
+
+    $currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
+    if ($currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator) -eq $false)
+    {
+        Write-Host -Object "[ERROR] You need to run this cmdlet with Administrator privileges!" -ForegroundColor Red
+        return
+    }
+
+    $afterDate = (Get-Date).AddDays(($NumberOfDays * -1))
+
+    # Create Temp folder
+    $guid = [Guid]::NewGuid()
+    $tempPath = Join-Path -Path $env:TEMP -ChildPath $guid
+    $null = New-Item -Path $tempPath -ItemType 'Directory'
+
+    # Copy DSC Verbose Logs
+    Write-Host '  * Copying DSC Verbose Logs' -ForegroundColor Gray
+    $logPath = Join-Path -Path $tempPath -ChildPath 'DSCLogs'
+    $null = New-Item -Path $logPath -ItemType 'Directory'
+
+    $sourceLogPath = Join-Path -Path $env:windir -ChildPath 'System32\Configuration\ConfigurationStatus'
+    $items = Get-ChildItem -Path "$sourceLogPath\*.json" | Where-Object { $_.LastWriteTime -gt $afterDate }
+
+    if ($null -ne $items)
+    {
+        Copy-Item -Path $items -Destination $logPath -ErrorAction 'SilentlyContinue' #-ErrorVariable $err
+    }
+
+    if ($Anonymize.IsPresent)
+    {
+        Write-Host '    * Anonymizing DSC Verbose Logs' -ForegroundColor Gray
+        foreach ($file in (Get-ChildItem -Path $logPath))
+        {
+            $content = Get-Content -Path $file.FullName -Raw -Encoding Unicode
+            $content = $content -replace $Domain, '[DOMAIN]' -replace $Url, 'fqdn.com' -replace $Server, '[SERVER]'
+            Set-Content -Path $file.FullName -Value $content
+        }
+    }
+
+    # Export SPDsc event log
+    Write-Host '  * Exporting DSC Event Log' -ForegroundColor Gray
+    $evtExportLog = Join-Path -Path $tempPath -ChildPath 'SPDsc.csv'
+
+    try
+    {
+        Get-EventLog -LogName 'SPDsc' -After $afterDate | Export-Csv $evtExportLog -NoTypeInformation
+        if ($Anonymize.IsPresent)
+        {
+            Write-Host '    * Anonymizing DSC Event Log' -ForegroundColor Gray
+            $newLog = Import-Csv $evtExportLog
+            foreach ($entry in $newLog)
+            {
+                $entry.MachineName = "[SERVER]"
+                $entry.UserName = "[USER]"
+                $entry.Message = $entry.Message -replace $Domain, '[DOMAIN]' -replace $Url, 'fqdn.com' -replace $Server, '[SERVER]'
+            }
+
+            $newLog | Export-Csv -Path $evtExportLog -NoTypeInformation
+        }
+    }
+    catch
+    {
+        $txtExportLog = Join-Path -Path $tempPath -ChildPath 'SPDsc.txt'
+        Add-Content -Value 'SPDsc event log does not exist!' -Path $txtExportLog
+    }
+
+    # PowerShell Version
+    Write-Host '  * Exporting PowerShell Version info' -ForegroundColor Gray
+    $psInfoFile = Join-Path -Path $tempPath -ChildPath 'PSInfo.txt'
+    $PSVersionTable | Out-File -FilePath $psInfoFile
+
+    # OS Version
+    Write-Host '  * Exporting OS Version info' -ForegroundColor Gray
+    $computerInfoFile = Join-Path -Path $tempPath -ChildPath 'OSInfo.txt'
+
+    Get-ComputerInfo -Property @(
+        'OsName',
+        'OsOperatingSystemSKU',
+        'OSArchitecture',
+        'WindowsVersion',
+        'WindowsBuildLabEx',
+        'OsLanguage',
+        'OsMuiLanguages') | Out-File -FilePath $computerInfoFile
+
+    # LCM settings
+    Write-Host '  * Exporting LCM Configuration info' -ForegroundColor Gray
+    $lcmInfoFile = Join-Path -Path $tempPath -ChildPath 'LCMInfo.txt'
+    Get-DscLocalConfigurationManager | Out-File -FilePath $lcmInfoFile
+
+    # Creating export package
+    Write-Host '  * Creating Zip file with all collected information' -ForegroundColor Gray
+
+    if ((Split-Path -Path $ExportFilePath -Leaf) -like "*.*")
+    {
+        # ExportFilePath is file
+        if ($ExportFilePath -match ".zip$")
+        {
+            $exportFilename = $ExportFilePath
+        }
+        else
+        {
+            # ExportFilePath does not have zip extension, correct to zip
+            $exportFilename = $ExportFilePath -replace "\..*$", '.zip'
+        }
+
+        $parentFolder = Split-Path -Path $ExportFilePath
+        if ((Test-Path -Path $parentFolder) -eq $false)
+        {
+            $null = New-Item -Path $parentFolder -ItemType Directory
+        }
+    }
+    else
+    {
+        # ExportFilePath is folder
+        $exportFilename = Join-Path -Path $ExportFilePath -ChildPath 'SPDsc.zip'
+
+        if ((Test-Path -Path $ExportFilePath) -eq $false)
+        {
+            $null = New-Item -Path $ExportFilePath -ItemType Directory
+        }
+    }
+    Compress-Archive -Path $tempPath -DestinationPath $exportFilename -Force
+
+    # Cleaning up temporary data
+    Write-Host '  * Removing temporary data' -ForegroundColor Gray
+    Remove-Item $tempPath -Recurse -Force -Confirm:$false
+
+    Write-Host ('Completed with export. Information exported to {0}' -f $exportFilename) -ForegroundColor Yellow
+}
+
+New-Alias -Name Start-SharePointDSCExtract -Value Export-SPConfiguration -Force

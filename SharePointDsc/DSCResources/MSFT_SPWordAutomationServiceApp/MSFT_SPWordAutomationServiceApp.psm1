@@ -769,7 +769,27 @@ function Test-TargetResource
 
     $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
         -Source $($MyInvocation.MyCommand.Source) `
-        -DesiredValues $PSBoundParameters
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @(
+        "ApplicationPool",
+        "ConversionProcesses",
+        "DatabaseCredentials",
+        "DatabaseName",
+        "DatabaseServer",
+        "DisableBinaryFileScan",
+        "DisableEmbeddedFonts",
+        "Ensure",
+        "JobConversionFrequency",
+        "KeepAliveTimeout",
+        "MaximumConversionAttempts",
+        "MaximumConversionTime",
+        "MaximumMemoryUsage",
+        "MaximumSyncConversionRequests",
+        "NumberOfConversionsPerProcess",
+        "RecycleThreshold",
+        "SupportedFileFormats",
+        "TimeBeforeConversionIsMonitored",
+        "UseSQLAuthentication")
 
     Write-Verbose -Message "Test-TargetResource returned $result"
 

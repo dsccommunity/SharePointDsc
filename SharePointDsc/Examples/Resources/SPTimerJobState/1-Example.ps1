@@ -39,23 +39,26 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
-    {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
 
-        node localhost {
-            SPTimerJobState DisableTimerJob_AppServerJob
-            {
-                TypeName             = "Microsoft.Office.Server.Administration.ApplicationServerJob"
-                WebAppUrl            = "http://sites.sharepoint.contoso.com"
-                Enabled              = $false
-                Schedule             ="weekly at sat 5:00"
-                PsDscRunAsCredential = $SetupAccount
-            }
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
+    {
+        SPTimerJobState DisableTimerJob_AppServerJob
+        {
+            TypeName             = "Microsoft.Office.Server.Administration.ApplicationServerJob"
+            WebAppUrl            = "http://sites.sharepoint.contoso.com"
+            Enabled              = $false
+            Schedule             ="weekly at sat 5:00"
+            PsDscRunAsCredential = $SetupAccount
         }
     }
+}

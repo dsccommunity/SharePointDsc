@@ -77,14 +77,15 @@ function Get-TargetResource
         $params = $args[0]
         $eventSource = $args[1]
 
-        $serviceApps = Get-SPServiceApplication -Name $params.Name `
-            -ErrorAction SilentlyContinue
         $nullReturn = @{
             Name                    = $params.Name
             Ensure                  = "Absent"
             ApplicationPool         = $params.ApplicationPool
             TermStoreAdministrators = @()
         }
+
+        $serviceApps = Get-SPServiceApplication -Name $params.Name `
+            -ErrorAction SilentlyContinue
 
         if ($null -eq $serviceApps)
         {
@@ -200,6 +201,13 @@ function Get-TargetResource
             | Where-Object -FilterScript {
                 $_.IsAdministrationWebApplication -eq $true
             }
+
+            if ($null -eq $centralAdminSite)
+            {
+                Write-Verbose "Unable to locate central administration web application"
+                return $nullReturn
+            }
+
             $session = Get-SPTaxonomySession -Site $centralAdminSite.Url
 
             $currentAdmins = @()
@@ -488,6 +496,17 @@ function Set-TargetResource
                 | Where-Object -FilterScript {
                     $_.IsAdministrationWebApplication -eq $true
                 }
+
+                if ($null -eq $centralAdminSite)
+                {
+                    $message = "Unable to locate central administration web application"
+                    Add-SPDscEvent -Message $message `
+                        -EntryType 'Error' `
+                        -EventID 100 `
+                        -Source $eventSource
+                    throw $message
+                }
+
                 $session = Get-SPTaxonomySession -Site $centralAdminSite.Url
                 $termStore = $session.TermStores[$pName]
 

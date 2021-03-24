@@ -40,21 +40,24 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
-    {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
 
-        node localhost {
-            SPFarmAdministrators LocalFarmAdmins
-            {
-                IsSingleInstance     = "Yes"
-                Members              = @("CONTOSO\user1", "CONTOSO\user2")
-                PsDscRunAsCredential = $SetupAccount
-            }
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
+    {
+        SPFarmAdministrators LocalFarmAdmins
+        {
+            IsSingleInstance     = "Yes"
+            Members              = @("CONTOSO\user1", "CONTOSO\user2")
+            PsDscRunAsCredential = $SetupAccount
         }
     }
+}

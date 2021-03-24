@@ -42,23 +42,26 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
-    {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
 
-        node localhost {
-            SPDistributedCacheService EnableDistributedCache
-            {
-                Name                 = "AppFabricCachingService"
-                CacheSizeInMB        = 8192
-                ServiceAccount       = "DEMO\ServiceAccount"
-                PsDscRunAsCredential = $SetupAccount
-                CreateFirewallRules  = $false
-            }
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
+    {
+        SPDistributedCacheService EnableDistributedCache
+        {
+            Name                 = "AppFabricCachingService"
+            CacheSizeInMB        = 8192
+            ServiceAccount       = "DEMO\ServiceAccount"
+            CreateFirewallRules  = $false
+            PsDscRunAsCredential = $SetupAccount
         }
     }
+}

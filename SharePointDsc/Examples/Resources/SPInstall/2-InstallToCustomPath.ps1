@@ -40,23 +40,26 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
-    {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
 
-        node localhost {
-            SPInstall InstallBinaries
-            {
-                IsSingleInstance = "Yes"
-                BinaryDir        = "D:\SharePoint\Binaries"
-                InstallPath      = "D:\SharePoint\Install"
-                DataPath         = "D:\SharePoint\Data"
-                ProductKey       = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
-            }
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
+    {
+        SPInstall InstallBinaries
+        {
+            IsSingleInstance = "Yes"
+            BinaryDir        = "D:\SharePoint\Binaries"
+            InstallPath      = "D:\SharePoint\Install"
+            DataPath         = "D:\SharePoint\Data"
+            ProductKey       = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
         }
     }
+}

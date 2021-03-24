@@ -40,32 +40,35 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
-    {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
 
-        node localhost {
-            SPInfoPathFormsServiceConfig InfoPathFormsServiceConfig
-            {
-                IsSingleInstance                         = "Yes"
-                AllowUserFormBrowserEnabling             = $true
-                AllowUserFormBrowserRendering            = $true
-                MaxDataConnectionTimeout                 = 20000
-                DefaultDataConnectionTimeout             = 10000
-                MaxDataConnectionResponseSize            = 1500
-                RequireSslForDataConnections             = $true
-                AllowEmbeddedSqlForDataConnections       = $false
-                AllowUdcAuthenticationForDataConnections = $false
-                AllowUserFormCrossDomainDataConnections  = $false
-                MaxPostbacksPerSession                   = 75
-                MaxUserActionsPerPostback                = 200
-                ActiveSessionsTimeout                    = 1440
-                MaxSizeOfUserFormState                   = 4096
-            }
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
+    {
+        SPInfoPathFormsServiceConfig InfoPathFormsServiceConfig
+        {
+            IsSingleInstance                         = "Yes"
+            AllowUserFormBrowserEnabling             = $true
+            AllowUserFormBrowserRendering            = $true
+            MaxDataConnectionTimeout                 = 20000
+            DefaultDataConnectionTimeout             = 10000
+            MaxDataConnectionResponseSize            = 1500
+            RequireSslForDataConnections             = $true
+            AllowEmbeddedSqlForDataConnections       = $false
+            AllowUdcAuthenticationForDataConnections = $false
+            AllowUserFormCrossDomainDataConnections  = $false
+            MaxPostbacksPerSession                   = 75
+            MaxUserActionsPerPostback                = 200
+            ActiveSessionsTimeout                    = 1440
+            MaxSizeOfUserFormState                   = 4096
         }
     }
+}

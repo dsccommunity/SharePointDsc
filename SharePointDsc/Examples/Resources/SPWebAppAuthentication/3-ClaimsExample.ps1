@@ -54,7 +54,8 @@ Configuration Example
 
     Import-DscResource -ModuleName SharePointDsc
 
-    node localhost {
+    node localhost
+    {
         SPTrustedIdentityTokenIssuer SampleSPTrust
         {
             Name                         = "Contoso"

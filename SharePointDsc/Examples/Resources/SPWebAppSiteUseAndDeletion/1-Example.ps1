@@ -39,24 +39,27 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
-    {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
 
-        node localhost {
-            SPWebAppSiteUseAndDeletion ConfigureSiteUseAndDeletion
-            {
-                WebAppUrl                                = "http://example.contoso.local"
-                SendUnusedSiteCollectionNotifications    = $true
-                UnusedSiteNotificationPeriod             = 90
-                AutomaticallyDeleteUnusedSiteCollections = $true
-                UnusedSiteNotificationsBeforeDeletion    = 24
-                PsDscRunAsCredential                     = $SetupAccount
-            }
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
+    {
+        SPWebAppSiteUseAndDeletion ConfigureSiteUseAndDeletion
+        {
+            WebAppUrl                                = "http://example.contoso.local"
+            SendUnusedSiteCollectionNotifications    = $true
+            UnusedSiteNotificationPeriod             = 90
+            AutomaticallyDeleteUnusedSiteCollections = $true
+            UnusedSiteNotificationsBeforeDeletion    = 24
+            PsDscRunAsCredential                     = $SetupAccount
         }
     }
+}

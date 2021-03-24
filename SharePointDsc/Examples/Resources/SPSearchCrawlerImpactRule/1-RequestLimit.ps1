@@ -39,23 +39,26 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
-    {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
 
-        node localhost {
-            SPSearchCrawlerImpactRule IntranetCrawlerImpactRequestLimitRule
-            {
-                ServiceAppName = "Search Service Application"
-                Name = "https://intranet.sharepoint.contoso.com"
-                RequestLimit = 8
-                Ensure = "Present"
-                PsDscRunAsCredential = $SetupAccount
-            }
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
+    {
+        SPSearchCrawlerImpactRule IntranetCrawlerImpactRequestLimitRule
+        {
+            ServiceAppName       = "Search Service Application"
+            Name                 = "https://intranet.sharepoint.contoso.com"
+            RequestLimit         = 8
+            Ensure               = "Present"
+            PsDscRunAsCredential = $SetupAccount
         }
     }
+}

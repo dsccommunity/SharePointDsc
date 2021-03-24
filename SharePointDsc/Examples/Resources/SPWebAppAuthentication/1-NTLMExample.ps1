@@ -51,8 +51,8 @@ Configuration Example
 
     Import-DscResource -ModuleName SharePointDsc
 
-    node localhost {
-
+    node localhost
+    {
         SPWebAppAuthentication ContosoAuthentication
         {
             WebAppUrl            = "http://sharepoint.contoso.com"

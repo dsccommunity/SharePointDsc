@@ -174,6 +174,7 @@ function Get-TargetResource
                 $languageEN = $parsedENProduct[0]
             }
         }
+        Write-Verbose "Installed Language Pack: $languageEN"
         $englishProducts += $languageEN
     }
 
@@ -218,7 +219,7 @@ function Get-TargetResource
         throw $message
     }
 
-    Write-Verbose -Message "Extract English name of the language code"
+    Write-Verbose -Message "Extract English name of the language code: $($cultureInfo.EnglishName)"
     switch ($cultureInfo.EnglishName)
     {
         "Dari (Afghanistan)"
@@ -249,7 +250,10 @@ function Get-TargetResource
         {
             $languageEnglish = "Serbian (Latin)"
         }
-        "Norwegian Bokmål (Norway)"
+        # If VS Code shows a strange character in Bokmål, this is correct.
+        # PowerShell encodes files in Windows-1252 and VSCode uses UTF8.
+        # This characters is therefore stored in Windows-1252.
+        "Norwegian Bokm�l (Norway)"
         {
             $languageEnglish = "Norwegian"
         }

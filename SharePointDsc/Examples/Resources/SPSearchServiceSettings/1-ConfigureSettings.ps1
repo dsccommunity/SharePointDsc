@@ -39,27 +39,30 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount,
+
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SearchAccount
+    )
+
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
     {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount,
-
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SearchAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
-
-        node localhost {
-            SPSearchServiceSettings SearchServiceSettings
-            {
-                IsSingleInstance      = "Yes"
-                PerformanceLevel      = "Maximum"
-                ContactEmail          = "sharepoint@contoso.com"
-                WindowsServiceAccount = $SearchAccount
-                PsDscRunAsCredential  = $SetupAccount
-            }
+        SPSearchServiceSettings SearchServiceSettings
+        {
+            IsSingleInstance      = "Yes"
+            PerformanceLevel      = "Maximum"
+            ContactEmail          = "sharepoint@contoso.com"
+            WindowsServiceAccount = $SearchAccount
+            PsDscRunAsCredential  = $SetupAccount
         }
     }
+}

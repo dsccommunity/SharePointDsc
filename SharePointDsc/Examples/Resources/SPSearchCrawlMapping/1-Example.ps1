@@ -39,26 +39,25 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
-    {
-        param
-        (
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
+    Import-DscResource -ModuleName SharePointDsc
 
-        node localhost {
-            SPSearchCrawlMapping IntranetCrawlMapping
-            {
-                ServiceAppName = "Search Service Application"
-                Url = "http://crawl.sharepoint.com"
-                Target = "http://site.sharepoint.com"
-                Ensure = "Present"
-                PsDScRunAsCredential = $SetupAccount
-            }
+    node localhost
+    {
+        SPSearchCrawlMapping IntranetCrawlMapping
+        {
+            ServiceAppName       = "Search Service Application"
+            Url                  = "http://crawl.sharepoint.com"
+            Target               = "http://site.sharepoint.com"
+            Ensure               = "Present"
+            PsDScRunAsCredential = $SetupAccount
         }
     }
-
-
+}

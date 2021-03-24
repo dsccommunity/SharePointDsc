@@ -48,12 +48,12 @@
     # ProcessorArchitecture = ''
 
     # Modules that must be imported into the global environment prior to importing this module
-    RequiredModules      = @(
-        @{
-            ModuleName      = "ReverseDSC"
-            RequiredVersion = "2.0.0.7"
-        }
-    )
+    # RequiredModules      = @(
+    #     @{
+    #         ModuleName      = "ReverseDSC"
+    #         RequiredVersion = "2.0.0.7"
+    #     }
+    # )
 
     # Assemblies that must be loaded prior to importing this module
     # RequiredAssemblies = @()
@@ -81,6 +81,8 @@
         'Convert-SPDscHashtableToString',
         'ConvertTo-ReverseString',
         'ConvertTo-TwoDigitFlipString',
+        'Export-SPConfiguration',
+        'Export-SPDscDiagnosticData',
         'Format-OfficePatchGUID',
         'Get-SPDscDBForAlias',
         'Get-SPDscAssemblyVersion',
@@ -115,7 +117,6 @@
         'Set-SPFarmAdministratorsBlock',
         'Set-SPDscTermStoreAdministrators',
         'Set-SPDscTermStoreAdministratorsBlock',
-        'Start-SharePointDSCExtract',
         'Test-SPDscIsADUser',
         'Test-SPDscObjectHasProperty',
         'Test-SPDscParameterState',
@@ -131,7 +132,7 @@
     VariablesToExport    = @()
 
     # Aliases to export from this module
-    AliasesToExport      = @()
+    AliasesToExport      = @('Start-SharePointDSCExtract')
 
     # DSCResources to export from this module
     DscResourcesToExport = @(

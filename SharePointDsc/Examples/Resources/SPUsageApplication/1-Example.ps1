@@ -39,25 +39,28 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
-    {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
 
-        node localhost {
-            SPUsageApplication UsageApplication
-            {
-                Name                  = "Usage Service Application"
-                DatabaseName          = "SP_Usage"
-                UsageLogCutTime       = 5
-                UsageLogLocation      = "L:\UsageLogs"
-                UsageLogMaxFileSizeKB = 1024
-                Ensure                = "Present"
-                PsDscRunAsCredential  = $SetupAccount
-            }
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
+    {
+        SPUsageApplication UsageApplication
+        {
+            Name                  = "Usage Service Application"
+            DatabaseName          = "SP_Usage"
+            UsageLogCutTime       = 5
+            UsageLogLocation      = "L:\UsageLogs"
+            UsageLogMaxFileSizeKB = 1024
+            Ensure                = "Present"
+            PsDscRunAsCredential  = $SetupAccount
         }
     }
+}

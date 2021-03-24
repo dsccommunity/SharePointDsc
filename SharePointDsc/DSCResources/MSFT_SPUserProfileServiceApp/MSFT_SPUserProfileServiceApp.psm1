@@ -229,7 +229,7 @@ function Get-TargetResource
                 $caSite = $ca.Sites[0]
                 $serviceContext = Get-SPServiceContext($caSite)
                 $userProfileManager = New-Object Microsoft.Office.Server.UserProfiles.UserProfileManager($serviceContext)
-                $upMySiteLocation = $userProfileManager.MySiteHostUrl
+                $upMySiteLocation = [System.Uri]$userProfileManager.MySiteHostUrl
                 $upMySiteManagedPath = $userProfileManager.PersonalSiteInclusion
                 $upSiteConflictNaming = $userProfileManager.PersonalSiteFormat
             }
@@ -247,7 +247,7 @@ function Get-TargetResource
                 Name                         = $serviceApp.DisplayName
                 ProxyName                    = $proxyName
                 ApplicationPool              = $serviceApp.ApplicationPool.Name
-                MySiteHostLocation           = $upMySiteLocation
+                MySiteHostLocation           = $upMySiteLocation.AbsoluteUri.TrimEnd("/")
                 MySiteManagedPath            = $upMySiteManagedPath
                 ProfileDBName                = $databases.ProfileDatabase.Name
                 ProfileDBServer              = $databases.ProfileDatabase.NormalizedDataSource
@@ -748,6 +748,11 @@ function Test-TargetResource
 
     $PSBoundParameters.Ensure = $Ensure
     $PSBoundParameters.UpdateProxyGroup = $UpdateProxyGroup
+
+    if ($PSBoundParameters.ContainsKey("MySiteHostLocation") -eq $true)
+    {
+        $PSBoundParameters.MySiteHostLocation = ([System.Uri]$MySiteHostLocation).AbsoluteUri.TrimEnd('/')
+    }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 

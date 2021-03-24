@@ -40,28 +40,31 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
+
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
     {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+        SPServiceAppProxyGroup ProxyGroup1
+        {
+            Name              = "Proxy Group 1"
+            Ensure            = "Present"
+            ServiceAppProxies = "Web 1 User Profile Service Application", "Web 1 MMS Service Application", "State Service Application"
+        }
 
-        node localhost {
-            SPServiceAppProxyGroup ProxyGroup1
-            {
-                Name                = "Proxy Group 1"
-                Ensure              = "Present"
-                ServiceAppProxies   = "Web 1 User Profile Service Application","Web 1 MMS Service Application","State Service Application"
-            }
-
-            SPServiceAppProxyGroup ProxyGroup2
-            {
-                Name                = "Proxy Group 2"
-                Ensure              = "Present"
-                ServiceAppProxiesToInclude = "Web 2 User Profile Service Application"
-            }
+        SPServiceAppProxyGroup ProxyGroup2
+        {
+            Name                       = "Proxy Group 2"
+            Ensure                     = "Present"
+            ServiceAppProxiesToInclude = "Web 2 User Profile Service Application"
         }
     }
+}

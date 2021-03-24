@@ -39,24 +39,27 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
-    {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
 
-        node localhost {
-            SPManagedPath TestManagedPath
-            {
-                WebAppUrl            = "http://sharepoint.contoso.com"
-                RelativeUrl          = "teams"
-                Explicit             = $false
-                HostHeader           = $true
-                Ensure               = "Absent"
-                PsDscRunAsCredential = $SetupAccount
-            }
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
+    {
+        SPManagedPath TestManagedPath
+        {
+            WebAppUrl            = "http://sharepoint.contoso.com"
+            RelativeUrl          = "teams"
+            Explicit             = $false
+            HostHeader           = $true
+            Ensure               = "Absent"
+            PsDscRunAsCredential = $SetupAccount
         }
     }
+}

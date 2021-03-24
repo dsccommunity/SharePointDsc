@@ -23,7 +23,7 @@ The default value for the Ensure parameter is Present. When not specifying this
 parameter, the result source is created.
 
 To define a result source as global, use the value 'SSA' as the ScopeName
-value.
+value and 'Global' as the ScopeUrl value (the parameter needs to have a value).
 
 ## Script
 

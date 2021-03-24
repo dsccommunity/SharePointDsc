@@ -39,21 +39,24 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
-    {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
 
-        node localhost {
-            SPAccessServices2010 Access2010Services
-            {
-                Name                 = "Access 2010 Services Service Application"
-                ApplicationPool      = "SharePoint Service Applications"
-                PsDscRunAsCredential = $SetupAccount
-            }
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
+    {
+        SPAccessServices2010 Access2010Services
+        {
+            Name                 = "Access 2010 Services Service Application"
+            ApplicationPool      = "SharePoint Service Applications"
+            PsDscRunAsCredential = $SetupAccount
         }
     }
+}

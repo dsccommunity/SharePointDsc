@@ -84,7 +84,7 @@ function Get-TargetResource
         try
         {
             $centralAdminWebApp = [Microsoft.SharePoint.Administration.SPAdministrationWebApplication]::Local
-            $centralAdminSite = Get-SPSite -Identity $centralAdminWebApp.Url
+            $centralAdminSite = Get-SPSite -Identity $centralAdminWebApp.Url -ErrorAction Stop
 
             $site = New-Object "Microsoft.SharePoint.SPSite" -ArgumentList @($params.Url, $centralAdminSite.SystemAccount.UserToken)
         }
@@ -281,10 +281,11 @@ function Set-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
     $null = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $CurrentValues) `
+        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $CurrentValues) `
         -ScriptBlock {
         $params = $args[0]
-        $CurrentValues = $args[1]
+        $eventSource = $args[1]
+        $CurrentValues = $args[2]
         $doCreateDefaultGroups = $false
 
         $params.Remove("InstallAccount") | Out-Null
@@ -325,7 +326,18 @@ function Set-TargetResource
             }
 
             $centralAdminWebApp = [Microsoft.SharePoint.Administration.SPAdministrationWebApplication]::Local
-            $centralAdminSite = Get-SPSite -Identity $centralAdminWebApp.Url
+            $centralAdminSite = Get-SPSite -Identity $centralAdminWebApp.Url -ErrorAction SilentlyContinue
+
+            if ($null -eq $centralAdminSite)
+            {
+                $message = "Unable to locate central administration site"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $eventSource
+                throw $message
+            }
+
             $systemAccountSite = New-Object "Microsoft.SharePoint.SPSite" -ArgumentList @($site.Id, $centralAdminSite.SystemAccount.UserToken)
 
             if ($params.OwnerAlias -ne $CurrentValues.OwnerAlias)
