@@ -73,7 +73,9 @@ function Get-TargetResource
         -ScriptBlock {
         $params = $args[0]
 
-        $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
+        $serviceApps = Get-SPServiceApplication | Where-Object -FilterScript {
+            $_.Name -eq $params.Name
+        }
 
         $nullReturn = @{
             Name            = $params.Name
@@ -249,8 +251,9 @@ function Set-TargetResource
                 -ScriptBlock {
                 $params = $args[0]
 
-                $serviceApp = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
-                    $_.GetType().FullName -eq "Microsoft.Office.Server.WorkManagement.WorkManagementServiceApplication"
+                $serviceApp = Get-SPServiceApplication | Where-Object -FilterScript {
+                    $_.Name -eq $params.Name -and `
+                        $_.GetType().FullName -eq "Microsoft.Office.Server.WorkManagement.WorkManagementServiceApplication"
                 }
                 $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool
                 Set-SPWorkManagementServiceApplication -Identity $serviceApp -ApplicationPool $appPool
@@ -311,8 +314,9 @@ function Set-TargetResource
                 $setParams.MinimumTimeBetweenSearchQueries = New-TimeSpan -Days $setParams.MinimumTimeBetweenSearchQueries
             }
             $setParams.Add("Confirm", $false)
-            $appService = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
-                $_.GetType().FullName -eq "Microsoft.Office.Server.WorkManagement.WorkManagementServiceApplication"
+            $appService = Get-SPServiceApplication | Where-Object -FilterScript {
+                $_.Name -eq $params.Name -and `
+                    $_.GetType().FullName -eq "Microsoft.Office.Server.WorkManagement.WorkManagementServiceApplication"
             }
 
             $appService | Set-SPWorkManagementServiceApplication @setPArams | Out-Null
@@ -328,8 +332,9 @@ function Set-TargetResource
             -ScriptBlock {
             $params = $args[0]
 
-            $serviceApp = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
-                $_.GetType().FullName -eq "Microsoft.Office.Server.WorkManagement.WorkManagementServiceApplication"
+            $serviceApp = Get-SPServiceApplication | Where-Object -FilterScript {
+                $_.Name -eq $params.Name -and `
+                    $_.GetType().FullName -eq "Microsoft.Office.Server.WorkManagement.WorkManagementServiceApplication"
             }
 
             $proxies = Get-SPServiceApplicationProxy

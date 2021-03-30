@@ -28,7 +28,9 @@ function Get-TargetResource
         -ScriptBlock {
         $params = $args[0]
 
-        $serviceApp = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
+        $serviceApp = Get-SPServiceApplication | Where-Object -FilterScript {
+            $_.Name -eq $params.Name
+        }
 
         if ($null -eq $serviceApp)
         {
@@ -90,7 +92,10 @@ function Set-TargetResource
         $params = $args[0]
         $eventSource = $args[1]
 
-        $serviceApp = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
+        $serviceApp = Get-SPServiceApplication | Where-Object -FilterScript {
+            $_.Name -eq $params.Name
+        }
+
         if ($null -eq $serviceApp)
         {
             $message = ("The service application $Name does not exist")

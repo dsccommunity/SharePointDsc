@@ -83,7 +83,10 @@ function Get-TargetResource
             Ensure          = "Absent"
         }
 
-        $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
+        $serviceApps = Get-SPServiceApplication | Where-Object -FilterScript {
+            $_.Name -eq $params.Name
+        }
+
         if ($null -eq $serviceApps)
         {
             return $nullReturn
@@ -298,8 +301,9 @@ function Set-TargetResource
                 -ScriptBlock {
                 $params = $args[0]
 
-                $serviceApp = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
-                    $_.GetType().FullName -eq "Microsoft.Office.SecureStoreService.Server.SecureStoreServiceApplication"
+                $serviceApp = Get-SPServiceApplication | Where-Object -FilterScript {
+                    $_.Name -eq $params.Name -and `
+                        $_.GetType().FullName -eq "Microsoft.Office.SecureStoreService.Server.SecureStoreServiceApplication"
                 }
                 $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool
                 Set-SPSecureStoreServiceApplication -Identity $serviceApp -ApplicationPool $appPool
@@ -316,8 +320,9 @@ function Set-TargetResource
             -ScriptBlock {
             $params = $args[0]
 
-            $serviceApp = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
-                $_.GetType().FullName -eq "Microsoft.Office.SecureStoreService.Server.SecureStoreServiceApplication"
+            $serviceApp = Get-SPServiceApplication | Where-Object -FilterScript {
+                $_.Name -eq $params.Name -and `
+                    $_.GetType().FullName -eq "Microsoft.Office.SecureStoreService.Server.SecureStoreServiceApplication"
             }
 
             # Remove the connected proxy(ies)

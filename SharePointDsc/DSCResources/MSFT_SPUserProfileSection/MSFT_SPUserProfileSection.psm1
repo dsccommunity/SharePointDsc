@@ -40,8 +40,10 @@ function Get-TargetResource
         -ScriptBlock {
         $params = $args[0]
 
-        $upsa = Get-SPServiceApplication -Name $params.UserProfileService `
-            -ErrorAction SilentlyContinue
+        $upsa = Get-SPServiceApplication | Where-Object -FilterScript {
+            $_.Name -eq $params.UserProfileService
+        }
+
         $nullReturn = @{
             Name               = $params.Name
             Ensure             = "Absent"
@@ -122,8 +124,9 @@ function Set-TargetResource
         $params = $args[0]
         $eventSource = $args[1]
 
-        $ups = Get-SPServiceApplication -Name $params.UserProfileService `
-            -ErrorAction SilentlyContinue
+        $ups = Get-SPServiceApplication | Where-Object -FilterScript {
+            $_.Name -eq $params.UserProfileService
+        }
 
         if ($null -eq $ups)
         {

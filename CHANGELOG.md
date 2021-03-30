@@ -29,6 +29,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- SPAccessServiceApp, SPAccessServices2010, SPAppManagementServiceApp, SPBCSServiceApp,
+  SPExcelServiceApp, SPMachineTranslationServiceApp, SPManagedMetadataServiceApp,
+  SPPerformancePointServiceApp, SPPowerPointAutomationServiceApp, SPProjectServerServiceApp,
+  SPPublishServiceApplication, SPSearchCrawlRule, SPSearchFileType, SPSearchServiceApp,
+  SPSecureStoreServiceApp, SPServiceAppSecurity, SPSubscriptionSettingsServiceApp,
+  SPUsageApplication, SPUserProfileProperty, SPUserProfileSection, SPUserProfileServiceApp,
+  SPUserProfileSyncConnection, SPUserProfileSyncService, SPVisioServiceApp,
+  SPWordAutomationServiceApp, SPWorkManagementServiceApp
+  - Fixed issue with the Name parameter of Get-SPServiceApplication, which is case
+    sensitive
 - SPInstallLanguagePack
   - Fixes issue in the Norwegian Language Pack detection
 - SPSearchManagedProperty

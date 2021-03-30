@@ -88,7 +88,9 @@ function Get-TargetResource
                     "does not exist.")
         }
 
-        $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
+        $serviceApps = Get-SPServiceApplication | Where-Object -FilterScript {
+            $_.Name -eq $params.Name
+        }
 
         $nullReturn = @{
             Name            = $params.Name
@@ -326,10 +328,10 @@ function Set-TargetResource
                 if ($params.ContainsKey("SearchCenterUrl") -eq $true)
                 {
                     Write-Verbose -Message "Setting SearchCenterUrl to $($params.SearchCenterUrl)"
-                    $serviceApp = Get-SPServiceApplication -Name $params.Name | `
-                            Where-Object -FilterScript {
+                    $serviceApp = Get-SPServiceApplication | Where-Object -FilterScript {
+                        $_.Name -eq $params.Name -and `
                             $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
-                        }
+                    }
                     $serviceApp.SearchCenterUrl = $params.SearchCenterUrl
                     $serviceApp.Update()
                 }
@@ -337,10 +339,10 @@ function Set-TargetResource
                 if ($params.ContainsKey("AlertsEnabled") -eq $true)
                 {
                     Write-Verbose -Message "Setting AlertsEnabled to $($params.AlertsEnabled)"
-                    $serviceApp = Get-SPServiceApplication -Name $params.Name | `
-                            Where-Object -FilterScript {
+                    $serviceApp = Get-SPServiceApplication | Where-Object -FilterScript {
+                        $_.Name -eq $params.Name -and `
                             $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
-                        }
+                    }
                     $serviceApp.AlertsEnabled = $params.AlertsEnabled
                     $serviceApp.Update()
                 }
@@ -358,10 +360,10 @@ function Set-TargetResource
             $params = $args[0]
             $result = $args[1]
 
-            $serviceApp = Get-SPServiceApplication -Name $params.Name | `
-                    Where-Object -FilterScript {
+            $serviceApp = Get-SPServiceApplication | Where-Object -FilterScript {
+                $_.Name -eq $params.Name -and `
                     $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
-                }
+            }
 
             if ($null -eq $params.ProxyName)
             {
@@ -422,10 +424,10 @@ function Set-TargetResource
                     $result.SearchCenterUrl -ne $params.SearchCenterUrl)
             {
                 Write-Verbose -Message "Updating SearchCenterUrl to $($params.SearchCenterUrl)"
-                $serviceApp = Get-SPServiceApplication -Name $params.Name | `
-                        Where-Object -FilterScript {
+                $serviceApp = Get-SPServiceApplication | Where-Object -FilterScript {
+                    $_.Name -eq $params.Name -and `
                         $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
-                    }
+                }
                 $serviceApp.SearchCenterUrl = $params.SearchCenterUrl
                 $serviceApp.Update()
             }
@@ -434,10 +436,10 @@ function Set-TargetResource
                     $result.AlertsEnabled -ne $params.AlertsEnabled)
             {
                 Write-Verbose -Message "Updating AlertsEnabled to $($params.AlertsEnabled)"
-                $serviceApp = Get-SPServiceApplication -Name $params.Name | `
-                        Where-Object -FilterScript {
+                $serviceApp = Get-SPServiceApplication | Where-Object -FilterScript {
+                    $_.Name -eq $params.Name -and `
                         $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
-                    }
+                }
                 $serviceApp.AlertsEnabled = $params.AlertsEnabled
                 $serviceApp.Update()
             }
@@ -453,9 +455,9 @@ function Set-TargetResource
             -ScriptBlock {
             $params = $args[0]
 
-            $serviceApp = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
-                $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
-
+            $serviceApp = Get-SPServiceApplication | Where-Object -FilterScript {
+                $_.Name -eq $params.Name -and `
+                    $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
             }
 
             $proxies = Get-SPServiceApplicationProxy

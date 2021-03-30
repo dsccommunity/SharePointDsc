@@ -60,8 +60,10 @@ function Get-TargetResource
         -ScriptBlock {
         $params = $args[0]
 
-        $serviceApps = Get-SPServiceApplication -Name $params.Name `
-            -ErrorAction SilentlyContinue
+        $serviceApps = Get-SPServiceApplication | Where-Object -FilterScript {
+            $_.Name -eq $params.Name
+        }
+
         $nullReturn = @{
             Name   = $params.Name
             Ensure = "Absent"
@@ -247,8 +249,8 @@ function Set-TargetResource
             -ScriptBlock {
             $params = $args[0]
 
-            $service = Get-SPServiceApplication -Name $params.Name `
-            | Where-Object -FilterScript {
+            $service = Get-SPServiceApplication | Where-Object -FilterScript {
+                $_.Name -eq $params.Name -and `
                 $_.GetType().FullName -eq "Microsoft.SharePoint.Administration.SPUsageApplication"
             }
             Remove-SPServiceApplication $service -Confirm:$false

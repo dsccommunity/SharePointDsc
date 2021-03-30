@@ -318,8 +318,10 @@ function Set-TargetResource
             # Start the Sync service if it should be running on this server
             if (($params.Ensure -eq "Present") -and ($syncService.Status -ne "Online"))
             {
-                $ups = Get-SPServiceApplication -Name $params.UserProfileServiceAppName `
-                    -ErrorAction SilentlyContinue
+                $ups = Get-SPServiceApplication | Where-Object -FilterScript {
+                    $_.Name -eq $params.UserProfileServiceAppName
+                }
+
                 if ($null -eq $ups)
                 {
                     $message = ("No User Profile Service Application was found " + `
@@ -487,8 +489,10 @@ function Test-SPDscUserProfileDBReadOnly()
         $UserProfileServiceAppName = $args[0]
         $eventSource = $args[1]
 
-        $serviceApps = Get-SPServiceApplication -Name $UserProfileServiceAppName `
-            -ErrorAction SilentlyContinue
+        $serviceApps = Get-SPServiceApplication | Where-Object -FilterScript {
+            $_.Name -eq $params.UserProfileServiceAppName
+        }
+
         if ($null -eq $serviceApps)
         {
             $message = ("No user profile service was found " + `

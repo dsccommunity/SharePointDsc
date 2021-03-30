@@ -84,8 +84,9 @@ function Get-TargetResource
             TermStoreAdministrators = @()
         }
 
-        $serviceApps = Get-SPServiceApplication -Name $params.Name `
-            -ErrorAction SilentlyContinue
+        $serviceApps = Get-SPServiceApplication | Where-Object -FilterScript {
+            $_.Name -eq $params.Name
+        }
 
         if ($null -eq $serviceApps)
         {
@@ -411,10 +412,11 @@ function Set-TargetResource
                 -ScriptBlock {
                 $params = $args[0]
 
-                $serviceApp = Get-SPServiceApplication -Name $params.Name `
-                | Where-Object -FilterScript {
-                    $_.GetType().FullName -eq "Microsoft.SharePoint.Taxonomy.MetadataWebServiceApplication"
+                $serviceApp = Get-SPServiceApplication | Where-Object -FilterScript {
+                    $_.Name -eq $params.Name -and `
+                        $_.GetType().FullName -eq "Microsoft.SharePoint.Taxonomy.MetadataWebServiceApplication"
                 }
+
                 $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool
                 Set-SPMetadataServiceApplication -Identity $serviceApp -ApplicationPool $appPool
             }
@@ -429,8 +431,9 @@ function Set-TargetResource
                 $params = $args[0]
                 $pName = $args[1]
 
-                $serviceApps = Get-SPServiceApplication -Name $params.Name `
-                    -ErrorAction SilentlyContinue
+                $serviceApps = Get-SPServiceApplication | Where-Object -FilterScript {
+                    $_.Name -eq $params.Name
+                }
                 $serviceApp = $serviceApps | Where-Object -FilterScript {
                     $_.GetType().FullName -eq "Microsoft.SharePoint.Taxonomy.MetadataWebServiceApplication"
                 }
@@ -469,9 +472,9 @@ function Set-TargetResource
                 -ScriptBlock {
                 $params = $args[0]
 
-                $serviceApp = Get-SPServiceApplication -Name $params.Name `
-                | Where-Object -FilterScript {
-                    $_.GetType().FullName -eq "Microsoft.SharePoint.Taxonomy.MetadataWebServiceApplication"
+                $serviceApp = Get-SPServiceApplication | Where-Object -FilterScript {
+                    $_.Name -eq $params.Name -and `
+                        $_.GetType().FullName -eq "Microsoft.SharePoint.Taxonomy.MetadataWebServiceApplication"
                 }
                 Set-SPMetadataServiceApplication -Identity $serviceApp -HubUri $params.ContentTypeHubUrl
             }
@@ -758,8 +761,9 @@ function Set-TargetResource
             -ScriptBlock {
             $params = $args[0]
 
-            $serviceApp = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
-                $_.GetType().FullName -eq "Microsoft.SharePoint.Taxonomy.MetadataWebServiceApplication"
+            $serviceApp = Get-SPServiceApplication | Where-Object -FilterScript {
+                $_.Name -eq $params.Name -and `
+                    $_.GetType().FullName -eq "Microsoft.SharePoint.Taxonomy.MetadataWebServiceApplication"
             }
 
             $proxies = Get-SPServiceApplicationProxy

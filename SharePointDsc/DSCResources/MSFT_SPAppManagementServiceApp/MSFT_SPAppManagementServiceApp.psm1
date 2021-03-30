@@ -52,7 +52,10 @@ function Get-TargetResource
         -ScriptBlock {
         $params = $args[0]
 
-        $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
+        $serviceApps = Get-SPServiceApplication | Where-Object -FilterScript {
+            $_.Name -eq $params.Name
+        }
+
         $nullReturn = @{
             Name            = $params.Name
             ApplicationPool = $params.ApplicationPool
@@ -209,8 +212,9 @@ function Set-TargetResource
                 -ScriptBlock {
                 $params = $args[0]
 
-                $app = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
-                    $_.GetType().FullName -eq "Microsoft.SharePoint.AppManagement.AppManagementServiceApplication"
+                $app = Get-SPServiceApplication | Where-Object -FilterScript {
+                    $_.Name -eq $params.Name -and `
+                        $_.GetType().FullName -eq "Microsoft.SharePoint.AppManagement.AppManagementServiceApplication"
                 }
 
                 if ($null -eq $params.ProxyName)
@@ -238,8 +242,9 @@ function Set-TargetResource
                 $params = $args[0]
                 $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool
 
-                $app = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
-                    $_.GetType().FullName -eq "Microsoft.SharePoint.AppManagement.AppManagementServiceApplication"
+                $app = Get-SPServiceApplication | Where-Object -FilterScript {
+                    $_.Name -eq $params.Name -and `
+                        $_.GetType().FullName -eq "Microsoft.SharePoint.AppManagement.AppManagementServiceApplication"
                 }
                 $app.ApplicationPool = $appPool
                 $app.Update()
@@ -256,8 +261,9 @@ function Set-TargetResource
             -ScriptBlock {
             $params = $args[0]
 
-            $app = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
-                $_.GetType().FullName -eq "Microsoft.SharePoint.AppManagement.AppManagementServiceApplication"
+            $app = Get-SPServiceApplication | Where-Object -FilterScript {
+                $_.Name -eq $params.Name -and `
+                    $_.GetType().FullName -eq "Microsoft.SharePoint.AppManagement.AppManagementServiceApplication"
             }
 
             $proxies = Get-SPServiceApplicationProxy
