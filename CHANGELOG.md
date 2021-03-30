@@ -48,6 +48,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SPUserProfileServiceApp
   - Fixed issue where MySiteHostLocation was return from Get method including port number,
     which causes the Test method to fail
+- SPWebAppAuthentication
+  - Fix issue in Get method to return Null when zone does not exist. That way the Test and
+    Set method can detect a non-existent zone and throw a proper error.
 - SPWordAutomation
   - Fixed issue where the resource never went into desired state when using AddToDefault
 
