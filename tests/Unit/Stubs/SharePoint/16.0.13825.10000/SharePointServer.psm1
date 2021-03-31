@@ -1,4 +1,4 @@
-﻿function Add-DatabaseToAvailabilityGroup { 
+﻿function Add-DatabaseToAvailabilityGroup {
   [CmdletBinding(DefaultParameterSetName='Default')]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -20,11 +20,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Add-SPAppDeniedEndpoint { 
+function Add-SPAppDeniedEndpoint {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -36,11 +36,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Add-SPClaimTypeMapping { 
+function Add-SPClaimTypeMapping {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -61,11 +61,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Add-SPDiagnosticsPerformanceCounter { 
+function Add-SPDiagnosticsPerformanceCounter {
   [CmdletBinding(DefaultParameterSetName='AddCounter', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(ParameterSetName='AddCounter', Mandatory=$true, Position=1, ValueFromPipelineByPropertyName=$true)]
@@ -111,11 +111,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Add-SPDistributedCacheServiceInstance { 
+function Add-SPDistributedCacheServiceInstance {
   [CmdletBinding(DefaultParameterSetName='NoArgumentsDefaultSet')]
 param(
     [Parameter(ParameterSetName='LocalServerRoleSet')]
@@ -132,11 +132,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Add-SPInfoPathUserAgent { 
+function Add-SPInfoPathUserAgent {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -147,11 +147,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Add-SPPeoplePickerDistributionListSearchDomain { 
+function Add-SPPeoplePickerDistributionListSearchDomain {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -172,11 +172,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Add-SPPeoplePickerSearchADDomain { 
+function Add-SPPeoplePickerSearchADDomain {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -203,11 +203,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Add-SPPeoplePickerServiceAccountDirectoryPath { 
+function Add-SPPeoplePickerServiceAccountDirectoryPath {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -228,11 +228,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Add-SPPluggableSecurityTrimmer { 
+function Add-SPPluggableSecurityTrimmer {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -254,11 +254,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Add-SPProfileLeader { 
+function Add-SPProfileLeader {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -280,11 +280,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Add-SPProfileSyncConnection { 
+function Add-SPProfileSyncConnection {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -342,11 +342,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Add-SPRoutingMachineInfo { 
+function Add-SPRoutingMachineInfo {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -378,11 +378,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Add-SPRoutingMachinePool { 
+function Add-SPRoutingMachinePool {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -402,11 +402,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Add-SPRoutingRule { 
+function Add-SPRoutingRule {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -437,11 +437,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Add-SPScaleOutDatabase { 
+function Add-SPScaleOutDatabase {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true)]
@@ -472,11 +472,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Add-SPSecureStoreSystemAccount { 
+function Add-SPSecureStoreSystemAccount {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -488,11 +488,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Add-SPServerScaleOutDatabase { 
+function Add-SPServerScaleOutDatabase {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true)]
@@ -523,11 +523,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Add-SPServiceApplicationProxyGroupMember { 
+function Add-SPServiceApplicationProxyGroupMember {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -545,11 +545,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Add-SPShellAdmin { 
+function Add-SPShellAdmin {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -564,11 +564,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Add-SPSiteSubscriptionFeaturePackMember { 
+function Add-SPSiteSubscriptionFeaturePackMember {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -585,11 +585,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Add-SPSiteSubscriptionProfileConfig { 
+function Add-SPSiteSubscriptionProfileConfig {
   [CmdletBinding(DefaultParameterSetName='Default', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -623,11 +623,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Add-SPSolution { 
+function Add-SPSolution {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -641,11 +641,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Add-SPThrottlingRule { 
+function Add-SPThrottlingRule {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -674,11 +674,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Add-SPUserLicenseMapping { 
+function Add-SPUserLicenseMapping {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true, ValueFromRemainingArguments=$true)]
@@ -690,11 +690,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Add-SPUserSolution { 
+function Add-SPUserSolution {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -710,11 +710,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Backup-SPConfigurationDatabase { 
+function Backup-SPConfigurationDatabase {
   [CmdletBinding(DefaultParameterSetName='DefaultSet')]
 param(
     [string]
@@ -742,11 +742,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Backup-SPEnterpriseSearchServiceApplicationIndex { 
+function Backup-SPEnterpriseSearchServiceApplicationIndex {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(ParameterSetName='RunBackup', Mandatory=$true, Position=0)]
@@ -785,11 +785,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Backup-SPFarm { 
+function Backup-SPFarm {
   [CmdletBinding(DefaultParameterSetName='DefaultSet', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(ParameterSetName='DefaultSet', Mandatory=$true)]
@@ -827,11 +827,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Backup-SPSite { 
+function Backup-SPSite {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -858,22 +858,22 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Clear-SPAppDeniedEndpointList { 
+function Clear-SPAppDeniedEndpointList {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Clear-SPBusinessDataCatalogEntityNotificationWeb { 
+function Clear-SPBusinessDataCatalogEntityNotificationWeb {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true)]
@@ -885,11 +885,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Clear-SPContentDatabaseSyncData { 
+function Clear-SPContentDatabaseSyncData {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [ValidateRange(0, 2147483647)]
@@ -900,11 +900,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Clear-SPDistributedCacheItem { 
+function Clear-SPDistributedCacheItem {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -916,11 +916,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Clear-SPLogLevel { 
+function Clear-SPLogLevel {
   [CmdletBinding()]
 param(
     [string[]]
@@ -934,11 +934,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Clear-SPMetadataWebServicePartitionData { 
+function Clear-SPMetadataWebServicePartitionData {
   [CmdletBinding(DefaultParameterSetName='Default')]
 param(
     [Parameter(ParameterSetName='Default', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -967,11 +967,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Clear-SPPeoplePickerDistributionListSearchDomain { 
+function Clear-SPPeoplePickerDistributionListSearchDomain {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -983,11 +983,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Clear-SPPeoplePickerSearchADDomain { 
+function Clear-SPPeoplePickerSearchADDomain {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -999,11 +999,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Clear-SPPeoplePickerServiceAccountDirectoryPath { 
+function Clear-SPPeoplePickerServiceAccountDirectoryPath {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -1015,11 +1015,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Clear-SPScaleOutDatabaseDeletedDataSubRange { 
+function Clear-SPScaleOutDatabaseDeletedDataSubRange {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -1040,11 +1040,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Clear-SPScaleOutDatabaseLog { 
+function Clear-SPScaleOutDatabaseLog {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -1059,11 +1059,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Clear-SPScaleOutDatabaseTenantData { 
+function Clear-SPScaleOutDatabaseTenantData {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true)]
@@ -1078,11 +1078,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Clear-SPSecureStoreCredentialMapping { 
+function Clear-SPSecureStoreCredentialMapping {
   [CmdletBinding(DefaultParameterSetName='OneApplication', SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(ParameterSetName='AllApplications', Mandatory=$true)]
@@ -1108,22 +1108,22 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Clear-SPSecureStoreDefaultProvider { 
+function Clear-SPSecureStoreDefaultProvider {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Clear-SPServerScaleOutDatabaseDeletedDataSubRange { 
+function Clear-SPServerScaleOutDatabaseDeletedDataSubRange {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -1144,11 +1144,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Clear-SPServerScaleOutDatabaseLog { 
+function Clear-SPServerScaleOutDatabaseLog {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -1163,11 +1163,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Clear-SPServerScaleOutDatabaseTenantData { 
+function Clear-SPServerScaleOutDatabaseTenantData {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true)]
@@ -1182,11 +1182,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Clear-SPSiteSubscriptionBusinessDataCatalogConfig { 
+function Clear-SPSiteSubscriptionBusinessDataCatalogConfig {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true)]
@@ -1198,11 +1198,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Connect-SPConfigurationDatabase { 
+function Connect-SPConfigurationDatabase {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -1237,11 +1237,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Convert-SPWebApplication { 
+function Convert-SPWebApplication {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -1309,11 +1309,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Copy-SPAccessServicesDatabaseCredentials { 
+function Copy-SPAccessServicesDatabaseCredentials {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -1340,11 +1340,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Copy-SPActivitiesToWorkflowService { 
+function Copy-SPActivitiesToWorkflowService {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [string]
@@ -1363,11 +1363,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Copy-SPBusinessDataCatalogAclToChildren { 
+function Copy-SPBusinessDataCatalogAclToChildren {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true)]
@@ -1379,11 +1379,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Copy-SPContentTypes { 
+function Copy-SPContentTypes {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -1416,11 +1416,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Copy-SPSideBySideFiles { 
+function Copy-SPSideBySideFiles {
   [CmdletBinding()]
 param(
     [string]
@@ -1430,11 +1430,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Copy-SPSite { 
+function Copy-SPSite {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -1459,11 +1459,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Copy-SPTaxonomyGroups { 
+function Copy-SPTaxonomyGroups {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -1496,22 +1496,22 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Disable-ProjectServerLicense { 
+function Disable-ProjectServerLicense {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Disable-SPAppAutoProvision { 
+function Disable-SPAppAutoProvision {
   [CmdletBinding()]
 param(
     [object]
@@ -1521,11 +1521,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Disable-SPBusinessDataCatalogEntity { 
+function Disable-SPBusinessDataCatalogEntity {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -1537,11 +1537,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Disable-SPFeature { 
+function Disable-SPFeature {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -1558,11 +1558,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Disable-SPHealthAnalysisRule { 
+function Disable-SPHealthAnalysisRule {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -1573,11 +1573,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Disable-SPInfoPathFormTemplate { 
+function Disable-SPInfoPathFormTemplate {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -1593,11 +1593,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Disable-SPProjectActiveDirectoryEnterpriseResourcePoolSync { 
+function Disable-SPProjectActiveDirectoryEnterpriseResourcePoolSync {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -1609,11 +1609,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Disable-SPProjectEmailNotification { 
+function Disable-SPProjectEmailNotification {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -1625,11 +1625,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Disable-SPProjectEnterpriseProjectTaskSync { 
+function Disable-SPProjectEnterpriseProjectTaskSync {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true)]
@@ -1640,33 +1640,33 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Disable-SPProjectQueueStatsMonitoring { 
+function Disable-SPProjectQueueStatsMonitoring {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Disable-SPSessionStateService { 
+function Disable-SPSessionStateService {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Disable-SPSingleSignOn { 
+function Disable-SPSingleSignOn {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true)]
@@ -1678,11 +1678,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Disable-SPTimerJob { 
+function Disable-SPTimerJob {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -1693,33 +1693,33 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Disable-SPUserLicensing { 
+function Disable-SPUserLicensing {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Disable-SPUserSolutionAllowList { 
+function Disable-SPUserSolutionAllowList {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Disable-SPWebApplicationHttpThrottling { 
+function Disable-SPWebApplicationHttpThrottling {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -1730,11 +1730,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Disable-SPWebTemplateForSiteMaster { 
+function Disable-SPWebTemplateForSiteMaster {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true)]
@@ -1748,22 +1748,22 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Disconnect-SPConfigurationDatabase { 
+function Disconnect-SPConfigurationDatabase {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Dismount-SPContentDatabase { 
+function Dismount-SPContentDatabase {
   [CmdletBinding(DefaultParameterSetName='DefaultSet', SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -1775,11 +1775,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Dismount-SPStateServiceDatabase { 
+function Dismount-SPStateServiceDatabase {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -1791,11 +1791,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Enable-ProjectServerLicense { 
+function Enable-ProjectServerLicense {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -1807,11 +1807,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Enable-SPAppAutoProvision { 
+function Enable-SPAppAutoProvision {
   [CmdletBinding()]
 param(
     [object]
@@ -1821,11 +1821,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Enable-SPBusinessDataCatalogEntity { 
+function Enable-SPBusinessDataCatalogEntity {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -1837,11 +1837,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Enable-SPFeature { 
+function Enable-SPFeature {
   [CmdletBinding(DefaultParameterSetName='FarmFeatureDefinition', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -1866,11 +1866,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Enable-SPHealthAnalysisRule { 
+function Enable-SPHealthAnalysisRule {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -1881,11 +1881,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Enable-SPInfoPathFormTemplate { 
+function Enable-SPInfoPathFormTemplate {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -1901,11 +1901,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Enable-SPProjectActiveDirectoryEnterpriseResourcePoolSync { 
+function Enable-SPProjectActiveDirectoryEnterpriseResourcePoolSync {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -1922,11 +1922,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Enable-SPProjectEmailNotification { 
+function Enable-SPProjectEmailNotification {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -1938,11 +1938,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Enable-SPProjectEnterpriseProjectTaskSync { 
+function Enable-SPProjectEnterpriseProjectTaskSync {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true)]
@@ -1953,22 +1953,22 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Enable-SPProjectQueueStatsMonitoring { 
+function Enable-SPProjectQueueStatsMonitoring {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Enable-SPSessionStateService { 
+function Enable-SPSessionStateService {
   [CmdletBinding(DefaultParameterSetName='AdvancedProvision', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(ParameterSetName='DefaultProvision', Mandatory=$true)]
@@ -1994,11 +1994,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Enable-SPTimerJob { 
+function Enable-SPTimerJob {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -2009,33 +2009,33 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Enable-SPUserLicensing { 
+function Enable-SPUserLicensing {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Enable-SPUserSolutionAllowList { 
+function Enable-SPUserSolutionAllowList {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Enable-SPWebApplicationHttpThrottling { 
+function Enable-SPWebApplicationHttpThrottling {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -2046,11 +2046,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Enable-SPWebTemplateForSiteMaster { 
+function Enable-SPWebTemplateForSiteMaster {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true)]
@@ -2064,11 +2064,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Export-SPAccessServicesDatabase { 
+function Export-SPAccessServicesDatabase {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -2085,11 +2085,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Export-SPAppPackage { 
+function Export-SPAppPackage {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true)]
@@ -2106,11 +2106,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Export-SPBusinessDataCatalogModel { 
+function Export-SPBusinessDataCatalogModel {
   [CmdletBinding()]
 param(
     [switch]
@@ -2148,11 +2148,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Export-SPCacheClusterConfig { 
+function Export-SPCacheClusterConfig {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -2164,11 +2164,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Export-SPCertificate { 
+function Export-SPCertificate {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(ParameterSetName='Pfx', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -2215,11 +2215,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Export-SPEnterpriseSearchTopology { 
+function Export-SPEnterpriseSearchTopology {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -2234,11 +2234,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Export-SPInfoPathAdministrationFiles { 
+function Export-SPInfoPathAdministrationFiles {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [object]
@@ -2252,11 +2252,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Export-SPMetadataWebServicePartitionData { 
+function Export-SPMetadataWebServicePartitionData {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -2280,11 +2280,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Export-SPScaleOutDatabaseTenantData { 
+function Export-SPScaleOutDatabaseTenantData {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true)]
@@ -2306,11 +2306,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Export-SPServerScaleOutDatabaseTenantData { 
+function Export-SPServerScaleOutDatabaseTenantData {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true)]
@@ -2332,11 +2332,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Export-SPSiteSubscriptionBusinessDataCatalogConfig { 
+function Export-SPSiteSubscriptionBusinessDataCatalogConfig {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true)]
@@ -2371,11 +2371,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Export-SPSiteSubscriptionSettings { 
+function Export-SPSiteSubscriptionSettings {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -2398,11 +2398,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Export-SPTagsAndNotesData { 
+function Export-SPTagsAndNotesData {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -2419,11 +2419,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Export-SPWeb { 
+function Export-SPWeb {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -2474,11 +2474,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-AvailabilityGroupStatus { 
+function Get-AvailabilityGroupStatus {
   [CmdletBinding()]
 param(
     [string]
@@ -2488,37 +2488,22 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-ProjectServerLicense { 
+function Get-ProjectServerLicense {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPAccessServiceApplication { 
-  [CmdletBinding()]
-param(
-    [Parameter(Position=0, ValueFromPipeline=$true)]
-    [object]
-    ${Identity},
-
-    [Parameter(ValueFromPipeline=$true)]
-    [object]
-    ${AssignmentCollection})
-
- 
- } 
-
-
-function Get-SPAccessServicesApplication { 
+function Get-SPAccessServiceApplication {
   [CmdletBinding()]
 param(
     [Parameter(Position=0, ValueFromPipeline=$true)]
@@ -2529,11 +2514,26 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPAccessServicesDatabase { 
+function Get-SPAccessServicesApplication {
+  [CmdletBinding()]
+param(
+    [Parameter(Position=0, ValueFromPipeline=$true)]
+    [object]
+    ${Identity},
+
+    [Parameter(ValueFromPipeline=$true)]
+    [object]
+    ${AssignmentCollection})
+
+
+ }
+
+
+function Get-SPAccessServicesDatabase {
   [CmdletBinding()]
 param(
     [Parameter(Position=0, ValueFromPipeline=$true)]
@@ -2552,11 +2552,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPAccessServicesDatabaseServer { 
+function Get-SPAccessServicesDatabaseServer {
   [CmdletBinding(DefaultParameterSetName='GetDatabaseServersParameterSet')]
 param(
     [Parameter(ParameterSetName='GetDatabaseServersParameterSet', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -2577,11 +2577,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPAccessServicesDatabaseServerGroup { 
+function Get-SPAccessServicesDatabaseServerGroup {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -2596,11 +2596,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPAccessServicesDatabaseServerGroupMapping { 
+function Get-SPAccessServicesDatabaseServerGroupMapping {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -2611,11 +2611,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPAlternateURL { 
+function Get-SPAlternateURL {
   [CmdletBinding(DefaultParameterSetName='Default')]
 param(
     [Parameter(Position=0, ValueFromPipeline=$true)]
@@ -2637,11 +2637,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPAppAcquisitionConfiguration { 
+function Get-SPAppAcquisitionConfiguration {
   [CmdletBinding(DefaultParameterSetName='MarketplaceSettingsInWebApplication')]
 param(
     [Parameter(ParameterSetName='MarketplaceSettingsInWebApplication', Mandatory=$true, ValueFromPipeline=$true)]
@@ -2656,11 +2656,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPAppAutoProvisionConnection { 
+function Get-SPAppAutoProvisionConnection {
   [CmdletBinding()]
 param(
     [object]
@@ -2673,44 +2673,44 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPAppDeniedEndpointList { 
+function Get-SPAppDeniedEndpointList {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPAppDisablingConfiguration { 
+function Get-SPAppDisablingConfiguration {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPAppDomain { 
+function Get-SPAppDomain {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPAppHostingQuotaConfiguration { 
+function Get-SPAppHostingQuotaConfiguration {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -2722,11 +2722,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPAppInstance { 
+function Get-SPAppInstance {
   [CmdletBinding()]
 param(
     [Parameter(ParameterSetName='IdentityParameterSet', Mandatory=$true, ValueFromPipeline=$true)]
@@ -2757,11 +2757,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPAppPrincipal { 
+function Get-SPAppPrincipal {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true)]
@@ -2778,22 +2778,22 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPAppScaleProfile { 
+function Get-SPAppScaleProfile {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPAppSiteSubscriptionName { 
+function Get-SPAppSiteSubscriptionName {
   [CmdletBinding()]
 param(
     [object]
@@ -2803,55 +2803,55 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPAppStateSyncLastRunTime { 
+function Get-SPAppStateSyncLastRunTime {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPAppStateUpdateInterval { 
+function Get-SPAppStateUpdateInterval {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPAppStoreConfiguration { 
+function Get-SPAppStoreConfiguration {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPAppStoreWebServiceConfiguration { 
+function Get-SPAppStoreWebServiceConfiguration {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPAuthenticationProvider { 
+function Get-SPAuthenticationProvider {
   [CmdletBinding()]
 param(
     [Parameter(Position=0, ValueFromPipeline=$true)]
@@ -2872,11 +2872,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPAuthenticationRealm { 
+function Get-SPAuthenticationRealm {
   [CmdletBinding()]
 param(
     [Parameter(Position=0)]
@@ -2888,11 +2888,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPBackupHistory { 
+function Get-SPBackupHistory {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true)]
@@ -2909,33 +2909,33 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPBingMapsBlock { 
+function Get-SPBingMapsBlock {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPBingMapsKey { 
+function Get-SPBingMapsKey {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPBrowserCustomerExperienceImprovementProgram { 
+function Get-SPBrowserCustomerExperienceImprovementProgram {
   [CmdletBinding()]
 param(
     [Parameter(ParameterSetName='Farm', Mandatory=$true)]
@@ -2954,11 +2954,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPBusinessDataCatalogEntityNotificationWeb { 
+function Get-SPBusinessDataCatalogEntityNotificationWeb {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true)]
@@ -2970,11 +2970,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPBusinessDataCatalogMetadataObject { 
+function Get-SPBusinessDataCatalogMetadataObject {
   [CmdletBinding()]
 param(
     [string]
@@ -2999,11 +2999,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPBusinessDataCatalogThrottleConfig { 
+function Get-SPBusinessDataCatalogThrottleConfig {
   [CmdletBinding(DefaultParameterSetName='ProxyProvided')]
 param(
     [Parameter(Mandatory=$true)]
@@ -3027,33 +3027,33 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPCacheClusterHealth { 
+function Get-SPCacheClusterHealth {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPCacheClusterInfo { 
+function Get-SPCacheClusterInfo {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPCacheHost { 
+function Get-SPCacheHost {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true)]
@@ -3070,11 +3070,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPCacheHostConfig { 
+function Get-SPCacheHostConfig {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true)]
@@ -3086,11 +3086,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPCertificate { 
+function Get-SPCertificate {
   [CmdletBinding(DefaultParameterSetName='SearchFilters', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(ParameterSetName='Identity', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -3127,33 +3127,33 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPCertificateAuthority { 
+function Get-SPCertificateAuthority {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPCertificateSettings { 
+function Get-SPCertificateSettings {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPClaimProvider { 
+function Get-SPClaimProvider {
   [CmdletBinding()]
 param(
     [Parameter(Position=0, ValueFromPipeline=$true)]
@@ -3164,22 +3164,22 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPClaimProviderManager { 
+function Get-SPClaimProviderManager {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPClaimTypeEncoding { 
+function Get-SPClaimTypeEncoding {
   [CmdletBinding()]
 param(
     [char]
@@ -3193,11 +3193,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPConnectedServiceApplicationInformation { 
+function Get-SPConnectedServiceApplicationInformation {
   [CmdletBinding()]
 param(
     [Parameter(Position=0, ValueFromPipeline=$true)]
@@ -3208,11 +3208,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPContentDatabase { 
+function Get-SPContentDatabase {
   [CmdletBinding(DefaultParameterSetName='DefaultSet')]
 param(
     [Parameter(ParameterSetName='DefaultSet', Position=0, ValueFromPipeline=$true)]
@@ -3261,11 +3261,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPContentDatabaseOrphanedData { 
+function Get-SPContentDatabaseOrphanedData {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -3277,11 +3277,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPContentDeploymentJob { 
+function Get-SPContentDeploymentJob {
   [CmdletBinding()]
 param(
     [Parameter(Position=0, ValueFromPipeline=$true)]
@@ -3296,11 +3296,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPContentDeploymentPath { 
+function Get-SPContentDeploymentPath {
   [CmdletBinding()]
 param(
     [Parameter(Position=0, ValueFromPipeline=$true)]
@@ -3311,11 +3311,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPCustomLayoutsPage { 
+function Get-SPCustomLayoutsPage {
   [CmdletBinding()]
 param(
     [object]
@@ -3333,11 +3333,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPDatabase { 
+function Get-SPDatabase {
   [CmdletBinding(DefaultParameterSetName='DefaultParameterSet')]
 param(
     [Parameter(ParameterSetName='DefaultParameterSet', Position=0, ValueFromPipeline=$true)]
@@ -3357,11 +3357,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPDataConnectionFile { 
+function Get-SPDataConnectionFile {
   [CmdletBinding()]
 param(
     [Parameter(Position=0, ValueFromPipeline=$true)]
@@ -3372,11 +3372,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPDataConnectionFileDependent { 
+function Get-SPDataConnectionFileDependent {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -3387,11 +3387,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPDeletedSite { 
+function Get-SPDeletedSite {
   [CmdletBinding(DefaultParameterSetName='AllDeletedSitesInWebApplication', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(ParameterSetName='AllDeletedSitesInIdentity', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -3423,11 +3423,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPDesignerSettings { 
+function Get-SPDesignerSettings {
   [CmdletBinding()]
 param(
     [Parameter(ParameterSetName='WebApplication', Mandatory=$true, Position=0, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -3438,22 +3438,22 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPDiagnosticConfig { 
+function Get-SPDiagnosticConfig {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPDiagnosticsPerformanceCounter { 
+function Get-SPDiagnosticsPerformanceCounter {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
@@ -3468,11 +3468,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPDiagnosticsProvider { 
+function Get-SPDiagnosticsProvider {
   [CmdletBinding()]
 param(
     [Parameter(Position=0, ValueFromPipeline=$true)]
@@ -3483,11 +3483,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPDistributedCacheClientSetting { 
+function Get-SPDistributedCacheClientSetting {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -3499,11 +3499,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPEnterpriseSearchAdministrationComponent { 
+function Get-SPEnterpriseSearchAdministrationComponent {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -3514,11 +3514,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPEnterpriseSearchComponent { 
+function Get-SPEnterpriseSearchComponent {
   [CmdletBinding()]
 param(
     [Parameter(Position=0)]
@@ -3536,11 +3536,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPEnterpriseSearchContentEnrichmentConfiguration { 
+function Get-SPEnterpriseSearchContentEnrichmentConfiguration {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -3551,11 +3551,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPEnterpriseSearchCrawlContentSource { 
+function Get-SPEnterpriseSearchCrawlContentSource {
   [CmdletBinding()]
 param(
     [Parameter(Position=0)]
@@ -3570,11 +3570,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPEnterpriseSearchCrawlCustomConnector { 
+function Get-SPEnterpriseSearchCrawlCustomConnector {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -3589,11 +3589,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPEnterpriseSearchCrawlDatabase { 
+function Get-SPEnterpriseSearchCrawlDatabase {
   [CmdletBinding()]
 param(
     [Parameter(Position=0)]
@@ -3608,11 +3608,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPEnterpriseSearchCrawlExtension { 
+function Get-SPEnterpriseSearchCrawlExtension {
   [CmdletBinding()]
 param(
     [Parameter(Position=0)]
@@ -3627,11 +3627,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPEnterpriseSearchCrawlLogReadPermission { 
+function Get-SPEnterpriseSearchCrawlLogReadPermission {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -3646,11 +3646,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPEnterpriseSearchCrawlMapping { 
+function Get-SPEnterpriseSearchCrawlMapping {
   [CmdletBinding()]
 param(
     [Parameter(Position=0)]
@@ -3665,11 +3665,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPEnterpriseSearchCrawlRule { 
+function Get-SPEnterpriseSearchCrawlRule {
   [CmdletBinding()]
 param(
     [Parameter(Position=0)]
@@ -3684,11 +3684,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPEnterpriseSearchFileFormat { 
+function Get-SPEnterpriseSearchFileFormat {
   [CmdletBinding()]
 param(
     [Parameter(Position=0)]
@@ -3703,11 +3703,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPEnterpriseSearchHostController { 
+function Get-SPEnterpriseSearchHostController {
   [CmdletBinding()]
 param(
     [object]
@@ -3717,11 +3717,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPEnterpriseSearchLanguageResourcePhrase { 
+function Get-SPEnterpriseSearchLanguageResourcePhrase {
   [CmdletBinding()]
 param(
     [Parameter(Position=0)]
@@ -3753,11 +3753,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPEnterpriseSearchLinguisticComponentsStatus { 
+function Get-SPEnterpriseSearchLinguisticComponentsStatus {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true)]
@@ -3772,11 +3772,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPEnterpriseSearchLinksDatabase { 
+function Get-SPEnterpriseSearchLinksDatabase {
   [CmdletBinding()]
 param(
     [Parameter(Position=0)]
@@ -3791,11 +3791,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPEnterpriseSearchMetadataCategory { 
+function Get-SPEnterpriseSearchMetadataCategory {
   [CmdletBinding()]
 param(
     [Parameter(Position=0)]
@@ -3816,11 +3816,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPEnterpriseSearchMetadataCrawledProperty { 
+function Get-SPEnterpriseSearchMetadataCrawledProperty {
   [CmdletBinding()]
 param(
     [Parameter(Position=0)]
@@ -3857,11 +3857,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPEnterpriseSearchMetadataManagedProperty { 
+function Get-SPEnterpriseSearchMetadataManagedProperty {
   [CmdletBinding()]
 param(
     [Parameter(Position=0)]
@@ -3885,11 +3885,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPEnterpriseSearchMetadataMapping { 
+function Get-SPEnterpriseSearchMetadataMapping {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -3912,11 +3912,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPEnterpriseSearchOwner { 
+function Get-SPEnterpriseSearchOwner {
   [CmdletBinding()]
 param(
     [Parameter(Position=0)]
@@ -3935,11 +3935,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPEnterpriseSearchPropertyRule { 
+function Get-SPEnterpriseSearchPropertyRule {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -3954,33 +3954,33 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPEnterpriseSearchPropertyRuleCollection { 
+function Get-SPEnterpriseSearchPropertyRuleCollection {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPEnterpriseSearchQueryAndSiteSettingsService { 
+function Get-SPEnterpriseSearchQueryAndSiteSettingsService {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPEnterpriseSearchQueryAndSiteSettingsServiceInstance { 
+function Get-SPEnterpriseSearchQueryAndSiteSettingsServiceInstance {
   [CmdletBinding()]
 param(
     [Parameter(Position=0)]
@@ -3994,46 +3994,22 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPEnterpriseSearchQueryAndSiteSettingsServiceProxy { 
+function Get-SPEnterpriseSearchQueryAndSiteSettingsServiceProxy {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPEnterpriseSearchQueryAuthority { 
-  [CmdletBinding()]
-param(
-    [Parameter(Position=0)]
-    [object]
-    ${Identity},
-
-    [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
-    [object]
-    ${SearchApplication},
-
-    [Parameter(Mandatory=$true)]
-    [Alias('o')]
-    [object]
-    ${Owner},
-
-    [Parameter(ValueFromPipeline=$true)]
-    [object]
-    ${AssignmentCollection})
-
- 
- } 
-
-
-function Get-SPEnterpriseSearchQueryDemoted { 
+function Get-SPEnterpriseSearchQueryAuthority {
   [CmdletBinding()]
 param(
     [Parameter(Position=0)]
@@ -4053,11 +4029,35 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPEnterpriseSearchQueryKeyword { 
+function Get-SPEnterpriseSearchQueryDemoted {
+  [CmdletBinding()]
+param(
+    [Parameter(Position=0)]
+    [object]
+    ${Identity},
+
+    [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
+    [object]
+    ${SearchApplication},
+
+    [Parameter(Mandatory=$true)]
+    [Alias('o')]
+    [object]
+    ${Owner},
+
+    [Parameter(ValueFromPipeline=$true)]
+    [object]
+    ${AssignmentCollection})
+
+
+ }
+
+
+function Get-SPEnterpriseSearchQueryKeyword {
   [CmdletBinding()]
 param(
     [Parameter(Position=0)]
@@ -4072,11 +4072,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPEnterpriseSearchQueryScope { 
+function Get-SPEnterpriseSearchQueryScope {
   [CmdletBinding()]
 param(
     [Parameter(Position=0)]
@@ -4095,11 +4095,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPEnterpriseSearchQueryScopeRule { 
+function Get-SPEnterpriseSearchQueryScopeRule {
   [CmdletBinding()]
 param(
     [Parameter(Position=0)]
@@ -4121,11 +4121,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPEnterpriseSearchQuerySpellingCorrection { 
+function Get-SPEnterpriseSearchQuerySpellingCorrection {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true)]
@@ -4140,11 +4140,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPEnterpriseSearchQuerySuggestionCandidates { 
+function Get-SPEnterpriseSearchQuerySuggestionCandidates {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -4163,11 +4163,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPEnterpriseSearchRankingModel { 
+function Get-SPEnterpriseSearchRankingModel {
   [CmdletBinding()]
 param(
     [Parameter(Position=0)]
@@ -4187,11 +4187,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPEnterpriseSearchResultItemType { 
+function Get-SPEnterpriseSearchResultItemType {
   [CmdletBinding()]
 param(
     [Parameter(Position=0)]
@@ -4215,11 +4215,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPEnterpriseSearchResultSource { 
+function Get-SPEnterpriseSearchResultSource {
   [CmdletBinding()]
 param(
     [Parameter(Position=0)]
@@ -4239,11 +4239,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPEnterpriseSearchSecurityTrimmer { 
+function Get-SPEnterpriseSearchSecurityTrimmer {
   [CmdletBinding()]
 param(
     [Parameter(Position=0)]
@@ -4258,22 +4258,22 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPEnterpriseSearchService { 
+function Get-SPEnterpriseSearchService {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPEnterpriseSearchServiceApplication { 
+function Get-SPEnterpriseSearchServiceApplication {
   [CmdletBinding()]
 param(
     [Parameter(Position=0)]
@@ -4284,11 +4284,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPEnterpriseSearchServiceApplicationBackupStore { 
+function Get-SPEnterpriseSearchServiceApplicationBackupStore {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -4315,11 +4315,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPEnterpriseSearchServiceApplicationProxy { 
+function Get-SPEnterpriseSearchServiceApplicationProxy {
   [CmdletBinding()]
 param(
     [Parameter(Position=0)]
@@ -4330,11 +4330,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPEnterpriseSearchServiceInstance { 
+function Get-SPEnterpriseSearchServiceInstance {
   [CmdletBinding()]
 param(
     [Parameter(Position=0)]
@@ -4348,11 +4348,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPEnterpriseSearchSiteHitRule { 
+function Get-SPEnterpriseSearchSiteHitRule {
   [CmdletBinding()]
 param(
     [Parameter(Position=0)]
@@ -4367,11 +4367,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPEnterpriseSearchStatus { 
+function Get-SPEnterpriseSearchStatus {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -4410,11 +4410,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPEnterpriseSearchTopology { 
+function Get-SPEnterpriseSearchTopology {
   [CmdletBinding()]
 param(
     [Parameter(Position=0)]
@@ -4432,33 +4432,33 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPEnterpriseSearchVssDataPath { 
+function Get-SPEnterpriseSearchVssDataPath {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPFarm { 
+function Get-SPFarm {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPFarmConfig { 
+function Get-SPFarmConfig {
   [CmdletBinding()]
 param(
     [switch]
@@ -4468,11 +4468,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPFeature { 
+function Get-SPFeature {
   [CmdletBinding(DefaultParameterSetName='Default')]
 param(
     [Parameter(Position=0, ValueFromPipeline=$true)]
@@ -4510,11 +4510,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPHealthAnalysisRule { 
+function Get-SPHealthAnalysisRule {
   [CmdletBinding(DefaultParameterSetName='Default')]
 param(
     [Parameter(ParameterSetName='SpecificRule', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -4525,11 +4525,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPHelpCollection { 
+function Get-SPHelpCollection {
   [CmdletBinding()]
 param(
     [string]
@@ -4539,11 +4539,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPInfoPathFormsService { 
+function Get-SPInfoPathFormsService {
   [CmdletBinding()]
 param(
     [object]
@@ -4553,26 +4553,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPInfoPathFormTemplate { 
-  [CmdletBinding()]
-param(
-    [Parameter(Position=0, ValueFromPipeline=$true)]
-    [object]
-    ${Identity},
-
-    [Parameter(ValueFromPipeline=$true)]
-    [object]
-    ${AssignmentCollection})
-
- 
- } 
-
-
-function Get-SPInfoPathUserAgent { 
+function Get-SPInfoPathFormTemplate {
   [CmdletBinding()]
 param(
     [Parameter(Position=0, ValueFromPipeline=$true)]
@@ -4583,11 +4568,26 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPInfoPathWebServiceProxy { 
+function Get-SPInfoPathUserAgent {
+  [CmdletBinding()]
+param(
+    [Parameter(Position=0, ValueFromPipeline=$true)]
+    [object]
+    ${Identity},
+
+    [Parameter(ValueFromPipeline=$true)]
+    [object]
+    ${AssignmentCollection})
+
+
+ }
+
+
+function Get-SPInfoPathWebServiceProxy {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -4598,44 +4598,44 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPInternalAppStateSyncLastRunTime { 
+function Get-SPInternalAppStateSyncLastRunTime {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPInternalAppStateUpdateInterval { 
+function Get-SPInternalAppStateUpdateInterval {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPIRMSettings { 
+function Get-SPIRMSettings {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPLogEvent { 
+function Get-SPLogEvent {
   [CmdletBinding(DefaultParameterSetName='Directory')]
 param(
     [Parameter(ParameterSetName='Directory')]
@@ -4669,11 +4669,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPLogLevel { 
+function Get-SPLogLevel {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
@@ -4684,11 +4684,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPManagedAccount { 
+function Get-SPManagedAccount {
   [CmdletBinding(DefaultParameterSetName='Service')]
 param(
     [Parameter(Position=0, ValueFromPipeline=$true)]
@@ -4711,11 +4711,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPManagedPath { 
+function Get-SPManagedPath {
   [CmdletBinding(DefaultParameterSetName='WebApplication')]
 param(
     [Parameter(Position=0)]
@@ -4734,11 +4734,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPMetadataServiceApplication { 
+function Get-SPMetadataServiceApplication {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -4749,11 +4749,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPMetadataServiceApplicationProxy { 
+function Get-SPMetadataServiceApplicationProxy {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -4764,11 +4764,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPMicrofeedOptions { 
+function Get-SPMicrofeedOptions {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -4785,11 +4785,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPMobileMessagingAccount { 
+function Get-SPMobileMessagingAccount {
   [CmdletBinding()]
 param(
     [Parameter(Position=0)]
@@ -4805,22 +4805,22 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPO365LinkSettings { 
+function Get-SPO365LinkSettings {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPODataConnectionSetting { 
+function Get-SPODataConnectionSetting {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true)]
@@ -4837,11 +4837,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPODataConnectionSettingMetadata { 
+function Get-SPODataConnectionSettingMetadata {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true)]
@@ -4859,11 +4859,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPOfficeStoreAppsDefaultActivation { 
+function Get-SPOfficeStoreAppsDefaultActivation {
   [CmdletBinding(DefaultParameterSetName='AppsForOfficeSettingsInWebApplication')]
 param(
     [Parameter(ParameterSetName='AppsForOfficeSettingsInWebApplication', Mandatory=$true, ValueFromPipeline=$true)]
@@ -4878,11 +4878,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPPendingUpgradeActions { 
+function Get-SPPendingUpgradeActions {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -4899,11 +4899,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPPeoplePickerConfig { 
+function Get-SPPeoplePickerConfig {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -4915,11 +4915,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPPeoplePickerDistributionListSearchDomain { 
+function Get-SPPeoplePickerDistributionListSearchDomain {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -4935,11 +4935,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPPeoplePickerSearchADDomain { 
+function Get-SPPeoplePickerSearchADDomain {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(ParameterSetName='BasicParameterSet', Mandatory=$true, Position=0, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -4961,11 +4961,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPPluggableSecurityTrimmer { 
+function Get-SPPluggableSecurityTrimmer {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -4977,11 +4977,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPProcessAccount { 
+function Get-SPProcessAccount {
   [CmdletBinding(DefaultParameterSetName='NetworkService')]
 param(
     [Parameter(ParameterSetName='NetworkService')]
@@ -5000,11 +5000,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPProduct { 
+function Get-SPProduct {
   [CmdletBinding(DefaultParameterSetName='Local')]
 param(
     [Parameter(ParameterSetName='Server', ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -5019,11 +5019,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPProfileLeader { 
+function Get-SPProfileLeader {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -5040,11 +5040,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPProfileServiceApplicationSecurity { 
+function Get-SPProfileServiceApplicationSecurity {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -5064,11 +5064,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPProjectDatabaseQuota { 
+function Get-SPProjectDatabaseQuota {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true)]
@@ -5080,11 +5080,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPProjectDatabaseUsage { 
+function Get-SPProjectDatabaseUsage {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true)]
@@ -5096,11 +5096,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPProjectEnterpriseProjectTaskSync { 
+function Get-SPProjectEnterpriseProjectTaskSync {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true)]
@@ -5111,65 +5111,22 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPProjectEventServiceSettings { 
+function Get-SPProjectEventServiceSettings {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPProjectIsEmailNotificationEnabled { 
-  [CmdletBinding()]
-param(
-    [Parameter(Mandatory=$true, Position=0)]
-    [ValidateNotNullOrEmpty()]
-    [uri]
-    ${Url},
-
-    [Parameter(ValueFromPipeline=$true)]
-    [object]
-    ${AssignmentCollection})
-
- 
- } 
-
-
-function Get-SPProjectOdataConfiguration { 
-  [CmdletBinding()]
-param(
-    [Parameter(ValueFromPipeline=$true)]
-    [object]
-    ${AssignmentCollection})
-
- 
- } 
-
-
-function Get-SPProjectPCSSettings { 
-  [CmdletBinding()]
-param(
-    [Parameter(ValueFromPipeline=$true)]
-    [Alias('sa')]
-    [object]
-    ${ServiceApplication},
-
-    [Parameter(ValueFromPipeline=$true)]
-    [object]
-    ${AssignmentCollection})
-
- 
- } 
-
-
-function Get-SPProjectPermissionMode { 
+function Get-SPProjectIsEmailNotificationEnabled {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -5181,11 +5138,22 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPProjectQueueSettings { 
+function Get-SPProjectOdataConfiguration {
+  [CmdletBinding()]
+param(
+    [Parameter(ValueFromPipeline=$true)]
+    [object]
+    ${AssignmentCollection})
+
+
+ }
+
+
+function Get-SPProjectPCSSettings {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
@@ -5197,11 +5165,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPProjectReportingTimephasedMode { 
+function Get-SPProjectPermissionMode {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -5213,11 +5181,43 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPProjectWebInstance { 
+function Get-SPProjectQueueSettings {
+  [CmdletBinding()]
+param(
+    [Parameter(ValueFromPipeline=$true)]
+    [Alias('sa')]
+    [object]
+    ${ServiceApplication},
+
+    [Parameter(ValueFromPipeline=$true)]
+    [object]
+    ${AssignmentCollection})
+
+
+ }
+
+
+function Get-SPProjectReportingTimephasedMode {
+  [CmdletBinding()]
+param(
+    [Parameter(Mandatory=$true, Position=0)]
+    [ValidateNotNullOrEmpty()]
+    [uri]
+    ${Url},
+
+    [Parameter(ValueFromPipeline=$true)]
+    [object]
+    ${AssignmentCollection})
+
+
+ }
+
+
+function Get-SPProjectWebInstance {
   [CmdletBinding()]
 param(
     [uri]
@@ -5232,11 +5232,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPRemoteShareBlobStore { 
+function Get-SPRemoteShareBlobStore {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(ParameterSetName='DefaultSet', Position=0, ValueFromPipeline=$true)]
@@ -5258,11 +5258,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPRequestManagementSettings { 
+function Get-SPRequestManagementSettings {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -5274,11 +5274,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPRoutingMachineInfo { 
+function Get-SPRoutingMachineInfo {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -5298,11 +5298,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPRoutingMachinePool { 
+function Get-SPRoutingMachinePool {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -5318,11 +5318,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPRoutingRule { 
+function Get-SPRoutingRule {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -5338,11 +5338,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPScaleOutDatabase { 
+function Get-SPScaleOutDatabase {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true)]
@@ -5353,11 +5353,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPScaleOutDatabaseDataState { 
+function Get-SPScaleOutDatabaseDataState {
   [CmdletBinding(DefaultParameterSetName='AttachedDatabase', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(ParameterSetName='AttachedDatabase', Mandatory=$true, ValueFromPipeline=$true)]
@@ -5378,11 +5378,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPScaleOutDatabaseInconsistency { 
+function Get-SPScaleOutDatabaseInconsistency {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true)]
@@ -5393,11 +5393,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPScaleOutDatabaseLogEntry { 
+function Get-SPScaleOutDatabaseLogEntry {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -5422,11 +5422,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPSecureStoreApplication { 
+function Get-SPSecureStoreApplication {
   [CmdletBinding(DefaultParameterSetName='NameSet')]
 param(
     [Parameter(ParameterSetName='AllSet', Mandatory=$true)]
@@ -5446,33 +5446,33 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPSecureStoreSystemAccount { 
+function Get-SPSecureStoreSystemAccount {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPSecurityTokenServiceConfig { 
+function Get-SPSecurityTokenServiceConfig {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPServer { 
+function Get-SPServer {
   [CmdletBinding()]
 param(
     [Parameter(Position=0, ValueFromPipeline=$true)]
@@ -5484,11 +5484,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPServerScaleOutDatabase { 
+function Get-SPServerScaleOutDatabase {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true)]
@@ -5499,11 +5499,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPServerScaleOutDatabaseDataState { 
+function Get-SPServerScaleOutDatabaseDataState {
   [CmdletBinding(DefaultParameterSetName='AttachedDatabase', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(ParameterSetName='AttachedDatabase', Mandatory=$true, ValueFromPipeline=$true)]
@@ -5524,11 +5524,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPServerScaleOutDatabaseInconsistency { 
+function Get-SPServerScaleOutDatabaseInconsistency {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true)]
@@ -5539,11 +5539,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPServerScaleOutDatabaseLogEntry { 
+function Get-SPServerScaleOutDatabaseLogEntry {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -5568,11 +5568,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPService { 
+function Get-SPService {
   [CmdletBinding(DefaultParameterSetName='Identity')]
 param(
     [Parameter(ParameterSetName='Identity', Position=0, ValueFromPipeline=$true)]
@@ -5586,11 +5586,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPServiceApplication { 
+function Get-SPServiceApplication {
   [CmdletBinding()]
 param(
     [Parameter(Position=0, ValueFromPipeline=$true)]
@@ -5604,11 +5604,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPServiceApplicationEndpoint { 
+function Get-SPServiceApplicationEndpoint {
   [CmdletBinding(DefaultParameterSetName='Identity')]
 param(
     [Parameter(ParameterSetName='Identity', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -5627,11 +5627,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPServiceApplicationPool { 
+function Get-SPServiceApplicationPool {
   [CmdletBinding()]
 param(
     [Parameter(Position=0, ValueFromPipeline=$true)]
@@ -5642,11 +5642,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPServiceApplicationProxy { 
+function Get-SPServiceApplicationProxy {
   [CmdletBinding()]
 param(
     [Parameter(Position=0, ValueFromPipeline=$true)]
@@ -5657,11 +5657,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPServiceApplicationProxyGroup { 
+function Get-SPServiceApplicationProxyGroup {
   [CmdletBinding(DefaultParameterSetName='Identity')]
 param(
     [Parameter(ParameterSetName='Identity', Position=0, ValueFromPipeline=$true)]
@@ -5676,11 +5676,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPServiceApplicationSecurity { 
+function Get-SPServiceApplicationSecurity {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -5695,11 +5695,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPServiceContext { 
+function Get-SPServiceContext {
   [CmdletBinding()]
 param(
     [Parameter(ParameterSetName='Site', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -5714,11 +5714,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPServiceHostConfig { 
+function Get-SPServiceHostConfig {
   [CmdletBinding()]
 param(
     [switch]
@@ -5728,11 +5728,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPServiceInstance { 
+function Get-SPServiceInstance {
   [CmdletBinding(DefaultParameterSetName='Identity')]
 param(
     [Parameter(ParameterSetName='Identity', Position=0, ValueFromPipeline=$true)]
@@ -5750,22 +5750,22 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPSessionStateService { 
+function Get-SPSessionStateService {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPShellAdmin { 
+function Get-SPShellAdmin {
   [CmdletBinding()]
 param(
     [Parameter(Position=0, ValueFromPipeline=$true)]
@@ -5776,11 +5776,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPSite { 
+function Get-SPSite {
   [CmdletBinding(DefaultParameterSetName='AllSitesInWebApplication', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(ParameterSetName='AllSitesInIdentity', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -5820,11 +5820,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPSiteAdministration { 
+function Get-SPSiteAdministration {
   [CmdletBinding(DefaultParameterSetName='AllSitesInWebApplication', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(ParameterSetName='AllSitesInIdentity', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -5857,11 +5857,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPSiteMaster { 
+function Get-SPSiteMaster {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -5872,11 +5872,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPSiteSubscription { 
+function Get-SPSiteSubscription {
   [CmdletBinding()]
 param(
     [Parameter(Position=0, ValueFromPipeline=$true)]
@@ -5887,11 +5887,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPSiteSubscriptionConfig { 
+function Get-SPSiteSubscriptionConfig {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -5903,11 +5903,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPSiteSubscriptionEdiscoveryHub { 
+function Get-SPSiteSubscriptionEdiscoveryHub {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -5918,11 +5918,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPSiteSubscriptionEdiscoverySearchScope { 
+function Get-SPSiteSubscriptionEdiscoverySearchScope {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -5933,11 +5933,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPSiteSubscriptionFeaturePack { 
+function Get-SPSiteSubscriptionFeaturePack {
   [CmdletBinding(DefaultParameterSetName='FeaturePack')]
 param(
     [Parameter(ParameterSetName='FeaturePack', Position=0, ValueFromPipeline=$true)]
@@ -5952,11 +5952,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPSiteSubscriptionIRMConfig { 
+function Get-SPSiteSubscriptionIRMConfig {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -5968,11 +5968,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPSiteSubscriptionMetadataConfig { 
+function Get-SPSiteSubscriptionMetadataConfig {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -5987,11 +5987,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPSiteUpgradeSessionInfo { 
+function Get-SPSiteUpgradeSessionInfo {
   [CmdletBinding(DefaultParameterSetName='ContentDB')]
 param(
     [Parameter(ParameterSetName='Site', Mandatory=$true)]
@@ -6026,11 +6026,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPSiteUrl { 
+function Get-SPSiteUrl {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -6041,11 +6041,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPSolution { 
+function Get-SPSolution {
   [CmdletBinding()]
 param(
     [Parameter(Position=0, ValueFromPipeline=$true)]
@@ -6056,11 +6056,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPStateServiceApplication { 
+function Get-SPStateServiceApplication {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Position=0, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -6072,11 +6072,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPStateServiceApplicationProxy { 
+function Get-SPStateServiceApplicationProxy {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Position=0, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -6088,11 +6088,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPStateServiceDatabase { 
+function Get-SPStateServiceDatabase {
   [CmdletBinding(DefaultParameterSetName='Default', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(ParameterSetName='Default', Position=0, ValueFromPipeline=$true)]
@@ -6109,11 +6109,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPTaxonomySession { 
+function Get-SPTaxonomySession {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -6124,11 +6124,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPThrottlingRule { 
+function Get-SPThrottlingRule {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -6144,11 +6144,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPTimerJob { 
+function Get-SPTimerJob {
   [CmdletBinding()]
 param(
     [Parameter(Position=0)]
@@ -6167,11 +6167,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPTopologyServiceApplication { 
+function Get-SPTopologyServiceApplication {
   [CmdletBinding()]
 param(
     [Parameter(Position=0, ValueFromPipeline=$true)]
@@ -6182,11 +6182,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPTopologyServiceApplicationProxy { 
+function Get-SPTopologyServiceApplicationProxy {
   [CmdletBinding()]
 param(
     [Parameter(Position=0, ValueFromPipeline=$true)]
@@ -6197,11 +6197,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPTranslationThrottlingSetting { 
+function Get-SPTranslationThrottlingSetting {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Low')]
 param(
     [object]
@@ -6211,11 +6211,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPTrustedIdentityTokenIssuer { 
+function Get-SPTrustedIdentityTokenIssuer {
   [CmdletBinding()]
 param(
     [Parameter(Position=0, ValueFromPipeline=$true)]
@@ -6227,11 +6227,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPTrustedRootAuthority { 
+function Get-SPTrustedRootAuthority {
   [CmdletBinding()]
 param(
     [Parameter(Position=0, ValueFromPipeline=$true)]
@@ -6243,11 +6243,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPTrustedSecurityTokenIssuer { 
+function Get-SPTrustedSecurityTokenIssuer {
   [CmdletBinding()]
 param(
     [Parameter(Position=0, ValueFromPipeline=$true)]
@@ -6258,11 +6258,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPTrustedServiceTokenIssuer { 
+function Get-SPTrustedServiceTokenIssuer {
   [CmdletBinding()]
 param(
     [Parameter(Position=0, ValueFromPipeline=$true)]
@@ -6273,22 +6273,22 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPUpgradeActions { 
+function Get-SPUpgradeActions {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPUsageApplication { 
+function Get-SPUsageApplication {
   [CmdletBinding()]
 param(
     [Parameter(Position=0, ValueFromPipeline=$true)]
@@ -6303,11 +6303,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPUsageDefinition { 
+function Get-SPUsageDefinition {
   [CmdletBinding()]
 param(
     [Parameter(Position=0, ValueFromPipeline=$true)]
@@ -6318,11 +6318,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPUsageService { 
+function Get-SPUsageService {
   [CmdletBinding()]
 param(
     [Parameter(Position=0, ValueFromPipeline=$true)]
@@ -6333,11 +6333,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPUser { 
+function Get-SPUser {
   [CmdletBinding()]
 param(
     [Parameter(Position=0, ValueFromPipeline=$true)]
@@ -6361,22 +6361,22 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPUserLicense { 
+function Get-SPUserLicense {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPUserLicenseMapping { 
+function Get-SPUserLicenseMapping {
   [CmdletBinding()]
 param(
     [Parameter(ParameterSetName='WebApplication', ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -6388,22 +6388,22 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPUserLicensing { 
+function Get-SPUserLicensing {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPUserSettingsProvider { 
+function Get-SPUserSettingsProvider {
   [CmdletBinding()]
 param(
     [Parameter(Position=0, ValueFromPipeline=$true)]
@@ -6414,22 +6414,22 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPUserSettingsProviderManager { 
+function Get-SPUserSettingsProviderManager {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPUserSolution { 
+function Get-SPUserSolution {
   [CmdletBinding()]
 param(
     [Parameter(Position=0)]
@@ -6444,11 +6444,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPUserSolutionAllowList { 
+function Get-SPUserSolutionAllowList {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true)]
@@ -6460,11 +6460,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPVisioExternalData { 
+function Get-SPVisioExternalData {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -6476,11 +6476,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPVisioPerformance { 
+function Get-SPVisioPerformance {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -6492,11 +6492,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPVisioSafeDataProvider { 
+function Get-SPVisioSafeDataProvider {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -6514,11 +6514,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPVisioServiceApplication { 
+function Get-SPVisioServiceApplication {
   [CmdletBinding()]
 param(
     [Parameter(Position=0, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -6529,11 +6529,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPVisioServiceApplicationProxy { 
+function Get-SPVisioServiceApplicationProxy {
   [CmdletBinding()]
 param(
     [Parameter(Position=0, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -6544,11 +6544,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPWeb { 
+function Get-SPWeb {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Position=0)]
@@ -6572,11 +6572,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPWebApplication { 
+function Get-SPWebApplication {
   [CmdletBinding()]
 param(
     [Parameter(Position=0, ValueFromPipeline=$true)]
@@ -6590,11 +6590,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPWebApplicationAppDomain { 
+function Get-SPWebApplicationAppDomain {
   [CmdletBinding(DefaultParameterSetName='Default')]
 param(
     [Parameter(Position=0, ValueFromPipeline=$true)]
@@ -6616,11 +6616,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPWebApplicationHttpThrottlingMonitor { 
+function Get-SPWebApplicationHttpThrottlingMonitor {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -6631,11 +6631,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPWebPartPack { 
+function Get-SPWebPartPack {
   [CmdletBinding()]
 param(
     [Parameter(Position=0)]
@@ -6654,11 +6654,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPWebTemplate { 
+function Get-SPWebTemplate {
   [CmdletBinding()]
 param(
     [Parameter(Position=0, ValueFromPipeline=$true)]
@@ -6672,22 +6672,22 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPWebTemplatesEnabledForSiteMaster { 
+function Get-SPWebTemplatesEnabledForSiteMaster {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPWOPIBinding { 
+function Get-SPWOPIBinding {
   [CmdletBinding()]
 param(
     [ValidateNotNullOrEmpty()]
@@ -6719,33 +6719,33 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPWOPISuppressionSetting { 
+function Get-SPWOPISuppressionSetting {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPWOPIZone { 
+function Get-SPWOPIZone {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPWorkflowConfig { 
+function Get-SPWorkflowConfig {
   [CmdletBinding()]
 param(
     [Parameter(ParameterSetName='WebApplication', Mandatory=$true, Position=0, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -6760,22 +6760,22 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Get-SPWorkflowServiceApplicationProxy { 
+function Get-SPWorkflowServiceApplicationProxy {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Grant-SPBusinessDataCatalogMetadataObject { 
+function Grant-SPBusinessDataCatalogMetadataObject {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true)]
@@ -6799,11 +6799,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Grant-SPObjectSecurity { 
+function Grant-SPObjectSecurity {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -6828,11 +6828,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Import-SPAccessServicesDatabase { 
+function Import-SPAccessServicesDatabase {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -6854,11 +6854,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Import-SPAppPackage { 
+function Import-SPAppPackage {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true)]
@@ -6885,11 +6885,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Import-SPBusinessDataCatalogDotNetAssembly { 
+function Import-SPBusinessDataCatalogDotNetAssembly {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true)]
@@ -6910,11 +6910,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Import-SPBusinessDataCatalogModel { 
+function Import-SPBusinessDataCatalogModel {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [switch]
@@ -6954,11 +6954,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Import-SPCacheClusterConfig { 
+function Import-SPCacheClusterConfig {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -6970,11 +6970,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Import-SPCertificate { 
+function Import-SPCertificate {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -7000,11 +7000,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Import-SPEnterpriseSearchCustomExtractionDictionary { 
+function Import-SPEnterpriseSearchCustomExtractionDictionary {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true)]
@@ -7024,11 +7024,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Import-SPEnterpriseSearchPopularQueries { 
+function Import-SPEnterpriseSearchPopularQueries {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -7050,11 +7050,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Import-SPEnterpriseSearchThesaurus { 
+function Import-SPEnterpriseSearchThesaurus {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true)]
@@ -7069,11 +7069,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Import-SPEnterpriseSearchTopology { 
+function Import-SPEnterpriseSearchTopology {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -7088,11 +7088,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Import-SPInfoPathAdministrationFiles { 
+function Import-SPInfoPathAdministrationFiles {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [object]
@@ -7106,11 +7106,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Import-SPMetadataWebServicePartitionData { 
+function Import-SPMetadataWebServicePartitionData {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -7145,11 +7145,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Import-SPScaleOutDatabaseTenantData { 
+function Import-SPScaleOutDatabaseTenantData {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true)]
@@ -7168,11 +7168,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Import-SPServerScaleOutDatabaseTenantData { 
+function Import-SPServerScaleOutDatabaseTenantData {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true)]
@@ -7191,11 +7191,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Import-SPSiteSubscriptionBusinessDataCatalogConfig { 
+function Import-SPSiteSubscriptionBusinessDataCatalogConfig {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true)]
@@ -7227,11 +7227,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Import-SPSiteSubscriptionSettings { 
+function Import-SPSiteSubscriptionSettings {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -7254,11 +7254,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Import-SPWeb { 
+function Import-SPWeb {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -7303,22 +7303,22 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Initialize-SPResourceSecurity { 
+function Initialize-SPResourceSecurity {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Initialize-SPStateServiceDatabase { 
+function Initialize-SPStateServiceDatabase {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -7330,11 +7330,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Install-SPApp { 
+function Install-SPApp {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Low')]
 param(
     [Parameter(Mandatory=$true)]
@@ -7351,22 +7351,22 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Install-SPApplicationContent { 
+function Install-SPApplicationContent {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Install-SPDataConnectionFile { 
+function Install-SPDataConnectionFile {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -7388,11 +7388,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Install-SPFeature { 
+function Install-SPFeature {
   [CmdletBinding(DefaultParameterSetName='PathSet', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(ParameterSetName='PathSet', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -7423,11 +7423,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Install-SPHelpCollection { 
+function Install-SPHelpCollection {
   [CmdletBinding(DefaultParameterSetName='InstallOne')]
 param(
     [Parameter(ParameterSetName='InstallOne', Mandatory=$true)]
@@ -7443,11 +7443,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Install-SPInfoPathFormTemplate { 
+function Install-SPInfoPathFormTemplate {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -7464,11 +7464,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Install-SPService { 
+function Install-SPService {
   [CmdletBinding()]
 param(
     [switch]
@@ -7478,11 +7478,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Install-SPSolution { 
+function Install-SPSolution {
   [CmdletBinding(DefaultParameterSetName='Deploy', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(ParameterSetName='Deploy', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -7537,11 +7537,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Install-SPUserSolution { 
+function Install-SPUserSolution {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -7556,11 +7556,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Install-SPWebPartPack { 
+function Install-SPWebPartPack {
   [CmdletBinding(DefaultParameterSetName='UseFileName', SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(ParameterSetName='UseName', Mandatory=$true, Position=0)]
@@ -7594,11 +7594,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Invoke-SPProjectActiveDirectoryEnterpriseResourcePoolSync { 
+function Invoke-SPProjectActiveDirectoryEnterpriseResourcePoolSync {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -7610,11 +7610,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Invoke-SPProjectActiveDirectoryGroupSync { 
+function Invoke-SPProjectActiveDirectoryGroupSync {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -7626,11 +7626,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Invoke-SPProjectRedactUser { 
+function Invoke-SPProjectRedactUser {
   [CmdletBinding()]
 param(
     [Parameter(ParameterSetName='ByResourceIdWithoutUpdateName', Mandatory=$true)]
@@ -7668,11 +7668,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Merge-SPLogFile { 
+function Merge-SPLogFile {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true)]
@@ -7722,11 +7722,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Merge-SPUsageLog { 
+function Merge-SPUsageLog {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -7755,11 +7755,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Migrate-SPDatabase { 
+function Migrate-SPDatabase {
   [CmdletBinding(DefaultParameterSetName='SiteSubscription', SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -7794,11 +7794,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Migrate-SPProjectResourcePlans { 
+function Migrate-SPProjectResourcePlans {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -7810,11 +7810,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Mount-SPContentDatabase { 
+function Mount-SPContentDatabase {
   [CmdletBinding(DefaultParameterSetName='DefaultSet', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [switch]
@@ -7873,11 +7873,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Mount-SPStateServiceDatabase { 
+function Mount-SPStateServiceDatabase {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -7902,11 +7902,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Move-SPAppManagementData { 
+function Move-SPAppManagementData {
   [CmdletBinding(DefaultParameterSetName='Default', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(ParameterSetName='Default', Mandatory=$true)]
@@ -7929,11 +7929,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Move-SPBlobStorageLocation { 
+function Move-SPBlobStorageLocation {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -7961,11 +7961,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Move-SPCertificate { 
+function Move-SPCertificate {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -7986,11 +7986,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Move-SPDeletedSite { 
+function Move-SPDeletedSite {
   [CmdletBinding(DefaultParameterSetName='DatabaseFromPipebind', SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -8017,11 +8017,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Move-SPEnterpriseSearchLinksDatabases { 
+function Move-SPEnterpriseSearchLinksDatabases {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -8044,11 +8044,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Move-SPProfileManagedMetadataProperty { 
+function Move-SPProfileManagedMetadataProperty {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -8071,11 +8071,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Move-SPSite { 
+function Move-SPSite {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -8097,11 +8097,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Move-SPSocialComment { 
+function Move-SPSocialComment {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -8123,11 +8123,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Move-SPUser { 
+function Move-SPUser {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -8148,11 +8148,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPAccessServiceApplication { 
+function New-SPAccessServiceApplication {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -8232,11 +8232,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPAccessServicesApplication { 
+function New-SPAccessServicesApplication {
   [CmdletBinding(DefaultParameterSetName='NoApplicationServerParameterSet', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(ParameterSetName='DefaultParameterSet', Mandatory=$true)]
@@ -8324,11 +8324,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPAccessServicesApplicationProxy { 
+function New-SPAccessServicesApplicationProxy {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -8339,11 +8339,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPAccessServicesDatabaseServer { 
+function New-SPAccessServicesDatabaseServer {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -8405,11 +8405,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPAlternateUrl { 
+function New-SPAlternateUrl {
   [CmdletBinding(DefaultParameterSetName='WebApplication', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -8434,11 +8434,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPAppManagementServiceApplication { 
+function New-SPAppManagementServiceApplication {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [string]
@@ -8470,11 +8470,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPAppManagementServiceApplicationProxy { 
+function New-SPAppManagementServiceApplicationProxy {
   [CmdletBinding(DefaultParameterSetName='Uri', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [string]
@@ -8496,11 +8496,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPAuthenticationProvider { 
+function New-SPAuthenticationProvider {
   [CmdletBinding(DefaultParameterSetName='Windows')]
 param(
     [Parameter(ParameterSetName='Windows')]
@@ -8538,11 +8538,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPAzureAccessControlServiceApplicationProxy { 
+function New-SPAzureAccessControlServiceApplicationProxy {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true)]
@@ -8563,11 +8563,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPBECWebServiceApplicationProxy { 
+function New-SPBECWebServiceApplicationProxy {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true)]
@@ -8588,11 +8588,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPBusinessDataCatalogServiceApplication { 
+function New-SPBusinessDataCatalogServiceApplication {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [string]
@@ -8634,11 +8634,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPBusinessDataCatalogServiceApplicationProxy { 
+function New-SPBusinessDataCatalogServiceApplicationProxy {
   [CmdletBinding(DefaultParameterSetName='Uri', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(ParameterSetName='Uri', Mandatory=$true)]
@@ -8665,11 +8665,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPCentralAdministration { 
+function New-SPCentralAdministration {
   [CmdletBinding()]
 param(
     [Parameter(ParameterSetName='SetIisWebSiteBinding', Mandatory=$true, Position=0, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -8712,11 +8712,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPCertificate { 
+function New-SPCertificate {
   [CmdletBinding(DefaultParameterSetName='Default', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(ParameterSetName='Default', Mandatory=$true)]
@@ -8815,11 +8815,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPClaimProvider { 
+function New-SPClaimProvider {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true)]
@@ -8851,11 +8851,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPClaimsPrincipal { 
+function New-SPClaimsPrincipal {
   [CmdletBinding(DefaultParameterSetName='IdentityType')]
 param(
     [Parameter(ParameterSetName='TrustIdentity', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -8906,11 +8906,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPClaimTypeEncoding { 
+function New-SPClaimTypeEncoding {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true)]
@@ -8929,11 +8929,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPClaimTypeMapping { 
+function New-SPClaimTypeMapping {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -8959,11 +8959,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPConfigurationDatabase { 
+function New-SPConfigurationDatabase {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -9011,11 +9011,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPContentDatabase { 
+function New-SPContentDatabase {
   [CmdletBinding(DefaultParameterSetName='DefaultSet', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -9064,11 +9064,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPContentDeploymentJob { 
+function New-SPContentDeploymentJob {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true)]
@@ -9110,11 +9110,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPContentDeploymentPath { 
+function New-SPContentDeploymentPath {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true)]
@@ -9173,11 +9173,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPEnterpriseSearchAdminComponent { 
+function New-SPEnterpriseSearchAdminComponent {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -9195,11 +9195,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPEnterpriseSearchAnalyticsProcessingComponent { 
+function New-SPEnterpriseSearchAnalyticsProcessingComponent {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -9217,22 +9217,22 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPEnterpriseSearchContentEnrichmentConfiguration { 
+function New-SPEnterpriseSearchContentEnrichmentConfiguration {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPEnterpriseSearchContentProcessingComponent { 
+function New-SPEnterpriseSearchContentProcessingComponent {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -9250,11 +9250,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPEnterpriseSearchCrawlComponent { 
+function New-SPEnterpriseSearchCrawlComponent {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -9272,11 +9272,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPEnterpriseSearchCrawlContentSource { 
+function New-SPEnterpriseSearchCrawlContentSource {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -9325,11 +9325,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPEnterpriseSearchCrawlCustomConnector { 
+function New-SPEnterpriseSearchCrawlCustomConnector {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -9352,11 +9352,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPEnterpriseSearchCrawlDatabase { 
+function New-SPEnterpriseSearchCrawlDatabase {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -9383,11 +9383,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPEnterpriseSearchCrawlExtension { 
+function New-SPEnterpriseSearchCrawlExtension {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Position=0)]
@@ -9402,11 +9402,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPEnterpriseSearchCrawlMapping { 
+function New-SPEnterpriseSearchCrawlMapping {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -9426,11 +9426,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPEnterpriseSearchCrawlRule { 
+function New-SPEnterpriseSearchCrawlRule {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -9480,11 +9480,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPEnterpriseSearchFileFormat { 
+function New-SPEnterpriseSearchFileFormat {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -9507,11 +9507,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPEnterpriseSearchIndexComponent { 
+function New-SPEnterpriseSearchIndexComponent {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -9535,11 +9535,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPEnterpriseSearchLanguageResourcePhrase { 
+function New-SPEnterpriseSearchLanguageResourcePhrase {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -9573,11 +9573,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPEnterpriseSearchLinksDatabase { 
+function New-SPEnterpriseSearchLinksDatabase {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -9604,11 +9604,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPEnterpriseSearchMetadataCategory { 
+function New-SPEnterpriseSearchMetadataCategory {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -9639,11 +9639,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPEnterpriseSearchMetadataCrawledProperty { 
+function New-SPEnterpriseSearchMetadataCrawledProperty {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true)]
@@ -9689,11 +9689,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPEnterpriseSearchMetadataManagedProperty { 
+function New-SPEnterpriseSearchMetadataManagedProperty {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -9788,11 +9788,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPEnterpriseSearchMetadataMapping { 
+function New-SPEnterpriseSearchMetadataMapping {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -9817,11 +9817,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPEnterpriseSearchQueryAuthority { 
+function New-SPEnterpriseSearchQueryAuthority {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -9846,11 +9846,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPEnterpriseSearchQueryDemoted { 
+function New-SPEnterpriseSearchQueryDemoted {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -9870,11 +9870,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPEnterpriseSearchQueryKeyword { 
+function New-SPEnterpriseSearchQueryKeyword {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -9909,11 +9909,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPEnterpriseSearchQueryProcessingComponent { 
+function New-SPEnterpriseSearchQueryProcessingComponent {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -9931,11 +9931,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPEnterpriseSearchQueryScope { 
+function New-SPEnterpriseSearchQueryScope {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -9976,11 +9976,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPEnterpriseSearchQueryScopeRule { 
+function New-SPEnterpriseSearchQueryScopeRule {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [object]
@@ -10025,11 +10025,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPEnterpriseSearchRankingModel { 
+function New-SPEnterpriseSearchRankingModel {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -10049,11 +10049,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPEnterpriseSearchResultItemType { 
+function New-SPEnterpriseSearchResultItemType {
   [CmdletBinding(DefaultParameterSetName='New', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(ValueFromPipeline=$true)]
@@ -10120,11 +10120,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPEnterpriseSearchResultSource { 
+function New-SPEnterpriseSearchResultSource {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -10175,11 +10175,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPEnterpriseSearchSecurityTrimmer { 
+function New-SPEnterpriseSearchSecurityTrimmer {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -10204,11 +10204,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPEnterpriseSearchServiceApplication { 
+function New-SPEnterpriseSearchServiceApplication {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(ParameterSetName='DefaultParameterSet', Position=0)]
@@ -10264,11 +10264,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPEnterpriseSearchServiceApplicationProxy { 
+function New-SPEnterpriseSearchServiceApplicationProxy {
   [CmdletBinding(DefaultParameterSetName='Uri', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(ParameterSetName='SSA', Mandatory=$true)]
@@ -10293,11 +10293,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPEnterpriseSearchSiteHitRule { 
+function New-SPEnterpriseSearchSiteHitRule {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -10320,11 +10320,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPEnterpriseSearchTopology { 
+function New-SPEnterpriseSearchTopology {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -10343,22 +10343,22 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPLogFile { 
+function New-SPLogFile {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPManagedAccount { 
+function New-SPManagedAccount {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -10369,11 +10369,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPManagedPath { 
+function New-SPManagedPath {
   [CmdletBinding(DefaultParameterSetName='WebApplication', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -10395,11 +10395,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPMarketplaceWebServiceApplicationProxy { 
+function New-SPMarketplaceWebServiceApplicationProxy {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true)]
@@ -10420,11 +10420,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPMetadataServiceApplication { 
+function New-SPMetadataServiceApplication {
   [CmdletBinding(DefaultParameterSetName='Default', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [string]
@@ -10512,11 +10512,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPMetadataServiceApplicationProxy { 
+function New-SPMetadataServiceApplicationProxy {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [switch]
@@ -10551,11 +10551,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPODataConnectionSetting { 
+function New-SPODataConnectionSetting {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true)]
@@ -10591,11 +10591,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPOnlineApplicationPrincipalManagementServiceApplicationProxy { 
+function New-SPOnlineApplicationPrincipalManagementServiceApplicationProxy {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true)]
@@ -10616,11 +10616,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPPowerPointConversionServiceApplication { 
+function New-SPPowerPointConversionServiceApplication {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -10637,11 +10637,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPPowerPointConversionServiceApplicationProxy { 
+function New-SPPowerPointConversionServiceApplicationProxy {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -10660,11 +10660,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPProfileServiceApplication { 
+function New-SPProfileServiceApplication {
   [CmdletBinding(DefaultParameterSetName='Default', SupportsShouldProcess=$true, ConfirmImpact='Low')]
 param(
     [string]
@@ -10735,11 +10735,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPProfileServiceApplicationProxy { 
+function New-SPProfileServiceApplicationProxy {
   [CmdletBinding(DefaultParameterSetName='Uri', SupportsShouldProcess=$true, ConfirmImpact='Low')]
 param(
     [string]
@@ -10765,11 +10765,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPProjectServiceApplication { 
+function New-SPProjectServiceApplication {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -10788,11 +10788,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPProjectServiceApplicationProxy { 
+function New-SPProjectServiceApplicationProxy {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -10808,11 +10808,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPRequestManagementRuleCriteria { 
+function New-SPRequestManagementRuleCriteria {
   [CmdletBinding()]
 param(
     [Parameter(ParameterSetName='StandardParameterSet', Mandatory=$true, Position=0)]
@@ -10845,11 +10845,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPSecureStoreApplication { 
+function New-SPSecureStoreApplication {
   [CmdletBinding()]
 param(
     [object[]]
@@ -10879,11 +10879,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPSecureStoreApplicationField { 
+function New-SPSecureStoreApplicationField {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true)]
@@ -10902,11 +10902,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPSecureStoreServiceApplication { 
+function New-SPSecureStoreServiceApplication {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true)]
@@ -10961,11 +10961,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPSecureStoreServiceApplicationProxy { 
+function New-SPSecureStoreServiceApplicationProxy {
   [CmdletBinding(DefaultParameterSetName='Uri', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [switch]
@@ -10987,11 +10987,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPSecureStoreTargetApplication { 
+function New-SPSecureStoreTargetApplication {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true)]
@@ -11020,11 +11020,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPServiceApplicationPool { 
+function New-SPServiceApplicationPool {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -11041,11 +11041,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPServiceApplicationProxyGroup { 
+function New-SPServiceApplicationProxyGroup {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -11059,11 +11059,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPSite { 
+function New-SPSite {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -11123,11 +11123,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPSiteMaster { 
+function New-SPSiteMaster {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -11148,33 +11148,33 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPSiteSubscription { 
+function New-SPSiteSubscription {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPSiteSubscriptionFeaturePack { 
+function New-SPSiteSubscriptionFeaturePack {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPStateServiceApplication { 
+function New-SPStateServiceApplication {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -11189,11 +11189,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPStateServiceApplicationProxy { 
+function New-SPStateServiceApplicationProxy {
   [CmdletBinding()]
 param(
     [string]
@@ -11210,11 +11210,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPStateServiceDatabase { 
+function New-SPStateServiceDatabase {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -11239,11 +11239,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPSubscriptionSettingsServiceApplication { 
+function New-SPSubscriptionSettingsServiceApplication {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [string]
@@ -11277,11 +11277,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPSubscriptionSettingsServiceApplicationProxy { 
+function New-SPSubscriptionSettingsServiceApplicationProxy {
   [CmdletBinding(DefaultParameterSetName='Uri', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(ParameterSetName='Uri', Mandatory=$true)]
@@ -11297,11 +11297,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPTranslationServiceApplication { 
+function New-SPTranslationServiceApplication {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Low')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -11337,11 +11337,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPTranslationServiceApplicationProxy { 
+function New-SPTranslationServiceApplicationProxy {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Low')]
 param(
     [switch]
@@ -11366,11 +11366,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPTrustedIdentityTokenIssuer { 
+function New-SPTrustedIdentityTokenIssuer {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(ParameterSetName='BasicParameterSet', Mandatory=$true)]
@@ -11503,11 +11503,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPTrustedRootAuthority { 
+function New-SPTrustedRootAuthority {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -11529,11 +11529,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPTrustedSecurityTokenIssuer { 
+function New-SPTrustedSecurityTokenIssuer {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -11567,11 +11567,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPTrustedServiceTokenIssuer { 
+function New-SPTrustedServiceTokenIssuer {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -11597,11 +11597,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPUsageApplication { 
+function New-SPUsageApplication {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Position=0)]
@@ -11642,22 +11642,22 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPUsageLogFile { 
+function New-SPUsageLogFile {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPUser { 
+function New-SPUser {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -11689,11 +11689,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPUserLicenseMapping { 
+function New-SPUserLicenseMapping {
   [CmdletBinding(DefaultParameterSetName='WindowsAuth', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(ParameterSetName='WindowsAuth', Mandatory=$true, ValueFromPipeline=$true)]
@@ -11749,11 +11749,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPUserSettingsProvider { 
+function New-SPUserSettingsProvider {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true)]
@@ -11772,11 +11772,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPUserSolutionAllowList { 
+function New-SPUserSolutionAllowList {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true)]
@@ -11793,11 +11793,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPVisioSafeDataProvider { 
+function New-SPVisioSafeDataProvider {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -11822,11 +11822,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPVisioServiceApplication { 
+function New-SPVisioServiceApplication {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -11846,11 +11846,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPVisioServiceApplicationProxy { 
+function New-SPVisioServiceApplicationProxy {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(ValueFromPipeline=$true)]
@@ -11866,11 +11866,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPWeb { 
+function New-SPWeb {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -11905,11 +11905,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPWebApplication { 
+function New-SPWebApplication {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -11987,11 +11987,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPWebApplicationAppDomain { 
+function New-SPWebApplicationAppDomain {
   [CmdletBinding(DefaultParameterSetName='WebApplication', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -12015,11 +12015,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPWebApplicationExtension { 
+function New-SPWebApplicationExtension {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -12082,11 +12082,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPWOPIBinding { 
+function New-SPWOPIBinding {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [ValidateNotNullOrEmpty()]
@@ -12121,11 +12121,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPWOPISuppressionSetting { 
+function New-SPWOPISuppressionSetting {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [ValidateNotNullOrEmpty()]
@@ -12144,11 +12144,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPWordConversionServiceApplication { 
+function New-SPWordConversionServiceApplication {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Low')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -12178,11 +12178,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function New-SPWorkflowServiceApplicationProxy { 
+function New-SPWorkflowServiceApplicationProxy {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [switch]
@@ -12192,11 +12192,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Pause-SPProjectWebInstance { 
+function Pause-SPProjectWebInstance {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -12207,11 +12207,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Publish-SPServiceApplication { 
+function Publish-SPServiceApplication {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -12232,11 +12232,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Receive-SPServiceApplicationConnectionInfo { 
+function Receive-SPServiceApplicationConnectionInfo {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -12252,11 +12252,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Register-SPAppPrincipal { 
+function Register-SPAppPrincipal {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true)]
@@ -12278,11 +12278,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Register-SPRemoteShareBlobStore { 
+function Register-SPRemoteShareBlobStore {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -12313,11 +12313,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Register-SPWorkflowService { 
+function Register-SPWorkflowService {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true)]
@@ -12345,11 +12345,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-DatabaseFromAvailabilityGroup { 
+function Remove-DatabaseFromAvailabilityGroup {
   [CmdletBinding(DefaultParameterSetName='Default')]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -12374,11 +12374,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPAccessServicesDatabaseServer { 
+function Remove-SPAccessServicesDatabaseServer {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true)]
@@ -12402,11 +12402,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPActivityFeedItems { 
+function Remove-SPActivityFeedItems {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -12431,11 +12431,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPAlternateUrl { 
+function Remove-SPAlternateUrl {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -12446,11 +12446,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPAppDeniedEndpoint { 
+function Remove-SPAppDeniedEndpoint {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -12462,22 +12462,22 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPApplicationCredentialKey { 
+function Remove-SPApplicationCredentialKey {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPAppPrincipalPermission { 
+function Remove-SPAppPrincipalPermission {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true)]
@@ -12502,11 +12502,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPBusinessDataCatalogModel { 
+function Remove-SPBusinessDataCatalogModel {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -12518,22 +12518,22 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPCentralAdministration { 
+function Remove-SPCentralAdministration {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPCertificate { 
+function Remove-SPCertificate {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -12548,11 +12548,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPClaimProvider { 
+function Remove-SPClaimProvider {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -12564,11 +12564,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPClaimTypeMapping { 
+function Remove-SPClaimTypeMapping {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -12585,11 +12585,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPConfigurationDatabase { 
+function Remove-SPConfigurationDatabase {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [switch]
@@ -12599,11 +12599,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPConfigurationObject { 
+function Remove-SPConfigurationObject {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -12617,11 +12617,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPContentDatabase { 
+function Remove-SPContentDatabase {
   [CmdletBinding(DefaultParameterSetName='DefaultSet', SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -12636,11 +12636,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPContentDeploymentJob { 
+function Remove-SPContentDeploymentJob {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -12651,11 +12651,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPContentDeploymentPath { 
+function Remove-SPContentDeploymentPath {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -12666,11 +12666,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPDeletedSite { 
+function Remove-SPDeletedSite {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -12690,11 +12690,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPDiagnosticsPerformanceCounter { 
+function Remove-SPDiagnosticsPerformanceCounter {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=1, ValueFromPipelineByPropertyName=$true)]
@@ -12721,22 +12721,22 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPDistributedCacheServiceInstance { 
+function Remove-SPDistributedCacheServiceInstance {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPEnterpriseSearchComponent { 
+function Remove-SPEnterpriseSearchComponent {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -12754,11 +12754,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPEnterpriseSearchContentEnrichmentConfiguration { 
+function Remove-SPEnterpriseSearchContentEnrichmentConfiguration {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -12769,11 +12769,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPEnterpriseSearchCrawlContentSource { 
+function Remove-SPEnterpriseSearchCrawlContentSource {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -12787,11 +12787,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPEnterpriseSearchCrawlCustomConnector { 
+function Remove-SPEnterpriseSearchCrawlCustomConnector {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -12807,11 +12807,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPEnterpriseSearchCrawlDatabase { 
+function Remove-SPEnterpriseSearchCrawlDatabase {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -12825,11 +12825,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPEnterpriseSearchCrawlExtension { 
+function Remove-SPEnterpriseSearchCrawlExtension {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -12843,11 +12843,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPEnterpriseSearchCrawlLogReadPermission { 
+function Remove-SPEnterpriseSearchCrawlLogReadPermission {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(ValueFromPipeline=$true)]
@@ -12869,11 +12869,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPEnterpriseSearchCrawlMapping { 
+function Remove-SPEnterpriseSearchCrawlMapping {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -12887,11 +12887,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPEnterpriseSearchCrawlRule { 
+function Remove-SPEnterpriseSearchCrawlRule {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -12905,11 +12905,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPEnterpriseSearchFileFormat { 
+function Remove-SPEnterpriseSearchFileFormat {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -12924,11 +12924,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPEnterpriseSearchLanguageResourcePhrase { 
+function Remove-SPEnterpriseSearchLanguageResourcePhrase {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -12959,11 +12959,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPEnterpriseSearchLinksDatabase { 
+function Remove-SPEnterpriseSearchLinksDatabase {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -12977,11 +12977,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPEnterpriseSearchMetadataCategory { 
+function Remove-SPEnterpriseSearchMetadataCategory {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -12995,11 +12995,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPEnterpriseSearchMetadataManagedProperty { 
+function Remove-SPEnterpriseSearchMetadataManagedProperty {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -13019,11 +13019,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPEnterpriseSearchMetadataMapping { 
+function Remove-SPEnterpriseSearchMetadataMapping {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -13037,34 +13037,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPEnterpriseSearchQueryAuthority { 
-  [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
-param(
-    [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
-    [object]
-    ${Identity},
-
-    [object]
-    ${SearchApplication},
-
-    [Parameter(Mandatory=$true)]
-    [Alias('o')]
-    [object]
-    ${Owner},
-
-    [Parameter(ValueFromPipeline=$true)]
-    [object]
-    ${AssignmentCollection})
-
- 
- } 
-
-
-function Remove-SPEnterpriseSearchQueryDemoted { 
+function Remove-SPEnterpriseSearchQueryAuthority {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -13083,11 +13060,34 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPEnterpriseSearchQueryKeyword { 
+function Remove-SPEnterpriseSearchQueryDemoted {
+  [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
+param(
+    [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
+    [object]
+    ${Identity},
+
+    [object]
+    ${SearchApplication},
+
+    [Parameter(Mandatory=$true)]
+    [Alias('o')]
+    [object]
+    ${Owner},
+
+    [Parameter(ValueFromPipeline=$true)]
+    [object]
+    ${AssignmentCollection})
+
+
+ }
+
+
+function Remove-SPEnterpriseSearchQueryKeyword {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -13102,11 +13102,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPEnterpriseSearchQueryScope { 
+function Remove-SPEnterpriseSearchQueryScope {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -13124,11 +13124,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPEnterpriseSearchQueryScopeRule { 
+function Remove-SPEnterpriseSearchQueryScopeRule {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -13151,11 +13151,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPEnterpriseSearchRankingModel { 
+function Remove-SPEnterpriseSearchRankingModel {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -13174,11 +13174,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPEnterpriseSearchResultItemType { 
+function Remove-SPEnterpriseSearchResultItemType {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -13201,11 +13201,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPEnterpriseSearchResultSource { 
+function Remove-SPEnterpriseSearchResultSource {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -13225,11 +13225,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPEnterpriseSearchSecurityTrimmer { 
+function Remove-SPEnterpriseSearchSecurityTrimmer {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Position=0, ValueFromPipeline=$true)]
@@ -13244,11 +13244,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPEnterpriseSearchServiceApplication { 
+function Remove-SPEnterpriseSearchServiceApplication {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -13262,11 +13262,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPEnterpriseSearchServiceApplicationProxy { 
+function Remove-SPEnterpriseSearchServiceApplicationProxy {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -13277,11 +13277,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPEnterpriseSearchServiceApplicationSiteSettings { 
+function Remove-SPEnterpriseSearchServiceApplicationSiteSettings {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -13299,11 +13299,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPEnterpriseSearchSiteHitRule { 
+function Remove-SPEnterpriseSearchSiteHitRule {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -13317,11 +13317,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPEnterpriseSearchTenantConfiguration { 
+function Remove-SPEnterpriseSearchTenantConfiguration {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -13337,11 +13337,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPEnterpriseSearchTenantSchema { 
+function Remove-SPEnterpriseSearchTenantSchema {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -13358,11 +13358,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPEnterpriseSearchTopology { 
+function Remove-SPEnterpriseSearchTopology {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -13376,11 +13376,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPInfoPathUserAgent { 
+function Remove-SPInfoPathUserAgent {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -13392,11 +13392,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPManagedAccount { 
+function Remove-SPManagedAccount {
   [CmdletBinding(DefaultParameterSetName='Default', SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -13415,11 +13415,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPManagedPath { 
+function Remove-SPManagedPath {
   [CmdletBinding(DefaultParameterSetName='WebApplication', SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -13438,11 +13438,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPODataConnectionSetting { 
+function Remove-SPODataConnectionSetting {
   [CmdletBinding(DefaultParameterSetName='Name', SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true)]
@@ -13464,11 +13464,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPPeoplePickerDistributionListSearchDomain { 
+function Remove-SPPeoplePickerDistributionListSearchDomain {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -13485,11 +13485,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPPeoplePickerSearchADDomain { 
+function Remove-SPPeoplePickerSearchADDomain {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -13512,11 +13512,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPPeoplePickerServiceAccountDirectoryPath { 
+function Remove-SPPeoplePickerServiceAccountDirectoryPath {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -13533,11 +13533,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPPluggableSecurityTrimmer { 
+function Remove-SPPluggableSecurityTrimmer {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -13553,11 +13553,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPProfileLeader { 
+function Remove-SPProfileLeader {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -13579,11 +13579,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPProfileSyncConnection { 
+function Remove-SPProfileSyncConnection {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -13621,11 +13621,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPProjectWebInstanceData { 
+function Remove-SPProjectWebInstanceData {
   [CmdletBinding(DefaultParameterSetName='web', SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(ParameterSetName='web', Mandatory=$true, ValueFromPipeline=$true)]
@@ -13636,11 +13636,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPRoutingMachineInfo { 
+function Remove-SPRoutingMachineInfo {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -13652,11 +13652,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPRoutingMachinePool { 
+function Remove-SPRoutingMachinePool {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -13668,11 +13668,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPRoutingRule { 
+function Remove-SPRoutingRule {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -13684,11 +13684,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPScaleOutDatabase { 
+function Remove-SPScaleOutDatabase {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true)]
@@ -13706,11 +13706,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPSecureStoreApplication { 
+function Remove-SPSecureStoreApplication {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -13722,11 +13722,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPSecureStoreSystemAccount { 
+function Remove-SPSecureStoreSystemAccount {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -13737,11 +13737,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPServerScaleOutDatabase { 
+function Remove-SPServerScaleOutDatabase {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true)]
@@ -13759,11 +13759,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPServiceApplication { 
+function Remove-SPServiceApplication {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -13779,11 +13779,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPServiceApplicationPool { 
+function Remove-SPServiceApplicationPool {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -13795,11 +13795,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPServiceApplicationProxy { 
+function Remove-SPServiceApplicationProxy {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -13815,11 +13815,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPServiceApplicationProxyGroup { 
+function Remove-SPServiceApplicationProxyGroup {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -13831,11 +13831,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPServiceApplicationProxyGroupMember { 
+function Remove-SPServiceApplicationProxyGroupMember {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -13853,11 +13853,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPShellAdmin { 
+function Remove-SPShellAdmin {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -13872,11 +13872,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPSite { 
+function Remove-SPSite {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -13897,11 +13897,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPSiteMaster { 
+function Remove-SPSiteMaster {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -13916,11 +13916,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPSiteSubscription { 
+function Remove-SPSiteSubscription {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -13934,11 +13934,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPSiteSubscriptionBusinessDataCatalogConfig { 
+function Remove-SPSiteSubscriptionBusinessDataCatalogConfig {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true)]
@@ -13950,11 +13950,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPSiteSubscriptionFeaturePack { 
+function Remove-SPSiteSubscriptionFeaturePack {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -13966,11 +13966,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPSiteSubscriptionFeaturePackMember { 
+function Remove-SPSiteSubscriptionFeaturePackMember {
   [CmdletBinding(DefaultParameterSetName='SingleFeatureDefinition', SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -13991,11 +13991,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPSiteSubscriptionMetadataConfig { 
+function Remove-SPSiteSubscriptionMetadataConfig {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -14010,11 +14010,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPSiteSubscriptionProfileConfig { 
+function Remove-SPSiteSubscriptionProfileConfig {
   [CmdletBinding(DefaultParameterSetName='Default', SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(ParameterSetName='Default', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -14036,11 +14036,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPSiteSubscriptionSettings { 
+function Remove-SPSiteSubscriptionSettings {
   [CmdletBinding(DefaultParameterSetName='SpecifySiteSubscriptions', SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -14071,11 +14071,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPSiteUpgradeSessionInfo { 
+function Remove-SPSiteUpgradeSessionInfo {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -14086,11 +14086,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPSiteUrl { 
+function Remove-SPSiteUrl {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -14101,11 +14101,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPSocialItemByDate { 
+function Remove-SPSocialItemByDate {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -14136,11 +14136,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPSolution { 
+function Remove-SPSolution {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -14157,11 +14157,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPSolutionDeploymentLock { 
+function Remove-SPSolutionDeploymentLock {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Position=0)]
@@ -14172,11 +14172,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPStateServiceDatabase { 
+function Remove-SPStateServiceDatabase {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -14188,11 +14188,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPThrottlingRule { 
+function Remove-SPThrottlingRule {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -14204,11 +14204,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPTranslationServiceJobHistory { 
+function Remove-SPTranslationServiceJobHistory {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -14234,11 +14234,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPTrustedIdentityTokenIssuer { 
+function Remove-SPTrustedIdentityTokenIssuer {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -14250,11 +14250,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPTrustedRootAuthority { 
+function Remove-SPTrustedRootAuthority {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -14266,11 +14266,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPTrustedSecurityTokenIssuer { 
+function Remove-SPTrustedSecurityTokenIssuer {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -14282,11 +14282,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPTrustedServiceTokenIssuer { 
+function Remove-SPTrustedServiceTokenIssuer {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -14298,11 +14298,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPUsageApplication { 
+function Remove-SPUsageApplication {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -14320,11 +14320,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPUser { 
+function Remove-SPUser {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -14345,11 +14345,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPUserLicenseMapping { 
+function Remove-SPUserLicenseMapping {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -14361,11 +14361,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPUserSettingsProvider { 
+function Remove-SPUserSettingsProvider {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -14377,11 +14377,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPUserSolution { 
+function Remove-SPUserSolution {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -14396,11 +14396,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPVisioSafeDataProvider { 
+function Remove-SPVisioSafeDataProvider {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -14422,11 +14422,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPWeb { 
+function Remove-SPWeb {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -14443,11 +14443,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPWebApplication { 
+function Remove-SPWebApplication {
   [CmdletBinding(DefaultParameterSetName='RemoveWebApp', SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -14469,11 +14469,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPWebApplicationAppDomain { 
+function Remove-SPWebApplicationAppDomain {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -14484,11 +14484,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPWOPIBinding { 
+function Remove-SPWOPIBinding {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(ParameterSetName='Identity', Position=0, ValueFromPipeline=$true)]
@@ -14533,11 +14533,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPWOPISuppressionSetting { 
+function Remove-SPWOPISuppressionSetting {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(ParameterSetName='DocTypeAndAction')]
@@ -14564,11 +14564,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Remove-SPWordConversionServiceJobHistory { 
+function Remove-SPWordConversionServiceJobHistory {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -14591,11 +14591,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Rename-SPCertificate { 
+function Rename-SPCertificate {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -14612,11 +14612,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Rename-SPServer { 
+function Rename-SPServer {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -14634,11 +14634,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Renew-SPCertificate { 
+function Renew-SPCertificate {
   [CmdletBinding(DefaultParameterSetName='Default', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(ParameterSetName='Default', Mandatory=$true, Position=0)]
@@ -14744,22 +14744,22 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Repair-SPManagedAccountDeployment { 
+function Repair-SPManagedAccountDeployment {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Repair-SPProjectWebInstance { 
+function Repair-SPProjectWebInstance {
   [CmdletBinding()]
 param(
     [Parameter(ParameterSetName='FindProjectSiteByWebInstance', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -14774,11 +14774,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Repair-SPSite { 
+function Repair-SPSite {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -14795,11 +14795,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Request-SPUpgradeEvaluationSite { 
+function Request-SPUpgradeEvaluationSite {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -14816,11 +14816,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Reset-SPAccessServicesDatabasePassword { 
+function Reset-SPAccessServicesDatabasePassword {
   [CmdletBinding(DefaultParameterSetName='ResetAllApps', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(ParameterSetName='ResetSingleApp', Mandatory=$true, ValueFromPipeline=$true)]
@@ -14836,38 +14836,22 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Reset-SPProjectEventServiceSettings { 
+function Reset-SPProjectEventServiceSettings {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Reset-SPProjectPCSSettings { 
-  [CmdletBinding()]
-param(
-    [Parameter(ValueFromPipeline=$true)]
-    [Alias('sa')]
-    [object]
-    ${ServiceApplication},
-
-    [Parameter(ValueFromPipeline=$true)]
-    [object]
-    ${AssignmentCollection})
-
- 
- } 
-
-
-function Reset-SPProjectQueueSettings { 
+function Reset-SPProjectPCSSettings {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
@@ -14879,11 +14863,27 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Reset-SPSites { 
+function Reset-SPProjectQueueSettings {
+  [CmdletBinding()]
+param(
+    [Parameter(ValueFromPipeline=$true)]
+    [Alias('sa')]
+    [object]
+    ${ServiceApplication},
+
+    [Parameter(ValueFromPipeline=$true)]
+    [object]
+    ${AssignmentCollection})
+
+
+ }
+
+
+function Reset-SPSites {
   [CmdletBinding(DefaultParameterSetName='DefaultSet', SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -14895,11 +14895,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Restart-SPAppInstanceJob { 
+function Restart-SPAppInstanceJob {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Low')]
 param(
     [Parameter(Mandatory=$true)]
@@ -14911,11 +14911,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Restore-SPDeletedSite { 
+function Restore-SPDeletedSite {
   [CmdletBinding(DefaultParameterSetName='DatabaseFromPipebind', SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -14935,11 +14935,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Restore-SPEnterpriseSearchServiceApplication { 
+function Restore-SPEnterpriseSearchServiceApplication {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -14990,11 +14990,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Restore-SPEnterpriseSearchServiceApplicationIndex { 
+function Restore-SPEnterpriseSearchServiceApplicationIndex {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -15029,11 +15029,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Restore-SPFarm { 
+function Restore-SPFarm {
   [CmdletBinding(DefaultParameterSetName='DefaultSet', SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true)]
@@ -15083,11 +15083,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Restore-SPSite { 
+function Restore-SPSite {
   [CmdletBinding(DefaultParameterSetName='DatabaseFromPipebind', SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -15126,11 +15126,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Resume-SPEnterpriseSearchServiceApplication { 
+function Resume-SPEnterpriseSearchServiceApplication {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -15141,11 +15141,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Resume-SPProjectWebInstance { 
+function Resume-SPProjectWebInstance {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -15156,11 +15156,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Resume-SPStateServiceDatabase { 
+function Resume-SPStateServiceDatabase {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -15172,11 +15172,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Revoke-SPBusinessDataCatalogMetadataObject { 
+function Revoke-SPBusinessDataCatalogMetadataObject {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true)]
@@ -15200,11 +15200,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Revoke-SPObjectSecurity { 
+function Revoke-SPObjectSecurity {
   [CmdletBinding(DefaultParameterSetName='RevokeOne')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -15230,11 +15230,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPAccessServiceApplication { 
+function Set-SPAccessServiceApplication {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -15307,11 +15307,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPAccessServicesApplication { 
+function Set-SPAccessServicesApplication {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -15350,11 +15350,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPAccessServicesDatabaseServer { 
+function Set-SPAccessServicesDatabaseServer {
   [CmdletBinding(DefaultParameterSetName='SetCredentialsParameterSet', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(ParameterSetName='SetCredentialsParameterSet', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -15442,11 +15442,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPAccessServicesDatabaseServerGroupMapping { 
+function Set-SPAccessServicesDatabaseServerGroupMapping {
   [CmdletBinding(DefaultParameterSetName='SetDatabaseServerGroupMappingParameter', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(ParameterSetName='SetDatabaseServerGroupMappingParameter', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -15492,11 +15492,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPAlternateUrl { 
+function Set-SPAlternateUrl {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -15513,11 +15513,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPAppAcquisitionConfiguration { 
+function Set-SPAppAcquisitionConfiguration {
   [CmdletBinding(DefaultParameterSetName='MarketplaceSettingsInWebApplication', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true)]
@@ -15536,11 +15536,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPAppAutoProvisionConnection { 
+function Set-SPAppAutoProvisionConnection {
   [CmdletBinding()]
 param(
     [object]
@@ -15575,11 +15575,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPAppDisablingConfiguration { 
+function Set-SPAppDisablingConfiguration {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true)]
@@ -15590,11 +15590,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPAppDomain { 
+function Set-SPAppDomain {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -15607,11 +15607,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPAppHostingQuotaConfiguration { 
+function Set-SPAppHostingQuotaConfiguration {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -15633,11 +15633,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPApplicationCredentialKey { 
+function Set-SPApplicationCredentialKey {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -15649,11 +15649,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPAppManagementDeploymentId { 
+function Set-SPAppManagementDeploymentId {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true)]
@@ -15675,11 +15675,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPAppPrincipalPermission { 
+function Set-SPAppPrincipalPermission {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true)]
@@ -15709,11 +15709,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPAppScaleProfile { 
+function Set-SPAppScaleProfile {
   [CmdletBinding()]
 param(
     [ValidateNotNullOrEmpty()]
@@ -15728,11 +15728,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPAppSiteDomain { 
+function Set-SPAppSiteDomain {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true)]
@@ -15744,11 +15744,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPAppSiteSubscriptionName { 
+function Set-SPAppSiteSubscriptionName {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true)]
@@ -15766,11 +15766,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPAppStateUpdateInterval { 
+function Set-SPAppStateUpdateInterval {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true)]
@@ -15787,11 +15787,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPAppStoreConfiguration { 
+function Set-SPAppStoreConfiguration {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [string]
@@ -15805,11 +15805,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPAppStoreWebServiceConfiguration { 
+function Set-SPAppStoreWebServiceConfiguration {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true)]
@@ -15823,11 +15823,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPAuthenticationRealm { 
+function Set-SPAuthenticationRealm {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [ValidateNotNull()]
@@ -15841,11 +15841,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPBingMapsBlock { 
+function Set-SPBingMapsBlock {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Position=0, HelpMessage='Block Bing Maps in all locales.')]
@@ -15856,11 +15856,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPBingMapskey { 
+function Set-SPBingMapskey {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, HelpMessage='Enter the Bing Maps API key.')]
@@ -15871,11 +15871,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPBrowserCustomerExperienceImprovementProgram { 
+function Set-SPBrowserCustomerExperienceImprovementProgram {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Low')]
 param(
     [Parameter(ParameterSetName='Farm', Mandatory=$true)]
@@ -15897,11 +15897,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPBusinessDataCatalogEntityNotificationWeb { 
+function Set-SPBusinessDataCatalogEntityNotificationWeb {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Low')]
 param(
     [Parameter(Mandatory=$true)]
@@ -15913,11 +15913,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPBusinessDataCatalogMetadataObject { 
+function Set-SPBusinessDataCatalogMetadataObject {
   [CmdletBinding(DefaultParameterSetName='NameValue', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(ParameterSetName='Display')]
@@ -15950,11 +15950,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPBusinessDataCatalogServiceApplication { 
+function Set-SPBusinessDataCatalogServiceApplication {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -16002,11 +16002,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPBusinessDataCatalogThrottleConfig { 
+function Set-SPBusinessDataCatalogThrottleConfig {
   [CmdletBinding(DefaultParameterSetName='MaxDefault', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -16030,11 +16030,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPCentralAdministration { 
+function Set-SPCentralAdministration {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true)]
@@ -16064,11 +16064,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPCertificateSettings { 
+function Set-SPCertificateSettings {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [string]
@@ -16118,11 +16118,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPClaimProvider { 
+function Set-SPClaimProvider {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -16140,11 +16140,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPContentDatabase { 
+function Set-SPContentDatabase {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -16170,11 +16170,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPContentDeploymentJob { 
+function Set-SPContentDeploymentJob {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -16217,11 +16217,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPContentDeploymentPath { 
+function Set-SPContentDeploymentPath {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -16267,11 +16267,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPCustomLayoutsPage { 
+function Set-SPCustomLayoutsPage {
   [CmdletBinding(DefaultParameterSetName='CustomPage', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true)]
@@ -16300,11 +16300,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPDataConnectionFile { 
+function Set-SPDataConnectionFile {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -16331,11 +16331,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPDefaultProfileConfig { 
+function Set-SPDefaultProfileConfig {
   [CmdletBinding(DefaultParameterSetName='Default', SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -16351,11 +16351,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPDesignerSettings { 
+function Set-SPDesignerSettings {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(ParameterSetName='WebApplication', Mandatory=$true, Position=0, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -16393,11 +16393,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPDiagnosticConfig { 
+function Set-SPDiagnosticConfig {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipelineByPropertyName=$true)]
@@ -16501,11 +16501,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPDiagnosticsProvider { 
+function Set-SPDiagnosticsProvider {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -16527,11 +16527,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPDistributedCacheClientSetting { 
+function Set-SPDistributedCacheClientSetting {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -16548,11 +16548,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPEnterpriseSearchAdministrationComponent { 
+function Set-SPEnterpriseSearchAdministrationComponent {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Position=0, ValueFromPipeline=$true)]
@@ -16575,11 +16575,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPEnterpriseSearchContentEnrichmentConfiguration { 
+function Set-SPEnterpriseSearchContentEnrichmentConfiguration {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -16594,11 +16594,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPEnterpriseSearchCrawlContentSource { 
+function Set-SPEnterpriseSearchCrawlContentSource {
   [CmdletBinding(DefaultParameterSetName='NoSchedule', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -16712,11 +16712,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPEnterpriseSearchCrawlDatabase { 
+function Set-SPEnterpriseSearchCrawlDatabase {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -16745,11 +16745,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPEnterpriseSearchCrawlLogReadPermission { 
+function Set-SPEnterpriseSearchCrawlLogReadPermission {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(ValueFromPipeline=$true)]
@@ -16770,11 +16770,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPEnterpriseSearchCrawlRule { 
+function Set-SPEnterpriseSearchCrawlRule {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -16822,11 +16822,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPEnterpriseSearchFileFormatState { 
+function Set-SPEnterpriseSearchFileFormatState {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true)]
@@ -16849,11 +16849,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPEnterpriseSearchLinguisticComponentsStatus { 
+function Set-SPEnterpriseSearchLinguisticComponentsStatus {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true)]
@@ -16883,11 +16883,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPEnterpriseSearchLinksDatabase { 
+function Set-SPEnterpriseSearchLinksDatabase {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -16916,11 +16916,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPEnterpriseSearchMetadataCategory { 
+function Set-SPEnterpriseSearchMetadataCategory {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -16951,11 +16951,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPEnterpriseSearchMetadataCrawledProperty { 
+function Set-SPEnterpriseSearchMetadataCrawledProperty {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -16971,11 +16971,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPEnterpriseSearchMetadataManagedProperty { 
+function Set-SPEnterpriseSearchMetadataManagedProperty {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -17064,11 +17064,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPEnterpriseSearchMetadataMapping { 
+function Set-SPEnterpriseSearchMetadataMapping {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -17094,11 +17094,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPEnterpriseSearchPrimaryHostController { 
+function Set-SPEnterpriseSearchPrimaryHostController {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -17112,11 +17112,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPEnterpriseSearchQueryAuthority { 
+function Set-SPEnterpriseSearchQueryAuthority {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -17139,11 +17139,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPEnterpriseSearchQueryKeyword { 
+function Set-SPEnterpriseSearchQueryKeyword {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -17182,11 +17182,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPEnterpriseSearchQueryScope { 
+function Set-SPEnterpriseSearchQueryScope {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -17224,11 +17224,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPEnterpriseSearchQueryScopeRule { 
+function Set-SPEnterpriseSearchQueryScopeRule {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -17271,11 +17271,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPEnterpriseSearchQuerySpellingCorrection { 
+function Set-SPEnterpriseSearchQuerySpellingCorrection {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true)]
@@ -17311,11 +17311,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPEnterpriseSearchRankingModel { 
+function Set-SPEnterpriseSearchRankingModel {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -17338,11 +17338,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPEnterpriseSearchResultItemType { 
+function Set-SPEnterpriseSearchResultItemType {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -17393,11 +17393,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPEnterpriseSearchResultSource { 
+function Set-SPEnterpriseSearchResultSource {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -17449,11 +17449,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPEnterpriseSearchService { 
+function Set-SPEnterpriseSearchService {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Position=0, ValueFromPipeline=$true)]
@@ -17491,11 +17491,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPEnterpriseSearchServiceApplication { 
+function Set-SPEnterpriseSearchServiceApplication {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -17542,11 +17542,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPEnterpriseSearchServiceApplicationProxy { 
+function Set-SPEnterpriseSearchServiceApplicationProxy {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -17560,11 +17560,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPEnterpriseSearchServiceInstance { 
+function Set-SPEnterpriseSearchServiceInstance {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -17578,11 +17578,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPEnterpriseSearchTopology { 
+function Set-SPEnterpriseSearchTopology {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -17596,11 +17596,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPFarmConfig { 
+function Set-SPFarmConfig {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(ValueFromPipelineByPropertyName=$true)]
@@ -17658,11 +17658,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPInfoPathFormsService { 
+function Set-SPInfoPathFormsService {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [object]
@@ -17744,11 +17744,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPInfoPathFormTemplate { 
+function Set-SPInfoPathFormTemplate {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -17763,11 +17763,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPInfoPathWebServiceProxy { 
+function Set-SPInfoPathWebServiceProxy {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -17786,11 +17786,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPInternalAppStateUpdateInterval { 
+function Set-SPInternalAppStateUpdateInterval {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true)]
@@ -17802,11 +17802,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPIRMSettings { 
+function Set-SPIRMSettings {
   [CmdletBinding(DefaultParameterSetName='UseServiceDiscovery', SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true)]
@@ -17839,11 +17839,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPLogLevel { 
+function Set-SPLogLevel {
   [CmdletBinding()]
 param(
     [string]
@@ -17863,11 +17863,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPManagedAccount { 
+function Set-SPManagedAccount {
   [CmdletBinding(DefaultParameterSetName='Default', SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -17915,11 +17915,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPMetadataServiceApplication { 
+function Set-SPMetadataServiceApplication {
   [CmdletBinding(DefaultParameterSetName='Default', SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [string]
@@ -18007,11 +18007,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPMetadataServiceApplicationProxy { 
+function Set-SPMetadataServiceApplicationProxy {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [switch]
@@ -18040,11 +18040,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPMicrofeedOptions { 
+function Set-SPMicrofeedOptions {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -18081,11 +18081,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPMobileMessagingAccount { 
+function Set-SPMobileMessagingAccount {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -18113,11 +18113,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPO365LinkSettings { 
+function Set-SPO365LinkSettings {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)]
@@ -18145,11 +18145,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPODataConnectionSetting { 
+function Set-SPODataConnectionSetting {
   [CmdletBinding(DefaultParameterSetName='Name', SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true)]
@@ -18188,11 +18188,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPODataConnectionSettingMetadata { 
+function Set-SPODataConnectionSettingMetadata {
   [CmdletBinding(DefaultParameterSetName='Name', SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true)]
@@ -18228,11 +18228,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPOfficeStoreAppsDefaultActivation { 
+function Set-SPOfficeStoreAppsDefaultActivation {
   [CmdletBinding(DefaultParameterSetName='AppsForOfficeSettingsInWebApplication', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true)]
@@ -18251,11 +18251,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPPassPhrase { 
+function Set-SPPassPhrase {
   [CmdletBinding(DefaultParameterSetName='AcrossFarm', SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true)]
@@ -18274,11 +18274,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPPeoplePickerConfig { 
+function Set-SPPeoplePickerConfig {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -18309,11 +18309,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPPowerPointConversionServiceApplication { 
+function Set-SPPowerPointConversionServiceApplication {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -18340,11 +18340,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPProfileServiceApplication { 
+function Set-SPProfileServiceApplication {
   [CmdletBinding(DefaultParameterSetName='Default', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -18403,11 +18403,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPProfileServiceApplicationProxy { 
+function Set-SPProfileServiceApplicationProxy {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -18437,11 +18437,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPProfileServiceApplicationSecurity { 
+function Set-SPProfileServiceApplicationSecurity {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -18472,11 +18472,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPProjectDatabaseQuota { 
+function Set-SPProjectDatabaseQuota {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true)]
@@ -18512,11 +18512,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPProjectEventServiceSettings { 
+function Set-SPProjectEventServiceSettings {
   [CmdletBinding()]
 param(
     [System.Nullable[int]]
@@ -18526,11 +18526,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPProjectOdataConfiguration { 
+function Set-SPProjectOdataConfiguration {
   [CmdletBinding()]
 param(
     [bool]
@@ -18564,11 +18564,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPProjectPCSSettings { 
+function Set-SPProjectPCSSettings {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
@@ -18607,11 +18607,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPProjectPermissionMode { 
+function Set-SPProjectPermissionMode {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -18629,11 +18629,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPProjectQueueSettings { 
+function Set-SPProjectQueueSettings {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
@@ -18681,11 +18681,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPProjectReportingTimephasedMode { 
+function Set-SPProjectReportingTimephasedMode {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true)]
@@ -18703,11 +18703,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPProjectServiceApplication { 
+function Set-SPProjectServiceApplication {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -18721,11 +18721,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPProjectUserSync { 
+function Set-SPProjectUserSync {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=1)]
@@ -18742,11 +18742,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPProjectUserSyncDisabledSyncThreshold { 
+function Set-SPProjectUserSyncDisabledSyncThreshold {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=1)]
@@ -18763,11 +18763,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPProjectUserSyncFullSyncThreshold { 
+function Set-SPProjectUserSyncFullSyncThreshold {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=1)]
@@ -18784,11 +18784,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPProjectUserSyncOffPeakSyncThreshold { 
+function Set-SPProjectUserSyncOffPeakSyncThreshold {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=1)]
@@ -18805,11 +18805,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPRemoteShareBlobStore { 
+function Set-SPRemoteShareBlobStore {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -18833,11 +18833,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPRequestManagementSettings { 
+function Set-SPRequestManagementSettings {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -18861,11 +18861,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPRoutingMachineInfo { 
+function Set-SPRoutingMachineInfo {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -18898,11 +18898,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPRoutingMachinePool { 
+function Set-SPRoutingMachinePool {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -18918,11 +18918,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPRoutingRule { 
+function Set-SPRoutingRule {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -18949,11 +18949,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPScaleOutDatabaseDataRange { 
+function Set-SPScaleOutDatabaseDataRange {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -18975,11 +18975,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPScaleOutDatabaseDataSubRange { 
+function Set-SPScaleOutDatabaseDataSubRange {
   [CmdletBinding(DefaultParameterSetName='AttachedDatabase', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(ParameterSetName='AttachedDatabase', Mandatory=$true, ValueFromPipeline=$true)]
@@ -19019,11 +19019,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPSecureStoreApplication { 
+function Set-SPSecureStoreApplication {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [object[]]
@@ -19050,11 +19050,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPSecureStoreDefaultProvider { 
+function Set-SPSecureStoreDefaultProvider {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true)]
@@ -19066,11 +19066,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPSecureStoreServiceApplication { 
+function Set-SPSecureStoreServiceApplication {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [object]
@@ -19118,11 +19118,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPSecurityTokenServiceConfig { 
+function Set-SPSecurityTokenServiceConfig {
   [CmdletBinding(DefaultParameterSetName='SigningCertificateImport', SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(ParameterSetName='SigningCertificateImport')]
@@ -19188,11 +19188,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPServer { 
+function Set-SPServer {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -19211,11 +19211,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPServerScaleOutDatabaseDataRange { 
+function Set-SPServerScaleOutDatabaseDataRange {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -19237,11 +19237,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPServerScaleOutDatabaseDataSubRange { 
+function Set-SPServerScaleOutDatabaseDataSubRange {
   [CmdletBinding(DefaultParameterSetName='AttachedDatabase', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(ParameterSetName='AttachedDatabase', Mandatory=$true, ValueFromPipeline=$true)]
@@ -19281,11 +19281,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPServiceApplication { 
+function Set-SPServiceApplication {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -19309,11 +19309,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPServiceApplicationEndpoint { 
+function Set-SPServiceApplicationEndpoint {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -19334,11 +19334,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPServiceApplicationPool { 
+function Set-SPServiceApplicationPool {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -19354,11 +19354,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPServiceApplicationSecurity { 
+function Set-SPServiceApplicationSecurity {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -19378,11 +19378,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPServiceHostConfig { 
+function Set-SPServiceHostConfig {
   [CmdletBinding(DefaultParameterSetName='SslCertificateImport', SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(ParameterSetName='SslCertificateReference', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -19447,11 +19447,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPSessionStateService { 
+function Set-SPSessionStateService {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [System.Nullable[int]]
@@ -19465,11 +19465,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPSite { 
+function Set-SPSite {
   [CmdletBinding(DefaultParameterSetName='Default', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -19532,11 +19532,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPSiteAdministration { 
+function Set-SPSiteAdministration {
   [CmdletBinding(DefaultParameterSetName='Default', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -19583,11 +19583,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPSiteSubscriptionConfig { 
+function Set-SPSiteSubscriptionConfig {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -19610,11 +19610,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPSiteSubscriptionEdiscoveryHub { 
+function Set-SPSiteSubscriptionEdiscoveryHub {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -19629,11 +19629,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPSiteSubscriptionIRMConfig { 
+function Set-SPSiteSubscriptionIRMConfig {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -19656,11 +19656,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPSiteSubscriptionMetadataConfig { 
+function Set-SPSiteSubscriptionMetadataConfig {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -19685,11 +19685,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPSiteSubscriptionProfileConfig { 
+function Set-SPSiteSubscriptionProfileConfig {
   [CmdletBinding(DefaultParameterSetName='Default', SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -19723,11 +19723,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPSiteUrl { 
+function Set-SPSiteUrl {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -19745,11 +19745,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPStateServiceApplication { 
+function Set-SPStateServiceApplication {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -19763,11 +19763,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPStateServiceApplicationProxy { 
+function Set-SPStateServiceApplicationProxy {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -19781,11 +19781,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPStateServiceDatabase { 
+function Set-SPStateServiceDatabase {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -19809,11 +19809,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPSubscriptionSettingsServiceApplication { 
+function Set-SPSubscriptionSettingsServiceApplication {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -19841,11 +19841,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPThrottlingRule { 
+function Set-SPThrottlingRule {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -19870,11 +19870,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPTimerJob { 
+function Set-SPTimerJob {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -19889,11 +19889,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPTopologyServiceApplication { 
+function Set-SPTopologyServiceApplication {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -19909,11 +19909,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPTopologyServiceApplicationProxy { 
+function Set-SPTopologyServiceApplicationProxy {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -19928,11 +19928,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPTranslationServiceApplication { 
+function Set-SPTranslationServiceApplication {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Low')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -20031,11 +20031,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPTranslationServiceApplicationProxy { 
+function Set-SPTranslationServiceApplicationProxy {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Low')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -20055,11 +20055,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPTranslationThrottlingSetting { 
+function Set-SPTranslationThrottlingSetting {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Low')]
 param(
     [System.Nullable[int]]
@@ -20072,11 +20072,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPTrustedIdentityTokenIssuer { 
+function Set-SPTrustedIdentityTokenIssuer {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(ParameterSetName='BasicParameterSet', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -20175,11 +20175,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPTrustedRootAuthority { 
+function Set-SPTrustedRootAuthority {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -20201,11 +20201,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPTrustedSecurityTokenIssuer { 
+function Set-SPTrustedSecurityTokenIssuer {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -20238,11 +20238,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPTrustedServiceTokenIssuer { 
+function Set-SPTrustedServiceTokenIssuer {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -20268,11 +20268,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPUsageApplication { 
+function Set-SPUsageApplication {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -20312,11 +20312,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPUsageDefinition { 
+function Set-SPUsageDefinition {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -20345,11 +20345,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPUsageService { 
+function Set-SPUsageService {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Position=0, ValueFromPipeline=$true)]
@@ -20384,11 +20384,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPUser { 
+function Set-SPUser {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -20432,11 +20432,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPVisioExternalData { 
+function Set-SPVisioExternalData {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -20453,11 +20453,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPVisioPerformance { 
+function Set-SPVisioPerformance {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -20493,11 +20493,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPVisioSafeDataProvider { 
+function Set-SPVisioSafeDataProvider {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -20523,11 +20523,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPVisioServiceApplication { 
+function Set-SPVisioServiceApplication {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -20544,11 +20544,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPWeb { 
+function Set-SPWeb {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -20572,11 +20572,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPWebApplication { 
+function Set-SPWebApplication {
   [CmdletBinding(DefaultParameterSetName='UpdateGeneralSettings', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -20687,11 +20687,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPWebApplicationHttpThrottlingMonitor { 
+function Set-SPWebApplicationHttpThrottlingMonitor {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -20735,11 +20735,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPWOPIBinding { 
+function Set-SPWOPIBinding {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -20754,11 +20754,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPWOPIZone { 
+function Set-SPWOPIZone {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Position=0)]
@@ -20770,11 +20770,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPWordConversionServiceApplication { 
+function Set-SPWordConversionServiceApplication {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Low')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -20846,11 +20846,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Set-SPWorkflowConfig { 
+function Set-SPWorkflowConfig {
   [CmdletBinding()]
 param(
     [Parameter(ParameterSetName='WebApplication', Mandatory=$true, Position=0, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -20877,11 +20877,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Split-SPScaleOutDatabase { 
+function Split-SPScaleOutDatabase {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(ParameterSetName='NewDatabase', Mandatory=$true)]
@@ -20927,11 +20927,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Split-SPServerScaleOutDatabase { 
+function Split-SPServerScaleOutDatabase {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(ParameterSetName='NewDatabase', Mandatory=$true)]
@@ -20977,22 +20977,22 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Start-SPAdminJob { 
+function Start-SPAdminJob {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Start-SPAssignment { 
+function Start-SPAssignment {
   [CmdletBinding()]
 param(
     [switch]
@@ -21002,22 +21002,22 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Start-SPCacheCluster { 
+function Start-SPCacheCluster {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Start-SPContentDeploymentJob { 
+function Start-SPContentDeploymentJob {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -21040,11 +21040,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Start-SPDiagnosticsSession { 
+function Start-SPDiagnosticsSession {
   [CmdletBinding()]
 param(
     [guid]
@@ -21061,11 +21061,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Start-SPEnterpriseSearchQueryAndSiteSettingsServiceInstance { 
+function Start-SPEnterpriseSearchQueryAndSiteSettingsServiceInstance {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -21076,11 +21076,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Start-SPEnterpriseSearchServiceInstance { 
+function Start-SPEnterpriseSearchServiceInstance {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -21091,11 +21091,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Start-SPInfoPathFormTemplate { 
+function Start-SPInfoPathFormTemplate {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -21106,11 +21106,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Start-SPService { 
+function Start-SPService {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -21125,11 +21125,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Start-SPServiceInstance { 
+function Start-SPServiceInstance {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -21141,11 +21141,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Start-SPTimerJob { 
+function Start-SPTimerJob {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -21156,11 +21156,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Stop-SPAssignment { 
+function Stop-SPAssignment {
   [CmdletBinding()]
 param(
     [switch]
@@ -21174,44 +21174,44 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Stop-SPCacheCluster { 
+function Stop-SPCacheCluster {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Stop-SPContentTypeReplication { 
+function Stop-SPContentTypeReplication {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Stop-SPDiagnosticsSession { 
+function Stop-SPDiagnosticsSession {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Stop-SPDistributedCacheServiceInstance { 
+function Stop-SPDistributedCacheServiceInstance {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
@@ -21234,11 +21234,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Stop-SPEnterpriseSearchQueryAndSiteSettingsServiceInstance { 
+function Stop-SPEnterpriseSearchQueryAndSiteSettingsServiceInstance {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -21249,11 +21249,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Stop-SPEnterpriseSearchServiceInstance { 
+function Stop-SPEnterpriseSearchServiceInstance {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -21264,11 +21264,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Stop-SPInfoPathFormTemplate { 
+function Stop-SPInfoPathFormTemplate {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -21283,11 +21283,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Stop-SPService { 
+function Stop-SPService {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -21302,11 +21302,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Stop-SPServiceInstance { 
+function Stop-SPServiceInstance {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -21318,11 +21318,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Stop-SPTaxonomyReplication { 
+function Stop-SPTaxonomyReplication {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -21333,11 +21333,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Suspend-SPEnterpriseSearchServiceApplication { 
+function Suspend-SPEnterpriseSearchServiceApplication {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -21348,11 +21348,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Suspend-SPStateServiceDatabase { 
+function Suspend-SPStateServiceDatabase {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -21364,11 +21364,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Switch-SPBlobStorage { 
+function Switch-SPBlobStorage {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(ParameterSetName='SQL', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -21388,11 +21388,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Switch-SPCertificate { 
+function Switch-SPCertificate {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -21409,11 +21409,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Sync-SPProjectPermissions { 
+function Sync-SPProjectPermissions {
   [CmdletBinding()]
 param(
     [Parameter(ParameterSetName='SPMode', Mandatory=$true, Position=0)]
@@ -21444,11 +21444,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Test-SPContentDatabase { 
+function Test-SPContentDatabase {
   [CmdletBinding(DefaultParameterSetName='ContentDatabaseById')]
 param(
     [Parameter(ParameterSetName='ContentDatabaseByName', Mandatory=$true)]
@@ -21486,11 +21486,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Test-SPInfoPathFormTemplate { 
+function Test-SPInfoPathFormTemplate {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -21501,11 +21501,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Test-SPO365LinkSettings { 
+function Test-SPO365LinkSettings {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)]
@@ -21516,11 +21516,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Test-SPProjectServiceApplication { 
+function Test-SPProjectServiceApplication {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -21535,11 +21535,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Test-SPProjectWebInstance { 
+function Test-SPProjectWebInstance {
   [CmdletBinding()]
 param(
     [Parameter(ParameterSetName='FindProjectSiteByWebInstance', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -21554,11 +21554,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Test-SPSite { 
+function Test-SPSite {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -21575,11 +21575,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Uninstall-SPAppInstance { 
+function Uninstall-SPAppInstance {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -21591,11 +21591,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Uninstall-SPDataConnectionFile { 
+function Uninstall-SPDataConnectionFile {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -21606,11 +21606,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Uninstall-SPFeature { 
+function Uninstall-SPFeature {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -21627,11 +21627,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Uninstall-SPHelpCollection { 
+function Uninstall-SPHelpCollection {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true)]
@@ -21643,11 +21643,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Uninstall-SPInfoPathFormTemplate { 
+function Uninstall-SPInfoPathFormTemplate {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -21658,11 +21658,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Uninstall-SPSolution { 
+function Uninstall-SPSolution {
   [CmdletBinding(DefaultParameterSetName='Default', SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -21693,11 +21693,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Uninstall-SPUserSolution { 
+function Uninstall-SPUserSolution {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -21712,11 +21712,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Uninstall-SPWebPartPack { 
+function Uninstall-SPWebPartPack {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -21738,11 +21738,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Unpublish-SPServiceApplication { 
+function Unpublish-SPServiceApplication {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -21754,11 +21754,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Unregister-SPRemoteShareBlobStore { 
+function Unregister-SPRemoteShareBlobStore {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -21773,11 +21773,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Update-SPAppCatalogConfiguration { 
+function Update-SPAppCatalogConfiguration {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -21795,11 +21795,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Update-SPAppInstance { 
+function Update-SPAppInstance {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -21816,11 +21816,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Update-SPAzureBlobConfigLocatorEx1 { 
+function Update-SPAzureBlobConfigLocatorEx1 {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
@@ -21832,11 +21832,11 @@ param(
     [byte[]]
     ${Locator})
 
- 
- } 
+
+ }
 
 
-function Update-SPDataRetrievalServiceConfig { 
+function Update-SPDataRetrievalServiceConfig {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(ParameterSetName='WebApplication', Mandatory=$true, Position=0, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -21873,11 +21873,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Update-SPDistributedCacheSize { 
+function Update-SPDistributedCacheSize {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
@@ -21888,11 +21888,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Update-SPFarmEncryptionKey { 
+function Update-SPFarmEncryptionKey {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [switch]
@@ -21902,11 +21902,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Update-SPFlightsConfigFile { 
+function Update-SPFlightsConfigFile {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, HelpMessage='Enter Flights config file path.')]
@@ -21917,11 +21917,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Update-SPHelp { 
+function Update-SPHelp {
   [CmdletBinding()]
 param(
     [switch]
@@ -21931,11 +21931,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Update-SPInfoPathAdminFileUrl { 
+function Update-SPInfoPathAdminFileUrl {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true)]
@@ -21953,22 +21953,22 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Update-SPInfoPathFormTemplate { 
+function Update-SPInfoPathFormTemplate {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Update-SPInfoPathUserFileUrl { 
+function Update-SPInfoPathUserFileUrl {
   [CmdletBinding(DefaultParameterSetName='WebApp', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(ParameterSetName='WebApp', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -21998,11 +21998,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Update-SPProfilePhotoStore { 
+function Update-SPProfilePhotoStore {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -22026,11 +22026,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Update-SPProfileSync { 
+function Update-SPProfileSync {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Position=0, ValueFromPipeline=$true)]
@@ -22057,11 +22057,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Update-SPRepopulateMicroblogFeedCache { 
+function Update-SPRepopulateMicroblogFeedCache {
   [CmdletBinding(DefaultParameterSetName='Default')]
 param(
     [Parameter(ParameterSetName='Default', Mandatory=$true, ValueFromPipeline=$true)]
@@ -22110,11 +22110,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Update-SPRepopulateMicroblogLMTCache { 
+function Update-SPRepopulateMicroblogLMTCache {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -22126,11 +22126,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Update-SPSecureStoreApplicationServerKey { 
+function Update-SPSecureStoreApplicationServerKey {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true)]
@@ -22147,11 +22147,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Update-SPSecureStoreCredentialMapping { 
+function Update-SPSecureStoreCredentialMapping {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -22173,11 +22173,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Update-SPSecureStoreGroupCredentialMapping { 
+function Update-SPSecureStoreGroupCredentialMapping {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -22194,11 +22194,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Update-SPSecureStoreMasterKey { 
+function Update-SPSecureStoreMasterKey {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true)]
@@ -22215,11 +22215,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Update-SPSolution { 
+function Update-SPSolution {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -22252,11 +22252,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Update-SPUserSolution { 
+function Update-SPUserSolution {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -22275,11 +22275,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Update-SPWOPIProofKey { 
+function Update-SPWOPIProofKey {
   [CmdletBinding()]
 param(
     [ValidateNotNullOrEmpty()]
@@ -22290,11 +22290,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Upgrade-SPAppManagementServiceApplication { 
+function Upgrade-SPAppManagementServiceApplication {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(ParameterSetName='AppManagementSvcAppById', Position=0, ValueFromPipeline=$true)]
@@ -22312,11 +22312,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Upgrade-SPContentDatabase { 
+function Upgrade-SPContentDatabase {
   [CmdletBinding(DefaultParameterSetName='ContentDatabaseById', SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(ParameterSetName='ContentDatabaseByName', Mandatory=$true)]
@@ -22358,11 +22358,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Upgrade-SPEnterpriseSearchServiceApplication { 
+function Upgrade-SPEnterpriseSearchServiceApplication {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -22373,11 +22373,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Upgrade-SPEnterpriseSearchServiceApplicationSiteSettings { 
+function Upgrade-SPEnterpriseSearchServiceApplicationSiteSettings {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -22388,11 +22388,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Upgrade-SPFarm { 
+function Upgrade-SPFarm {
   [CmdletBinding(DefaultParameterSetName='FarmById', SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [switch]
@@ -22409,11 +22409,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Upgrade-SPProfileServiceApplication { 
+function Upgrade-SPProfileServiceApplication {
   [CmdletBinding(DefaultParameterSetName='Default', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -22425,11 +22425,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Upgrade-SPSingleSignOnDatabase { 
+function Upgrade-SPSingleSignOnDatabase {
   [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true)]
@@ -22451,11 +22451,11 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Upgrade-SPSite { 
+function Upgrade-SPSite {
   [CmdletBinding(DefaultParameterSetName='SPSiteById', SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(ParameterSetName='SPSiteById', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -22481,19 +22481,19 @@ param(
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
-function Use-SPCacheCluster { 
+function Use-SPCacheCluster {
   [CmdletBinding()]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
- 
- } 
+
+ }
 
 
 
