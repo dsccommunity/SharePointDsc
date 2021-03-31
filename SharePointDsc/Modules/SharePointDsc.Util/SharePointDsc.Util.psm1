@@ -615,13 +615,24 @@ function Invoke-SPDscCommand
 
     $VerbosePreference = 'Continue'
 
-    $baseScript = @"
-        if (`$null -eq (Get-PSSnapin -Name Microsoft.SharePoint.PowerShell -ErrorAction SilentlyContinue))
-        {
-            Add-PSSnapin Microsoft.SharePoint.PowerShell
-        }
+    $installedVersion = Get-SPDscInstalledProductVersion
+    if ($installedVersion.ProductMajorPart -eq 15 -or $installedVersion.ProductBuildPart -le 12999)
+    {
+        $baseScript = @"
+            if (`$null -eq (Get-PSSnapin -Name Microsoft.SharePoint.PowerShell -ErrorAction SilentlyContinue))
+            {
+                Add-PSSnapin Microsoft.SharePoint.PowerShell
+            }
 
 "@
+    }
+    else
+    {
+        $baseScript = @"
+            Import-Module SharePointServer
+
+"@
+    }
 
     $invokeArgs = @{
         ScriptBlock = [ScriptBlock]::Create($baseScript + $ScriptBlock.ToString())

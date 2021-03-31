@@ -141,20 +141,30 @@ function Get-TargetResource
                 Write-Verbose -Message $message
             }
 
-            if ($installedVersion.ProductBuildPart.ToString().Length -eq 4)
+            $buildVersion = $installedVersion.ProductBuildPart
+            # SharePoint 2016
+            if ($buildVersion -lt 10000)
             {
                 Write-Verbose -Message "Detected installation of SharePoint 2016"
             }
-            else
+            # SharePoint 2019
+            elseif ($buildVersion -ge 10000 -and
+                $buildVersion -le 12999)
             {
                 Write-Verbose -Message "Detected installation of SharePoint 2019"
+                $supportsSettingApplicationCredentialKey = $true
+            }
+            # SharePoint [vNext]
+            elseif ($buildVersion -ge 13000)
+            {
+                Write-Verbose -Message "Detected installation of SharePoint [vNext]"
                 $supportsSettingApplicationCredentialKey = $true
             }
         }
         default
         {
             $message = ("Detected an unsupported major version of SharePoint. SharePointDsc only " +
-                "supports SharePoint 2013, 2016 or 2019.")
+                "supports SharePoint 2013, 2016, 2019 and [vNext].")
             Add-SPDscEvent -Message $message `
                 -EntryType 'Error' `
                 -EventID 100 `
@@ -167,7 +177,7 @@ function Get-TargetResource
         -not $supportsSettingApplicationCredentialKey)
     {
         $message = ("Specifying ApplicationCredentialKey is only supported " +
-            "on SharePoint 2019")
+            "on SharePoint 2019 and [vNext]")
         Add-SPDscEvent -Message $message `
             -EntryType 'Error' `
             -EventID 100 `
@@ -178,7 +188,7 @@ function Get-TargetResource
     if (($PSBoundParameters.ContainsKey("ServerRole") -eq $true) -and
         $installedVersion.FileMajorPart -ne 16)
     {
-        $message = "Server role is only supported in SharePoint 2016 and 2019."
+        $message = "Server role is only supported in SharePoint 2016, 2019 and [vNext]."
         Add-SPDscEvent -Message $message `
             -EntryType 'Error' `
             -EventID 100 `
@@ -866,14 +876,25 @@ function Set-TargetResource
                 {
                     if ($params.ContainsKey("ServerRole") -eq $true)
                     {
-                        if ($installedVersion.ProductBuildPart.ToString().Length -eq 4)
+                        $buildVersion = $installedVersion.ProductBuildPart
+                        # SharePoint 2016
+                        if ($buildVersion -lt 10000)
                         {
                             Write-Verbose -Message ("Detected Version: SharePoint 2016 - " +
                                 "configuring server as $($params.ServerRole)")
                         }
-                        else
+                        # SharePoint 2019
+                        elseif ($buildVersion -ge 10000 -and
+                            $buildVersion -le 12999)
                         {
                             Write-Verbose -Message ("Detected Version: SharePoint 2019 - " +
+                                "configuring server as $($params.ServerRole)")
+                            $supportsSettingApplicationCredentialKey = $true
+                        }
+                        # SharePoint [vNext]
+                        elseif ($buildVersion -ge 13000)
+                        {
+                            Write-Verbose -Message ("Detected Version: SharePoint [vNext] - " +
                                 "configuring server as $($params.ServerRole)")
                             $supportsSettingApplicationCredentialKey = $true
                         }
@@ -881,17 +902,28 @@ function Set-TargetResource
                     }
                     else
                     {
-                        if ($installedVersion.ProductBuildPart.ToString().Length -eq 4)
+                        $buildVersion = $installedVersion.ProductBuildPart
+                        # SharePoint 2016
+                        if ($buildVersion -lt 10000)
                         {
                             Write-Verbose -Message ("Detected Version: SharePoint 2016 - no server " +
                                 "role provided, configuring server without a " +
                                 "specific role")
                         }
-                        else
+                        # SharePoint 2019
+                        elseif ($buildVersion -ge 10000 -and
+                            $buildVersion -le 12999)
                         {
                             Write-Verbose -Message ("Detected Version: SharePoint 2019 - no server " +
                                 "role provided, configuring server without a " +
                                 "specific role")
+                            $supportsSettingApplicationCredentialKey = $true
+                        }
+                        # SharePoint [vNext]
+                        elseif ($buildVersion -ge 13000)
+                        {
+                            Write-Verbose -Message ("Detected Version: SharePoint [vNext] - " +
+                                "configuring server as $($params.ServerRole)")
                             $supportsSettingApplicationCredentialKey = $true
                         }
                         $executeArgs.Add("ServerRoleOptional", $true)
@@ -901,7 +933,7 @@ function Set-TargetResource
                 {
                     $message = ("An unknown version of SharePoint (Major version $_) " +
                         "was detected. Only versions 15 (SharePoint 2013) and" +
-                        "16 (SharePoint 2016 or SharePoint 2019) are supported.")
+                        "16 (SharePoint 2016, 2019 or [vNext]) are supported.")
                     Add-SPDscEvent -Message $message `
                         -EntryType 'Error' `
                         -EventID 100 `
@@ -914,7 +946,7 @@ function Set-TargetResource
                 -not $supportsSettingApplicationCredentialKey)
             {
                 $message = ("Specifying ApplicationCredentialKey is only supported " +
-                    "on SharePoint 2019")
+                    "on SharePoint 2019 or [vNext]")
                 Add-SPDscEvent -Message $message `
                     -EntryType 'Error' `
                     -EventID 100 `
