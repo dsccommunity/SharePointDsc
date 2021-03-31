@@ -93,6 +93,18 @@ $Script:SP2019Win19Features = @("Web-Server", "Web-WebServer",
     "Windows-Identity-Foundation", "WAS", "WAS-Process-Model",
     "WAS-NET-Environment", "WAS-Config-APIs", "XPS-Viewer")
 
+$Script:SPvNextFeatures = @("NET-WCF-Pipe-Activation45",
+    "NET-WCF-HTTP-Activation45", "NET-WCF-TCP-Activation45",
+    "Web-Server", "Web-WebServer", "Web-Common-Http",
+    "Web-Static-Content", "Web-Default-Doc", "Web-Dir-Browsing",
+    "Web-Http-Errors", "Web-App-Dev", "Web-Asp-Net45", "Web-Net-Ext45",
+    "Web-ISAPI-Ext", "Web-ISAPI-Filter", "Web-Health", "Web-Http-Logging",
+    "Web-Log-Libraries", "Web-Request-Monitor", "Web-Http-Tracing",
+    "Web-Security", "Web-Basic-Auth", "Web-Windows-Auth", "Web-Filtering",
+    "Web-Performance", "Web-Stat-Compression", "Web-Dyn-Compression",
+    "WAS", "WAS-Process-Model", "WAS-Config-APIs", "Web-Mgmt-Console",
+    "Web-Mgmt-Tools")
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -369,14 +381,19 @@ function Get-TargetResource
         {
             if ($osVersion.Major -eq 10)
             {
-                if ($osVersion.Build -ge 17763)
+                if ($osVersion.Build -eq 17763)
                 {
                     Write-Verbose -Message "OS Version: Windows Server 2019"
-                    $WindowsFeatures = Get-WindowsFeature -Name $Script:SP2019Win19Features
+                    $WindowsFeatures = Get-WindowsFeature -Name $Script:SPvNextFeatures
+                }
+                elseif ($osVersion.Build -ge 20000)
+                {
+                    Write-Verbose -Message "OS Version: Windows Server 2022"
+                    $WindowsFeatures = Get-WindowsFeature -Name $Script:SPvNextFeatures
                 }
                 else
                 {
-                    $message = "SharePoint [vNext] only supports Windows Server 2019"
+                    $message = "SharePoint [vNext] only supports Windows Server 2019 or Windows Server 2022"
                     Add-SPDscEvent -Message $message `
                         -EntryType 'Error' `
                         -EventID 100 `
@@ -386,7 +403,7 @@ function Get-TargetResource
             }
             else
             {
-                $message = "SharePoint [vNext] only supports Windows Server 2019"
+                $message = "SharePoint [vNext] only supports Windows Server 2019 or Windows Server 2022"
                 Add-SPDscEvent -Message $message `
                     -EntryType 'Error' `
                     -EventID 100 `
@@ -419,16 +436,6 @@ function Get-TargetResource
     # Common prereqs
     $prereqsToTest = @(
         [PSObject]@{
-            Name        = "Microsoft Identity Extensions"
-            SearchType  = "Equals"
-            SearchValue = "Microsoft Identity Extensions"
-        },
-        [PSObject]@{
-            Name        = "Microsoft Sync Framework Runtime v1.0 SP1 (x64)"
-            SearchType  = "Equals"
-            SearchValue = "Microsoft Sync Framework Runtime v1.0 SP1 (x64)"
-        },
-        [PSObject]@{
             Name        = "WCF Data Services 5.6.0 Runtime"
             SearchType  = "Equals"
             SearchValue = "WCF Data Services 5.6.0 Runtime"
@@ -455,9 +462,19 @@ function Get-TargetResource
                 SearchValue = "Microsoft CCR and DSS Runtime 2008 R3"
             },
             [PSObject]@{
+                Name        = "Microsoft Identity Extensions"
+                SearchType  = "Equals"
+                SearchValue = "Microsoft Identity Extensions"
+            },
+            [PSObject]@{
                 Name        = "Microsoft SQL Server Native Client (2008 R2 or 2012)"
                 SearchType  = "Match"
                 SearchValue = "SQL Server (2008 R2|2012) Native Client"
+            },
+            [PSObject]@{
+                Name        = "Microsoft Sync Framework Runtime v1.0 SP1 (x64)"
+                SearchType  = "Equals"
+                SearchValue = "Microsoft Sync Framework Runtime v1.0 SP1 (x64)"
             },
             [PSObject]@{
                 Name        = "WCF Data Services 5.0 (for OData v3) Primary Components"
@@ -490,9 +507,19 @@ function Get-TargetResource
                     SearchValue = "Microsoft CCR and DSS Runtime 2008 R3"
                 },
                 [PSObject]@{
+                    Name        = "Microsoft Identity Extensions"
+                    SearchType  = "Equals"
+                    SearchValue = "Microsoft Identity Extensions"
+                },
+                [PSObject]@{
                     Name        = "Microsoft SQL Server 2012 Native Client"
                     SearchType  = "Equals"
                     SearchValue = "Microsoft SQL Server 2012 Native Client"
+                },
+                [PSObject]@{
+                    Name        = "Microsoft Sync Framework Runtime v1.0 SP1 (x64)"
+                    SearchType  = "Equals"
+                    SearchValue = "Microsoft Sync Framework Runtime v1.0 SP1 (x64)"
                 },
                 [PSObject]@{
                     Name        = "Microsoft ODBC Driver 11 for SQL Server"
@@ -538,9 +565,19 @@ function Get-TargetResource
                     SearchValue = "Microsoft CCR and DSS Runtime 2008 R3"
                 },
                 [PSObject]@{
+                    Name        = "Microsoft Identity Extensions"
+                    SearchType  = "Equals"
+                    SearchValue = "Microsoft Identity Extensions"
+                },
+                [PSObject]@{
                     Name        = "Microsoft SQL Server 2012 Native Client"
                     SearchType  = "Equals"
                     SearchValue = "Microsoft SQL Server 2012 Native Client"
+                },
+                [PSObject]@{
+                    Name        = "Microsoft Sync Framework Runtime v1.0 SP1 (x64)"
+                    SearchType  = "Equals"
+                    SearchValue = "Microsoft Sync Framework Runtime v1.0 SP1 (x64)"
                 },
                 [PSObject]@{
                     Name                   = "Microsoft Visual C++ 2017 Redistributable (x64)"
@@ -821,9 +858,13 @@ function Set-TargetResource
             {
                 Write-Verbose -Message "Operating System: Windows Server 2016"
             }
-            else
+            elseif ($osVersion.Build -eq 17763)
             {
                 Write-Verbose -Message "Operating System: Windows Server 2019"
+            }
+            else
+            {
+                Write-Verbose -Message "Operating System: Windows Server 2022"
             }
         }
     }
@@ -958,18 +999,23 @@ function Set-TargetResource
         elseif ($buildVersion -ge 13000)
         {
             Write-Verbose -Message "Version: SharePoint [vNext]"
-            $requiredParams = @("Sync", "IDFX11", "WCFDataServices56", "DotNet48", "MSVCRT142")
+            $requiredParams = @("WCFDataServices56", "DotNet48", "MSVCRT142")
 
             if ($osVersion.Major -eq 10)
             {
-                if ($osVersion.Build -ge 17763)
+                if ($osVersion.Build -eq 17763)
                 {
                     # Server 2019
-                    $WindowsFeatures = Get-WindowsFeature -Name $Script:SP2019Win19Features
+                    $WindowsFeatures = Get-WindowsFeature -Name $Script:SPvNextFeatures
+                }
+                if ($osVersion.Build -ge 20000)
+                {
+                    # Server 2022
+                    $WindowsFeatures = Get-WindowsFeature -Name $Script:SPvNextFeatures
                 }
                 else
                 {
-                    $message = "SharePoint [vNext] only supports Windows Server 2019"
+                    $message = "SharePoint [vNext] only supports Windows Server 2019 or Windows Server 2022"
                     Add-SPDscEvent -Message $message `
                         -EntryType 'Error' `
                         -EventID 100 `
@@ -979,7 +1025,7 @@ function Set-TargetResource
             }
             else
             {
-                $message = "SharePoint [vNext] only supports Windows Server 2019"
+                $message = "SharePoint [vNext] only supports Windows Server 2019 or Windows Server 2022"
                 Add-SPDscEvent -Message $message `
                     -EntryType 'Error' `
                     -EventID 100 `
