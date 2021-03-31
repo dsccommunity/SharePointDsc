@@ -145,6 +145,7 @@ try
                             Mock -CommandName Get-SPServiceApplication -MockWith {
                                 $spServiceApp = [PSCustomObject]@{
                                     DisplayName = $testParams.Name
+                                    Name        = $testParams.Name
                                 }
                                 $spServiceApp | Add-Member -MemberType ScriptMethod `
                                     -Name GetType `
@@ -174,6 +175,7 @@ try
                                 $spServiceApp = [PSCustomObject]@{
                                     TypeName        = "Project Application Services"
                                     DisplayName     = $testParams.Name
+                                    Name            = $testParams.Name
                                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
                                 }
                                 $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
@@ -204,6 +206,7 @@ try
                                 $spServiceApp = [PSCustomObject]@{
                                     TypeName        = "Project Application Services"
                                     DisplayName     = $testParams.Name
+                                    Name            = $testParams.Name
                                     ApplicationPool = @{ Name = "Wrong App Pool Name" }
                                 }
                                 $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
@@ -241,6 +244,7 @@ try
                                 $spServiceApp = [PSCustomObject]@{
                                     TypeName        = "Project Application Services"
                                     DisplayName     = $testParams.Name
+                                    Name            = $testParams.Name
                                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
                                 }
                                 $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
