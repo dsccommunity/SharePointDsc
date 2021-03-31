@@ -213,6 +213,7 @@ try
                     Mock -CommandName Get-SPServiceApplication -MockWith {
                         $spServiceApp = [pscustomobject]@{
                             DisplayName = $testParams.Name
+                            Name        = $testParams.Name
                         }
                         $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
                             return @{ FullName = "Microsoft.Office.UnKnownWebServiceApplication" }
@@ -256,6 +257,7 @@ try
                     Mock -CommandName Get-SPServiceApplication -MockWith {
                         $spServiceApp = [pscustomobject]@{
                             DisplayName                   = $testParams.Name
+                            Name                          = $testParams.Name
                             ApplicationPool               = @{ Name = $testParams.ApplicationPool }
                             Database                      = @{
                                 Name                 = $testParams.DatabaseName
@@ -323,6 +325,7 @@ try
                     Mock -CommandName Get-SPServiceApplication -MockWith {
                         $spServiceApp = [pscustomobject]@{
                             DisplayName                   = $testParams.Name
+                            Name                          = $testParams.Name
                             ApplicationPool               = @{ Name = "Wrong App Pool Name" }
                             Database                      = @{
                                 Name                 = $testParams.DatabaseName
@@ -405,6 +408,7 @@ try
                     Mock -CommandName Get-SPServiceApplication -MockWith {
                         $spServiceApp = [pscustomobject]@{
                             DisplayName                   = $testParams.Name
+                            Name                          = $testParams.Name
                             Database                      = @{
                                 Name                 = $testParams.DatabaseName
                                 NormalizedDataSource = $testParams.DatabaseServer
@@ -487,6 +491,7 @@ try
                     Mock -CommandName Get-SPServiceApplication -MockWith {
                         $spServiceApp = [pscustomobject]@{
                             DisplayName                   = $testParams.Name
+                            Name                          = $testParams.Name
                             ApplicationPool               = @{ Name = $testParams.ApplicationPool }
                             Database                      = @{
                                 Name                 = $testParams.DatabaseName

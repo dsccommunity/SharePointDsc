@@ -149,6 +149,7 @@ try
                         $spServiceApp = [PSCustomObject]@{
                             TypeName        = "Access Services Web Service Application"
                             DisplayName     = $testParams.Name
+                            Name            = $testParams.Name
                             DatabaseServer  = $testParams.DatabaseServer
                             ApplicationPool = @{ Name = $testParams.ApplicationPool }
                         }
@@ -191,6 +192,7 @@ try
                         $spServiceApp = [PSCustomObject]@{
                             TypeName        = "Access Services Web Service Application"
                             DisplayName     = $testParams.Name
+                            Name            = $testParams.Name
                             DatabaseServer  = $testParams.DatabaseServer
                             ApplicationPool = @{ Name = $testParams.ApplicationPool }
                         }

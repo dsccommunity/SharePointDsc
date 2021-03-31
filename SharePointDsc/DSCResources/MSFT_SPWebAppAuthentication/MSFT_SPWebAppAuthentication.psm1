@@ -390,7 +390,7 @@ function Set-TargetResource
     if ($Internet)
     {
         # Check if specified zone exists
-        if ($null -eq $CurrentValues.Intranet)
+        if ($null -eq $CurrentValues.Internet)
         {
             $message = "Specified zone Internet does not exist"
             Add-SPDscEvent -Message $message `

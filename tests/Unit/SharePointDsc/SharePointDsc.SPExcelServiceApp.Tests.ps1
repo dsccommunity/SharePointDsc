@@ -164,6 +164,7 @@ try
                                 $spServiceApp = [PSCustomObject]@{
                                     TypeName        = "Excel Services Application Web Service Application"
                                     DisplayName     = $testParams.Name
+                                    Name            = $testParams.Name
                                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
                                 }
                                 $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
@@ -194,6 +195,7 @@ try
                                 $spServiceApp = [PSCustomObject]@{
                                     TypeName        = "Excel Services Application Web Service Application"
                                     DisplayName     = $testParams.Name
+                                    Name            = $testParams.Name
                                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
                                 }
                                 $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
@@ -255,6 +257,7 @@ try
                                 $spServiceApp = [PSCustomObject]@{
                                     TypeName        = "Excel Services Application Web Service Application"
                                     DisplayName     = $testParams.Name
+                                    Name            = $testParams.Name
                                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
                                 }
                                 $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
@@ -300,6 +303,7 @@ try
                                 $spServiceApp = [PSCustomObject]@{
                                     TypeName        = "Excel Services Application Web Service Application"
                                     DisplayName     = $testParams.Name
+                                    Name            = $testParams.Name
                                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
                                 }
                                 $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
@@ -349,6 +353,7 @@ try
                                 $spServiceApp = [PSCustomObject]@{
                                     TypeName        = "Excel Services Application Web Service Application"
                                     DisplayName     = $testParams.Name
+                                    Name            = $testParams.Name
                                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
                                 }
                                 $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
@@ -393,6 +398,7 @@ try
                                 $spServiceApp = [PSCustomObject]@{
                                     TypeName        = "Excel Services Application Web Service Application"
                                     DisplayName     = $testParams.Name
+                                    Name            = $testParams.Name
                                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
                                 }
                                 $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {

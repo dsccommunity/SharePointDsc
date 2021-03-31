@@ -99,6 +99,7 @@ try
                         Mock -CommandName Get-SPServiceApplication {
                             $spServiceApp = [pscustomobject]@{
                                 DisplayName     = $testParams.Name
+                                Name            = $testParams.Name
                                 ApplicationPool = @{ Name = "Wrong App Pool Name" }
                             }
                             $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
@@ -168,6 +169,7 @@ try
                         Mock -CommandName Get-SPServiceApplication {
                             $spServiceApp = [pscustomobject]@{
                                 DisplayName = $testParams.Name
+                                Name        = $testParams.Name
                             }
                             $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
                                 return @{ FullName = "Microsoft.Office.UnKnownWebServiceApplication" }
@@ -206,6 +208,7 @@ try
                         Mock -CommandName Get-SPServiceApplication {
                             $spServiceApp = [pscustomobject]@{
                                 DisplayName     = $testParams.Name
+                                Name            = $testParams.Name
                                 ApplicationPool = @{ Name = $testParams.ApplicationPool }
                                 AdminSettings   = @{
                                     MinimumTimeBetweenEwsSyncSubscriptionSearches = (New-TimeSpan -Minutes 10)
@@ -248,6 +251,7 @@ try
                         Mock -CommandName Get-SPServiceApplication {
                             $spServiceApp = [pscustomobject]@{
                                 DisplayName     = $testParams.Name
+                                Name            = $testParams.Name
                                 ApplicationPool = @{ Name = "Wrong App Pool Name" }
                                 AdminSettings   = @{
                                     MinimumTimeBetweenEwsSyncSubscriptionSearches = (New-TimeSpan -Minutes 10)

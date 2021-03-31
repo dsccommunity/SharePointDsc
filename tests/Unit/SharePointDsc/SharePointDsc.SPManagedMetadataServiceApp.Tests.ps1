@@ -265,6 +265,7 @@ try
                     Mock -CommandName Get-SPServiceApplication -MockWith {
                         $spServiceApp = [PSCustomObject]@{
                             DisplayName = $testParams.Name
+                            Name        = $testParams.Name
                         }
                         $spServiceApp | Add-Member -MemberType ScriptMethod `
                             -Name GetType `
@@ -308,6 +309,7 @@ try
                             $spServiceApp = [PSCustomObject]@{
                                 TypeName        = "Managed Metadata Service"
                                 DisplayName     = $testParams.Name
+                                Name            = $testParams.Name
                                 ApplicationPool = @{
                                     Name = $testParams.ApplicationPool
                                 }
@@ -345,6 +347,7 @@ try
                             $spServiceApp = [PSCustomObject]@{
                                 TypeName        = "Managed Metadata Service"
                                 DisplayName     = $testParams.Name
+                                Name            = $testParams.Name
                                 ApplicationPool = @{
                                     Name = $testParams.ApplicationPool
                                 }
@@ -432,6 +435,7 @@ try
                                             $spServiceApp = [PSCustomObject]@{
                                                 TypeName        = "Managed Metadata Service"
                                                 DisplayName     = $testParams.Name
+                                                Name            = $testParams.Name
                                                 ApplicationPool = @{
                                                     Name = "Wrong App Pool Name"
                                                 }
@@ -469,6 +473,7 @@ try
                                             $spServiceApp = [PSCustomObject]@{
                                                 TypeName        = "Managed Metadata Service"
                                                 DisplayName     = $testParams.Name
+                                                Name            = $testParams.Name
                                                 ApplicationPool = @{
                                                     Name = "Wrong App Pool Name"
                                                 }
@@ -570,6 +575,7 @@ try
                                                             $spServiceApp = [PSCustomObject]@{
                                                                 TypeName        = "Managed Metadata Service"
                                                                 DisplayName     = $testParams.Name
+                                                                Name            = $testParams.Name
                                                                 ApplicationPool = @{
                                                                     Name = $testParams.ApplicationPool
                                                                 }
@@ -607,6 +613,7 @@ try
                                                             $spServiceApp = [PSCustomObject]@{
                                                                 TypeName        = "Managed Metadata Service"
                                                                 DisplayName     = $testParams.Name
+                                                                Name            = $testParams.Name
                                                                 ApplicationPool = @{
                                                                     Name = "Wrong App Pool Name"
                                                                 }
@@ -702,6 +709,7 @@ try
                                                                             $spServiceApp = [PSCustomObject]@{
                                                                                 TypeName        = "Managed Metadata Service"
                                                                                 DisplayName     = $testParams.Name
+                                                                                Name            = $testParams.Name
                                                                                 ApplicationPool = @{
                                                                                     Name = "Wrong App Pool Name"
                                                                                 }
@@ -739,6 +747,7 @@ try
                                                                             $spServiceApp = [PSCustomObject]@{
                                                                                 TypeName        = "Managed Metadata Service"
                                                                                 DisplayName     = $testParams.Name
+                                                                                Name            = $testParams.Name
                                                                                 ApplicationPool = @{
                                                                                     Name = "Wrong App Pool Name"
                                                                                 }
@@ -869,6 +878,7 @@ try
                         $spServiceApp = [PSCustomObject]@{
                             TypeName        = "Managed Metadata Service"
                             DisplayName     = $testParams.Name
+                            Name            = $testParams.Name
                             ApplicationPool = @{
                                 Name = $testParams.ApplicationPool
                             }
@@ -927,6 +937,7 @@ try
                         $spServiceApp = [PSCustomObject]@{
                             TypeName        = "Managed Metadata Service"
                             DisplayName     = $testParams.Name
+                            Name            = $testParams.Name
                             ApplicationPool = @{
                                 Name = $testParams.ApplicationPool
                             }
@@ -992,6 +1003,7 @@ try
                         $spServiceApp = [PSCustomObject]@{
                             TypeName        = "Managed Metadata Service"
                             DisplayName     = $testParams.Name
+                            Name            = $testParams.Name
                             ApplicationPool = @{
                                 Name = $testParams.ApplicationPool
                             }
@@ -1104,6 +1116,7 @@ try
                         $spServiceApp = [PSCustomObject]@{
                             TypeName        = "Managed Metadata Service"
                             DisplayName     = $testParams.Name
+                            Name            = $testParams.Name
                             ApplicationPool = @{
                                 Name = $testParams.ApplicationPool
                             }
@@ -1172,6 +1185,7 @@ try
                         $spServiceApp = [PSCustomObject]@{
                             TypeName        = "Managed Metadata Service"
                             DisplayName     = $testParams.Name
+                            Name            = $testParams.Name
                             ApplicationPool = @{
                                 Name = $testParams.ApplicationPool
                             }
@@ -1278,6 +1292,7 @@ try
                         $spServiceApp = [PSCustomObject]@{
                             TypeName        = "Managed Metadata Service"
                             DisplayName     = $testParams.Name
+                            Name            = $testParams.Name
                             ApplicationPool = @{
                                 Name = $testParams.ApplicationPool
                             }
@@ -1337,6 +1352,7 @@ try
                             $spServiceApp = [PSCustomObject]@{
                                 TypeName        = "Managed Metadata Service"
                                 DisplayName     = $testParams.Name
+                                Name            = $testParams.Name
                                 ApplicationPool = @{
                                     Name = $testParams.ApplicationPool
                                 }
@@ -1374,6 +1390,7 @@ try
                             $spServiceApp = [PSCustomObject]@{
                                 TypeName        = "Managed Metadata Service"
                                 DisplayName     = $testParams.Name
+                                Name            = $testParams.Name
                                 ApplicationPool = @{
                                     Name = $testParams.ApplicationPool
                                 }
@@ -1631,6 +1648,7 @@ try
                             $spServiceApp = [PSCustomObject]@{
                                 TypeName        = "Managed Metadata Service"
                                 DisplayName     = $testParams.Name
+                                Name            = $testParams.Name
                                 ApplicationPool = @{
                                     Name = $testParams.ApplicationPool
                                 }
@@ -1668,6 +1686,7 @@ try
                             $spServiceApp = [PSCustomObject]@{
                                 TypeName        = "Managed Metadata Service"
                                 DisplayName     = $testParams.Name
+                                Name            = $testParams.Name
                                 ApplicationPool = @{
                                     Name = $testParams.ApplicationPool
                                 }

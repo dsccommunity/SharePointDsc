@@ -86,75 +86,79 @@ try
                                     -Value "User Profile Service Service App" `
                                     -PassThru |
                                     Add-Member -MemberType NoteProperty `
-                                        -Name ApplicationPool `
-                                        -Value @{
-                                        Name = "Service Pool"
-                                    } -PassThru |
-                                        Add-Member -MemberType ScriptMethod `
-                                            -Name GetType `
-                                            -Value {
-                                            New-Object -TypeName "Object" |
-                                                Add-Member -MemberType NoteProperty `
-                                                    -Name FullName `
-                                                    -Value $getTypeFullName `
-                                                    -PassThru |
-                                                    Add-Member -MemberType ScriptMethod `
-                                                        -Name GetProperties `
-                                                        -Value {
-                                                        param($x)
-                                                        return @(
-                                                            (New-Object -TypeName "Object" |
-                                                                    Add-Member -MemberType NoteProperty `
-                                                                        -Name Name `
-                                                                        -Value "SocialDatabase" `
-                                                                        -PassThru |
-                                                                        Add-Member -MemberType ScriptMethod `
-                                                                            -Name GetValue `
-                                                                            -Value {
-                                                                            param($x)
-                                                                            return @{
-                                                                                Name   = "SP_SocialDB"
-                                                                                Server = @{
-                                                                                    Name = "SQL.domain.local"
-                                                                                }
-                                                                            }
-                                                                        } -PassThru
-                                                                    ),
-                                                                    (New-Object -TypeName "Object" |
-                                                                            Add-Member -MemberType NoteProperty `
-                                                                                -Name Name `
-                                                                                -Value "ProfileDatabase" `
-                                                                                -PassThru |
-                                                                                Add-Member -MemberType ScriptMethod `
-                                                                                    -Name GetValue `
-                                                                                    -Value {
-                                                                                    return @{
-                                                                                        Name   = "SP_ProfileDB"
-                                                                                        Server = @{
-                                                                                            Name = "SQL.domain.local"
-                                                                                        }
+                                        -Name Name `
+                                        -Value "User Profile Service Service App" `
+                                        -PassThru |
+                                        Add-Member -MemberType NoteProperty `
+                                            -Name ApplicationPool `
+                                            -Value @{
+                                            Name = "Service Pool"
+                                        } -PassThru |
+                                            Add-Member -MemberType ScriptMethod `
+                                                -Name GetType `
+                                                -Value {
+                                                New-Object -TypeName "Object" |
+                                                    Add-Member -MemberType NoteProperty `
+                                                        -Name FullName `
+                                                        -Value $getTypeFullName `
+                                                        -PassThru |
+                                                        Add-Member -MemberType ScriptMethod `
+                                                            -Name GetProperties `
+                                                            -Value {
+                                                            param($x)
+                                                            return @(
+                                                                (New-Object -TypeName "Object" |
+                                                                        Add-Member -MemberType NoteProperty `
+                                                                            -Name Name `
+                                                                            -Value "SocialDatabase" `
+                                                                            -PassThru |
+                                                                            Add-Member -MemberType ScriptMethod `
+                                                                                -Name GetValue `
+                                                                                -Value {
+                                                                                param($x)
+                                                                                return @{
+                                                                                    Name   = "SP_SocialDB"
+                                                                                    Server = @{
+                                                                                        Name = "SQL.domain.local"
                                                                                     }
-                                                                                } -PassThru
-                                                                            ),
-                                                                            (New-Object -TypeName "Object" |
-                                                                                    Add-Member -MemberType NoteProperty `
-                                                                                        -Name Name `
-                                                                                        -Value "SynchronizationDatabase" `
-                                                                                        -PassThru |
-                                                                                        Add-Member -MemberType ScriptMethod `
-                                                                                            -Name GetValue `
-                                                                                            -Value {
-                                                                                            return @{
-                                                                                                Name   = "SP_ProfileSyncDB"
-                                                                                                Server = @{
-                                                                                                    Name = "SQL.domain.local"
-                                                                                                }
-                                                                                            }
-                                                                                        } -PassThru
-                                                                                    )
-                                                                                )
+                                                                                }
                                                                             } -PassThru
-                                                                        } -PassThru -Force
+                                                                        ),
+                                                                        (New-Object -TypeName "Object" |
+                                                                                Add-Member -MemberType NoteProperty `
+                                                                                    -Name Name `
+                                                                                    -Value "ProfileDatabase" `
+                                                                                    -PassThru |
+                                                                                    Add-Member -MemberType ScriptMethod `
+                                                                                        -Name GetValue `
+                                                                                        -Value {
+                                                                                        return @{
+                                                                                            Name   = "SP_ProfileDB"
+                                                                                            Server = @{
+                                                                                                Name = "SQL.domain.local"
+                                                                                            }
+                                                                                        }
+                                                                                    } -PassThru
+                                                                                ),
+                                                                                (New-Object -TypeName "Object" |
+                                                                                        Add-Member -MemberType NoteProperty `
+                                                                                            -Name Name `
+                                                                                            -Value "SynchronizationDatabase" `
+                                                                                            -PassThru |
+                                                                                            Add-Member -MemberType ScriptMethod `
+                                                                                                -Name GetValue `
+                                                                                                -Value {
+                                                                                                return @{
+                                                                                                    Name   = "SP_ProfileSyncDB"
+                                                                                                    Server = @{
+                                                                                                        Name = "SQL.domain.local"
+                                                                                                    }
+                                                                                                }
+                                                                                            } -PassThru
+                                                                                        )
+                                                                                    )
+                                                                                } -PassThru
+                                                                            } -PassThru -Force
                     )
                 }
 
@@ -289,33 +293,34 @@ try
                             }
 
                             Mock -CommandName Get-SPServiceApplication -MockWith {
-                                return @(
-                                    New-Object -TypeName "Object" |
-                                        Add-Member -MemberType NoteProperty `
-                                            -Name ID `
-                                            -Value ([Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")) `
-                                            -PassThru |
+                                $returnval = @{
+                                    Name = $testParams.UserProfileServiceAppName
+                                } | Add-Member -MemberType NoteProperty `
+                                    -Name ID `
+                                    -Value ([Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")) `
+                                    -PassThru |
+                                    Add-Member -MemberType ScriptMethod `
+                                        -Name GetType `
+                                        -Value {
+                                        New-Object -TypeName "Object" |
+                                            Add-Member -MemberType NoteProperty `
+                                                -Name FullName `
+                                                -Value $getTypeFullName `
+                                                -PassThru
+                                        } `
+                                            -PassThru -Force |
                                             Add-Member -MemberType ScriptMethod `
-                                                -Name GetType `
+                                                -Name SetSynchronizationMachine `
                                                 -Value {
-                                                New-Object -TypeName "Object" |
-                                                    Add-Member -MemberType NoteProperty `
-                                                        -Name FullName `
-                                                        -Value $getTypeFullName `
-                                                        -PassThru
-                                                } `
-                                                    -PassThru -Force |
-                                                    Add-Member -MemberType ScriptMethod `
-                                                        -Name SetSynchronizationMachine `
-                                                        -Value {
-                                                        param(
-                                                            $computerName,
-                                                            $syncServiceID,
-                                                            $FarmUserName,
-                                                            $FarmPassword
-                                                        )
-                                                    } -PassThru
-                                )
+                                                param(
+                                                    $computerName,
+                                                    $syncServiceID,
+                                                    $FarmUserName,
+                                                    $FarmPassword
+                                                )
+                                            } -PassThru
+
+                                return $returnval
                             }
                         }
 

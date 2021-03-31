@@ -490,7 +490,7 @@ function Test-SPDscUserProfileDBReadOnly()
         $eventSource = $args[1]
 
         $serviceApps = Get-SPServiceApplication | Where-Object -FilterScript {
-            $_.Name -eq $params.UserProfileServiceAppName
+            $_.Name -eq $UserProfileServiceAppName
         }
 
         if ($null -eq $serviceApps)

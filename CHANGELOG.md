@@ -39,8 +39,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   SPWordAutomationServiceApp, SPWorkManagementServiceApp
   - Fixed issue with the Name parameter of Get-SPServiceApplication, which is case
     sensitive
+- SPExcelServiceApp
+  - Fixed issue where PSBoundParameters was used multiple times, but manipulated at an early
+    stage, breaking all subsequent usages
 - SPInstallLanguagePack
-  - Fixes issue in the Norwegian Language Pack detection
+  - Fixed issue in the Norwegian Language Pack detection
 - SPSearchManagedProperty
   - Fixed issue where setting Searchable=True resulted in an error
 - SPSearchResultSource

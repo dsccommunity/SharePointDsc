@@ -356,18 +356,19 @@ function Set-TargetResource
             -ScriptBlock {
             $params = $args[0]
 
-            $params.Add("Identity", $params.Name)
+            $newParams = @{
+                Identity = $params.Name
+            }
 
-            # Remove parameters that do not belong on the set method
-            @("InstallAccount", "Ensure", "TrustedFileLocations", "Name", "ApplicationPool") |
-                ForEach-Object -Process {
-                    if ($params.ContainsKey($_) -eq $true)
-                    {
-                        $params.Remove($_) | Out-Null
-                    }
+            foreach ($key in $params.Keys)
+            {
+                if ($key -notin @("InstallAccount", "Ensure", "TrustedFileLocations", "Name", "ApplicationPool"))
+                {
+                    $newParams.Add($key, $params.$key)
                 }
+            }
 
-            Set-SPExcelServiceApplication @params
+            Set-SPExcelServiceApplication @newParams
         }
 
 

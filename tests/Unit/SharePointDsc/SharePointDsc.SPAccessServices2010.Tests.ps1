@@ -49,7 +49,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
                 $getTypeFullName = "Microsoft.Office.Access.Server.MossHost.AccessServerWebServiceApplication"
@@ -112,6 +112,7 @@ try
                     Mock -CommandName Get-SPServiceApplication -MockWith {
                         $spServiceApp = [PSCustomObject]@{
                             DisplayName     = $testParams.Name
+                            Name            = $testParams.Name
                             ApplicationPool = [PSCustomObject]@{
                                 Name = $testParams.ApplicationPool
                             }
@@ -153,6 +154,7 @@ try
                     Mock -CommandName Get-SPServiceApplication -MockWith {
                         $spServiceApp = [PSCustomObject]@{
                             DisplayName     = $testParams.Name
+                            Name            = $testParams.Name
                             ApplicationPool = [PSCustomObject]@{
                                 Name = $testParams.ApplicationPool
                             }
