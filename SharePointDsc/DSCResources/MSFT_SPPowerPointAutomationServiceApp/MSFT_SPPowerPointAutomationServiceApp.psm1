@@ -362,7 +362,7 @@ function Set-TargetResource
             $serviceApps = Get-SPServiceApplication | Where-Object -FilterScript {
                 $_.Name -eq $params.Name
             }
-            
+
             if ($null -eq $serviceApps)
             {
                 return;
