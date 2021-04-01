@@ -184,14 +184,14 @@ try
                         } -PassThru )
                 } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" }
 
-                $userProfileService = @{
-                    Name                         = "User Profile Service Application"
-                    TypeName                     = "User Profile Service Application"
-                    ApplicationPool              = "SharePoint Service Applications"
-                    ServiceApplicationProxyGroup = "Proxy Group"
+                Mock -CommandName Get-SPServiceApplication -MockWith {
+                    return @{
+                        Name                         = "User Profile Service Application"
+                        TypeName                     = "User Profile Service Application"
+                        ApplicationPool              = "SharePoint Service Applications"
+                        ServiceApplicationProxyGroup = "Proxy Group"
+                    }
                 }
-
-                Mock -CommandName Get-SPServiceApplication -MockWith { return $userProfileService }
 
                 function Add-SPDscEvent
                 {
@@ -220,7 +220,7 @@ try
                 It "Should return null from the Get method" {
                     $Global:UpsConfigManagerGetSectionByNameCalled = $false
                     (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
-                    Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.UserProfileService }
+                    Assert-MockCalled Get-SPServiceApplication
                     $Global:UpsConfigManagerGetSectionByNameCalled | Should -Be $true
                 }
 
@@ -310,7 +310,7 @@ try
                     $Global:SPUPGetSectionByNameCalled = $true
                     $currentValues = Get-TargetResource @testParams
                     $currentValues.Ensure | Should -Be "Present"
-                    Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.UserProfileService }
+                    Assert-MockCalled Get-SPServiceApplication
                 }
 
                 It "Should return false when the Test method is called" {

@@ -31,8 +31,10 @@ function Get-TargetResource
         -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
-        $serviceApps = Get-SPServiceApplication -Name $params.Name `
-            -ErrorAction SilentlyContinue
+        $serviceApps = Get-SPServiceApplication | Where-Object -FilterScript {
+            $_.Name -eq $params.Name
+        }
+
         $nullReturn = @{
             Name            = $params.Name
             ApplicationPool = $params.ApplicationPool
@@ -107,8 +109,10 @@ function Set-TargetResource
             -Arguments $PSBoundParameters `
             -ScriptBlock {
             $params = $args[0]
-            $apps = Get-SPServiceApplication -Name $params.Name `
-                -ErrorAction SilentlyContinue
+            $apps = Get-SPServiceApplication | Where-Object -FilterScript {
+                $_.Name -eq $params.Name
+            }
+
             if ($null -ne $apps)
             {
                 $app = $apps | Where-Object -FilterScript {
@@ -138,8 +142,10 @@ function Set-TargetResource
             -ScriptBlock {
             $params = $args[0]
 
-            $apps = Get-SPServiceApplication -Name $params.Name `
-                -ErrorAction SilentlyContinue
+            $apps = Get-SPServiceApplication | Where-Object -FilterScript {
+                $_.Name -eq $params.Name
+            }
+
             if ($null -eq $apps)
             {
                 return

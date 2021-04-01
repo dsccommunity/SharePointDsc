@@ -121,55 +121,26 @@ function Get-TargetResource
         }
 
         $zones = $wa.IisSettings.Keys
-        $default = @()
-        $intranet = @()
-        $internet = @()
-        $extranet = @()
-        $custom = @()
+        $zoneConfig = @{}
 
         foreach ($zone in $zones)
         {
+            $zoneName = $zone.ToString()
+            $zoneConfig.$zoneName = @()
+
             $authProviders = Get-SPAuthenticationProvider -WebApplication $params.WebAppUrl -Zone $zone
             if ($null -eq $authProviders)
             {
-                $localAuthMode = "Classic"
-                $windowsAuthMethod = $null
-                $basicAuth = $null
-                $authenticationProvider = $null
-                $roleProvider = $null
-                $membershipProvider = $null
-
                 $provider = @{
-                    AuthenticationMethod   = $localAuthMode
-                    WindowsAuthMethod      = $windowsAuthMethod
-                    UseBasicAuth           = $basicAuth
-                    AuthenticationProvider = $authenticationProvider
-                    MembershipProvider     = $membershipProvider
-                    RoleProvider           = $roleProvider
+                    AuthenticationMethod   = "Classic"
+                    WindowsAuthMethod      = $null
+                    UseBasicAuth           = $null
+                    AuthenticationProvider = $null
+                    MembershipProvider     = $null
+                    RoleProvider           = $null
                 }
-                switch ($zone)
-                {
-                    "Default"
-                    {
-                        $default += $provider
-                    }
-                    "Intranet"
-                    {
-                        $intranet += $provider
-                    }
-                    "Internet"
-                    {
-                        $internet += $provider
-                    }
-                    "Extranet"
-                    {
-                        $extranet += $provider
-                    }
-                    "Custom"
-                    {
-                        $custom += $provider
-                    }
-                }
+
+                $zoneConfig.$zoneName += $provider
             }
             else
             {
@@ -223,40 +194,19 @@ function Get-TargetResource
                         MembershipProvider     = $membershipProvider
                         RoleProvider           = $roleProvider
                     }
-                    switch ($zone)
-                    {
-                        "Default"
-                        {
-                            $default += $provider
-                        }
-                        "Intranet"
-                        {
-                            $intranet += $provider
-                        }
-                        "Internet"
-                        {
-                            $internet += $provider
-                        }
-                        "Extranet"
-                        {
-                            $extranet += $provider
-                        }
-                        "Custom"
-                        {
-                            $custom += $provider
-                        }
-                    }
+
+                    $zoneConfig.$zoneName += $provider
                 }
             }
         }
 
         return @{
             WebAppUrl = $params.WebAppUrl
-            Default   = $default
-            Intranet  = $intranet
-            Internet  = $internet
-            Extranet  = $extranet
-            Custom    = $custom
+            Default   = $zoneConfig.Default
+            Intranet  = $zoneConfig.Intranet
+            Internet  = $zoneConfig.Internet
+            Extranet  = $zoneConfig.Extranet
+            Custom    = $zoneConfig.Custom
         }
     }
     return $result
@@ -416,7 +366,7 @@ function Set-TargetResource
     if ($Intranet)
     {
         # Check if specified zone exists
-        if ($CurrentValues.ContainsKey("Intranet") -eq $false)
+        if ($null -eq $CurrentValues.Intranet)
         {
             $message = "Specified zone Intranet does not exist"
             Add-SPDscEvent -Message $message `
@@ -440,7 +390,7 @@ function Set-TargetResource
     if ($Internet)
     {
         # Check if specified zone exists
-        if ($CurrentValues.ContainsKey("Internet") -eq $false)
+        if ($null -eq $CurrentValues.Internet)
         {
             $message = "Specified zone Internet does not exist"
             Add-SPDscEvent -Message $message `
@@ -464,7 +414,7 @@ function Set-TargetResource
     if ($Extranet)
     {
         # Check if specified zone exists
-        if ($CurrentValues.ContainsKey("Extranet") -eq $false)
+        if ($null -eq $CurrentValues.Extranet)
         {
             $message = "Specified zone Extranet does not exist"
             Add-SPDscEvent -Message $message `
@@ -488,7 +438,7 @@ function Set-TargetResource
     if ($Custom)
     {
         # Check if specified zone exists
-        if ($CurrentValues.ContainsKey("Custom") -eq $false)
+        if ($null -eq $CurrentValues.Custom)
         {
             $message = "Specified zone Custom does not exist"
             Add-SPDscEvent -Message $message `
@@ -577,7 +527,7 @@ function Test-TargetResource
 
     if ($Intranet)
     {
-        if ($CurrentValues.ContainsKey("Intranet") -eq $false)
+        if ($null -eq $CurrentValues.Intranet)
         {
             $message = "Specified zone Intranet does not exist"
             Add-SPDscEvent -Message $message `
@@ -600,7 +550,7 @@ function Test-TargetResource
 
     if ($Internet)
     {
-        if ($CurrentValues.ContainsKey("Internet") -eq $false)
+        if ($null -eq $CurrentValues.Internet)
         {
             $message = "Specified zone Internet does not exist"
             Add-SPDscEvent -Message $message `
@@ -623,7 +573,7 @@ function Test-TargetResource
 
     if ($Extranet)
     {
-        if ($CurrentValues.ContainsKey("Extranet") -eq $false)
+        if ($null -eq $CurrentValues.Extranet)
         {
             $message = "Specified zone Extranet does not exist"
             Add-SPDscEvent -Message $message `
@@ -646,7 +596,7 @@ function Test-TargetResource
 
     if ($Custom)
     {
-        if ($CurrentValues.ContainsKey("Custom") -eq $false)
+        if ($null -eq $CurrentValues.Custom)
         {
             $message = "Specified zone Custom does not exist"
             Add-SPDscEvent -Message $message `

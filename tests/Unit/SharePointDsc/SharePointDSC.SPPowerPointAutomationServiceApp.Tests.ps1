@@ -49,7 +49,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
                 $getTypeFullName = "Microsoft.Office.Server.PowerPoint.Administration.PowerPointConversionServiceApplication"
@@ -255,6 +255,7 @@ try
                     Mock -CommandName Get-SPServiceApplication -MockWith {
                         $spServiceApp = [PSCustomObject]@{
                             DisplayName     = $testParams.Name
+                            Name            = $testParams.Name
                             ApplicationPool = @{ Name = $testParams.ApplicationPool }
                         }
                         $spServiceApp | Add-Member -MemberType ScriptMethod `
@@ -299,6 +300,7 @@ try
                     Mock -CommandName Get-SPServiceApplication -MockWith {
                         $spServiceApp = [PSCustomObject]@{
                             DisplayName = $testParams.Name
+                            Name        = $testParams.Name
                         }
                         $spServiceApp | Add-Member -MemberType ScriptMethod `
                             -Name GetType `
@@ -343,6 +345,7 @@ try
                     Mock -CommandName Get-SPServiceApplication -MockWith {
                         $spServiceApp = [PSCustomObject]@{
                             DisplayName                     = $testParams.Name
+                            Name                            = $testParams.Name
                             ApplicationPool                 = @{ Name = $testParams.ApplicationPool }
                             CacheExpirationPeriodInSeconds  = $testParams.CacheExpirationPeriodInSeconds
                             MaximumConversionsPerWorker     = $testParams.MaximumConversionsPerWorker
@@ -400,6 +403,7 @@ try
                     Mock -CommandName Get-SPServiceApplication -MockWith {
                         $spServiceApp = [PSCustomObject]@{
                             DisplayName                     = $testParams.Name
+                            Name                            = $testParams.Name
                             ApplicationPool                 = @{ Name = $testParams.ApplicationPool }
                             CacheExpirationPeriodInSeconds  = $testParams.CacheExpirationPeriodInSeconds
                             MaximumConversionsPerWorker     = $testParams.MaximumConversionsPerWorker
@@ -487,6 +491,7 @@ try
                     Mock -CommandName Get-SPServiceApplication -MockWith {
                         $spServiceApp = [PSCustomObject]@{
                             DisplayName     = $testParams.Name
+                            Name            = $testParams.Name
                             ApplicationPool = @{ Name = "Other SharePoint Services App Pool" }
                         }
                         $spServiceApp | Add-Member -MemberType ScriptMethod `
@@ -518,6 +523,7 @@ try
                     Mock -CommandName Get-SPServiceApplication -MockWith {
                         $spServiceApp = [PSCustomObject]@{
                             DisplayName     = $testParams.Name
+                            Name            = $testParams.Name
                             ApplicationPool = @{ Name = $testParams.ApplicationPool }
                         }
                         $spServiceApp | Add-Member -MemberType ScriptMethod `

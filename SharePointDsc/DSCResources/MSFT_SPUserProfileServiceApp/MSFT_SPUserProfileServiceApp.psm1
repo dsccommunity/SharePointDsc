@@ -151,7 +151,10 @@ function Get-TargetResource
         $params = $args[0]
         $eventSource = $args[1]
 
-        $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
+        $serviceApps = Get-SPServiceApplication | Where-Object -FilterScript {
+            $_.Name -eq $params.Name
+        }
+
         $nullReturn = @{
             Name            = $params.Name
             Ensure          = "Absent"
@@ -516,8 +519,10 @@ function Set-TargetResource
             $params.Remove("UseSQLAuthentication") | Out-Null
             $params.Remove("DatabaseCredentials") | Out-Null
 
-            $serviceApps = Get-SPServiceApplication -Name $params.Name `
-                -ErrorAction SilentlyContinue
+            $serviceApps = Get-SPServiceApplication | Where-Object -FilterScript {
+                $_.Name -eq $params.Name
+            }
+
             $app = $serviceApps | Select-Object -First 1
             if ($null -eq $serviceApps)
             {
@@ -547,8 +552,9 @@ function Set-TargetResource
                 Set-SPServiceApplicationSecurity -Identity $app `
                     -ObjectSecurity $serviceAppSecurity
 
-                $app = Get-SPServiceApplication -Name $params.Name `
-                    -ErrorAction SilentlyContinue
+                $app = Get-SPServiceApplication | Where-Object -FilterScript {
+                    $_.Name -eq $params.Name
+                }
             }
 
             $updateServiceApp = $false
@@ -640,8 +646,8 @@ function Set-TargetResource
 
             $params = $args[0]
 
-            $app = Get-SPServiceApplication -Name $params.Name `
-            | Where-Object -FilterScript {
+            $app = Get-SPServiceApplication | Where-Object -FilterScript {
+                $_.Name -eq $params.Name -and `
                 $_.GetType().FullName -eq "Microsoft.Office.Server.Administration.UserProfileApplication"
             }
 

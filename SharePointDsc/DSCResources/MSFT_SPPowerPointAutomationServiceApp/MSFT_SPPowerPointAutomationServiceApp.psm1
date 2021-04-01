@@ -82,8 +82,10 @@ function Get-TargetResource
         -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
-        $serviceApps = Get-SPServiceApplication -Name $params.Name `
-            -ErrorAction SilentlyContinue
+        $serviceApps = Get-SPServiceApplication | Where-Object -FilterScript {
+            $_.Name -eq $params.Name
+        }
+
         $nullReturn = @{
             Name            = $params.Name
             Ensure          = "Absent"
@@ -274,8 +276,10 @@ function Set-TargetResource
             $eventSource = $args[1]
             $result = $args[2]
 
-            $serviceApps = Get-SPServiceApplication -Name $params.Name `
-                -ErrorAction SilentlyContinue
+            $serviceApps = Get-SPServiceApplication | Where-Object -FilterScript {
+                $_.Name -eq $params.Name
+            }
+
             if ($null -eq $serviceApps)
             {
                 $message = "No Service applications are available in the farm."
@@ -355,7 +359,10 @@ function Set-TargetResource
         Invoke-SPDscCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
 
-            $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
+            $serviceApps = Get-SPServiceApplication | Where-Object -FilterScript {
+                $_.Name -eq $params.Name
+            }
+            
             if ($null -eq $serviceApps)
             {
                 return;

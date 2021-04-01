@@ -73,8 +73,9 @@ function Get-TargetResource
         -ScriptBlock {
         $params = $args[0]
 
-        $ups = Get-SPServiceApplication -Name $params.UserProfileService `
-            -ErrorAction SilentlyContinue
+        $ups = Get-SPServiceApplication | Where-Object -FilterScript {
+            $_.Name -eq $params.UserProfileService
+        }
 
         $nullReturn = @{
             Name                  = $params.Name
@@ -344,7 +345,9 @@ function Set-TargetResource
         {
             $params.Remove("InstallAccount") | Out-Null
         }
-        $ups = Get-SPServiceApplication -Name $params.UserProfileService -ErrorAction SilentlyContinue
+        $ups = Get-SPServiceApplication | Where-Object -FilterScript {
+            $_.Name -eq $params.UserProfileService
+        }
 
         if ($null -eq $ups)
         {

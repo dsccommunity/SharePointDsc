@@ -51,7 +51,9 @@ function Get-TargetResource
         -ScriptBlock {
         $params = $args[0]
 
-        $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
+        $serviceApps = Get-SPServiceApplication | Where-Object -FilterScript {
+            $_.Name -eq $params.Name
+        }
 
         $nullReturn = @{
             Name            = $params.Name
@@ -169,7 +171,9 @@ function Set-TargetResource
                 $databaseCredentialsParam = ""
             }
 
-            $serviceApps = Get-SPServiceApplication -Identity $params.Name
+            $serviceApps = Get-SPServiceApplication | Where-Object -FilterScript {
+                $_.Name -eq $params.Name
+            }
 
             $serviceApp = $serviceApps | Where-Object -FilterScript {
                 $_.GetType().FullName -eq "Microsoft.Office.TranslationServices.TranslationServiceApplication"
@@ -236,7 +240,10 @@ function Set-TargetResource
             -ScriptBlock {
             $params = $args[0]
 
-            $serviceApps = Get-SPServiceApplication -Identity $params.Name
+            $serviceApps = Get-SPServiceApplication | Where-Object -FilterScript {
+                $_.Name -eq $params.Name
+            }
+
             $serviceApp = $serviceApps | Where-Object -FilterScript {
                 $_.GetType().FullName -eq "Microsoft.Office.TranslationServices.TranslationServiceApplication"
             }

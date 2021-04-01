@@ -61,18 +61,19 @@ try
                 Mock -CommandName Set-SPEnterpriseSearchCrawlRule -MockWith { }
 
                 Mock -CommandName Get-SPServiceApplication -MockWith {
-                    return @(
+                    $returnval = @{
+                        Name = "Search Service Application"
+                    } | Add-Member -MemberType ScriptMethod `
+                        -Name GetType `
+                        -Value {
                         New-Object -TypeName "Object" |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name GetType `
-                                -Value {
-                                New-Object -TypeName "Object" |
-                                    Add-Member -MemberType NoteProperty `
-                                        -Name FullName `
-                                        -Value $getTypeFullName `
-                                        -PassThru
-                                } `
-                                    -PassThru -Force)
+                            Add-Member -MemberType NoteProperty `
+                                -Name FullName `
+                                -Value $getTypeFullName `
+                                -PassThru
+                        } -PassThru -Force
+
+                    return $returnval
                 }
 
                 function Add-SPDscEvent

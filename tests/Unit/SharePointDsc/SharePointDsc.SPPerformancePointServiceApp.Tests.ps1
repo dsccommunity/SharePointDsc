@@ -95,6 +95,7 @@ try
                     Mock -CommandName Get-SPServiceApplication -MockWith {
                         $spServiceApp = [PSCustomObject]@{
                             DisplayName = $testParams.Name
+                            Name        = $testParams.Name
                         }
                         $spServiceApp | Add-Member -MemberType ScriptMethod `
                             -Name GetType `
@@ -127,6 +128,7 @@ try
                         $spServiceApp = [PSCustomObject]@{
                             TypeName        = "PerformancePoint Service Application"
                             DisplayName     = $testParams.Name
+                            Name            = $testParams.Name
                             ApplicationPool = @{
                                 Name = $testParams.ApplicationPool
                             }
@@ -162,6 +164,7 @@ try
                         $spServiceApp = [PSCustomObject]@{
                             TypeName        = "Access Services Web Service Application"
                             DisplayName     = $testParams.Name
+                            Name            = $testParams.Name
                             DatabaseServer  = $testParams.DatabaseName
                             ApplicationPool = @{ Name = "Wrong app pool name" }
                         }
@@ -204,6 +207,7 @@ try
                         $spServiceApp = [PSCustomObject]@{
                             TypeName        = "PerformancePoint Service Application"
                             DisplayName     = $testParams.Name
+                            Name            = $testParams.Name
                             ApplicationPool = @{ Name = "Wrong App Pool Name" }
                         }
                         $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {

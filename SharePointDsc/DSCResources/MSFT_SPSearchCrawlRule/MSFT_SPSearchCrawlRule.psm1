@@ -145,8 +145,9 @@ function Get-TargetResource
         -ScriptBlock {
         $params = $args[0]
 
-        $serviceApps = Get-SPServiceApplication -Name $params.ServiceAppName `
-            -ErrorAction SilentlyContinue
+        $serviceApps = Get-SPServiceApplication | Where-Object -FilterScript {
+            $_.Name -eq $params.ServiceAppName
+        }
 
         $nullReturn = @{
             Path           = $params.Path

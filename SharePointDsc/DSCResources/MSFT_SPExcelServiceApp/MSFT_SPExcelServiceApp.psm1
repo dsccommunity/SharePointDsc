@@ -143,8 +143,10 @@ function Get-TargetResource
         $params = $args[0]
         $serviceAppObjectType = $args[1]
 
-        $serviceApps = Get-SPServiceApplication -Name $params.Name `
-            -ErrorAction SilentlyContinue
+        $serviceApps = Get-SPServiceApplication | Where-Object -FilterScript {
+            $_.Name -eq $params.Name
+        }
+
         $nullReturn = @{
             Name            = $params.Name
             ApplicationPool = $params.ApplicationPool
@@ -354,18 +356,19 @@ function Set-TargetResource
             -ScriptBlock {
             $params = $args[0]
 
-            $params.Add("Identity", $params.Name)
+            $newParams = @{
+                Identity = $params.Name
+            }
 
-            # Remove parameters that do not belong on the set method
-            @("InstallAccount", "Ensure", "TrustedFileLocations", "Name", "ApplicationPool") |
-                ForEach-Object -Process {
-                    if ($params.ContainsKey($_) -eq $true)
-                    {
-                        $params.Remove($_) | Out-Null
-                    }
+            foreach ($key in $params.Keys)
+            {
+                if ($key -notin @("InstallAccount", "Ensure", "TrustedFileLocations", "Name", "ApplicationPool"))
+                {
+                    $newParams.Add($key, $params.$key)
                 }
+            }
 
-            Set-SPExcelServiceApplication @params
+            Set-SPExcelServiceApplication @newParams
         }
 
 
@@ -395,8 +398,9 @@ function Set-TargetResource
                                 $newArgs.Add($_, $desiredLocation.$_)
                             }
                         }
-                        $serviceApp = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
-                            $_.GetType().FullName -eq $serviceAppObjectType
+                        $serviceApp = Get-SPServiceApplication | Where-Object -FilterScript {
+                            $_.Name -eq $params.Name -and `
+                                $_.GetType().FullName -eq $serviceAppObjectType
                         }
                         $newArgs.Add("ExcelServiceApplication", $serviceApp)
 
@@ -421,8 +425,9 @@ function Set-TargetResource
                                 $updateArgs.Add($_, $desiredLocation.$_)
                             }
                         }
-                        $serviceApp = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
-                            $_.GetType().FullName -eq $serviceAppObjectType
+                        $serviceApp = Get-SPServiceApplication | Where-Object -FilterScript {
+                            $_.Name -eq $params.Name -and `
+                                $_.GetType().FullName -eq $serviceAppObjectType
                         }
                         $updateArgs.Add("Identity", $desiredLocation.Address)
                         $updateArgs.Add("ExcelServiceApplication", $serviceApp)
@@ -463,8 +468,9 @@ function Set-TargetResource
             $params = $args[0]
             $serviceAppObjectType = $args[1]
 
-            $serviceApp = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
-                $_.GetType().FullName -eq $serviceAppObjectType
+            $serviceApp = Get-SPServiceApplication | Where-Object -FilterScript {
+                $_.Name -eq $params.Name -and `
+                    $_.GetType().FullName -eq $serviceAppObjectType
             }
 
             $proxies = Get-SPServiceApplicationProxy

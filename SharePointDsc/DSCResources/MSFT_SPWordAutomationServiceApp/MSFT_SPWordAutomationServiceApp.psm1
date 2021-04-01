@@ -153,8 +153,10 @@ function Get-TargetResource
         -ScriptBlock {
         $params = $args[0]
 
-        $serviceApps = Get-SPServiceApplication -Name $params.Name `
-            -ErrorAction SilentlyContinue
+        $serviceApps = Get-SPServiceApplication | Where-Object -FilterScript {
+            $_.Name -eq $params.Name
+        }
+
         $nullReturn = @{
             Name            = $params.Name
             Ensure          = "Absent"
@@ -439,9 +441,9 @@ function Set-TargetResource
             $params = $args[0]
             $eventSource = $args[1]
 
-            $serviceApp = Get-SPServiceApplication -Name $params.Name `
-            | Where-Object -FilterScript {
-                $_.GetType().FullName -eq "Microsoft.Office.Word.Server.Service.WordServiceApplication"
+            $serviceApp = Get-SPServiceApplication | Where-Object -FilterScript {
+                $_.Name -eq $params.Name -and `
+                    $_.GetType().FullName -eq "Microsoft.Office.Word.Server.Service.WordServiceApplication"
             }
 
             # Check if the specified Application Pool is different and change if so
@@ -594,8 +596,9 @@ function Set-TargetResource
         Invoke-SPDscCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
 
-            $serviceApp = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
-                $_.GetType().FullName -eq "Microsoft.Office.Word.Server.Service.WordServiceApplication"
+            $serviceApp = Get-SPServiceApplication | Where-Object -FilterScript {
+                $_.Name -eq $params.Name -and `
+                    $_.GetType().FullName -eq "Microsoft.Office.Word.Server.Service.WordServiceApplication"
             }
             if ($null -ne $serviceApp)
             {

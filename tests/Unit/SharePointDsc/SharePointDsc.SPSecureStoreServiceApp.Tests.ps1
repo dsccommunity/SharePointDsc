@@ -182,6 +182,7 @@ try
                     Mock -CommandName Get-SPServiceApplication -MockWith {
                         $spServiceApp = [PSCustomObject]@{
                             DisplayName = $testParams.Name
+                            Name        = $testParams.Name
                         }
                         $spServiceApp | Add-Member -MemberType ScriptMethod `
                             -Name GetType `
@@ -216,6 +217,7 @@ try
                         $spServiceApp = [PSCustomObject]@{
                             TypeName        = "Secure Store Service Application"
                             DisplayName     = $testParams.Name
+                            Name            = $testParams.Name
                             ApplicationPool = @{
                                 Name = $testParams.ApplicationPool
                             }
@@ -236,39 +238,39 @@ try
                                                         -Name Name `
                                                         -Value "Database" `
                                                         -PassThru |
-                                                    Add-Member -MemberType ScriptMethod `
-                                                        -Name GetValue `
-                                                        -Value {
-                                                        param ($x)
-                                                        return (
-                                                            @{
-                                                                FullName             = $getTypeFullName
-                                                                Name                 = "Database"
-                                                                NormalizedDataSource = "DBServer"
-                                                                Server               = @{
-                                                                    Name = "DBServer"
-                                                                }
-                                                                FailoverServer       = @{
-                                                                    Name = "DBServer_Failover"
-                                                                }
-                                                            }
-                                                        )
-                                                    } -PassThru
-                                            ),
-                                            (New-Object -TypeName "Object" |
-                                                    Add-Member -MemberType NoteProperty `
-                                                        -Name Name `
-                                                        -Value "AuditEnabled" `
-                                                        -PassThru |
                                                         Add-Member -MemberType ScriptMethod `
                                                             -Name GetValue `
                                                             -Value {
-                                                            param($x)
-                                                            return $params.AuditEnabled
+                                                            param ($x)
+                                                            return (
+                                                                @{
+                                                                    FullName             = $getTypeFullName
+                                                                    Name                 = "Database"
+                                                                    NormalizedDataSource = "DBServer"
+                                                                    Server               = @{
+                                                                        Name = "DBServer"
+                                                                    }
+                                                                    FailoverServer       = @{
+                                                                        Name = "DBServer_Failover"
+                                                                    }
+                                                                }
+                                                            )
                                                         } -PassThru
-                                            )
-                                        )
-                                    } -PassThru
+                                                    ),
+                                                    (New-Object -TypeName "Object" |
+                                                            Add-Member -MemberType NoteProperty `
+                                                                -Name Name `
+                                                                -Value "AuditEnabled" `
+                                                                -PassThru |
+                                                                Add-Member -MemberType ScriptMethod `
+                                                                    -Name GetValue `
+                                                                    -Value {
+                                                                    param($x)
+                                                                    return $params.AuditEnabled
+                                                                } -PassThru
+                                                            )
+                                                        )
+                                                    } -PassThru
                         } -PassThru -Force
 
                         return $spServiceApp
@@ -297,6 +299,7 @@ try
                         $spServiceApp = [PSCustomObject]@{
                             TypeName        = "Secure Store Service Application"
                             DisplayName     = $testParams.Name
+                            Name            = $testParams.Name
                             ApplicationPool = @{
                                 Name = "Wrong App Pool Name"
                             }
@@ -317,39 +320,39 @@ try
                                                         -Name Name `
                                                         -Value "Database" `
                                                         -PassThru |
-                                                    Add-Member -MemberType ScriptMethod `
-                                                        -Name GetValue `
-                                                        -Value {
-                                                        param($x)
-                                                        return (
-                                                            @{
-                                                                FullName             = $getTypeFullName
-                                                                Name                 = "Database"
-                                                                NormalizedDataSource = "DBServer"
-                                                                Server               = @{
-                                                                    Name = "DBServer"
-                                                                }
-                                                                FailoverServer       = @{
-                                                                    Name = "DBServer_Failover"
-                                                                }
-                                                            }
-                                                        )
-                                                    } -PassThru
-                                            ),
-                                            (New-Object -TypeName "Object" |
-                                                    Add-Member -MemberType NoteProperty `
-                                                        -Name Name `
-                                                        -Value "AuditEnabled" `
-                                                        -PassThru |
                                                         Add-Member -MemberType ScriptMethod `
                                                             -Name GetValue `
                                                             -Value {
                                                             param($x)
-                                                            return $params.AuditEnabled
+                                                            return (
+                                                                @{
+                                                                    FullName             = $getTypeFullName
+                                                                    Name                 = "Database"
+                                                                    NormalizedDataSource = "DBServer"
+                                                                    Server               = @{
+                                                                        Name = "DBServer"
+                                                                    }
+                                                                    FailoverServer       = @{
+                                                                        Name = "DBServer_Failover"
+                                                                    }
+                                                                }
+                                                            )
                                                         } -PassThru
-                                            )
-                                        )
-                                    } -PassThru
+                                                    ),
+                                                    (New-Object -TypeName "Object" |
+                                                            Add-Member -MemberType NoteProperty `
+                                                                -Name Name `
+                                                                -Value "AuditEnabled" `
+                                                                -PassThru |
+                                                                Add-Member -MemberType ScriptMethod `
+                                                                    -Name GetValue `
+                                                                    -Value {
+                                                                    param($x)
+                                                                    return $params.AuditEnabled
+                                                                } -PassThru
+                                                            )
+                                                        )
+                                                    } -PassThru
                         } -PassThru -Force
 
                         return $spServiceApp
@@ -430,6 +433,7 @@ try
                         $spServiceApp = [PSCustomObject]@{
                             TypeName        = "Secure Store Service Application"
                             DisplayName     = $testParams.Name
+                            Name            = $testParams.Name
                             ApplicationPool = @{
                                 Name = "Wrong App Pool Name"
                             }
@@ -450,39 +454,39 @@ try
                                                         -Name Name `
                                                         -Value "Database" `
                                                         -PassThru |
-                                                    Add-Member -MemberType ScriptMethod `
-                                                        -Name GetValue `
-                                                        -Value {
-                                                        param($x)
-                                                        return (
-                                                            @{
-                                                                FullName             = $getTypeFullName
-                                                                Name                 = "Database"
-                                                                NormalizedDataSource = "DBServer"
-                                                                Server               = @{
-                                                                    Name = "DBServer"
-                                                                }
-                                                                FailoverServer       = @{
-                                                                    Name = "DBServer_Failover"
-                                                                }
-                                                            }
-                                                        )
-                                                    } -PassThru
-                                            ),
-                                            (New-Object -TypeName "Object" |
-                                                    Add-Member -MemberType NoteProperty `
-                                                        -Name Name `
-                                                        -Value "AuditEnabled" `
-                                                        -PassThru |
                                                         Add-Member -MemberType ScriptMethod `
                                                             -Name GetValue `
                                                             -Value {
                                                             param($x)
-                                                            return $params.AuditEnabled
+                                                            return (
+                                                                @{
+                                                                    FullName             = $getTypeFullName
+                                                                    Name                 = "Database"
+                                                                    NormalizedDataSource = "DBServer"
+                                                                    Server               = @{
+                                                                        Name = "DBServer"
+                                                                    }
+                                                                    FailoverServer       = @{
+                                                                        Name = "DBServer_Failover"
+                                                                    }
+                                                                }
+                                                            )
                                                         } -PassThru
-                                                    )
-                                                )
-                                        } -PassThru
+                                                    ),
+                                                    (New-Object -TypeName "Object" |
+                                                            Add-Member -MemberType NoteProperty `
+                                                                -Name Name `
+                                                                -Value "AuditEnabled" `
+                                                                -PassThru |
+                                                                Add-Member -MemberType ScriptMethod `
+                                                                    -Name GetValue `
+                                                                    -Value {
+                                                                    param($x)
+                                                                    return $params.AuditEnabled
+                                                                } -PassThru
+                                                            )
+                                                        )
+                                                    } -PassThru
                         } -PassThru -Force
 
                         return $spServiceApp
@@ -517,6 +521,7 @@ try
                         $spServiceApp = [PSCustomObject]@{
                             TypeName        = "Secure Store Service Application"
                             DisplayName     = $testParams.Name
+                            Name            = $testParams.Name
                             ApplicationPool = @{
                                 Name = $testParams.ApplicationPool
                             }
@@ -537,39 +542,39 @@ try
                                                         -Name Name `
                                                         -Value "Database" `
                                                         -PassThru |
-                                                    Add-Member -MemberType ScriptMethod `
-                                                        -Name GetValue `
-                                                        -Value {
-                                                        param($x)
-                                                        return (
-                                                            @{
-                                                                FullName             = $getTypeFullName
-                                                                Name                 = "Wrong Database"
-                                                                NormalizedDataSource = "DBServer"
-                                                                Server               = @{
-                                                                    Name = "DBServer"
+                                                        Add-Member -MemberType ScriptMethod `
+                                                            -Name GetValue `
+                                                            -Value {
+                                                            param($x)
+                                                            return (
+                                                                @{
+                                                                    FullName             = $getTypeFullName
+                                                                    Name                 = "Wrong Database"
+                                                                    NormalizedDataSource = "DBServer"
+                                                                    Server               = @{
+                                                                        Name = "DBServer"
+                                                                    }
+                                                                    FailoverServer       = @{
+                                                                        Name = "DBServer_Failover"
+                                                                    }
                                                                 }
-                                                                FailoverServer       = @{
-                                                                    Name = "DBServer_Failover"
-                                                                }
-                                                            }
+                                                            )
+                                                        } -PassThru
+                                                    ),
+                                                    (New-Object -TypeName "Object" |
+                                                            Add-Member -MemberType NoteProperty `
+                                                                -Name Name `
+                                                                -Value "AuditEnabled" `
+                                                                -PassThru |
+                                                                Add-Member -MemberType ScriptMethod `
+                                                                    -Name GetValue `
+                                                                    -Value {
+                                                                    param($x)
+                                                                    return $params.AuditEnabled
+                                                                } -PassThru
+                                                            )
                                                         )
                                                     } -PassThru
-                                            ),
-                                            (New-Object -TypeName "Object" |
-                                                    Add-Member -MemberType NoteProperty `
-                                                        -Name Name `
-                                                        -Value "AuditEnabled" `
-                                                        -PassThru |
-                                                    Add-Member -MemberType ScriptMethod `
-                                                        -Name GetValue `
-                                                        -Value {
-                                                        param($x)
-                                                        return $params.AuditEnabled
-                                                    } -PassThru
-                                            )
-                                        )
-                                    } -PassThru
                         } -PassThru -Force
 
                         return $spServiceApp
@@ -607,6 +612,7 @@ try
                         $spServiceApp = [PSCustomObject]@{
                             TypeName        = "Secure Store Service Application"
                             DisplayName     = $testParams.Name
+                            Name            = $testParams.Name
                             ApplicationPool = @{
                                 Name = $testParams.ApplicationPool
                             }
@@ -627,39 +633,39 @@ try
                                                         -Name Name `
                                                         -Value "Database" `
                                                         -PassThru |
-                                                    Add-Member -MemberType ScriptMethod `
-                                                        -Name GetValue `
-                                                        -Value {
-                                                        param($x)
-                                                        return (
-                                                            @{
-                                                                FullName             = $getTypeFullName
-                                                                Name                 = "SecureStoreDB"
-                                                                NormalizedDataSource = "Wrong DBServer"
-                                                                Server               = @{
-                                                                    Name = "Wrong DBServer"
-                                                                }
-                                                                FailoverServer       = @{
-                                                                    Name = "DBServer_Failover"
-                                                                }
-                                                            }
-                                                        )
-                                                    } -PassThru
-                                            ),
-                                            (New-Object -TypeName "Object" |
-                                                    Add-Member -MemberType NoteProperty `
-                                                        -Name Name `
-                                                        -Value "AuditEnabled" `
-                                                        -PassThru |
                                                         Add-Member -MemberType ScriptMethod `
                                                             -Name GetValue `
                                                             -Value {
                                                             param($x)
-                                                            return $params.AuditEnabled
+                                                            return (
+                                                                @{
+                                                                    FullName             = $getTypeFullName
+                                                                    Name                 = "SecureStoreDB"
+                                                                    NormalizedDataSource = "Wrong DBServer"
+                                                                    Server               = @{
+                                                                        Name = "Wrong DBServer"
+                                                                    }
+                                                                    FailoverServer       = @{
+                                                                        Name = "DBServer_Failover"
+                                                                    }
+                                                                }
+                                                            )
                                                         } -PassThru
-                                            )
-                                        )
-                                    } -PassThru
+                                                    ),
+                                                    (New-Object -TypeName "Object" |
+                                                            Add-Member -MemberType NoteProperty `
+                                                                -Name Name `
+                                                                -Value "AuditEnabled" `
+                                                                -PassThru |
+                                                                Add-Member -MemberType ScriptMethod `
+                                                                    -Name GetValue `
+                                                                    -Value {
+                                                                    param($x)
+                                                                    return $params.AuditEnabled
+                                                                } -PassThru
+                                                            )
+                                                        )
+                                                    } -PassThru
                         } -PassThru -Force
 
                         return $spServiceApp

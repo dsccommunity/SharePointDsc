@@ -181,6 +181,7 @@ try
                         $spServiceApp = [PSCustomObject]@{
                             TypeName      = "Usage and Health Data Collection Service Application"
                             DisplayName   = $testParams.Name
+                            Name          = $testParams.Name
                             UsageDatabase = @{
                                 Name                 = $testParams.DatabaseName
                                 NormalizedDataSource = $testParams.DatabaseServer
@@ -220,6 +221,7 @@ try
                         $spServiceApp = [PSCustomObject]@{
                             TypeName      = "Usage and Health Data Collection Service Application"
                             DisplayName   = $testParams.Name
+                            Name          = $testParams.Name
                             UsageDatabase = @{
                                 Name                 = $testParams.DatabaseName
                                 NormalizedDataSource = $testParams.DatabaseServer
@@ -269,6 +271,7 @@ try
                         $spServiceApp = [PSCustomObject]@{
                             TypeName      = "Usage and Health Data Collection Service Application"
                             DisplayName   = $testParams.Name
+                            Name          = $testParams.Name
                             UsageDatabase = @{
                                 Name                 = $testParams.DatabaseName
                                 NormalizedDataSource = $testParams.DatabaseServer
@@ -311,6 +314,7 @@ try
                         $spServiceApp = [PSCustomObject]@{
                             TypeName      = "Usage and Health Data Collection Service Application"
                             DisplayName   = $testParams.Name
+                            Name          = $testParams.Name
                             UsageDatabase = @{
                                 Name                 = "db"
                                 NormalizedDataSource = "server"
@@ -369,6 +373,7 @@ try
                         $spServiceApp = [PSCustomObject]@{
                             TypeName      = "Usage and Health Data Collection Service Application"
                             DisplayName   = $testParams.Name
+                            Name          = $testParams.Name
                             UsageDatabase = @{
                                 Name                 = "db"
                                 NormalizedDataSource = "server"

@@ -63,7 +63,9 @@ function Get-TargetResource
         $params = $args[0]
 
         Write-Verbose -Message "Getting Service Application $($params.ServiceAppName)"
-        $serviceApp = Get-SPServiceApplication -Name $params.ServiceAppName
+        $serviceApp = Get-SPServiceApplication | Where-Object -FilterScript {
+            $_.Name -eq $params.ServiceAppName
+        }
 
         $nullReturn = @{
             ServiceAppName = ""
@@ -273,7 +275,10 @@ function Set-TargetResource
         $eventSource = $args[1]
         $CurrentValues = $args[2]
 
-        $serviceApp = Get-SPServiceApplication -Name $params.ServiceAppName
+        $serviceApp = Get-SPServiceApplication | Where-Object -FilterScript {
+            $_.Name -eq $params.ServiceAppName
+        }
+
         if ($null -eq $serviceApp)
         {
             $message = "Unable to locate service application $($params.ServiceAppName)"
@@ -583,7 +588,10 @@ function Test-TargetResource
         $relPath = "..\..\Modules\SharePointDsc.ServiceAppSecurity\SPServiceAppSecurity.psm1"
         Import-Module (Join-Path -Path $ScriptRoot -ChildPath $relPath -Resolve)
 
-        $serviceApp = Get-SPServiceApplication -Name $params.ServiceAppName
+        $serviceApp = Get-SPServiceApplication | Where-Object -FilterScript {
+            $_.Name -eq $params.ServiceAppName
+        }
+
         switch ($params.SecurityType)
         {
             "Administrators"

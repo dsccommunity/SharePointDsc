@@ -322,7 +322,9 @@ try
                     }
 
                     Mock -CommandName Get-SPServiceApplication -MockWith {
-                        return @{ }
+                        return @{
+                            Name = $testParams.ServiceAppName
+                        }
                     }
 
                     Mock -CommandName Get-SPServiceApplicationSecurity -MockWith {
@@ -392,7 +394,9 @@ try
                     }
 
                     Mock -CommandName Get-SPServiceApplication -MockWith {
-                        return @{ }
+                        return @{
+                            Name = $testParams.ServiceAppName
+                        }
                     }
 
                     Mock -CommandName Get-SPServiceApplicationSecurity -MockWith {
@@ -460,7 +464,9 @@ try
                     }
 
                     Mock -CommandName Get-SPServiceApplication -MockWith {
-                        return @{ }
+                        return @{
+                            Name = $testParams.ServiceAppName
+                        }
                     }
 
                     Mock -CommandName Get-SPServiceApplicationSecurity -MockWith {
@@ -518,7 +524,9 @@ try
                     }
 
                     Mock -CommandName Get-SPServiceApplication -MockWith {
-                        return @{ }
+                        return @{
+                            Name = $testParams.ServiceAppName
+                        }
                     }
 
                     Mock -CommandName Get-SPServiceApplicationSecurity -MockWith {
@@ -565,7 +573,9 @@ try
                     }
 
                     Mock -CommandName Get-SPServiceApplication -MockWith {
-                        return @{ }
+                        return @{
+                            Name = $testParams.ServiceAppName
+                        }
                     }
 
                     Mock -CommandName Get-SPServiceApplicationSecurity {
@@ -625,7 +635,9 @@ try
                     }
 
                     Mock -CommandName Get-SPServiceApplication -MockWith {
-                        return @{ }
+                        return @{
+                            Name = $testParams.ServiceAppName
+                        }
                     }
 
                     Mock -CommandName Get-SPServiceApplicationSecurity -MockWith {
@@ -680,7 +692,9 @@ try
                     }
 
                     Mock -CommandName Get-SPServiceApplication -MockWith {
-                        return @{ }
+                        return @{
+                            Name = $testParams.ServiceAppName
+                        }
                     }
 
                     Mock -CommandName Get-SPServiceApplicationSecurity -MockWith {
@@ -739,7 +753,9 @@ try
                     }
 
                     Mock -CommandName Get-SPServiceApplication -MockWith {
-                        return @{ }
+                        return @{
+                            Name = $testParams.ServiceAppName
+                        }
                     }
 
                     Mock -CommandName Get-SPServiceApplicationSecurity -MockWith {
@@ -791,7 +807,9 @@ try
                     }
 
                     Mock -CommandName Get-SPServiceApplication -MockWith {
-                        return @{ }
+                        return @{
+                            Name = $testParams.ServiceAppName
+                        }
                     }
 
                     Mock -CommandName Get-SPServiceApplicationSecurity -MockWith {
@@ -820,7 +838,9 @@ try
                     }
 
                     Mock -CommandName Get-SPServiceApplication -MockWith {
-                        return @{ }
+                        return @{
+                            Name = $testParams.ServiceAppName
+                        }
                     }
 
                     Mock -CommandName Get-SPServiceApplicationSecurity -MockWith {
@@ -863,7 +883,9 @@ try
                     }
 
                     Mock -CommandName Get-SPServiceApplication -MockWith {
-                        return @{ }
+                        return @{
+                            Name = $testParams.ServiceAppName
+                        }
                     }
                     Mock -CommandName Get-SPServiceApplicationSecurity {
                         $security = @{
@@ -927,7 +949,9 @@ try
                     }
 
                     Mock -CommandName Get-SPServiceApplication -MockWith {
-                        return @{ }
+                        return @{
+                            Name = $testParams.ServiceAppName
+                        }
                     }
 
                     Mock -CommandName Get-SPServiceApplicationSecurity {
@@ -989,7 +1013,9 @@ try
                     }
 
                     Mock -CommandName Get-SPServiceApplication -MockWith {
-                        return @{ }
+                        return @{
+                            Name = $testParams.ServiceAppName
+                        }
                     }
 
                     Mock -CommandName Get-SPServiceApplicationSecurity -MockWith {
@@ -1045,7 +1071,9 @@ try
                     }
 
                     Mock -CommandName Get-SPServiceApplication -MockWith {
-                        return @{ }
+                        return @{
+                            Name = $testParams.ServiceAppName
+                        }
                     }
 
                     Mock -CommandName Get-SPServiceApplicationSecurity -MockWith {
@@ -1098,7 +1126,9 @@ try
                     }
 
                     Mock -CommandName Get-SPServiceApplication -MockWith {
-                        return @{ }
+                        return @{
+                            Name = $testParams.ServiceAppName
+                        }
                     }
 
                     Mock -CommandName Get-SPServiceApplicationSecurity -MockWith {
@@ -1134,7 +1164,9 @@ try
                     }
 
                     Mock -CommandName Get-SPServiceApplication -MockWith {
-                        return @{ }
+                        return @{
+                            Name = $testParams.ServiceAppName
+                        }
                     }
 
                     Mock -CommandName Get-SPServiceApplicationSecurity -MockWith {
@@ -1177,7 +1209,9 @@ try
                     }
 
                     Mock -CommandName Get-SPServiceApplication -MockWith {
-                        return @{ }
+                        return @{
+                            Name = $testParams.ServiceAppName
+                        }
                     }
 
                     Mock -CommandName Get-SPServiceApplicationSecurity {

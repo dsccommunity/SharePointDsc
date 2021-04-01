@@ -169,6 +169,7 @@ try
                             $spServiceApp = [PSCustomObject]@{
                                 TypeName        = "Search Service Application"
                                 DisplayName     = $testParams.Name
+                                Name            = $testParams.Name
                                 ApplicationPool = @{ Name = $testParams.ApplicationPool }
                                 AlertsEnabled   = $false
                                 Database        = @{
@@ -219,6 +220,7 @@ try
                     Mock -CommandName Get-SPServiceApplication -MockWith {
                         $spServiceApp = [PSCustomObject]@{
                             DisplayName = $testParams.Name
+                            Name        = $testParams.Name
                         }
                         $spServiceApp | Add-Member -MemberType ScriptMethod `
                             -Name GetType `
@@ -259,6 +261,7 @@ try
                         $spServiceApp = [PSCustomObject]@{
                             TypeName        = "Search Service Application"
                             DisplayName     = $testParams.Name
+                            Name            = $testParams.Name
                             ApplicationPool = @{ Name = $testParams.ApplicationPool }
                             Database        = @{
                                 Name                 = $testParams.DatabaseName
@@ -274,7 +277,7 @@ try
 
                 It "Should return present from the get method" {
                     (Get-TargetResource @testParams).Ensure | Should -Be "Present"
-                    Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name }
+                    Assert-MockCalled Get-SPServiceApplication
                 }
 
                 It "Should return true when the Test method is called" {
@@ -296,6 +299,7 @@ try
                         $spServiceApp = [PSCustomObject]@{
                             TypeName        = "Search Service Application"
                             DisplayName     = $testParams.Name
+                            Name            = $testParams.Name
                             ApplicationPool = @{ Name = "Wrong App Pool Name" }
                             Database        = @{
                                 Name                 = $testParams.DatabaseName
@@ -351,6 +355,7 @@ try
                         $spServiceApp = [PSCustomObject]@{
                             TypeName        = "Search Service Application"
                             DisplayName     = $testParams.Name
+                            Name            = $testParams.Name
                             ApplicationPool = @{ Name = $testParams.ApplicationPool }
                             Database        = @{
                                 Name                 = $testParams.DatabaseName
@@ -410,6 +415,7 @@ try
                         $spServiceApp = [PSCustomObject]@{
                             TypeName        = "Search Service Application"
                             DisplayName     = $testParams.Name
+                            Name            = $testParams.Name
                             ApplicationPool = @{ Name = $testParams.ApplicationPool }
                             Database        = @{
                                 Name                 = $testParams.DatabaseName
@@ -461,6 +467,7 @@ try
                         $spServiceApp = [PSCustomObject]@{
                             TypeName        = "Search Service Application"
                             DisplayName     = $testParams.Name
+                            Name            = $testParams.Name
                             ApplicationPool = @{ Name = $testParams.ApplicationPool }
                             Database        = @{
                                 Name                 = $testParams.DatabaseName
@@ -518,6 +525,7 @@ try
                         $spServiceApp = [PSCustomObject]@{
                             TypeName        = "Search Service Application"
                             DisplayName     = $testParams.Name
+                            Name            = $testParams.Name
                             ApplicationPool = @{
                                 Name = $testParams.ApplicationPool
                             }
@@ -563,6 +571,7 @@ try
                         $spServiceApp = [PSCustomObject]@{
                             TypeName        = "Search Service Application"
                             DisplayName     = $testParams.Name
+                            Name            = $testParams.Name
                             ApplicationPool = @{ Name = $testParams.ApplicationPool }
                             SearchCenterUrl = "http://wrong.url.here"
                             Database        = @{
@@ -630,6 +639,7 @@ try
                         $spServiceApp = [PSCustomObject]@{
                             TypeName        = "Search Service Application"
                             DisplayName     = $testParams.Name
+                            Name            = $testParams.Name
                             ApplicationPool = @{ Name = $testParams.ApplicationPool }
                             AlertsEnabled   = $false
                             Database        = @{
@@ -700,6 +710,7 @@ try
                         $spServiceApp = [PSCustomObject]@{
                             TypeName        = "Search Service Application"
                             DisplayName     = $testParams.Name
+                            Name            = $testParams.Name
                             ApplicationPool = @{ Name = $testParams.ApplicationPool }
                             SearchCenterUrl = "http://search.sp.contoso.com"
                             Database        = @{
@@ -741,6 +752,7 @@ try
                         $spServiceApp = [PSCustomObject]@{
                             TypeName        = "Search Service Application"
                             DisplayName     = $testParams.Name
+                            Name            = $testParams.Name
                             ApplicationPool = @{
                                 Name = $testParams.ApplicationPool
                             }
@@ -809,6 +821,7 @@ try
                         $spServiceApp = [PSCustomObject]@{
                             TypeName        = "Search Service Application"
                             DisplayName     = $testParams.Name
+                            Name            = $testParams.Name
                             ApplicationPool = @{ Name = $testParams.ApplicationPool }
                             CloudIndex      = $true
                             Database        = @{

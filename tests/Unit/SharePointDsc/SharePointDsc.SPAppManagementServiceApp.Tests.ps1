@@ -77,7 +77,7 @@ try
 
                 It "Should return absent from the get method" {
                     (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
-                    Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name }
+                    Assert-MockCalled Get-SPServiceApplication
                 }
 
                 It "Should return false when the test method is called" {
@@ -117,7 +117,7 @@ try
 
                 It "Should return absent from the get method" {
                     (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
-                    Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name }
+                    Assert-MockCalled Get-SPServiceApplication
                 }
 
             }
@@ -135,6 +135,7 @@ try
                     Mock -CommandName Get-SPServiceApplication -MockWith {
                         $spServiceApp = [PSCustomObject]@{
                             TypeName        = "App Management Service Application"
+                            Name            = $testParams.Name
                             DisplayName     = $testParams.Name
                             ApplicationPool = @{ Name = $testParams.ApplicationPool }
                             Database        = @{
@@ -169,7 +170,7 @@ try
 
                 It "Should return present from the get method" {
                     (Get-TargetResource @testParams).Ensure | Should -Be "Present"
-                    Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name }
+                    Assert-MockCalled Get-SPServiceApplication
                 }
 
                 It "Should return true when the test method is called" {
@@ -191,6 +192,7 @@ try
                         $spServiceApp = [PSCustomObject]@{
                             TypeName        = "App Management Service Application"
                             DisplayName     = $testParams.Name
+                            Name            = $testParams.Name
                             ApplicationPool = @{ Name = "Wrong app pool" }
                             Database        = @{
                                 Name                 = $testParams.DatabaseName
@@ -237,6 +239,7 @@ try
                         $spServiceApp = [PSCustomObject]@{
                             TypeName        = "App Management Service Application"
                             DisplayName     = $testParams.Name
+                            Name            = $testParams.Name
                             ApplicationPool = @{ Name = $testParams.ApplicationPool }
                             Database        = @{
                                 Name                 = $testParams.DatabaseName
@@ -305,6 +308,7 @@ try
                         $spServiceApp = [PSCustomObject]@{
                             TypeName        = "App Management Service Application"
                             DisplayName     = $testParams.Name
+                            Name            = $testParams.Name
                             ApplicationPool = @{ Name = $testParams.ApplicationPool }
                             Database        = @{
                                 Name                 = $testParams.DatabaseName

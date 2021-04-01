@@ -314,7 +314,7 @@ try
 
                 It "Should return null from the Get method" {
                     (Get-TargetResource @testParams).UserProfileService | Should -BeNullOrEmpty
-                    Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.UserProfileService }
+                    Assert-MockCalled Get-SPServiceApplication
                 }
 
                 It "Should return false when the Test method is called" {
@@ -355,7 +355,7 @@ try
 
                 It "Should return null from the Get method" {
                     (Get-TargetResource @testParams).UserProfileService | Should -BeNullOrEmpty
-                    Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.UserProfileService }
+                    Assert-MockCalled Get-SPServiceApplication
                 }
 
                 It "Should return false when the Test method is called" {
@@ -395,7 +395,7 @@ try
 
                 It "Should return service instance from the Get method" {
                     (Get-TargetResource @testParams).UserProfileService | Should -Not -BeNullOrEmpty
-                    Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.UserProfileService }
+                    Assert-MockCalled Get-SPServiceApplication
                 }
 
                 It "Should return false when the Test method is called" {
@@ -438,7 +438,7 @@ try
 
                 It "Should return service instance from the Get method" {
                     (Get-TargetResource @testParams).UserProfileService | Should -Not -BeNullOrEmpty
-                    Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.UserProfileService }
+                    Assert-MockCalled Get-SPServiceApplication
                 }
 
                 It "Should return false when the Test method is called" {
@@ -521,7 +521,7 @@ try
 
                 It "Should return service instance from the Get method" {
                     (Get-TargetResource @testParams).UserProfileService | Should -Not -BeNullOrEmpty
-                    Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.UserProfileService }
+                    Assert-MockCalled Get-SPServiceApplication
                 }
 
                 It "Should return false when the Test method is called" {
@@ -602,12 +602,13 @@ try
                     }
 
                     Mock -CommandName Get-SPServiceApplication -MockWith {
-                        return @(
-                            New-Object -TypeName "Object" | Add-Member -MemberType NoteProperty `
-                                -Name ServiceApplicationProxyGroup `
-                                -Value "Proxy Group" `
-                                -PassThru
-                        )
+                        $returnval = @{
+                            Name = $testParams.UserProfileService
+                        } | Add-Member -MemberType NoteProperty `
+                            -Name ServiceApplicationProxyGroup `
+                            -Value "Proxy Group" `
+                            -PassThru
+                        return $returnval
                     }
 
                     Mock -CommandName New-Object -MockWith {
@@ -693,7 +694,7 @@ try
 
                 It "Should return values from the get method" {
                     (Get-TargetResource @testParams).UserProfileService | Should -Not -BeNullOrEmpty
-                    Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.UserProfileService }
+                    Assert-MockCalled Get-SPServiceApplication
                 }
 
                 It "Should return false when the Test method is called" {

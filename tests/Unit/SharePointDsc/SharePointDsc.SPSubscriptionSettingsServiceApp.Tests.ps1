@@ -118,6 +118,7 @@ try
                     Mock -CommandName Get-SPServiceApplication -MockWith {
                         $spServiceApp = [PSCustomObject]@{
                             DisplayName = $testParams.Name
+                            Name        = $testParams.Name
                         }
                         $spServiceApp | Add-Member -MemberType ScriptMethod `
                             -Name GetType `
@@ -149,6 +150,7 @@ try
                         $spServiceApp = [PSCustomObject]@{
                             TypeName        = "Microsoft SharePoint Foundation Subscription Settings Service Application"
                             DisplayName     = $testParams.Name
+                            Name            = $testParams.Name
                             ApplicationPool = @{
                                 Name = $testParams.ApplicationPool
                             }
@@ -170,25 +172,25 @@ try
                                                         -Name Name `
                                                         -Value "Database" `
                                                         -PassThru |
-                                                    Add-Member -MemberType ScriptMethod `
-                                                        -Name GetValue `
-                                                        -Value {
-                                                        param($x)
-                                                        return (
-                                                            @{
-                                                                FullName             = $getTypeFullName
-                                                                Name                 = "Test_DB"
-                                                                NormalizedDataSource = "TestServer\Instance"
-                                                                FailoverServer       = @{
-                                                                    Name = "DBServer_Failover"
+                                                        Add-Member -MemberType ScriptMethod `
+                                                            -Name GetValue `
+                                                            -Value {
+                                                            param($x)
+                                                            return (
+                                                                @{
+                                                                    FullName             = $getTypeFullName
+                                                                    Name                 = "Test_DB"
+                                                                    NormalizedDataSource = "TestServer\Instance"
+                                                                    FailoverServer       = @{
+                                                                        Name = "DBServer_Failover"
+                                                                    }
                                                                 }
-                                                            }
-                                                        )
-                                                    } -PassThru
-                                            )
-                                        )
-                                    } -PassThru
-                        } -PassThru -Force
+                                                            )
+                                                        } -PassThru
+                                                    )
+                                                )
+                                            } -PassThru
+                                        } -PassThru -Force
 
                         $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
                             -Name IsConnected `
@@ -237,6 +239,7 @@ try
                         $spServiceApp = [PSCustomObject]@{
                             TypeName        = "Microsoft SharePoint Foundation Subscription Settings Service Application"
                             DisplayName     = $testParams.Name
+                            Name            = $testParams.Name
                             ApplicationPool = @{
                                 Name = $testParams.ApplicationPool
                             }
@@ -258,24 +261,24 @@ try
                                                         -Name Name `
                                                         -Value "Database" `
                                                         -PassThru |
-                                                    Add-Member -MemberType ScriptMethod `
-                                                        -Name GetValue `
-                                                        -Value {
-                                                        param($x)
-                                                        return (
-                                                            @{
-                                                                FullName             = $getTypeFullName
-                                                                Name                 = "Test_DB"
-                                                                NormalizedDataSource = "TestServer\Instance"
-                                                                FailoverServer       = @{
-                                                                    Name = "DBServer_Failover"
+                                                        Add-Member -MemberType ScriptMethod `
+                                                            -Name GetValue `
+                                                            -Value {
+                                                            param($x)
+                                                            return (
+                                                                @{
+                                                                    FullName             = $getTypeFullName
+                                                                    Name                 = "Test_DB"
+                                                                    NormalizedDataSource = "TestServer\Instance"
+                                                                    FailoverServer       = @{
+                                                                        Name = "DBServer_Failover"
+                                                                    }
                                                                 }
-                                                            }
-                                                        )
-                                                    } -PassThru
-                                            )
-                                        )
-                                    } -PassThru
+                                                            )
+                                                        } -PassThru
+                                                    )
+                                                )
+                                            } -PassThru
                         } -PassThru -Force
 
                         return $spServiceApp
@@ -305,6 +308,7 @@ try
                         $spServiceApp = [pscustomobject]@{
                             TypeName        = "Microsoft SharePoint Foundation Subscription Settings Service Application"
                             DisplayName     = $testParams.Name
+                            Name            = $testParams.Name
                             ApplicationPool = @{ Name = "Wrong App Pool Name" }
                         }
                         $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
@@ -329,24 +333,24 @@ try
                                                         -Name Name `
                                                         -Value "Database" `
                                                         -PassThru |
-                                                    Add-Member -MemberType ScriptMethod `
-                                                        -Name GetValue `
-                                                        -Value {
-                                                        param($x)
-                                                        return (
-                                                            @{
-                                                                FullName             = $getTypeFullName
-                                                                Name                 = "Test_DB"
-                                                                NormalizedDataSource = "TestServer\Instance"
-                                                                FailoverServer       = @{
-                                                                    Name = "DBServer_Failover"
+                                                        Add-Member -MemberType ScriptMethod `
+                                                            -Name GetValue `
+                                                            -Value {
+                                                            param($x)
+                                                            return (
+                                                                @{
+                                                                    FullName             = $getTypeFullName
+                                                                    Name                 = "Test_DB"
+                                                                    NormalizedDataSource = "TestServer\Instance"
+                                                                    FailoverServer       = @{
+                                                                        Name = "DBServer_Failover"
+                                                                    }
                                                                 }
-                                                            }
-                                                        )
-                                                    } -PassThru
-                                            )
-                                        )
-                                    } -PassThru
+                                                            )
+                                                        } -PassThru
+                                                    )
+                                                )
+                                            } -PassThru
                         } -PassThru -Force
 
                         return $spServiceApp
@@ -403,6 +407,7 @@ try
                         $spServiceApp = [PSCustomObject]@{
                             TypeName        = "Microsoft SharePoint Foundation Subscription Settings Service Application"
                             DisplayName     = $testParams.Name
+                            Name            = $testParams.Name
                             ApplicationPool = @{
                                 Name = $testParams.ApplicationPool
                             }
@@ -423,24 +428,24 @@ try
                                                         -Name Name `
                                                         -Value "Database" `
                                                         -PassThru |
-                                                    Add-Member -MemberType ScriptMethod `
-                                                        -Name GetValue `
-                                                        -Value {
-                                                        param($x)
-                                                        return (
-                                                            @{
-                                                                FullName             = $getTypeFullName
-                                                                Name                 = "Test_DB"
-                                                                NormalizedDataSource = "TestServer\Instance"
-                                                                FailoverServer       = @{
-                                                                    Name = "DBServer_Failover"
+                                                        Add-Member -MemberType ScriptMethod `
+                                                            -Name GetValue `
+                                                            -Value {
+                                                            param($x)
+                                                            return (
+                                                                @{
+                                                                    FullName             = $getTypeFullName
+                                                                    Name                 = "Test_DB"
+                                                                    NormalizedDataSource = "TestServer\Instance"
+                                                                    FailoverServer       = @{
+                                                                        Name = "DBServer_Failover"
+                                                                    }
                                                                 }
-                                                            }
-                                                        )
-                                                    } -PassThru
-                                            )
-                                        )
-                                    } -PassThru
+                                                            )
+                                                        } -PassThru
+                                                    )
+                                                )
+                                            } -PassThru
                         } -PassThru -Force
                         return $spServiceApp
                     }

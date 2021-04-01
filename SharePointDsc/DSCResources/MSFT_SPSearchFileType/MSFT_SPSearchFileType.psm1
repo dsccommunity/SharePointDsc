@@ -57,8 +57,9 @@ function Get-TargetResource
         -ScriptBlock {
         $params = $args[0]
 
-        $serviceApps = Get-SPServiceApplication -Name $params.ServiceAppName `
-            -ErrorAction SilentlyContinue
+        $serviceApps = Get-SPServiceApplication | Where-Object -FilterScript {
+            $_.Name -eq $params.ServiceAppName
+        }
 
         $nullReturn = @{
             FileType       = $params.FileType
@@ -171,8 +172,9 @@ function Set-TargetResource
         $params = $args[0]
         $eventSource = $args[1]
 
-        $serviceApps = Get-SPServiceApplication -Name $params.ServiceAppName `
-            -ErrorAction SilentlyContinue
+        $serviceApps = Get-SPServiceApplication | Where-Object -FilterScript {
+            $_.Name -eq $params.ServiceAppName
+        }
 
         if ($null -eq $serviceApps)
         {

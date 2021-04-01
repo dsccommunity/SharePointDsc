@@ -61,18 +61,23 @@ try
                 Mock -CommandName Set-SPEnterpriseSearchFileFormatState -MockWith { }
 
                 Mock -CommandName Get-SPServiceApplication -MockWith {
-                    return @(
-                        New-Object -TypeName "Object" |
-                            Add-Member -MemberType ScriptMethod `
-                                -Name GetType `
-                                -Value {
-                                New-Object -TypeName "Object" |
-                                    Add-Member -MemberType NoteProperty `
-                                        -Name FullName `
-                                        -Value $getTypeFullName `
-                                        -PassThru
-                                } `
-                                    -PassThru -Force)
+                    $returnval = @{
+                        Name = "Search Service Application"
+                    }
+
+                    $returnval = $returnval |
+                        Add-Member -MemberType ScriptMethod `
+                            -Name GetType `
+                            -Value {
+                            New-Object -TypeName "Object" |
+                                Add-Member -MemberType NoteProperty `
+                                    -Name FullName `
+                                    -Value $getTypeFullName `
+                                    -PassThru
+                            } `
+                                -PassThru -Force
+
+                    return $returnval
                 }
 
                 function Add-SPDscEvent
@@ -137,9 +142,23 @@ try
                     }
 
                     Mock -CommandName Get-SPServiceApplication -MockWith {
-                        return @(@{
-                                TypeName = "Some other service app type"
-                            })
+                        $returnval = @{
+                            Name = $testParams.ServiceAppName
+                        }
+
+                        $returnval = $returnval |
+                            Add-Member -MemberType ScriptMethod `
+                                -Name GetType `
+                                -Value {
+                                New-Object -TypeName "Object" |
+                                    Add-Member -MemberType NoteProperty `
+                                        -Name FullName `
+                                        -Value "Some other service app type" `
+                                        -PassThru
+                                } `
+                                    -PassThru -Force
+
+                        return $returnval
                     }
                 }
 
