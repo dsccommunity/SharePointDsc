@@ -360,11 +360,11 @@ param(
     ${Name},
 
     [ValidateNotNull()]
-    [System.Nullable[object]]
+    [object]
     ${Availability},
 
     [ValidateNotNull()]
-    [System.Nullable[object]]
+    [object]
     ${OutgoingScheme},
 
     [System.Nullable[int]]
@@ -395,7 +395,7 @@ param(
     ${Name},
 
     [ValidateNotNull()]
-    [object]
+    [object[]]
     ${MachineTargets},
 
     [Parameter(ValueFromPipeline=$true)]
@@ -419,7 +419,7 @@ param(
     ${Name},
 
     [ValidateNotNull()]
-    [object]
+    [object[]]
     ${Criteria},
 
     [object]
@@ -538,7 +538,7 @@ param(
     [Parameter(Mandatory=$true, Position=1)]
     [Alias('Proxy')]
     [ValidateNotNull()]
-    [object]
+    [object[]]
     ${Member},
 
     [Parameter(ValueFromPipeline=$true)]
@@ -658,7 +658,7 @@ param(
     ${Name},
 
     [ValidateNotNull()]
-    [object]
+    [object[]]
     ${Criteria},
 
     [ValidateNotNull()]
@@ -683,7 +683,7 @@ function Add-SPUserLicenseMapping {
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true, ValueFromRemainingArguments=$true)]
     [ValidateNotNullOrEmpty()]
-    [System.Collections.Generic.List[object]
+    [System.Collections.Generic.List[object]]
     ${Mapping},
 
     [Parameter(ValueFromPipeline=$true)]
@@ -1230,7 +1230,7 @@ param(
     ${DatabaseFailOverPartner},
 
     [ValidateSet('Application','ApplicationWithSearch','Custom','DistributedCache','Search','SingleServerFarm','WebFrontEnd','WebFrontEndWithDistributedCache')]
-    [System.Nullable[object]]
+    [object]
     ${LocalServerRole},
 
     [Parameter(ValueFromPipeline=$true)]
@@ -3732,7 +3732,7 @@ param(
     [object]
     ${SearchApplication},
 
-    [System.Nullable[object]]
+    [object]
     ${Type},
 
     [string]
@@ -5291,7 +5291,7 @@ param(
     ${Name},
 
     [ValidateNotNull()]
-    [System.Nullable[object]]
+    [object]
     ${Availability},
 
     [Parameter(ValueFromPipeline=$true)]
@@ -5409,7 +5409,7 @@ param(
     [int]
     ${Count},
 
-    [System.Nullable[object]]
+    [object]
     ${MajorAction},
 
     [System.Nullable[guid]]
@@ -5555,7 +5555,7 @@ param(
     [int]
     ${Count},
 
-    [System.Nullable[object]]
+    [object]
     ${MajorAction},
 
     [System.Nullable[guid]]
@@ -8033,11 +8033,11 @@ param(
     ${RepartitioningId},
 
     [Parameter(Position=2)]
-    [object]
+    [object[]]
     ${SourceStores},
 
     [Parameter(Position=3)]
-    [object]
+    [object[]]
     ${TargetStores},
 
     [Parameter(ValueFromPipeline=$true)]
@@ -9001,7 +9001,7 @@ param(
     ${DatabaseFailOverServer},
 
     [ValidateSet('Application','ApplicationWithSearch','Custom','DistributedCache','Search','SingleServerFarm','WebFrontEnd','WebFrontEndWithDistributedCache')]
-    [System.Nullable[object]]
+    [object]
     ${LocalServerRole},
 
     [switch]
@@ -9082,7 +9082,7 @@ param(
     [object]
     ${SPContentDeploymentPath},
 
-    [object]
+    [object[]]
     ${Scope},
 
     [string]
@@ -9300,7 +9300,7 @@ param(
     ${StartAddresses},
 
     [Alias('p')]
-    [System.Nullable[object]]
+    [object]
     ${CrawlPriority},
 
     [System.Nullable[int]]
@@ -9309,7 +9309,7 @@ param(
     [System.Nullable[int]]
     ${MaxSiteEnumerationDepth},
 
-    [System.Nullable[object]]
+    [object]
     ${SharePointCrawlBehavior},
 
     [object]
@@ -9467,7 +9467,7 @@ param(
     [string]
     ${ContentClass},
 
-    [System.Nullable[object]]
+    [object]
     ${AuthenticationType},
 
     [string]
@@ -9551,7 +9551,7 @@ param(
     ${SearchApplication},
 
     [Parameter(Mandatory=$true)]
-    [System.Nullable[object]]
+    [object]
     ${Type},
 
     [Parameter(Mandatory=$true)]
@@ -10156,7 +10156,7 @@ param(
     [System.Nullable[bool]]
     ${AutoDiscover},
 
-    [System.Nullable[object]]
+    [object]
     ${AuthenticationType},
 
     [string]
@@ -10827,13 +10827,13 @@ param(
 
     [Parameter(ParameterSetName='StandardParameterSet', Mandatory=$true, Position=1)]
     [ValidateNotNull()]
-    [System.Nullable[object]]
+    [object]
     ${Property},
 
     [Parameter(ParameterSetName='StandardParameterSet', Position=2)]
     [Parameter(ParameterSetName='CustomPropertyParameterSet', Position=2)]
     [ValidateNotNull()]
-    [System.Nullable[object]]
+    [object]
     ${MatchType},
 
     [Parameter(ParameterSetName='StandardParameterSet', Position=2)]
@@ -10852,15 +10852,15 @@ param(
 function New-SPSecureStoreApplication { 
   [CmdletBinding()]
 param(
-    [object]
+    [object[]]
     ${Administrator},
 
-    [object]
+    [object[]]
     ${CredentialsOwnerGroup},
 
     [Parameter(Mandatory=$true)]
     [ValidateNotNull()]
-    [object]
+    [object[]]
     ${Fields},
 
     [Parameter(Mandatory=$true)]
@@ -10872,7 +10872,7 @@ param(
     [object]
     ${TargetApplication},
 
-    [object]
+    [object[]]
     ${TicketRedeemer},
 
     [Parameter(ValueFromPipeline=$true)]
@@ -11413,7 +11413,7 @@ param(
     [Parameter(ParameterSetName='OIDCParameterSet', Mandatory=$true)]
     [Parameter(ParameterSetName='OIDCMetadataParameterSetName', Mandatory=$true)]
     [ValidateNotNull()]
-    [object]
+    [object[]]
     ${ClaimsMappings},
 
     [Parameter(ParameterSetName='BasicParameterSet', Mandatory=$true)]
@@ -11959,10 +11959,10 @@ param(
     [string]
     ${AuthenticationMethod},
 
-    [object]
+    [object[]]
     ${AuthenticationProvider},
 
-    [object]
+    [object[]]
     ${AdditionalClaimProvider},
 
     [string]
@@ -12066,10 +12066,10 @@ param(
     [switch]
     ${SecureSocketsLayer},
 
-    [object]
+    [object[]]
     ${AuthenticationProvider},
 
-    [object]
+    [object[]]
     ${AdditionalClaimProvider},
 
     [string]
@@ -12938,7 +12938,7 @@ param(
     [object]
     ${SearchApplication},
 
-    [System.Nullable[object]]
+    [object]
     ${Type},
 
     [string]
@@ -13846,7 +13846,7 @@ param(
     [Parameter(Mandatory=$true, Position=1)]
     [Alias('Proxy')]
     [ValidateNotNull()]
-    [object]
+    [object[]]
     ${Member},
 
     [Parameter(ValueFromPipeline=$true)]
@@ -16189,7 +16189,7 @@ param(
     [string]
     ${Description},
 
-    [object]
+    [object[]]
     ${Scope},
 
     [string]
@@ -16621,14 +16621,14 @@ param(
     ${StartAddresses},
 
     [Alias('p')]
-    [System.Nullable[object]]
+    [object]
     ${CrawlPriority},
 
     [Parameter(ParameterSetName='Daily', Mandatory=$true)]
     [Parameter(ParameterSetName='Weekly')]
     [Parameter(ParameterSetName='MonthlyDate')]
     [Parameter(ParameterSetName='RemoveSchedule')]
-    [System.Nullable[object]]
+    [object]
     ${ScheduleType},
 
     [Parameter(ParameterSetName='Daily')]
@@ -16678,7 +16678,7 @@ param(
     ${CrawlScheduleRunEveryInterval},
 
     [Parameter(ParameterSetName='Weekly')]
-    [System.Nullable[object]]
+    [object]
     ${CrawlScheduleDaysOfWeek},
 
     [Parameter(ParameterSetName='MonthlyDate')]
@@ -16687,7 +16687,7 @@ param(
 
     [Parameter(ParameterSetName='MonthlyDate')]
     [Alias('month')]
-    [System.Nullable[object]]
+    [object]
     ${CrawlScheduleMonthsOfYear},
 
     [System.Nullable[int]]
@@ -16785,7 +16785,7 @@ param(
     ${SearchApplication},
 
     [Alias('t')]
-    [System.Nullable[object]]
+    [object]
     ${Type},
 
     [System.Nullable[bool]]
@@ -16809,7 +16809,7 @@ param(
     [string]
     ${ContentClass},
 
-    [System.Nullable[object]]
+    [object]
     ${AuthenticationType},
 
     [string]
@@ -17301,7 +17301,7 @@ param(
     [System.Nullable[bool]]
     ${SecurityTrimmingEnabled},
 
-    [System.Nullable[object]]
+    [object]
     ${SpellingDictionary},
 
     [System.Nullable[timespan]]
@@ -17430,7 +17430,7 @@ param(
     [System.Nullable[bool]]
     ${AutoDiscover},
 
-    [System.Nullable[object]]
+    [object]
     ${AuthenticationType},
 
     [string]
@@ -17508,7 +17508,7 @@ param(
     [string]
     ${DiacriticSensitive},
 
-    [System.Nullable[object]]
+    [object]
     ${DefaultSearchProvider},
 
     [string]
@@ -17633,7 +17633,7 @@ param(
     [string]
     ${ServiceConnectionPointBindingInformation},
 
-    [System.Nullable[object]]
+    [object]
     ${SiteMasterMode},
 
     [System.Nullable[uint32]]
@@ -18168,7 +18168,7 @@ param(
     ${ServiceAddressURL},
 
     [ValidateNotNull()]
-    [System.Nullable[object]]
+    [object]
     ${AuthenticationMode},
 
     [ValidateNotNull()]
@@ -18211,7 +18211,7 @@ param(
     ${ServiceAddressMetadataURL},
 
     [ValidateNotNull()]
-    [System.Nullable[object]]
+    [object]
     ${AuthenticationMode},
 
     [ValidateNotNull()]
@@ -18735,7 +18735,7 @@ param(
 
     [Parameter(Mandatory=$true, Position=2)]
     [ValidateNotNullOrEmpty()]
-    [object]
+    [object[]]
     ${Value},
 
     [Parameter(ValueFromPipeline=$true)]
@@ -18854,7 +18854,7 @@ param(
     ${ThrottlingEnabled},
 
     [ValidateNotNull()]
-    [System.Nullable[object]]
+    [object]
     ${RoutingScheme},
 
     [Parameter(ValueFromPipeline=$true)]
@@ -18874,11 +18874,11 @@ param(
     ${Identity},
 
     [ValidateNotNull()]
-    [System.Nullable[object]]
+    [object]
     ${Availability},
 
     [ValidateNotNull()]
-    [System.Nullable[object]]
+    [object]
     ${OutgoingScheme},
 
     [ValidateNotNull()]
@@ -18911,7 +18911,7 @@ param(
     ${Identity},
 
     [ValidateNotNull()]
-    [object]
+    [object[]]
     ${MachineTargets},
 
     [Parameter(ValueFromPipeline=$true)]
@@ -18931,7 +18931,7 @@ param(
     ${Identity},
 
     [ValidateNotNull()]
-    [object]
+    [object[]]
     ${Criteria},
 
     [object]
@@ -19026,13 +19026,13 @@ param(
 function Set-SPSecureStoreApplication { 
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
-    [object]
+    [object[]]
     ${Administrator},
 
-    [object]
+    [object[]]
     ${CredentialsOwnerGroup},
 
-    [object]
+    [object[]]
     ${Fields},
 
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -19043,7 +19043,7 @@ param(
     [object]
     ${TargetApplication},
 
-    [object]
+    [object[]]
     ${TicketRedeemer},
 
     [Parameter(ValueFromPipeline=$true)]
@@ -19200,11 +19200,11 @@ param(
     [object]
     ${Identity},
 
-    [System.Nullable[object]]
+    [object]
     ${Status},
 
     [ValidateSet('Application','ApplicationWithSearch','Custom','DistributedCache','Search','SingleServerFarm','WebFrontEnd','WebFrontEndWithDistributedCache')]
-    [System.Nullable[object]]
+    [object]
     ${Role},
 
     [Parameter(ValueFromPipeline=$true)]
@@ -19854,7 +19854,7 @@ param(
     ${Identity},
 
     [ValidateNotNull()]
-    [object]
+    [object[]]
     ${Criteria},
 
     [ValidateNotNull()]
@@ -20110,7 +20110,7 @@ param(
     [Parameter(ParameterSetName='MetadataEndPointParameterSet')]
     [Parameter(ParameterSetName='ImportCertificateParameterSet')]
     [Parameter(ParameterSetName='OIDCParameterSet')]
-    [object]
+    [object[]]
     ${ClaimsMappings},
 
     [Parameter(ParameterSetName='BasicParameterSet')]
@@ -20626,11 +20626,11 @@ param(
     ${ServiceApplicationProxyGroup},
 
     [Parameter(ParameterSetName='UpdateClaimSettings')]
-    [object]
+    [object[]]
     ${AuthenticationProvider},
 
     [Parameter(ParameterSetName='UpdateClaimSettings')]
-    [object]
+    [object[]]
     ${AdditionalClaimProvider},
 
     [Parameter(ParameterSetName='UpdateClaimSettings')]

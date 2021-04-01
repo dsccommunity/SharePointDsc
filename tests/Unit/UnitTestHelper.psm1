@@ -137,10 +137,21 @@ function Write-SPDscStubFile
         $SharePointStubPath
     )
 
-    Add-PSSnapin Microsoft.SharePoint.PowerShell
+    $installedVersion = Get-SPDscInstalledProductVersion
+    if ($installedVersion.ProductMajorPart -eq 15 -or $installedVersion.ProductBuildPart -le 12999)
+    {
+        # SharePoint 2013, 2016 or 2019
+        Add-PSSnapin Microsoft.SharePoint.PowerShell
+        $sourceModule = "Microsoft.SharePoint.PowerShell"
+    }
+    else
+    {
+        # SharePoint [vNext]
+        $sourceModule = "SharePointServer"
+    }
 
     $SPStubContent = ((Get-Command | Where-Object -FilterScript {
-                $_.Source -eq "Microsoft.SharePoint.PowerShell"
+                $_.Source -eq $sourceModule
             } ) | ForEach-Object -Process {
             $signature = $null
             $command = $_
@@ -163,7 +174,8 @@ function Write-SPDscStubFile
         $line = $line.Replace("[System.Nullable``1[[Microsoft.Office.Server.Search.Cmdlet.ContentSourceCrawlScheduleType, Microsoft.Office.Server.Search.PowerShell, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c]], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]", "[object]")
         $line = $line.Replace("[System.Collections.Generic.List``1[[Microsoft.SharePoint.PowerShell.SPUserLicenseMapping, Microsoft.SharePoint.PowerShell, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c]], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]", "[object]")
         $line = $line -replace "\[System.Nullable\[Microsoft.*]]", "[System.Nullable[object]]"
-        $line = $line -replace "\[Microsoft.*.\]", "[object]"
+        $line = $line -replace "\[Microsoft\.[a-zA-Z.+0-9]+\[\]\]", "[object[]]"
+        $line = $line -replace "\[Microsoft\.[a-zA-Z.+0-9]+\]", "[object]"
 
         $line | Out-File -FilePath $SharePointStubPath -Encoding utf8 -Append
     }
