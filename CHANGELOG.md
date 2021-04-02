@@ -5,6 +5,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.6.0] - 2021-04-02
+
 ### Added
 - SharePointDsc
   - Export-SPDscDiagnosticData cmdlet to create a diagnostic package which can
