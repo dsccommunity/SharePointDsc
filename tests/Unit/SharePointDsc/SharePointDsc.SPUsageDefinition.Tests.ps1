@@ -194,7 +194,7 @@ try
 
                     if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -ne 15)
                     {
-                        $testParams.UsageDatabaseEnabled = $false
+                        $testParams.UsageDatabaseEnabled = $true
                     }
                 }
 
@@ -226,6 +226,65 @@ try
 
                 It "Should throw an exception in the set method" {
                     { Set-TargetResource @testParams } | Should -Throw "This resource cannot remove a Usage Definition. Please use ensure equals Present."
+                }
+            }
+
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Import-Module (Join-Path -Path (Split-Path -Path (Get-Module SharePointDsc -ListAvailable).Path -Parent) -ChildPath "Modules\SharePointDSC.Reverse\SharePointDSC.Reverse.psm1")
+
+                    Mock -CommandName Write-Host -MockWith { }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            Name                 = "Administrative Actions"
+                            DaysRetained         = 14
+                            DaysToKeepUsageFiles = 1
+                            MaxTotalSizeInBytes  = 10000000000000
+                            Enabled              = $true
+                            Ensure               = "Present"
+                        }
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'DynamicCompilation' -ErrorAction SilentlyContinue))
+                    {
+                        $DynamicCompilation = $false
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'StandAlone' -ErrorAction SilentlyContinue))
+                    {
+                        $StandAlone = $true
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'ExtractionModeValue' -ErrorAction SilentlyContinue))
+                    {
+                        $Global:ExtractionModeValue = 2
+                        $Global:ComponentsToExtract = @('SPFarm')
+                    }
+
+                    $result = @'
+        SPUsageDefinition UsageDefinition_AdministrativeActions
+        {
+            DaysRetained         = 14;
+            DaysToKeepUsageFiles = 1;
+            Enabled              = $True;
+            Ensure               = "Present";
+            MaxTotalSizeInBytes  = 10000000000000;
+            Name                 = "Administrative Actions";
+            PsDscRunAsCredential = $Credsspfarm;
+        }
+
+'@
+                }
+
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource | Should -Be $result
                 }
             }
         }
