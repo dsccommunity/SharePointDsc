@@ -102,6 +102,8 @@ try
                     {
                         $testParams.UsageDatabaseEnabled = $true
                     }
+
+                    Mock -CommandName Get-SPUsageDefinition -MockWith { return $null }
                 }
 
                 It "Should return false when the Test method is called" {

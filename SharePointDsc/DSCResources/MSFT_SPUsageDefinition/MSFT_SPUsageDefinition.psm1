@@ -49,7 +49,7 @@ function Get-TargetResource
         -ScriptBlock {
         $params = $args[0]
 
-        $usageDefinition = Get-SPUsageDefinition | Where-Object { $_.Name -eq $params.Name }
+        $usageDefinition = Get-SPUsageDefinition -Identity $params.Name
         $nullReturn = @{
             Name                 = $params.Name
             DaysRetained         = $params.DaysRetained
@@ -162,7 +162,7 @@ function Set-TargetResource
         $params = $args[0]
         $eventSource = $args[1]
 
-        $usageDefinition = Get-SPUsageDefinition | Where-Object { $_.Name -eq $params.Name }
+        $usageDefinition = Get-SPUsageDefinition -Identity $params.Name
 
         if ($null -eq $usageDefinition)
         {
