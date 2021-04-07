@@ -33,6 +33,18 @@ function Get-TargetResource
         $AllowMetadataOverHttp = $false,
 
         [Parameter()]
+        [System.Int32]
+        $FormsTokenLifetime,
+
+        [Parameter()]
+        [System.Int32]
+        $WindowsTokenLifetime,
+
+        [Parameter()]
+        [System.Int32]
+        $LogonTokenCacheExpirationWindow,
+
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount,
 
@@ -50,14 +62,37 @@ function Get-TargetResource
         $params = $args[0]
 
         $config = Get-SPSecurityTokenServiceConfig
+
+        if ($null -ne $config)
+        {
+            # Converting timespan values back to int32
+            [Int32]$FormsTokenLifetime = $config.FormsTokenLifetime
+            [Int32]$WindowsTokenLifetime = $config.WindowsTokenLifetime
+            [Int32]$LogonTokenCacheExpirationWindow = $config.LogonTokenCacheExpirationWindow
+            
+            if ( ($params.LogonTokenCacheExpirationWindow -le $FormsTokenLifetime) -or ($params.LogonTokenCacheExpirationWindow -le $WindowsTokenLifetime) )
+            {
+                $message = ("Setting LogonTokenCacheExpirationWindow to a value lower or equal as WindowsTokenLifetime or FormsTokenLifetime ist not supported. " + `
+                            "Please set LogonTokenCacheExpirationWindow to value higher than WindowsTokenLifetime and FormsTokenLifetime")
+                    Add-SPDscEvent -Message $message `
+                        -EntryType 'Error' `
+                        -EventID 100 `
+                        -Source $MyInvocation.MyCommand.Source
+                    throw $message
+            }
+        }
+
         $nullReturn = @{
-            IsSingleInstance      = "Yes"
-            Name                  = $params.Name
-            NameIdentifier        = $params.NameIdentifier
-            UseSessionCookies     = $params.UseSessionCookies
-            AllowOAuthOverHttp    = $params.AllowOAuthOverHttp
-            AllowMetadataOverHttp = $params.AllowMetadataOverHttp
-            Ensure                = "Absent"
+            IsSingleInstance                = "Yes"
+            Name                            = $params.Name
+            NameIdentifier                  = $params.NameIdentifier
+            UseSessionCookies               = $params.UseSessionCookies
+            AllowOAuthOverHttp              = $params.AllowOAuthOverHttp
+            AllowMetadataOverHttp           = $params.AllowMetadataOverHttp
+            FormsTokenLifetime              = $params.FormsTokenLifetime
+            WindowsTokenLifetime            = $params.WindowsTokenLifetime
+            LogonTokenCacheExpirationWindow = $params.LogonTokenCacheExpirationWindow
+            Ensure                          = "Absent"
         }
         if ($null -eq $config)
         {
@@ -65,13 +100,16 @@ function Get-TargetResource
         }
 
         return @{
-            IsSingleInstance      = "Yes"
-            Name                  = $config.Name
-            NameIdentifier        = $config.NameIdentifier
-            UseSessionCookies     = $config.UseSessionCookies
-            AllowOAuthOverHttp    = $config.AllowOAuthOverHttp
-            AllowMetadataOverHttp = $config.AllowMetadataOverHttp
-            Ensure                = "Present"
+            IsSingleInstance                = "Yes"
+            Name                            = $config.Name
+            NameIdentifier                  = $config.NameIdentifier
+            UseSessionCookies               = $config.UseSessionCookies
+            AllowOAuthOverHttp              = $config.AllowOAuthOverHttp
+            AllowMetadataOverHttp           = $config.AllowMetadataOverHttp
+            FormsTokenLifetime              = $FormsTokenLifetime
+            WindowsTokenLifetime            = $WindowsTokenLifetime
+            LogonTokenCacheExpirationWindow = $LogonTokenCacheExpirationWindow
+            Ensure                          = "Present"
         }
     }
     return $result
@@ -106,6 +144,18 @@ function Set-TargetResource
         [Parameter()]
         [System.Boolean]
         $AllowMetadataOverHttp = $false,
+
+        [Parameter()]
+        [System.Int32]
+        $FormsTokenLifetime,
+
+        [Parameter()]
+        [System.Int32]
+        $WindowsTokenLifetime,
+
+        [Parameter()]
+        [System.Int32]
+        $LogonTokenCacheExpirationWindow,
 
         [Parameter()]
         [System.Management.Automation.PSCredential]
@@ -157,6 +207,35 @@ function Set-TargetResource
             $config.AllowMetadataOverHttp = $params.AllowMetadataOverHttp
         }
 
+        if ($params.ContainsKey("FormsTokenLifetime"))
+        {
+            $config.FormsTokenLifetime = (New-TimeSpan -Minutes $params.FormsTokenLifetime)
+        }
+
+        if ($params.ContainsKey("WindowsTokenLifetime"))
+        {
+            $config.WindowsTokenLifetime = (New-TimeSpan -Minutes $params.WindowsTokenLifetime)
+        }
+
+        if ($params.ContainsKey("LogonTokenCacheExpirationWindow"))
+        {
+            if ($params.ContainsKey("WindowsTokenLifetime") -or $params.ContainsKey("FormsTokenLifetime"))
+            {
+                if ( ($params.LogonTokenCacheExpirationWindow -le $params.WindowsTokenLifetime) -or ($params.LogonTokenCacheExpirationWindow -le $params.FormsTokenLifetime) )
+                {
+                    $message = ("Setting LogonTokenCacheExpirationWindow to a value lower or equal as WindowsTokenLifetime or FormsTokenLifetime ist not supported. " + `
+                            "Please set LogonTokenCacheExpirationWindow to value higher than WindowsTokenLifetime and FormsTokenLifetime")
+                    Add-SPDscEvent -Message $message `
+                        -EntryType 'Error' `
+                        -EventID 100 `
+                        -Source $MyInvocation.MyCommand.Source
+                    throw $message
+                }
+            }
+            
+            $config.LogonTokenCacheExpirationWindow = (New-TimeSpan -Minutes $params.LogonTokenCacheExpirationWindow)
+        }
+
         $config.Update()
     }
 }
@@ -193,6 +272,18 @@ function Test-TargetResource
         $AllowMetadataOverHttp = $false,
 
         [Parameter()]
+        [System.Int32]
+        $FormsTokenLifetime,
+
+        [Parameter()]
+        [System.Int32]
+        $WindowsTokenLifetime,
+
+        [Parameter()]
+        [System.Int32]
+        $LogonTokenCacheExpirationWindow,
+
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount,
 
@@ -218,7 +309,10 @@ function Test-TargetResource
         "NameIdentifier",
         "UseSessionCookies",
         "AllowOAuthOverHttp",
-        "AllowMetadataOverHttp")
+        "AllowMetadataOverHttp",
+        "FormsTokenLifetime",
+        "WindowsTokenLifetime",
+        "LogonTokenCacheExpirationWindow")
 
     Write-Verbose -Message "Test-TargetResource returned $result"
 
