@@ -54,13 +54,15 @@ function Get-TargetResource
         $Ensure = "Present"
     )
 
+    Write-Verbose -Message "Getting Security Token Service Configuration"
+
     if ($PSBoundParameters.ContainsKey("LogonTokenCacheExpirationWindow") -eq $true -and `
         $PSBoundParameters.ContainsKey("WindowsTokenLifetime") -eq $true)
     {
-        if ($PSBoundParameters.LogonTokenCacheExpirationWindow -le $PSBoundParameters.WindowsTokenLifetime)
+        if ($PSBoundParameters.LogonTokenCacheExpirationWindow -ge $PSBoundParameters.WindowsTokenLifetime)
         {
-            $message = ("Setting LogonTokenCacheExpirationWindow to a value lower or equal as WindowsTokenLifetime ist not supported. " + `
-                    "Please set LogonTokenCacheExpirationWindow to value higher than WindowsTokenLifetime")
+            $message = ("Setting LogonTokenCacheExpirationWindow to a value higher or equal as WindowsTokenLifetime is not supported. " + `
+                    "Please set LogonTokenCacheExpirationWindow to value lower as WindowsTokenLifetime")
             Add-SPDscEvent -Message $message `
                 -EntryType 'Error' `
                 -EventID 100 `
@@ -74,8 +76,8 @@ function Get-TargetResource
     {
         if ($PSBoundParameters.LogonTokenCacheExpirationWindow -le $PSBoundParameters.FormsTokenLifetime)
         {
-            $message = ("Setting LogonTokenCacheExpirationWindow to a value lower or equal as FormsTokenLifetime ist not supported. " + `
-                    "Please set LogonTokenCacheExpirationWindow to value higher than FormsTokenLifetime")
+            $message = ("Setting LogonTokenCacheExpirationWindow to a value higher or equal as FormsTokenLifetime is not supported. " + `
+                    "Please set LogonTokenCacheExpirationWindow to value lower as FormsTokenLifetime")
             Add-SPDscEvent -Message $message `
                 -EntryType 'Error' `
                 -EventID 100 `
@@ -84,28 +86,12 @@ function Get-TargetResource
         }
     }
 
-    Write-Verbose -Message "Getting Security Token Service Configuration"
-
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
         -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
         $config = Get-SPSecurityTokenServiceConfig
-
-        if ($null -ne $config)
-        {
-            if ( ($params.LogonTokenCacheExpirationWindow -le $config.FormsTokenLifetime.TotalMinutes) -or ($params.LogonTokenCacheExpirationWindow -le $config.WindowsTokenLifetime.TotalMinutes) )
-            {
-                $message = ("Setting LogonTokenCacheExpirationWindow to a value lower or equal as WindowsTokenLifetime or FormsTokenLifetime ist not supported. " + `
-                            "Please set LogonTokenCacheExpirationWindow to value higher than WindowsTokenLifetime and FormsTokenLifetime")
-                    Add-SPDscEvent -Message $message `
-                        -EntryType 'Error' `
-                        -EventID 100 `
-                        -Source $MyInvocation.MyCommand.Source
-                    throw $message
-            }
-        }
 
         $nullReturn = @{
             IsSingleInstance                = "Yes"
@@ -119,6 +105,7 @@ function Get-TargetResource
             LogonTokenCacheExpirationWindow = $params.LogonTokenCacheExpirationWindow
             Ensure                          = "Absent"
         }
+
         if ($null -eq $config)
         {
             return $nullReturn
@@ -208,10 +195,10 @@ function Set-TargetResource
     if ($PSBoundParameters.ContainsKey("LogonTokenCacheExpirationWindow") -eq $true -and `
         $PSBoundParameters.ContainsKey("WindowsTokenLifetime") -eq $true)
     {
-        if ($PSBoundParameters.LogonTokenCacheExpirationWindow -le $PSBoundParameters.WindowsTokenLifetime)
+        if ($PSBoundParameters.LogonTokenCacheExpirationWindow -ge $PSBoundParameters.WindowsTokenLifetime)
         {
-            $message = ("Setting LogonTokenCacheExpirationWindow to a value lower or equal as WindowsTokenLifetime ist not supported. " + `
-                    "Please set LogonTokenCacheExpirationWindow to value higher than WindowsTokenLifetime")
+            $message = ("Setting LogonTokenCacheExpirationWindow to a value higher or equal as WindowsTokenLifetime is not supported. " + `
+                    "Please set LogonTokenCacheExpirationWindow to value lower as WindowsTokenLifetime")
             Add-SPDscEvent -Message $message `
                 -EntryType 'Error' `
                 -EventID 100 `
@@ -223,10 +210,10 @@ function Set-TargetResource
     if ($PSBoundParameters.ContainsKey("LogonTokenCacheExpirationWindow") -eq $true -and `
         $PSBoundParameters.ContainsKey("FormsTokenLifetime") -eq $true)
     {
-        if ($PSBoundParameters.LogonTokenCacheExpirationWindow -le $PSBoundParameters.FormsTokenLifetime)
+        if ($PSBoundParameters.LogonTokenCacheExpirationWindow -ge $PSBoundParameters.FormsTokenLifetime)
         {
-            $message = ("Setting LogonTokenCacheExpirationWindow to a value lower or equal as FormsTokenLifetime ist not supported. " + `
-                    "Please set LogonTokenCacheExpirationWindow to value higher than FormsTokenLifetime")
+            $message = ("Setting LogonTokenCacheExpirationWindow to a value higher or equal as FormsTokenLifetime is not supported. " + `
+                    "Please set LogonTokenCacheExpirationWindow to value lower as FormsTokenLifetime")
             Add-SPDscEvent -Message $message `
                 -EntryType 'Error' `
                 -EventID 100 `
@@ -274,10 +261,10 @@ function Set-TargetResource
 
         if ($params.ContainsKey("LogonTokenCacheExpirationWindow"))
         {
-            if (!($params.ContainsKey("WindowsTokenLifetime")) -and ($params.LogonTokenCacheExpirationWindow -le $config.WindowsTokenLifetime.TotalMinutes))
+            if (-not $params.ContainsKey("WindowsTokenLifetime") -and ($params.LogonTokenCacheExpirationWindow -ge $config.WindowsTokenLifetime.TotalMinutes))
             {
-                $message = ("Setting LogonTokenCacheExpirationWindow to a value lower or equal as WindowsTokenLifetime ist not supported. " + `
-                            "Please set LogonTokenCacheExpirationWindow to value higher than WindowsTokenLifetime")
+                $message = ("Setting LogonTokenCacheExpirationWindow to a value higher or equal as WindowsTokenLifetime is not supported. " + `
+                            "Please set LogonTokenCacheExpirationWindow to value lower as WindowsTokenLifetime")
                 Add-SPDscEvent -Message $message `
                     -EntryType 'Error' `
                     -EventID 100 `
@@ -285,10 +272,10 @@ function Set-TargetResource
                 throw $message
             }
 
-            if (!($params.ContainsKey("FormsTokenLifetime")) -and ($params.LogonTokenCacheExpirationWindow -le $config.FormsTokenLifetime.TotalMinutes))
+            if (-not $params.ContainsKey("FormsTokenLifetime") -and ($params.LogonTokenCacheExpirationWindow -ge $config.FormsTokenLifetime.TotalMinutes))
             {
-                $message = ("Setting LogonTokenCacheExpirationWindow to a value lower or equal as FormsTokenLifetime ist not supported. " + `
-                            "Please set LogonTokenCacheExpirationWindow to value higher than FormsTokenLifetime")
+                $message = ("Setting LogonTokenCacheExpirationWindow to a value higher or equal as FormsTokenLifetime is not supported. " + `
+                            "Please set LogonTokenCacheExpirationWindow to value lower as FormsTokenLifetime")
                 Add-SPDscEvent -Message $message `
                     -EntryType 'Error' `
                     -EventID 100 `
