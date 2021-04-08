@@ -253,7 +253,7 @@ stages:
             condition: succeededOrFailed()
             inputs:
               codeCoverageTool: 'JaCoCo'
-              summaryFileLocation: '$(buildFolderName)/$(testResultFolderName)/CodeCov_Merged.xml'
+              summaryFileLocation: '$(Build.SourcesDirectory)/$(buildFolderName)/$(testResultFolderName)/CodeCov_Merged.xml'
               pathToSources: '$(Build.SourcesDirectory)/$(dscBuildVariable.RepositoryName)/'
 
           - script: |
