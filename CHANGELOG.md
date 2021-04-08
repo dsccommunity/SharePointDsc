@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- SPService
+  - New resource
 - SPUsageDefinition
   - New resource
 
@@ -18,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [4.6.0] - 2021-04-02
 
 ### Added
+
 - SharePointDsc
   - Export-SPDscDiagnosticData cmdlet to create a diagnostic package which can
     easily be shared for troubleshooting
