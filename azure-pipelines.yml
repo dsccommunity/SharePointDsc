@@ -252,9 +252,9 @@ stages:
             displayName: 'Publish Azure Code Coverage'
             condition: succeededOrFailed()
             inputs:
-              codeCoverageTool: "JaCoCo"
-              summaryFileLocation: "$(buildFolderName)/$(testResultFolderName)/CodeCov_Merged.xml"
-              pathToSources: "$(Build.SourcesDirectory)/$(dscBuildVariable.RepositoryName)/"
+              codeCoverageTool: 'JaCoCo'
+              summaryFileLocation: '$(buildFolderName)/$(testResultFolderName)/CodeCov_Merged.xml'
+              pathToSources: '$(Build.SourcesDirectory)/$(dscBuildVariable.RepositoryName)/''
 
           - script: |
               bash <(curl -s https://codecov.io/bash) -f "./$(buildFolderName)/CodeCov_Merged.xml" -F unit
