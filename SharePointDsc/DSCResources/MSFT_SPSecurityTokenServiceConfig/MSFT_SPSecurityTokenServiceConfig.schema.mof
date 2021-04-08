@@ -7,9 +7,9 @@ class MSFT_SPSecurityTokenServiceConfig : OMI_BaseResource
     [Write, Description("True set the security token service to use cookies")] Boolean UseSessionCookies;
     [Write, Description("True set the security token service to allow OAuth over HTTP")] Boolean AllowOAuthOverHttp;
     [Write, Description("True set the security token service to allow metadata exchange over HTTP")] Boolean AllowMetadataOverHttp;
-    [Write, Description("Timespan in minutes to set FormsTokenLifetime")] Int32 FormsTokenLifetime;
-    [Write, Description("Timespan in minutes to set WindowsTokenLifetime")] Int32 WindowsTokenLifetime;
-    [Write, Description("Timespan in minutes to set LogonTokenCacheExpirationWindow")] Int32 LogonTokenCacheExpirationWindow;
+    [Write, Description("Timespan in minutes to set FormsTokenLifetime")] UInt32 FormsTokenLifetime;
+    [Write, Description("Timespan in minutes to set WindowsTokenLifetime")] UInt32 WindowsTokenLifetime;
+    [Write, Description("Timespan in minutes to set LogonTokenCacheExpirationWindow")] UInt32 LogonTokenCacheExpirationWindow;
     [Write, Description("Present ensures the configurations are applied"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
     [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
