@@ -6,8 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
 - SPUsageDefinition
   - New resource
+
+### Fixed
+
+- SharePointDsc
+  - Fixed code coverage in pipeline.
 
 ## [4.6.0] - 2021-04-02
 
