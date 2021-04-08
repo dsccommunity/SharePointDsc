@@ -1,0 +1,12 @@
+[ClassVersion("1.0.0.0"), FriendlyName("SPUsageDefinition")]
+class MSFT_SPUsageDefinition : OMI_BaseResource
+{
+    [Key, Description("Name of the Usage Definition to configure")] string Name;
+    [Write, Description("The number of days that usage is retained")] Uint32 DaysRetained;
+    [Write, Description("The number of days to keep usage file retention")] Uint32 DaysToKeepUsageFiles;
+    [Write, Description("Sets the maximum retention size in bytes")] Uint64 MaxTotalSizeInBytes;
+    [Write, Description("True enables the Usage Definition")] Boolean Enabled;
+    [Write, Description("True enables logging to the Usage database(SP2016 and above only)")] Boolean UsageDatabaseEnabled;
+    [Write, Description("Present to configure the diagnostics provider"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
+    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+};
