@@ -79,7 +79,10 @@ Pester:
   CodeCoverageThreshold: 75 # Set to 0 to bypass
   CodeCoverageOutputFile: CodeCoverage.xml
   CodeCoverageOutputFileEncoding: ascii
-  # CodeCoverageMergedOutputFile: JaCoCo_Merged.xml
+
+CodeCoverage:
+  CodeCoverageMergedOutputFile: CodeCov_Merged.xml
+  CodeCoverageFilePattern: Codecov*.xml
 
 DscTest:
   ExcludeTag:
