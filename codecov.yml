@@ -25,4 +25,4 @@ coverage:
         threshold: 5
 
 fixes:
-  - '^\d+\.\d+\.\d+\::SharePointDsc' # move path "X.Y.Z/" => "SharePointDsc"
+  - '^\d+\.\d+\.\d+::SharePointDsc' # move path "X.Y.Z/" => "SharePointDsc"
