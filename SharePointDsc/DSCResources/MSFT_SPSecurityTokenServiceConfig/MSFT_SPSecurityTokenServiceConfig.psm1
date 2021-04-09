@@ -74,7 +74,7 @@ function Get-TargetResource
     if ($PSBoundParameters.ContainsKey("LogonTokenCacheExpirationWindow") -eq $true -and `
         $PSBoundParameters.ContainsKey("FormsTokenLifetime") -eq $true)
     {
-        if ($PSBoundParameters.LogonTokenCacheExpirationWindow -le $PSBoundParameters.FormsTokenLifetime)
+        if ($PSBoundParameters.LogonTokenCacheExpirationWindow -ge $PSBoundParameters.FormsTokenLifetime)
         {
             $message = ("Setting LogonTokenCacheExpirationWindow to a value higher or equal as FormsTokenLifetime is not supported. " + `
                     "Please set LogonTokenCacheExpirationWindow to value lower as FormsTokenLifetime")
