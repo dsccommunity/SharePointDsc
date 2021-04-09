@@ -89,15 +89,15 @@ try
                         }
 
                         It "Should throw on the get method" {
-                            { Get-TargetResource @testParams } | Should -Throw "This resource is only supported on SharePoint 2016 and later. SharePoint 2013 does not support MinRole yet."
+                            { Get-TargetResource @testParams } | Should -Throw "This resource is only supported on SharePoint 2016 and later. SharePoint 2013 does not support MinRole."
                         }
 
                         It "Should throw on the test method" {
-                            { Test-TargetResource @testParams } | Should -Throw "This resource is only supported on SharePoint 2016 and later. SharePoint 2013 does not support MinRole yet."
+                            { Test-TargetResource @testParams } | Should -Throw "This resource is only supported on SharePoint 2016 and later. SharePoint 2013 does not support MinRole."
                         }
 
                         It "Should throw on the set method" {
-                            { Set-TargetResource @testParams } | Should -Throw "This resource is only supported on SharePoint 2016 and later. SharePoint 2013 does not support MinRole yet."
+                            { Set-TargetResource @testParams } | Should -Throw "This resource is only supported on SharePoint 2016 and later. SharePoint 2013 does not support MinRole."
                         }
                     }
                 }

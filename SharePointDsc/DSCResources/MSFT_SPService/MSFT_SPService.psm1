@@ -26,7 +26,7 @@ function Get-TargetResource
     if ((Get-SPDscInstalledProductVersion).FileMajorPart -eq 15)
     {
         $message = ("This resource is only supported on SharePoint 2016 and later. " + `
-                "SharePoint 2013 does not support MinRole yet.")
+                "SharePoint 2013 does not support MinRole.")
         Add-SPDscEvent -Message $message `
             -EntryType 'Error' `
             -EventID 100 `
@@ -90,7 +90,7 @@ function Set-TargetResource
     if ((Get-SPDscInstalledProductVersion).FileMajorPart -eq 15)
     {
         $message = ("This resource is only supported on SharePoint 2016 and later. " + `
-                "SharePoint 2013 does not support MinRole yet.")
+                "SharePoint 2013 does not support MinRole.")
         Add-SPDscEvent -Message $message `
             -EntryType 'Error' `
             -EventID 100 `
