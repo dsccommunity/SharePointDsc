@@ -257,7 +257,7 @@ stages:
               pathToSources: '$(Build.SourcesDirectory)/$(dscBuildVariable.RepositoryName)/'
 
           - script: |
-              bash <(curl -s https://codecov.io/bash) -f "./$(buildFolderName)/CodeCov_Merged.xml" -F unit
+              bash <(curl -s https://codecov.io/bash) -f "./$(buildFolderName)/$(testResultFolderName)/CodeCov_Merged.xml"
             displayName: 'Upload to Codecov.io'
             condition: succeededOrFailed()
 
