@@ -6,16 +6,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
 - SPSecurityTokenServiceConfig
   - Added support for LogonTokenCacheExpirationWindow, WindowsTokenLifetime and FormsTokenLifetime settings
 - SPService
   - New resource
-- SPUsageDefinition
-  - New resource
  - SPSecurityTokenServiceConfig
   - Added support for LogonTokenCacheExpirationWindow, WindowsTokenLifetime and FormsTokenLifetime settings
+- SPUsageDefinition
+  - New resource
+- SPUserProfileProperty
+  - Added check for unique ConnectionNames in PropertyMappings, which is required by SharePoint
 
 ### Fixed
+
 - SharePointDsc
   - Fixed code coverage in pipeline.
 - SPConfigWizard
