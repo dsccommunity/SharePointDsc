@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- SPSearchServiceApp
+  - Added ability to correct database permissions for the farm account, to prevent issue
+    as described in the Readme of the resource
 - SPSecurityTokenServiceConfig
   - Added support for LogonTokenCacheExpirationWindow, WindowsTokenLifetime and FormsTokenLifetime settings
 - SPService

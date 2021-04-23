@@ -50,9 +50,13 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
+                Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                        -ChildPath "..\..\..\output\SharePointDsc\$ModuleVersion\Modules\SharePointDsc.Search\SPSearchServiceApp.psm1" `
+                        -Resolve)
+
                 $getTypeFullName = "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
 
                 Add-Type -TypeDefinition @"
@@ -101,6 +105,42 @@ try
                         ProcessIdentity = "DOMAIN\username"
                     }
                 }
+
+                Mock -CommandName Get-SPFarm -MockWith {
+                    return @{
+                        DefaultServiceAccount = @{
+                            Name = 'contoso\sa_farm'
+                        }
+                    }
+                }
+
+                Mock -CommandName Get-SPEnterpriseSearchCrawlDatabase -MockWith {
+                    return @(
+                        @{
+                            Database = @{
+                                Name                 = 'SP_Search_CrawlStore'
+                                NormalizedDataSource = 'SQL01'
+                            }
+                        }
+                    )
+                }
+
+                Mock -CommandName Get-SPEnterpriseSearchLinksDatabase -MockWith {
+                    return @(
+                        @{
+                            Database = @{
+                                Name                 = 'SP_Search_LinksStore'
+                                NormalizedDataSource = 'SQL01'
+                            }
+                        }
+                    )
+                }
+
+                Mock -CommandName Confirm-UserIsDBOwner -MockWith {
+                    return $true
+                }
+
+                Mock -CommandName Set-UserAsDBOwner -MockWith {}
 
                 function Add-SPDscEvent
                 {
@@ -151,6 +191,7 @@ try
                     $testParams = @{
                         Name            = "Search Service Application"
                         ApplicationPool = "SharePoint Search Services"
+                        DatabaseName    = 'SP_Search'
                         AlertsEnabled   = $true
                         Ensure          = "Present"
                     }
@@ -167,14 +208,18 @@ try
                         else
                         {
                             $spServiceApp = [PSCustomObject]@{
-                                TypeName        = "Search Service Application"
-                                DisplayName     = $testParams.Name
-                                Name            = $testParams.Name
-                                ApplicationPool = @{ Name = $testParams.ApplicationPool }
-                                AlertsEnabled   = $false
-                                Database        = @{
+                                TypeName            = "Search Service Application"
+                                DisplayName         = $testParams.Name
+                                Name                = $testParams.Name
+                                ApplicationPool     = @{ Name = $testParams.ApplicationPool }
+                                AlertsEnabled       = $false
+                                Database            = @{
                                     Name                 = $testParams.DatabaseName
-                                    NormalizedDataSource = $testParams.DatabaseServer
+                                    NormalizedDataSource = 'SQL01'
+                                }
+                                SearchAdminDatabase = @{
+                                    Name                 = $testParams.DatabaseName
+                                    NormalizedDataSource = 'SQL01'
                                 }
                             }
                             $spServiceApp = $spServiceApp | Add-Member ScriptMethod Update {
@@ -247,11 +292,66 @@ try
                 }
             }
 
+            Context -Name "When a service application exists but the database permissions are not fixed" -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        Name                      = "Search Service Application"
+                        ApplicationPool           = "SharePoint Search Services"
+                        DatabaseName              = "SP_Search"
+                        FixFarmAccountPermissions = $true
+                        Ensure                    = "Present"
+                    }
+
+                    Mock Import-Module -MockWith { } -ParameterFilter { $_.Name -eq $ModuleName }
+
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        $spServiceApp = [PSCustomObject]@{
+                            TypeName            = "Search Service Application"
+                            DisplayName         = $testParams.Name
+                            Name                = $testParams.Name
+                            ApplicationPool     = @{ Name = $testParams.ApplicationPool }
+                            Database            = @{
+                                Name                 = $testParams.DatabaseName
+                                NormalizedDataSource = 'SQL01'
+                            }
+                            SearchAdminDatabase = @{
+                                Name                 = $testParams.DatabaseName
+                                NormalizedDataSource = 'SQL01'
+                            }
+                        }
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                            return @{ FullName = $getTypeFullName }
+                        } -PassThru -Force
+                        return $spServiceApp
+                    }
+
+
+                    Mock -CommandName Confirm-UserIsDBOwner -MockWith {
+                        return $false
+                    }
+                }
+
+                It "Should return FixFarmAccountPermissions=False from the get method" {
+                    (Get-TargetResource @testParams).FixFarmAccountPermissions | Should -Be $false
+                    Assert-MockCalled Confirm-UserIsDBOwner
+                }
+
+                It "Should return false when the Test method is called" {
+                    Test-TargetResource @testParams | Should -Be $false
+                }
+
+                It "Should correct database permissions in the set method" {
+                    Set-TargetResource @testParams
+                    Assert-MockCalled Set-UserAsDBOwner -Times 4
+                }
+            }
+
             Context -Name "When a service application exists and is configured correctly" -Fixture {
                 BeforeAll {
                     $testParams = @{
                         Name            = "Search Service Application"
                         ApplicationPool = "SharePoint Search Services"
+                        DatabaseName    = "SP_Search"
                         Ensure          = "Present"
                     }
 
@@ -259,13 +359,17 @@ try
 
                     Mock -CommandName Get-SPServiceApplication -MockWith {
                         $spServiceApp = [PSCustomObject]@{
-                            TypeName        = "Search Service Application"
-                            DisplayName     = $testParams.Name
-                            Name            = $testParams.Name
-                            ApplicationPool = @{ Name = $testParams.ApplicationPool }
-                            Database        = @{
+                            TypeName            = "Search Service Application"
+                            DisplayName         = $testParams.Name
+                            Name                = $testParams.Name
+                            ApplicationPool     = @{ Name = $testParams.ApplicationPool }
+                            Database            = @{
                                 Name                 = $testParams.DatabaseName
-                                NormalizedDataSource = $testParams.DatabaseServer
+                                NormalizedDataSource = 'SQL01'
+                            }
+                            SearchAdminDatabase = @{
+                                Name                 = $testParams.DatabaseName
+                                NormalizedDataSource = 'SQL01'
                             }
                         }
                         $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
@@ -290,6 +394,7 @@ try
                     $testParams = @{
                         Name            = "Search Service Application"
                         ApplicationPool = "SharePoint Search Services"
+                        DatabaseName    = "SP_Search"
                         Ensure          = "Present"
                     }
 
@@ -297,13 +402,17 @@ try
 
                     Mock -CommandName Get-SPServiceApplication -MockWith {
                         $spServiceApp = [PSCustomObject]@{
-                            TypeName        = "Search Service Application"
-                            DisplayName     = $testParams.Name
-                            Name            = $testParams.Name
-                            ApplicationPool = @{ Name = "Wrong App Pool Name" }
-                            Database        = @{
+                            TypeName            = "Search Service Application"
+                            DisplayName         = $testParams.Name
+                            Name                = $testParams.Name
+                            ApplicationPool     = @{ Name = "Wrong App Pool Name" }
+                            Database            = @{
                                 Name                 = $testParams.DatabaseName
-                                NormalizedDataSource = $testParams.DatabaseServer
+                                NormalizedDataSource = 'SQL01'
+                            }
+                            SearchAdminDatabase = @{
+                                Name                 = $testParams.DatabaseName
+                                NormalizedDataSource = 'SQL01'
                             }
                         }
                         $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
@@ -346,6 +455,7 @@ try
                         Name            = "Search Service Application"
                         ProxyName       = "Search SA Proxy"
                         ApplicationPool = "SharePoint Search Services"
+                        DatabaseName    = "SP_Search"
                         Ensure          = "Present"
                     }
 
@@ -353,13 +463,17 @@ try
 
                     Mock -CommandName Get-SPServiceApplication -MockWith {
                         $spServiceApp = [PSCustomObject]@{
-                            TypeName        = "Search Service Application"
-                            DisplayName     = $testParams.Name
-                            Name            = $testParams.Name
-                            ApplicationPool = @{ Name = $testParams.ApplicationPool }
-                            Database        = @{
+                            TypeName            = "Search Service Application"
+                            DisplayName         = $testParams.Name
+                            Name                = $testParams.Name
+                            ApplicationPool     = @{ Name = $testParams.ApplicationPool }
+                            Database            = @{
                                 Name                 = $testParams.DatabaseName
-                                NormalizedDataSource = $testParams.DatabaseServer
+                                NormalizedDataSource = 'SQL01'
+                            }
+                            SearchAdminDatabase = @{
+                                Name                 = $testParams.DatabaseName
+                                NormalizedDataSource = 'SQL01'
                             }
                         }
                         $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
@@ -406,6 +520,7 @@ try
                         Name            = "Search Service Application"
                         ProxyName       = "Search SA Proxy"
                         ApplicationPool = "SharePoint Search Services"
+                        DatabaseName    = "SP_Search"
                         Ensure          = "Present"
                     }
 
@@ -413,13 +528,17 @@ try
 
                     Mock -CommandName Get-SPServiceApplication -MockWith {
                         $spServiceApp = [PSCustomObject]@{
-                            TypeName        = "Search Service Application"
-                            DisplayName     = $testParams.Name
-                            Name            = $testParams.Name
-                            ApplicationPool = @{ Name = $testParams.ApplicationPool }
-                            Database        = @{
+                            TypeName            = "Search Service Application"
+                            DisplayName         = $testParams.Name
+                            Name                = $testParams.Name
+                            ApplicationPool     = @{ Name = $testParams.ApplicationPool }
+                            Database            = @{
                                 Name                 = $testParams.DatabaseName
-                                NormalizedDataSource = $testParams.DatabaseServer
+                                NormalizedDataSource = 'SQL01'
+                            }
+                            SearchAdminDatabase = @{
+                                Name                 = $testParams.DatabaseName
+                                NormalizedDataSource = 'SQL01'
                             }
                         }
                         $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
@@ -457,6 +576,7 @@ try
                     $testParams = @{
                         Name                        = "Search Service Application"
                         ApplicationPool             = "SharePoint Search Services"
+                        DatabaseName                = "SP_Search"
                         Ensure                      = "Present"
                         DefaultContentAccessAccount = $mockCredential
                     }
@@ -465,13 +585,17 @@ try
 
                     Mock -CommandName Get-SPServiceApplication -MockWith {
                         $spServiceApp = [PSCustomObject]@{
-                            TypeName        = "Search Service Application"
-                            DisplayName     = $testParams.Name
-                            Name            = $testParams.Name
-                            ApplicationPool = @{ Name = $testParams.ApplicationPool }
-                            Database        = @{
+                            TypeName            = "Search Service Application"
+                            DisplayName         = $testParams.Name
+                            Name                = $testParams.Name
+                            ApplicationPool     = @{ Name = $testParams.ApplicationPool }
+                            Database            = @{
                                 Name                 = $testParams.DatabaseName
-                                NormalizedDataSource = $testParams.DatabaseServer
+                                NormalizedDataSource = 'SQL01'
+                            }
+                            SearchAdminDatabase = @{
+                                Name                 = $testParams.DatabaseName
+                                NormalizedDataSource = 'SQL01'
                             }
                         }
                         $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
@@ -515,6 +639,7 @@ try
                     $testParams = @{
                         Name                        = "Search Service Application"
                         ApplicationPool             = "SharePoint Search Services"
+                        DatabaseName                = "SP_Search"
                         Ensure                      = "Present"
                         DefaultContentAccessAccount = $mockCredential
                     }
@@ -523,15 +648,19 @@ try
 
                     Mock -CommandName Get-SPServiceApplication -MockWith {
                         $spServiceApp = [PSCustomObject]@{
-                            TypeName        = "Search Service Application"
-                            DisplayName     = $testParams.Name
-                            Name            = $testParams.Name
-                            ApplicationPool = @{
+                            TypeName            = "Search Service Application"
+                            DisplayName         = $testParams.Name
+                            Name                = $testParams.Name
+                            ApplicationPool     = @{
                                 Name = $testParams.ApplicationPool
                             }
-                            Database        = @{
+                            Database            = @{
                                 Name                 = $testParams.DatabaseName
-                                NormalizedDataSource = $testParams.DatabaseServer
+                                NormalizedDataSource = 'SQL01'
+                            }
+                            SearchAdminDatabase = @{
+                                Name                 = $testParams.DatabaseName
+                                NormalizedDataSource = 'SQL01'
                             }
                         }
                         $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
@@ -559,6 +688,7 @@ try
                     $testParams = @{
                         Name            = "Search Service Application"
                         ApplicationPool = "SharePoint Search Services"
+                        DatabaseName    = "SP_Search"
                         Ensure          = "Present"
                         SearchCenterUrl = "http://search.sp.contoso.com"
                     }
@@ -569,14 +699,18 @@ try
 
                     Mock -CommandName Get-SPServiceApplication -MockWith {
                         $spServiceApp = [PSCustomObject]@{
-                            TypeName        = "Search Service Application"
-                            DisplayName     = $testParams.Name
-                            Name            = $testParams.Name
-                            ApplicationPool = @{ Name = $testParams.ApplicationPool }
-                            SearchCenterUrl = "http://wrong.url.here"
-                            Database        = @{
+                            TypeName            = "Search Service Application"
+                            DisplayName         = $testParams.Name
+                            Name                = $testParams.Name
+                            ApplicationPool     = @{ Name = $testParams.ApplicationPool }
+                            SearchCenterUrl     = "http://wrong.url.here"
+                            Database            = @{
                                 Name                 = $testParams.DatabaseName
-                                NormalizedDataSource = $testParams.DatabaseServer
+                                NormalizedDataSource = 'SQL01'
+                            }
+                            SearchAdminDatabase = @{
+                                Name                 = $testParams.DatabaseName
+                                NormalizedDataSource = 'SQL01'
                             }
                         }
                         $spServiceApp = $spServiceApp | Add-Member ScriptMethod Update {
@@ -627,6 +761,7 @@ try
                     $testParams = @{
                         Name            = "Search Service Application"
                         ApplicationPool = "SharePoint Search Services"
+                        DatabaseName    = "SP_Search"
                         Ensure          = "Present"
                         AlertsEnabled   = $true
                     }
@@ -637,14 +772,18 @@ try
 
                     Mock -CommandName Get-SPServiceApplication -MockWith {
                         $spServiceApp = [PSCustomObject]@{
-                            TypeName        = "Search Service Application"
-                            DisplayName     = $testParams.Name
-                            Name            = $testParams.Name
-                            ApplicationPool = @{ Name = $testParams.ApplicationPool }
-                            AlertsEnabled   = $false
-                            Database        = @{
+                            TypeName            = "Search Service Application"
+                            DisplayName         = $testParams.Name
+                            Name                = $testParams.Name
+                            ApplicationPool     = @{ Name = $testParams.ApplicationPool }
+                            AlertsEnabled       = $false
+                            Database            = @{
                                 Name                 = $testParams.DatabaseName
-                                NormalizedDataSource = $testParams.DatabaseServer
+                                NormalizedDataSource = 'SQL01'
+                            }
+                            SearchAdminDatabase = @{
+                                Name                 = $testParams.DatabaseName
+                                NormalizedDataSource = 'SQL01'
                             }
                         }
                         $spServiceApp = $spServiceApp | Add-Member ScriptMethod Update {
@@ -695,6 +834,7 @@ try
                     $testParams = @{
                         Name            = "Search Service Application"
                         ApplicationPool = "SharePoint Search Services"
+                        DatabaseName    = "SP_Search"
                         Ensure          = "Present"
                     }
 
@@ -708,14 +848,18 @@ try
 
                     Mock -CommandName Get-SPServiceApplication -MockWith {
                         $spServiceApp = [PSCustomObject]@{
-                            TypeName        = "Search Service Application"
-                            DisplayName     = $testParams.Name
-                            Name            = $testParams.Name
-                            ApplicationPool = @{ Name = $testParams.ApplicationPool }
-                            SearchCenterUrl = "http://search.sp.contoso.com"
-                            Database        = @{
+                            TypeName            = "Search Service Application"
+                            DisplayName         = $testParams.Name
+                            Name                = $testParams.Name
+                            ApplicationPool     = @{ Name = $testParams.ApplicationPool }
+                            SearchCenterUrl     = "http://search.sp.contoso.com"
+                            Database            = @{
                                 Name                 = $testParams.DatabaseName
-                                NormalizedDataSource = $testParams.DatabaseServer
+                                NormalizedDataSource = 'SQL01'
+                            }
+                            SearchAdminDatabase = @{
+                                Name                 = $testParams.DatabaseName
+                                NormalizedDataSource = 'SQL01'
                             }
                         }
                         $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
@@ -743,6 +887,7 @@ try
                     $testParams = @{
                         Name            = "Search Service Application"
                         ApplicationPool = "SharePoint Search Services"
+                        DatabaseName    = "SP_Search"
                         Ensure          = "Absent"
                     }
 
@@ -750,15 +895,19 @@ try
 
                     Mock -CommandName Get-SPServiceApplication -MockWith {
                         $spServiceApp = [PSCustomObject]@{
-                            TypeName        = "Search Service Application"
-                            DisplayName     = $testParams.Name
-                            Name            = $testParams.Name
-                            ApplicationPool = @{
+                            TypeName            = "Search Service Application"
+                            DisplayName         = $testParams.Name
+                            Name                = $testParams.Name
+                            ApplicationPool     = @{
                                 Name = $testParams.ApplicationPool
                             }
-                            Database        = @{
+                            Database            = @{
                                 Name                 = $testParams.DatabaseName
-                                NormalizedDataSource = $testParams.DatabaseServer
+                                NormalizedDataSource = 'SQL01'
+                            }
+                            SearchAdminDatabase = @{
+                                Name                 = $testParams.DatabaseName
+                                NormalizedDataSource = 'SQL01'
                             }
                         }
                         $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
@@ -811,6 +960,7 @@ try
                     $testParams = @{
                         Name            = "Search Service Application"
                         ApplicationPool = "SharePoint Search Services"
+                        DatabaseName    = "SP_Search"
                         Ensure          = "Present"
                         CloudIndex      = $true
                     }
@@ -819,14 +969,18 @@ try
 
                     Mock -CommandName Get-SPServiceApplication -MockWith {
                         $spServiceApp = [PSCustomObject]@{
-                            TypeName        = "Search Service Application"
-                            DisplayName     = $testParams.Name
-                            Name            = $testParams.Name
-                            ApplicationPool = @{ Name = $testParams.ApplicationPool }
-                            CloudIndex      = $true
-                            Database        = @{
+                            TypeName            = "Search Service Application"
+                            DisplayName         = $testParams.Name
+                            Name                = $testParams.Name
+                            ApplicationPool     = @{ Name = $testParams.ApplicationPool }
+                            CloudIndex          = $true
+                            Database            = @{
                                 Name                 = $testParams.DatabaseName
-                                NormalizedDataSource = $testParams.DatabaseServer
+                                NormalizedDataSource = 'SQL01'
+                            }
+                            SearchAdminDatabase = @{
+                                Name                 = $testParams.DatabaseName
+                                NormalizedDataSource = 'SQL01'
                             }
                         }
                         $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {

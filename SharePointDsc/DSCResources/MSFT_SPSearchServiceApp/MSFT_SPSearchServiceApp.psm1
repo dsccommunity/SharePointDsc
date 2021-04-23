@@ -56,6 +56,10 @@ function Get-TargetResource
         $AlertsEnabled,
 
         [Parameter()]
+        [System.Boolean]
+        $FixFarmAccountPermissions = $true,
+
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $DefaultContentAccessAccount,
 
@@ -72,7 +76,8 @@ function Get-TargetResource
         $params = $args[0]
         $scriptRoot = $args[1]
 
-        Import-Module -Name (Join-Path $scriptRoot "MSFT_SPSearchServiceApp.psm1")
+        $modulePath = "..\..\Modules\SharePointDsc.Search\SPSearchServiceApp.psm1"
+        Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve) -Verbose:$false
 
         [void][System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SharePoint")
         [void][System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SharePoint.Administration")
@@ -143,6 +148,56 @@ function Get-TargetResource
                 }
             }
 
+            Write-Verbose -Message "Checking Farm account permissions"
+            $correctFarmAccountPermissions = $true
+
+            $farmAccount = (Get-SPFarm).DefaultServiceAccount.Name
+            $dbServer = $serviceApp.SearchAdminDatabase.NormalizedDataSource
+
+            Write-Verbose -Message "Checking Admin Database"
+            $adminDB = $serviceApp.SearchAdminDatabase.Name
+            if ($correctFarmAccountPermissions -eq $true)
+            {
+                $correctFarmAccountPermissions = Confirm-UserIsDBOwner -SQLServer $dbServer `
+                    -Database $adminDB `
+                    -User $farmAccount
+            }
+
+            Write-Verbose -Message "Checking Analytics reporting Database"
+            $analyticsDB = "$($adminDB)_AnalyticsReportingStore"
+            if ($correctFarmAccountPermissions -eq $true)
+            {
+                $correctFarmAccountPermissions = Confirm-UserIsDBOwner -SQLServer $dbServer `
+                    -Database $analyticsDB `
+                    -User $farmAccount
+            }
+
+            Write-Verbose -Message "Checking Crawl Database(s)"
+            if ($correctFarmAccountPermissions -eq $true)
+            {
+                foreach ($database in (Get-SPEnterpriseSearchCrawlDatabase -SearchApplication $serviceApp))
+                {
+                    $crawlDB = $database.Database.Name
+                    $dbServer = $database.Database.NormalizedDataSource
+                    $correctFarmAccountPermissions = Confirm-UserIsDBOwner -SQLServer $dbServer `
+                        -Database $crawlDB `
+                        -User $farmAccount
+                }
+            }
+
+            Write-Verbose -Message "Checking Links Database(s)"
+            if ($correctFarmAccountPermissions -eq $true)
+            {
+                foreach ($database in (Get-SPEnterpriseSearchLinksDatabase -SearchApplication $serviceApp))
+                {
+                    $linksDB = $database.Database.Name
+                    $dbServer = $database.Database.NormalizedDataSource
+                    $correctFarmAccountPermissions = Confirm-UserIsDBOwner -SQLServer $dbServer `
+                        -Database $linksDB `
+                        -User $farmAccount
+                }
+            }
+
             $returnVal = @{
                 Name                        = $serviceApp.DisplayName
                 ProxyName                   = $pName
@@ -154,6 +209,7 @@ function Get-TargetResource
                 DefaultContentAccessAccount = $defaultAccount
                 CloudIndex                  = $cloudIndex
                 AlertsEnabled               = $serviceApp.AlertsEnabled
+                FixFarmAccountPermissions   = $correctFarmAccountPermissions
             }
             return $returnVal
         }
@@ -212,6 +268,10 @@ function Set-TargetResource
         $AlertsEnabled,
 
         [Parameter()]
+        [System.Boolean]
+        $FixFarmAccountPermissions = $true,
+
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $DefaultContentAccessAccount,
 
@@ -222,12 +282,13 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting Search service application '$Name'"
 
+    $PSBoundParameters.FixFarmAccountPermissions = $FixFarmAccountPermissions
+
     $result = Get-TargetResource @PSBoundParameters
 
     if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present")
     {
         # Create the service app as it doesn't exist
-
         Write-Verbose -Message "Creating Search Service Application $Name"
         Invoke-SPDscCommand -Credential $InstallAccount `
             -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
@@ -446,6 +507,87 @@ function Set-TargetResource
         }
     }
 
+    # Only check and correct when Ensure=Present, FixFarmAccountPermissions=True and the permissions are incorrect
+    if ($Ensure -eq "Present" -and `
+            $FixFarmAccountPermissions -eq $true -and `
+            $result.FixFarmAccountPermissions -eq $false)
+    {
+        Write-Verbose -Message "Fixing database permissions for Search Service Application $Name"
+        Invoke-SPDscCommand -Credential $InstallAccount `
+            -Arguments @($PSBoundParameters, $PSScriptRoot) `
+            -ScriptBlock {
+            $params = $args[0]
+            $scriptRoot = $args[1]
+
+            $modulePath = "..\..\Modules\SharePointDsc.Search\SPSearchServiceApp.psm1"
+            Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve) -Verbose:$false
+
+            $serviceApp = Get-SPServiceApplication | Where-Object -FilterScript {
+                $_.Name -eq $params.Name -and `
+                    $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
+            }
+
+            $farmAccount = (Get-SPFarm).DefaultServiceAccount.Name
+            $dbServer = $serviceApp.SearchAdminDatabase.NormalizedDataSource
+
+            Write-Verbose -Message "Checking and correcting Admin Database"
+            $adminDB = $serviceApp.SearchAdminDatabase.Name
+            if ((Confirm-UserIsDBOwner -SQLServer $dbServer `
+                        -Database $adminDB `
+                        -User $farmAccount) -eq $false)
+            {
+                Set-UserAsDBOwner -SQLServer $dbServer `
+                    -Database $adminDB `
+                    -User $farmAccount
+            }
+
+            Write-Verbose -Message "Checking and correcting Analytics reporting Database"
+            $analyticsDB = "$($adminDB)_AnalyticsReportingStore"
+            if ((Confirm-UserIsDBOwner -SQLServer $dbServer `
+                        -Database $analyticsDB `
+                        -User $farmAccount) -eq $false)
+            {
+                Set-UserAsDBOwner -SQLServer $dbServer `
+                    -Database $analyticsDB `
+                    -User $farmAccount
+            }
+
+            Write-Verbose -Message "Checking and correcting Crawl Database(s)"
+            foreach ($database in (Get-SPEnterpriseSearchCrawlDatabase -SearchApplication $serviceApp))
+            {
+                $crawlDB = $database.Database.Name
+                Write-Verbose -Message "  * Processing $crawlDB"
+
+                $dbServer = $database.Database.NormalizedDataSource
+                if ((Confirm-UserIsDBOwner -SQLServer $dbServer `
+                            -Database $crawlDB `
+                            -User $farmAccount) -eq $false)
+                {
+                    Set-UserAsDBOwner -SQLServer $dbServer `
+                        -Database $crawlDB `
+                        -User $farmAccount
+                }
+            }
+
+            Write-Verbose -Message "Checking and correcting Links Database(s)"
+            foreach ($database in (Get-SPEnterpriseSearchLinksDatabase -SearchApplication $serviceApp))
+            {
+                $linksDB = $database.Database.Name
+                Write-Verbose -Message "  * Processing $linksDB"
+
+                $dbServer = $database.Database.NormalizedDataSource
+                if ((Confirm-UserIsDBOwner -SQLServer $dbServer `
+                            -Database $linksDB `
+                            -User $farmAccount) -eq $false)
+                {
+                    Set-UserAsDBOwner -SQLServer $dbServer `
+                        -Database $linksDB `
+                        -User $farmAccount
+                }
+            }
+        }
+    }
+
     if ($Ensure -eq "Absent")
     {
         # The service app should not exit
@@ -526,6 +668,10 @@ function Test-TargetResource
         $AlertsEnabled,
 
         [Parameter()]
+        [System.Boolean]
+        $FixFarmAccountPermissions = $true,
+
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $DefaultContentAccessAccount,
 
@@ -537,6 +683,7 @@ function Test-TargetResource
     Write-Verbose -Message "Testing Search service application '$Name'"
 
     $PSBoundParameters.Ensure = $Ensure
+    $PSBoundParameters.FixFarmAccountPermissions = $FixFarmAccountPermissions
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
@@ -555,8 +702,18 @@ function Test-TargetResource
                     "Actual: $current Desired: $desired")
             Write-Verbose -Message $message
             Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+            return $false
+        }
+    }
 
-            Write-Verbose -Message "Desired: $desired. Current: $current."
+    if ($FixFarmAccountPermissions -eq $true)
+    {
+        if ($CurrentValues.FixFarmAccountPermissions -eq $false)
+        {
+            $message = ("FixFarmAccountPermissions is set to True, but the Search databases " + `
+                    "do not have the correct permissions")
+            Write-Verbose -Message $message
+            Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
             return $false
         }
     }

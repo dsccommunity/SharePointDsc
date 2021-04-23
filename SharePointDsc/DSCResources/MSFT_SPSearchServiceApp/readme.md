@@ -17,3 +17,9 @@ parameter, the service application is provisioned.
 NOTE: The WindowsServiceAccount parameter is deprecated and no longer does
 anything. The functionality for changing this account has been moved to
 SPSearchServiceSettings.
+
+NOTE2: The resource is also able to add the Farm account as db_owner to all
+Search databases, to prevent the issue described here:
+https://www.techmikael.com/2014/10/caution-if-you-have-used.html
+Use the FixFarmAccountPermissions parameter to implement this fix (default
+$true if not specified).
