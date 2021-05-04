@@ -18,8 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - SharePointDsc
   - Fixed code coverage in pipeline.
-
--SPConfigWizard
+- SPConfigWizard
   - Fixed issue with executing PSCONFIG remotely.
 
 ## [4.6.0] - 2021-04-02
