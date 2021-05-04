@@ -277,6 +277,9 @@ function Set-TargetResource
             $count++
         }
 
+        # Fix for issue with psconfig on SharePoint 2019
+        Upgrade-SPFarm - ServerOnly -SkipDatabaseUpgrade -SkipSiteUpgrade -Confirm:$false
+
         $stdOutTempFile = "$env:TEMP\$((New-Guid).Guid)"
         $psconfig = Start-Process -FilePath $psconfigExe `
             -ArgumentList "-cmd upgrade -inplace b2b -wait -cmd applicationcontent -install -cmd installfeatures -cmd secureresources -cmd services -install" `
