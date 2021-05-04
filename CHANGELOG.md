@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+<<<<<<< HEAD
+=======
+
+- SPSecurityTokenServiceConfig
+  - Added support for LogonTokenCacheExpirationWindow, WindowsTokenLifetime and FormsTokenLifetime settings
+- SPService
+  - New resource
+>>>>>>> 202b8a5119026c2bc6387df9e85e43d082cf888d
 - SPUsageDefinition
   - New resource
  - SPSecurityTokenServiceConfig
@@ -20,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [4.6.0] - 2021-04-02
 
 ### Added
+
 - SharePointDsc
   - Export-SPDscDiagnosticData cmdlet to create a diagnostic package which can
     easily be shared for troubleshooting

@@ -282,7 +282,7 @@ function Set-TargetResource
                     -Source $MyInvocation.MyCommand.Source
                 throw $message
             }
-            
+
             $config.LogonTokenCacheExpirationWindow = (New-TimeSpan -Minutes $params.LogonTokenCacheExpirationWindow)
         }
 
