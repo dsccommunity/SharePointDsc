@@ -4,18 +4,18 @@ The format is based on and uses the types of changes according to [Keep a Change
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-- SPSecurityTokenServiceConfig
-  - Added support for LogonTokenCacheExpirationWindow, WindowsTokenLifetime and FormsTokenLifetime settings
 
 ### Added
-
 - SPUsageDefinition
   - New resource
+ - SPSecurityTokenServiceConfig
+  - Added support for LogonTokenCacheExpirationWindow, WindowsTokenLifetime and FormsTokenLifetime settings
 
 ### Fixed
-
 - SharePointDsc
   - Fixed code coverage in pipeline.
+-SPConfigWizard
+  - Fixed issue with executing PSCONFIG remotely.
 
 ## [4.6.0] - 2021-04-02
 
