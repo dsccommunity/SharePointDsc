@@ -89,6 +89,9 @@ function Get-SPDscConfigDBStatus
         }
 
         $connection.ChangeDatabase('TempDB')
+
+        Write-Verbose -Message "Testing lock for $Database"
+
         # Added $Database just in case multiple farms are added at once.
         $command.CommandText = "SELECT COUNT([name]) FROM sys.tables WHERE [name] = '##SPDscLock$Database'"
         $lockExists = ($command.ExecuteScalar() -eq 1)
@@ -203,10 +206,13 @@ The name of the SQL server to check against
 
 The name of the database to validate as the configuration database
 
-.RETURNS the active connection to the locktable to prevent it being destroyed.
+.RETURNS
+
+the active connection to the locktable to prevent it being destroyed.
+
 .EXAMPLE
 
-Add-SPDscConfigDBLock -SQLServer sql.contoso.com -Database SP_Config
+$lockConnection = Add-SPDscConfigDBLock -SQLServer sql.contoso.com -Database SP_Config
 
 #>
 function Add-SPDscConfigDBLock
@@ -247,6 +253,7 @@ function Add-SPDscConfigDBLock
         $connection.Open()
         $command.Connection = $connection
 
+        # Added $Database just in case multiple farms are added at once.
         $command.CommandText = "CREATE TABLE ##SPDscLock$Database (Locked BIT)"
         $null = $command.ExecuteNonQuery()
     }
@@ -284,6 +291,10 @@ The connection returned by Add-SPDscConfigDBLock
 .EXAMPLE
 
 Remove-SPDscConfigDBLock -SQLServer sql.contoso.com -Database SP_Config
+
+.EXAMPLE
+
+Remove-SPDscConfigDBLock -SQLServer sql.contoso.com -Database SP_Config -Connection $lockConnection
 
 #>
 function Remove-SPDscConfigDBLock
@@ -335,6 +346,7 @@ function Remove-SPDscConfigDBLock
             $Connection.Open()
         }
 
+        # Added $Database just in case multiple farms are added at once.
         $command.CommandText = "DROP TABLE [##SPDscLock$Database]"
         $null = $command.ExecuteNonQuery()
     }
