@@ -20,6 +20,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - New resource
 - SPUserProfileProperty
   - Added check for unique ConnectionNames in PropertyMappings, which is required by SharePoint
+- SPWebAppAuthentication
+  - Added ability to configure generic authentication settings per zone, like allow
+    anonymous authentication or a custom signin page
 
 ### Fixed
 

@@ -8,6 +8,14 @@ Class MSFT_SPWebAppAuthenticationMode
     [Write, Description("Name of Membership Provider (only for FBA)")] String MembershipProvider;
     [Write, Description("Name of the Role Manager (only for FBA)")] String RoleProvider;
 };
+[ClassVersion("1.0.0.0")]
+Class MSFT_SPWebAppZoneSettings
+{
+    [Write, Description("Use Basic Authentication (only for Windows Authentication)")] Boolean AnonymousAuthentication;
+    [Write, Description("Specifies the used authentication method")] String CustomSignInPage;
+    [Write, Description("Use Basic Authentication (only for Windows Authentication)")] Boolean EnableClientIntegration;
+    [Write, Description("Use Basic Authentication (only for Windows Authentication)")] Boolean RequireUseRemoteInterfaces;
+};
 [ClassVersion("1.0.0.0"), FriendlyName("SPWebAppAuthentication")]
 class MSFT_SPWebAppAuthentication : OMI_BaseResource
 {
@@ -17,6 +25,10 @@ class MSFT_SPWebAppAuthentication : OMI_BaseResource
     [Write, Description("Specifies the authentication for the Internet zone."), EmbeddedInstance("MSFT_SPWebAppAuthenticationMode")] string Internet[];
     [Write, Description("Specifies the authentication for the Extranet zone."), EmbeddedInstance("MSFT_SPWebAppAuthenticationMode")] string Extranet[];
     [Write, Description("Specifies the authentication for the Custom zone."), EmbeddedInstance("MSFT_SPWebAppAuthenticationMode")] string Custom[];
+    [Write, Description("Specifies the zone settings for the Default zone."), EmbeddedInstance("MSFT_SPWebAppZoneSettings")] string DefaultSettings;
+    [Write, Description("Specifies the zone settings for the Intranet zone."), EmbeddedInstance("MSFT_SPWebAppZoneSettings")] string IntranetSettings;
+    [Write, Description("Specifies the zone settings for the Internet zone."), EmbeddedInstance("MSFT_SPWebAppZoneSettings")] string InternetSettings;
+    [Write, Description("Specifies the zone settings for the Extranet zone."), EmbeddedInstance("MSFT_SPWebAppZoneSettings")] string ExtranetSettings;
+    [Write, Description("Specifies the zone settings for the Custom zone."), EmbeddedInstance("MSFT_SPWebAppZoneSettings")] string CustomSettings;
     [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] string InstallAccount;
 };
-

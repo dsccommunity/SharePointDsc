@@ -3,10 +3,11 @@
 **Type:** Distributed
 **Requires CredSSP:** No
 
-This resource is responsible for configuring the authentication on a web
-application within the local SharePoint farm. The resource is able to
-configure the five available zones (if they exist) separately and each
-zone can have multiple authentication methods configured.
+This resource is responsible for configuring the authentication and
+authentication settings on a web application within the local SharePoint
+farm. The resource is able to configure the five available zones (if
+they exist) separately and each zone can have multiple authentication
+methods configured.
 
 NOTE:
 This resource cannot be used to convert a Classic web application
