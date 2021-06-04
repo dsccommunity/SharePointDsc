@@ -1199,7 +1199,7 @@ function Set-TargetResource
                 Write-Verbose -Message "Updating Developer Dashboard setting"
                 $admService = Get-SPDscContentService
                 $developerDashboardSettings = $admService.DeveloperDashboardSettings
-                $developerDashboardSettings.DisplayLevel = [Microsoft.SharePoint.Administration.SPDeveloperDashboardLevel]::$params.DeveloperDashboard
+                $developerDashboardSettings.DisplayLevel = [Microsoft.SharePoint.Administration.SPDeveloperDashboardLevel]::$($params.DeveloperDashboard)
                 $developerDashboardSettings.Update()
             }
 
