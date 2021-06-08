@@ -53,8 +53,8 @@ try
                 Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
-                Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                        -ChildPath "..\..\..\output\SharePointDsc\$ModuleVersion\Modules\SharePointDsc.Search\SPSearchServiceApp.psm1" `
+                Import-Module -Name (Join-Path -Path (Get-Module SharePointDsc -ListAvailable).ModuleBase `
+                        -ChildPath "Modules\SharePointDsc.Search\SPSearchServiceApp.psm1" `
                         -Resolve)
 
                 $getTypeFullName = "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"

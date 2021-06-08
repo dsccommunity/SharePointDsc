@@ -37,7 +37,7 @@ function New-SPDscUnitTestHelper
     $describeHeader += "[SP Build: $spBuild] "
 
     $repoRoot = Join-Path -Path $PSScriptRoot -ChildPath "..\..\" -Resolve
-    $moduleRoot = Join-Path -Path $repoRoot -ChildPath "output\SharePointDsc\$ModuleVersion"
+    $moduleRoot = (Get-Module SharePointDsc -ListAvailable).ModuleBase
 
     $initScript = @"
     Set-StrictMode -Version 1
@@ -142,21 +142,21 @@ function Write-SPDscStubFile
     $SPStubContent = ((Get-Command | Where-Object -FilterScript {
                 $_.Source -eq "Microsoft.SharePoint.PowerShell"
             } ) | ForEach-Object -Process {
-        $signature = $null
-        $command = $_
-        $metadata = New-Object -TypeName System.Management.Automation.CommandMetaData `
-            -ArgumentList $command
-        $definition = [System.Management.Automation.ProxyCommand]::Create($metadata)
-        foreach ($line in $definition -split "`n")
-        {
-            if ($line.Trim() -eq 'begin')
+            $signature = $null
+            $command = $_
+            $metadata = New-Object -TypeName System.Management.Automation.CommandMetaData `
+                -ArgumentList $command
+            $definition = [System.Management.Automation.ProxyCommand]::Create($metadata)
+            foreach ($line in $definition -split "`n")
             {
-                break
+                if ($line.Trim() -eq 'begin')
+                {
+                    break
+                }
+                $signature += $line
             }
-            $signature += $line
-        }
-        "function $($command.Name) { `n  $signature `n } `n"
-    }) | Out-String
+            "function $($command.Name) { `n  $signature `n } `n"
+        }) | Out-String
 
     foreach ($line in $SPStubContent.Split([Environment]::NewLine))
     {
