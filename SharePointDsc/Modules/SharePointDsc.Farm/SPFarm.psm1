@@ -89,7 +89,10 @@ function Get-SPDscConfigDBStatus
         }
 
         $connection.ChangeDatabase('TempDB')
-        $command.CommandText = "SELECT COUNT([name]) FROM sys.tables WHERE [name] = 'SPDscLock'"
+
+        # Added $Database just in case multiple farms are added at once.
+        Write-Verbose -Message "Testing lock for $Database"
+        $command.CommandText = "SELECT COUNT([name]) FROM sys.tables WHERE [name] = '##SPDscLock$Database'"
         $lockExists = ($command.ExecuteScalar() -eq 1)
 
         return @{
@@ -204,7 +207,7 @@ The name of the database to validate as the configuration database
 
 .EXAMPLE
 
-Add-SPDscConfigDBLock -SQLServer sql.contoso.com -Database SP_Config
+$lockConnection = Add-SPDscConfigDBLock -SQLServer sql.contoso.com -Database SP_Config
 
 #>
 function Add-SPDscConfigDBLock
@@ -224,7 +227,7 @@ function Add-SPDscConfigDBLock
         $DatabaseCredentials
     )
 
-    Write-Verbose -Message "Creating lock database $($Database)_Lock"
+    Write-Verbose -Message "Creating lock for database $Database"
 
     $connection = New-Object -TypeName "System.Data.SqlClient.SqlConnection"
     # If we specified SQL credentials then try to use them
@@ -245,29 +248,28 @@ function Add-SPDscConfigDBLock
         $connection.Open()
         $command.Connection = $connection
 
-        $command.CommandText = "CREATE TABLE SPDscLock (Locked BIT)"
+        # Added $Database just in case multiple farms are added at once.
+        $command.CommandText = "CREATE TABLE ##SPDscLock$Database (Locked BIT)"
         $null = $command.ExecuteNonQuery()
     }
     finally
     {
-        if ($connection.State -eq "Open")
-        {
-            $connection.Close()
-            $connection.Dispose()
-        }
+        # cannot close the connection here, that would destroy the ##lock table
     }
+
+    return $connection
 }
 
 <#
 
 .SYNOPSIS
 
-Remove-SPDscConfigDBLock is used to create a lock to tell other servers that the
-config DB is currently provisioning
+Remove-SPDscConfigDBLock will remove the lock created by the
+Add-SPDscConfigDBLock command.
 
 .DESCRIPTION
 
-Remove-SPDscConfigDBLock will cremove the lock database created by the
+Remove-SPDscConfigDBLock will remove the lock created by the
 Add-SPDscConfigDBLock command.
 
 .PARAMETER SQLServer
@@ -280,7 +282,7 @@ The name of the database to validate as the configuration database
 
 .EXAMPLE
 
-Remove-SPDscConfigDBLock -SQLServer sql.contoso.com -Database SP_Config
+Remove-SPDscConfigDBLock -SQLServer sql.contoso.com -Database SP_Config -Connection $lockConnection
 
 #>
 function Remove-SPDscConfigDBLock
@@ -297,39 +299,55 @@ function Remove-SPDscConfigDBLock
 
         [Parameter()]
         [System.Management.Automation.PSCredential]
-        $DatabaseCredentials
+        $DatabaseCredentials,
+
+        [Parameter(Mandatory = $true)]
+        [System.Data.SqlClient.SqlConnection]
+        $Connection
     )
 
-    Write-Verbose -Message "Removing lock database $($Database)_Lock"
+    Write-Verbose -Message "Removing lock for database $Database"
 
-    $connection = New-Object -TypeName "System.Data.SqlClient.SqlConnection"
-    # If we specified SQL credentials then try to use them
-    if ($PSBoundParameters.ContainsKey("DatabaseCredentials"))
+    if ($Connection.State -ne "Open")
     {
-        $marshal = [Runtime.InteropServices.Marshal]
-        $dbCredentialsPlainPassword = $marshal::PtrToStringAuto($marshal::SecureStringToBSTR($DatabaseCredentials.Password))
-        $connection.ConnectionString = "Server=$SQLServer;Integrated Security=False;User ID=$($DatabaseCredentials.Username);Password=$dbCredentialsPlainPassword;Database=Master"
+        $conn = New-Object -TypeName "System.Data.SqlClient.SqlConnection"
+
+        # If we specified SQL credentials then try to use them
+        if ($PSBoundParameters.ContainsKey("DatabaseCredentials"))
+        {
+            $marshal = [Runtime.InteropServices.Marshal]
+            $dbCredentialsPlainPassword = $marshal::PtrToStringAuto($marshal::SecureStringToBSTR($DatabaseCredentials.Password))
+            $conn.ConnectionString = "Server=$SQLServer;Integrated Security=False;User ID=$($DatabaseCredentials.Username);Password=$dbCredentialsPlainPassword;Database=Master"
+        }
+        else # Just use Windows integrated auth
+        {
+            $conn.ConnectionString = "Server=$SQLServer;Integrated Security=SSPI;Database=TempDB"
+        }
     }
-    else # Just use Windows integrated auth
+    else
     {
-        $connection.ConnectionString = "Server=$SQLServer;Integrated Security=SSPI;Database=TempDB"
+        $conn = $Connection
     }
+
     $command = New-Object -TypeName "System.Data.SqlClient.SqlCommand"
+    $command.Connection = $conn
 
     try
     {
-        $connection.Open()
-        $command.Connection = $connection
+        if ($conn.State -ne "Open")
+        {
+            $conn.Open()
+        }
 
-        $command.CommandText = "DROP TABLE [SPDscLock]"
+        $command.CommandText = "DROP TABLE [##SPDscLock$Database]"
         $null = $command.ExecuteNonQuery()
     }
     finally
     {
-        if ($connection.State -eq "Open")
+        if ($conn.State -eq "Open")
         {
-            $connection.Close()
-            $connection.Dispose()
+            $conn.Close()
+            $conn.Dispose()
         }
     }
 }

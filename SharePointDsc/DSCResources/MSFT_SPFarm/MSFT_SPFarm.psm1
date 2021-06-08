@@ -1032,8 +1032,8 @@ function Set-TargetResource
             {
                 Write-Verbose -Message "The database does not exist, so create a new farm"
 
-                Write-Verbose -Message "Creating Lock database to prevent two servers creating the same farm"
-                Add-SPDscConfigDBLock -SQLServer $params.DatabaseServer `
+                Write-Verbose -Message "Creating Lock to prevent two servers creating the same farm"
+                $lockConnection = Add-SPDscConfigDBLock -SQLServer $params.DatabaseServer `
                     -Database $params.FarmConfigDatabaseName `
                     @databaseCredentialsParam
 
@@ -1063,9 +1063,10 @@ function Set-TargetResource
                 }
                 finally
                 {
-                    Write-Verbose -Message "Removing Lock database"
+                    Write-Verbose -Message "Removing Lock"
                     Remove-SPDscConfigDBLock -SQLServer $params.DatabaseServer `
                         -Database $params.FarmConfigDatabaseName `
+                        -Connection $lockConnection `
                         @databaseCredentialsParam
                 }
             }

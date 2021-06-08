@@ -50,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
                 $mockPassword = ConvertTo-SecureString -String 'password' -AsPlainText -Force
@@ -73,7 +73,7 @@ try
                 }
 
                 # Mocks for all contexts
-                Mock -CommandName Add-SPDscConfigDBLock -MockWith { }
+                Mock -CommandName Add-SPDscConfigDBLock -MockWith { return (New-Object -TypeName "System.Data.SqlClient.SqlConnection") }
                 Mock -CommandName Remove-SPDscConfigDBLock -MockWith { }
                 Mock -CommandName New-SPConfigurationDatabase -MockWith { }
                 Mock -CommandName Connect-SPConfigurationDatabase -MockWith { }
