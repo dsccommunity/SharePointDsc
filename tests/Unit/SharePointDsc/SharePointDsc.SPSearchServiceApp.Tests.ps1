@@ -332,7 +332,7 @@ try
                 }
 
                 It "Should return FixFarmAccountPermissions=False from the get method" {
-                    (Get-TargetResource @testParams).FixFarmAccountPermissions | Should -Be $false
+                    (Get-TargetResource @testParams).FixFarmAccountPermissions | Should -Be $true
                     Assert-MockCalled Confirm-UserIsDBOwner
                 }
 

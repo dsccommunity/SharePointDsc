@@ -149,52 +149,49 @@ function Get-TargetResource
             }
 
             Write-Verbose -Message "Checking Farm account permissions"
-            $correctFarmAccountPermissions = $true
+            $farmAccountPermissionsNeedCorrecting = $false
 
             $farmAccount = (Get-SPFarm).DefaultServiceAccount.Name
             $dbServer = $serviceApp.SearchAdminDatabase.NormalizedDataSource
 
             Write-Verbose -Message "Checking Admin Database"
             $adminDB = $serviceApp.SearchAdminDatabase.Name
-            if ($correctFarmAccountPermissions -eq $true)
-            {
-                $correctFarmAccountPermissions = Confirm-UserIsDBOwner -SQLServer $dbServer `
+            $farmAccountPermissionsNeedCorrecting = (Confirm-UserIsDBOwner -SQLServer $dbServer `
                     -Database $adminDB `
-                    -User $farmAccount
-            }
+                    -User $farmAccount) -eq $false
 
             Write-Verbose -Message "Checking Analytics reporting Database"
             $analyticsDB = "$($adminDB)_AnalyticsReportingStore"
-            if ($correctFarmAccountPermissions -eq $true)
+            if ($farmAccountPermissionsNeedCorrecting -eq $false)
             {
-                $correctFarmAccountPermissions = Confirm-UserIsDBOwner -SQLServer $dbServer `
-                    -Database $analyticsDB `
-                    -User $farmAccount
+                $farmAccountPermissionsNeedCorrecting = (Confirm-UserIsDBOwner -SQLServer $dbServer `
+                        -Database $analyticsDB `
+                        -User $farmAccount) -eq $false
             }
 
             Write-Verbose -Message "Checking Crawl Database(s)"
-            if ($correctFarmAccountPermissions -eq $true)
+            if ($farmAccountPermissionsNeedCorrecting -eq $false)
             {
                 foreach ($database in (Get-SPEnterpriseSearchCrawlDatabase -SearchApplication $serviceApp))
                 {
                     $crawlDB = $database.Database.Name
                     $dbServer = $database.Database.NormalizedDataSource
-                    $correctFarmAccountPermissions = Confirm-UserIsDBOwner -SQLServer $dbServer `
-                        -Database $crawlDB `
-                        -User $farmAccount
+                    $farmAccountPermissionsNeedCorrecting = (Confirm-UserIsDBOwner -SQLServer $dbServer `
+                            -Database $crawlDB `
+                            -User $farmAccount) -eq $false
                 }
             }
 
             Write-Verbose -Message "Checking Links Database(s)"
-            if ($correctFarmAccountPermissions -eq $true)
+            if ($farmAccountPermissionsNeedCorrecting -eq $false)
             {
                 foreach ($database in (Get-SPEnterpriseSearchLinksDatabase -SearchApplication $serviceApp))
                 {
                     $linksDB = $database.Database.Name
                     $dbServer = $database.Database.NormalizedDataSource
-                    $correctFarmAccountPermissions = Confirm-UserIsDBOwner -SQLServer $dbServer `
-                        -Database $linksDB `
-                        -User $farmAccount
+                    $farmAccountPermissionsNeedCorrecting = (Confirm-UserIsDBOwner -SQLServer $dbServer `
+                            -Database $linksDB `
+                            -User $farmAccount) -eq $false
                 }
             }
 
@@ -209,7 +206,7 @@ function Get-TargetResource
                 DefaultContentAccessAccount = $defaultAccount
                 CloudIndex                  = $cloudIndex
                 AlertsEnabled               = $serviceApp.AlertsEnabled
-                FixFarmAccountPermissions   = $correctFarmAccountPermissions
+                FixFarmAccountPermissions   = $farmAccountPermissionsNeedCorrecting
             }
             return $returnVal
         }
@@ -510,7 +507,7 @@ function Set-TargetResource
     # Only check and correct when Ensure=Present, FixFarmAccountPermissions=True and the permissions are incorrect
     if ($Ensure -eq "Present" -and `
             $FixFarmAccountPermissions -eq $true -and `
-            $result.FixFarmAccountPermissions -eq $false)
+            $result.FixFarmAccountPermissions -eq $true)
     {
         Write-Verbose -Message "Fixing database permissions for Search Service Application $Name"
         Invoke-SPDscCommand -Credential $InstallAccount `
@@ -708,7 +705,7 @@ function Test-TargetResource
 
     if ($FixFarmAccountPermissions -eq $true)
     {
-        if ($CurrentValues.FixFarmAccountPermissions -eq $false)
+        if ($CurrentValues.FixFarmAccountPermissions -eq $true)
         {
             $message = ("FixFarmAccountPermissions is set to True, but the Search databases " + `
                     "do not have the correct permissions")
