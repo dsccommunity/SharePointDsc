@@ -427,7 +427,7 @@ try
                 }
             }
 
-            Context -Name "No zones are specified" -Fixture {
+            Context -Name "No additional parameters are specified" -Fixture {
                 BeforeAll {
                     $testParams = @{
                         WebAppUrl = "http://sharepoint.contoso.com"
@@ -450,7 +450,7 @@ try
                 }
 
                 It "Should throw exception in the set method" {
-                    { Set-TargetResource @testParams } | Should -Throw "You have to specify at least one zone."
+                    { Set-TargetResource @testParams } | Should -Throw "You have to specify at least one parameter."
                 }
             }
 
@@ -1292,6 +1292,700 @@ try
                 }
             }
 
+            Context -Name "Default Zone Settings of Web application is configured as specified" -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl       = "http://sharepoint.contoso.com"
+                        DefaultSettings = (New-CimInstance -ClassName MSFT_SPWebAppZoneSettings -Property @{
+                                AnonymousAuthentication    = $false
+                                CustomSignInPage           = ""
+                                EnableClientIntegration    = $true
+                                RequireUseRemoteInterfaces = $true
+                            } -ClientOnly)
+                    }
+
+                    Mock -CommandName Get-SPWebapplication -MockWith {
+                        return @{
+                            IisSettings = @{
+                                Default  = @{
+                                    AllowAnonymous                                   = $false
+                                    ClaimsAuthenticationRedirectionUrl               = ""
+                                    EnableClientIntegration                          = $true
+                                    ClientObjectModelRequiresUseRemoteAPIsPermission = $true
+                                }
+                                Intranet = @{
+                                    AllowAnonymous                                   = $false
+                                    ClaimsAuthenticationRedirectionUrl               = ""
+                                    EnableClientIntegration                          = $true
+                                    ClientObjectModelRequiresUseRemoteAPIsPermission = $true
+                                }
+                            }
+                        }
+                    }
+                    Mock -CommandName Get-SPAuthenticationProvider -MockWith {
+                        return @(
+                            @{
+                                DisplayName       = "Windows Authentication"
+                                ClaimProviderName = 'AD'
+                                DisableKerberos   = $true
+                            },
+                            @{
+                                DisplayName        = "Forms Authentication"
+                                ClaimProviderName  = 'Forms'
+                                RoleProvider       = "RoleProvider"
+                                MembershipProvider = "MemberProvider"
+                            },
+                            @{
+                                DisplayName = "ADFS"
+                            }
+                        )
+                    }
+                }
+
+                It "Should return null from the get method" {
+                    $result = Get-TargetResource @testParams
+                    $result.DefaultSettings.AnonymousAuthentication | Should -Be $false
+                    $result.DefaultSettings.CustomSignInPage | Should -Be ""
+                    $result.DefaultSettings.EnableClientIntegration | Should -Be $true
+                    $result.DefaultSettings.RequireUseRemoteInterfaces | Should -Be $true
+                }
+
+                It "Should return false from the test method" {
+                    Test-TargetResource @testParams | Should -Be $true
+                }
+            }
+
+            Context -Name "Default Zone Settings of Web application is not configured as specified" -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl       = "http://sharepoint.contoso.com"
+                        DefaultSettings = (New-CimInstance -ClassName MSFT_SPWebAppZoneSettings -Property @{
+                                AnonymousAuthentication    = $true
+                                CustomSignInPage           = "/signin"
+                                EnableClientIntegration    = $false
+                                RequireUseRemoteInterfaces = $false
+                            } -ClientOnly)
+                    }
+
+                    Mock -CommandName Get-SPWebapplication -MockWith {
+                        $returnval = @{
+                            IisSettings = @{
+                                Default  = @{
+                                    AllowAnonymous                                   = $false
+                                    ClaimsAuthenticationRedirectionUrl               = ""
+                                    EnableClientIntegration                          = $true
+                                    ClientObjectModelRequiresUseRemoteAPIsPermission = $true
+                                }
+                                Intranet = @{
+                                    AllowAnonymous                                   = $false
+                                    ClaimsAuthenticationRedirectionUrl               = ""
+                                    EnableClientIntegration                          = $true
+                                    ClientObjectModelRequiresUseRemoteAPIsPermission = $true
+                                }
+                            }
+                        }
+                        $returnval = $returnval | Add-Member -MemberType ScriptMethod `
+                            -Name Update `
+                            -Value {
+                            $global:SPWebAppUpdateExecuted = $true
+                        } -PassThru -Force
+
+                        return $returnval
+                    }
+                    Mock -CommandName Get-SPAuthenticationProvider -MockWith {
+                        return @(
+                            @{
+                                DisplayName       = "Windows Authentication"
+                                ClaimProviderName = 'AD'
+                                DisableKerberos   = $true
+                            },
+                            @{
+                                DisplayName        = "Forms Authentication"
+                                ClaimProviderName  = 'Forms'
+                                RoleProvider       = "RoleProvider"
+                                MembershipProvider = "MemberProvider"
+                            }
+                        )
+                    }
+
+                    Mock -CommandName New-SPAuthenticationProvider -MockWith { return @{ } }
+                    Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith { return @{ } }
+                }
+
+                It "Should return null from the get method" {
+                    $result = Get-TargetResource @testParams
+                    $result.DefaultSettings.AnonymousAuthentication | Should -Be $false
+                    $result.DefaultSettings.CustomSignInPage | Should -Be ""
+                    $result.DefaultSettings.EnableClientIntegration | Should -Be $true
+                    $result.DefaultSettings.RequireUseRemoteInterfaces | Should -Be $true
+                }
+
+                It "Should return false from the test method" {
+                    Test-TargetResource @testParams | Should -Be $false
+                }
+
+                It "Should run the Set-SPWebApplication cmdlet in the set method" {
+                    $global:SPWebAppUpdateExecuted = $false
+                    Set-TargetResource @testParams
+                    $global:SPWebAppUpdateExecuted | Should -Be $true
+                }
+            }
+
+            Context -Name "Intranet Zone Settings of Web application is configured as specified" -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl        = "http://sharepoint.contoso.com"
+                        IntranetSettings = (New-CimInstance -ClassName MSFT_SPWebAppZoneSettings -Property @{
+                                AnonymousAuthentication    = $false
+                                CustomSignInPage           = ""
+                                EnableClientIntegration    = $true
+                                RequireUseRemoteInterfaces = $true
+                            } -ClientOnly)
+                    }
+
+                    Mock -CommandName Get-SPWebapplication -MockWith {
+                        return @{
+                            IisSettings = @{
+                                Default  = @{
+                                    AllowAnonymous                                   = $false
+                                    ClaimsAuthenticationRedirectionUrl               = ""
+                                    EnableClientIntegration                          = $true
+                                    ClientObjectModelRequiresUseRemoteAPIsPermission = $true
+                                }
+                                Intranet = @{
+                                    AllowAnonymous                                   = $false
+                                    ClaimsAuthenticationRedirectionUrl               = ""
+                                    EnableClientIntegration                          = $true
+                                    ClientObjectModelRequiresUseRemoteAPIsPermission = $true
+                                }
+                            }
+                        }
+                    }
+                    Mock -CommandName Get-SPAuthenticationProvider -MockWith {
+                        return @(
+                            @{
+                                DisplayName       = "Windows Authentication"
+                                ClaimProviderName = 'AD'
+                                DisableKerberos   = $true
+                            },
+                            @{
+                                DisplayName        = "Forms Authentication"
+                                ClaimProviderName  = 'Forms'
+                                RoleProvider       = "RoleProvider"
+                                MembershipProvider = "MemberProvider"
+                            },
+                            @{
+                                DisplayName = "ADFS"
+                            }
+                        )
+                    }
+                }
+
+                It "Should return null from the get method" {
+                    $result = Get-TargetResource @testParams
+                    $result.IntranetSettings.AnonymousAuthentication | Should -Be $false
+                    $result.IntranetSettings.CustomSignInPage | Should -Be ""
+                    $result.IntranetSettings.EnableClientIntegration | Should -Be $true
+                    $result.IntranetSettings.RequireUseRemoteInterfaces | Should -Be $true
+                }
+
+                It "Should return false from the test method" {
+                    Test-TargetResource @testParams | Should -Be $true
+                }
+            }
+
+            Context -Name "Intranet Zone Settings of Web application is not configured as specified" -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl        = "http://sharepoint.contoso.com"
+                        IntranetSettings = (New-CimInstance -ClassName MSFT_SPWebAppZoneSettings -Property @{
+                                AnonymousAuthentication    = $true
+                                CustomSignInPage           = "/signin"
+                                EnableClientIntegration    = $false
+                                RequireUseRemoteInterfaces = $false
+                            } -ClientOnly)
+                    }
+
+                    Mock -CommandName Get-SPWebapplication -MockWith {
+                        $returnval = @{
+                            IisSettings = @{
+                                Default  = @{
+                                    AllowAnonymous                                   = $false
+                                    ClaimsAuthenticationRedirectionUrl               = ""
+                                    EnableClientIntegration                          = $true
+                                    ClientObjectModelRequiresUseRemoteAPIsPermission = $true
+                                }
+                                Intranet = @{
+                                    AllowAnonymous                                   = $false
+                                    ClaimsAuthenticationRedirectionUrl               = ""
+                                    EnableClientIntegration                          = $true
+                                    ClientObjectModelRequiresUseRemoteAPIsPermission = $true
+                                }
+                            }
+                        }
+                        $returnval = $returnval | Add-Member -MemberType ScriptMethod `
+                            -Name Update `
+                            -Value {
+                            $global:SPWebAppUpdateExecuted = $true
+                        } -PassThru -Force
+
+                        return $returnval
+                    }
+                    Mock -CommandName Get-SPAuthenticationProvider -MockWith {
+                        return @(
+                            @{
+                                DisplayName       = "Windows Authentication"
+                                ClaimProviderName = 'AD'
+                                DisableKerberos   = $true
+                            },
+                            @{
+                                DisplayName        = "Forms Authentication"
+                                ClaimProviderName  = 'Forms'
+                                RoleProvider       = "RoleProvider"
+                                MembershipProvider = "MemberProvider"
+                            }
+                        )
+                    }
+
+                    Mock -CommandName New-SPAuthenticationProvider -MockWith { return @{ } }
+                    Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith { return @{ } }
+                }
+
+                It "Should return null from the get method" {
+                    $result = Get-TargetResource @testParams
+                    $result.IntranetSettings.AnonymousAuthentication | Should -Be $false
+                    $result.IntranetSettings.CustomSignInPage | Should -Be ""
+                    $result.IntranetSettings.EnableClientIntegration | Should -Be $true
+                    $result.IntranetSettings.RequireUseRemoteInterfaces | Should -Be $true
+                }
+
+                It "Should return false from the test method" {
+                    Test-TargetResource @testParams | Should -Be $false
+                }
+
+                It "Should run the Set-SPWebApplication cmdlet in the set method" {
+                    $global:SPWebAppUpdateExecuted = $false
+                    Set-TargetResource @testParams
+                    $global:SPWebAppUpdateExecuted | Should -Be $true
+                }
+            }
+
+            Context -Name "Internet Zone Settings of Web application is configured as specified" -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl        = "http://sharepoint.contoso.com"
+                        InternetSettings = (New-CimInstance -ClassName MSFT_SPWebAppZoneSettings -Property @{
+                                AnonymousAuthentication    = $false
+                                CustomSignInPage           = ""
+                                EnableClientIntegration    = $true
+                                RequireUseRemoteInterfaces = $true
+                            } -ClientOnly)
+                    }
+
+                    Mock -CommandName Get-SPWebapplication -MockWith {
+                        return @{
+                            IisSettings = @{
+                                Default  = @{
+                                    AllowAnonymous                                   = $false
+                                    ClaimsAuthenticationRedirectionUrl               = ""
+                                    EnableClientIntegration                          = $true
+                                    ClientObjectModelRequiresUseRemoteAPIsPermission = $true
+                                }
+                                Internet = @{
+                                    AllowAnonymous                                   = $false
+                                    ClaimsAuthenticationRedirectionUrl               = ""
+                                    EnableClientIntegration                          = $true
+                                    ClientObjectModelRequiresUseRemoteAPIsPermission = $true
+                                }
+                            }
+                        }
+                    }
+                    Mock -CommandName Get-SPAuthenticationProvider -MockWith {
+                        return @(
+                            @{
+                                DisplayName       = "Windows Authentication"
+                                ClaimProviderName = 'AD'
+                                DisableKerberos   = $true
+                            },
+                            @{
+                                DisplayName        = "Forms Authentication"
+                                ClaimProviderName  = 'Forms'
+                                RoleProvider       = "RoleProvider"
+                                MembershipProvider = "MemberProvider"
+                            },
+                            @{
+                                DisplayName = "ADFS"
+                            }
+                        )
+                    }
+                }
+
+                It "Should return null from the get method" {
+                    $result = Get-TargetResource @testParams
+                    $result.InternetSettings.AnonymousAuthentication | Should -Be $false
+                    $result.InternetSettings.CustomSignInPage | Should -Be ""
+                    $result.InternetSettings.EnableClientIntegration | Should -Be $true
+                    $result.InternetSettings.RequireUseRemoteInterfaces | Should -Be $true
+                }
+
+                It "Should return false from the test method" {
+                    Test-TargetResource @testParams | Should -Be $true
+                }
+            }
+
+            Context -Name "Internet Zone Settings of Web application is not configured as specified" -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl        = "http://sharepoint.contoso.com"
+                        InternetSettings = (New-CimInstance -ClassName MSFT_SPWebAppZoneSettings -Property @{
+                                AnonymousAuthentication    = $true
+                                CustomSignInPage           = "/signin"
+                                EnableClientIntegration    = $false
+                                RequireUseRemoteInterfaces = $false
+                            } -ClientOnly)
+                    }
+
+                    Mock -CommandName Get-SPWebapplication -MockWith {
+                        $returnval = @{
+                            IisSettings = @{
+                                Default  = @{
+                                    AllowAnonymous                                   = $false
+                                    ClaimsAuthenticationRedirectionUrl               = ""
+                                    EnableClientIntegration                          = $true
+                                    ClientObjectModelRequiresUseRemoteAPIsPermission = $true
+                                }
+                                Internet = @{
+                                    AllowAnonymous                                   = $false
+                                    ClaimsAuthenticationRedirectionUrl               = ""
+                                    EnableClientIntegration                          = $true
+                                    ClientObjectModelRequiresUseRemoteAPIsPermission = $true
+                                }
+                            }
+                        }
+                        $returnval = $returnval | Add-Member -MemberType ScriptMethod `
+                            -Name Update `
+                            -Value {
+                            $global:SPWebAppUpdateExecuted = $true
+                        } -PassThru -Force
+
+                        return $returnval
+                    }
+                    Mock -CommandName Get-SPAuthenticationProvider -MockWith {
+                        return @(
+                            @{
+                                DisplayName       = "Windows Authentication"
+                                ClaimProviderName = 'AD'
+                                DisableKerberos   = $true
+                            },
+                            @{
+                                DisplayName        = "Forms Authentication"
+                                ClaimProviderName  = 'Forms'
+                                RoleProvider       = "RoleProvider"
+                                MembershipProvider = "MemberProvider"
+                            }
+                        )
+                    }
+
+                    Mock -CommandName New-SPAuthenticationProvider -MockWith { return @{ } }
+                    Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith { return @{ } }
+                }
+
+                It "Should return null from the get method" {
+                    $result = Get-TargetResource @testParams
+                    $result.InternetSettings.AnonymousAuthentication | Should -Be $false
+                    $result.InternetSettings.CustomSignInPage | Should -Be ""
+                    $result.InternetSettings.EnableClientIntegration | Should -Be $true
+                    $result.InternetSettings.RequireUseRemoteInterfaces | Should -Be $true
+                }
+
+                It "Should return false from the test method" {
+                    Test-TargetResource @testParams | Should -Be $false
+                }
+
+                It "Should run the Set-SPWebApplication cmdlet in the set method" {
+                    $global:SPWebAppUpdateExecuted = $false
+                    Set-TargetResource @testParams
+                    $global:SPWebAppUpdateExecuted | Should -Be $true
+                }
+            }
+
+            Context -Name "Extranet Zone Settings of Web application is configured as specified" -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl        = "http://sharepoint.contoso.com"
+                        ExtranetSettings = (New-CimInstance -ClassName MSFT_SPWebAppZoneSettings -Property @{
+                                AnonymousAuthentication    = $false
+                                CustomSignInPage           = ""
+                                EnableClientIntegration    = $true
+                                RequireUseRemoteInterfaces = $true
+                            } -ClientOnly)
+                    }
+
+                    Mock -CommandName Get-SPWebapplication -MockWith {
+                        return @{
+                            IisSettings = @{
+                                Default  = @{
+                                    AllowAnonymous                                   = $false
+                                    ClaimsAuthenticationRedirectionUrl               = ""
+                                    EnableClientIntegration                          = $true
+                                    ClientObjectModelRequiresUseRemoteAPIsPermission = $true
+                                }
+                                Extranet = @{
+                                    AllowAnonymous                                   = $false
+                                    ClaimsAuthenticationRedirectionUrl               = ""
+                                    EnableClientIntegration                          = $true
+                                    ClientObjectModelRequiresUseRemoteAPIsPermission = $true
+                                }
+                            }
+                        }
+                    }
+                    Mock -CommandName Get-SPAuthenticationProvider -MockWith {
+                        return @(
+                            @{
+                                DisplayName       = "Windows Authentication"
+                                ClaimProviderName = 'AD'
+                                DisableKerberos   = $true
+                            },
+                            @{
+                                DisplayName        = "Forms Authentication"
+                                ClaimProviderName  = 'Forms'
+                                RoleProvider       = "RoleProvider"
+                                MembershipProvider = "MemberProvider"
+                            },
+                            @{
+                                DisplayName = "ADFS"
+                            }
+                        )
+                    }
+                }
+
+                It "Should return null from the get method" {
+                    $result = Get-TargetResource @testParams
+                    $result.ExtranetSettings.AnonymousAuthentication | Should -Be $false
+                    $result.ExtranetSettings.CustomSignInPage | Should -Be ""
+                    $result.ExtranetSettings.EnableClientIntegration | Should -Be $true
+                    $result.ExtranetSettings.RequireUseRemoteInterfaces | Should -Be $true
+                }
+
+                It "Should return false from the test method" {
+                    Test-TargetResource @testParams | Should -Be $true
+                }
+            }
+
+            Context -Name "Extranet Zone Settings of Web application is not configured as specified" -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl        = "http://sharepoint.contoso.com"
+                        ExtranetSettings = (New-CimInstance -ClassName MSFT_SPWebAppZoneSettings -Property @{
+                                AnonymousAuthentication    = $true
+                                CustomSignInPage           = "/signin"
+                                EnableClientIntegration    = $false
+                                RequireUseRemoteInterfaces = $false
+                            } -ClientOnly)
+                    }
+
+                    Mock -CommandName Get-SPWebapplication -MockWith {
+                        $returnval = @{
+                            IisSettings = @{
+                                Default  = @{
+                                    AllowAnonymous                                   = $false
+                                    ClaimsAuthenticationRedirectionUrl               = ""
+                                    EnableClientIntegration                          = $true
+                                    ClientObjectModelRequiresUseRemoteAPIsPermission = $true
+                                }
+                                Extranet = @{
+                                    AllowAnonymous                                   = $false
+                                    ClaimsAuthenticationRedirectionUrl               = ""
+                                    EnableClientIntegration                          = $true
+                                    ClientObjectModelRequiresUseRemoteAPIsPermission = $true
+                                }
+                            }
+                        }
+                        $returnval = $returnval | Add-Member -MemberType ScriptMethod `
+                            -Name Update `
+                            -Value {
+                            $global:SPWebAppUpdateExecuted = $true
+                        } -PassThru -Force
+
+                        return $returnval
+                    }
+                    Mock -CommandName Get-SPAuthenticationProvider -MockWith {
+                        return @(
+                            @{
+                                DisplayName       = "Windows Authentication"
+                                ClaimProviderName = 'AD'
+                                DisableKerberos   = $true
+                            },
+                            @{
+                                DisplayName        = "Forms Authentication"
+                                ClaimProviderName  = 'Forms'
+                                RoleProvider       = "RoleProvider"
+                                MembershipProvider = "MemberProvider"
+                            }
+                        )
+                    }
+
+                    Mock -CommandName New-SPAuthenticationProvider -MockWith { return @{ } }
+                    Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith { return @{ } }
+                }
+
+                It "Should return null from the get method" {
+                    $result = Get-TargetResource @testParams
+                    $result.ExtranetSettings.AnonymousAuthentication | Should -Be $false
+                    $result.ExtranetSettings.CustomSignInPage | Should -Be ""
+                    $result.ExtranetSettings.EnableClientIntegration | Should -Be $true
+                    $result.ExtranetSettings.RequireUseRemoteInterfaces | Should -Be $true
+                }
+
+                It "Should return false from the test method" {
+                    Test-TargetResource @testParams | Should -Be $false
+                }
+
+                It "Should run the Set-SPWebApplication cmdlet in the set method" {
+                    $global:SPWebAppUpdateExecuted = $false
+                    Set-TargetResource @testParams
+                    $global:SPWebAppUpdateExecuted | Should -Be $true
+                }
+            }
+
+            Context -Name "Custom Zone Settings of Web application is configured as specified" -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl      = "http://sharepoint.contoso.com"
+                        CustomSettings = (New-CimInstance -ClassName MSFT_SPWebAppZoneSettings -Property @{
+                                AnonymousAuthentication    = $false
+                                CustomSignInPage           = ""
+                                EnableClientIntegration    = $true
+                                RequireUseRemoteInterfaces = $true
+                            } -ClientOnly)
+                    }
+
+                    Mock -CommandName Get-SPWebapplication -MockWith {
+                        return @{
+                            IisSettings = @{
+                                Default = @{
+                                    AllowAnonymous                                   = $false
+                                    ClaimsAuthenticationRedirectionUrl               = ""
+                                    EnableClientIntegration                          = $true
+                                    ClientObjectModelRequiresUseRemoteAPIsPermission = $true
+                                }
+                                Custom  = @{
+                                    AllowAnonymous                                   = $false
+                                    ClaimsAuthenticationRedirectionUrl               = ""
+                                    EnableClientIntegration                          = $true
+                                    ClientObjectModelRequiresUseRemoteAPIsPermission = $true
+                                }
+                            }
+                        }
+                    }
+                    Mock -CommandName Get-SPAuthenticationProvider -MockWith {
+                        return @(
+                            @{
+                                DisplayName       = "Windows Authentication"
+                                ClaimProviderName = 'AD'
+                                DisableKerberos   = $true
+                            },
+                            @{
+                                DisplayName        = "Forms Authentication"
+                                ClaimProviderName  = 'Forms'
+                                RoleProvider       = "RoleProvider"
+                                MembershipProvider = "MemberProvider"
+                            },
+                            @{
+                                DisplayName = "ADFS"
+                            }
+                        )
+                    }
+                }
+
+                It "Should return null from the get method" {
+                    $result = Get-TargetResource @testParams
+                    $result.CustomSettings.AnonymousAuthentication | Should -Be $false
+                    $result.CustomSettings.CustomSignInPage | Should -Be ""
+                    $result.CustomSettings.EnableClientIntegration | Should -Be $true
+                    $result.CustomSettings.RequireUseRemoteInterfaces | Should -Be $true
+                }
+
+                It "Should return false from the test method" {
+                    Test-TargetResource @testParams | Should -Be $true
+                }
+            }
+
+            Context -Name "Custom Zone Settings of Web application is not configured as specified" -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl      = "http://sharepoint.contoso.com"
+                        CustomSettings = (New-CimInstance -ClassName MSFT_SPWebAppZoneSettings -Property @{
+                                AnonymousAuthentication    = $true
+                                CustomSignInPage           = "/signin"
+                                EnableClientIntegration    = $false
+                                RequireUseRemoteInterfaces = $false
+                            } -ClientOnly)
+                    }
+
+                    Mock -CommandName Get-SPWebapplication -MockWith {
+                        $returnval = @{
+                            IisSettings = @{
+                                Default = @{
+                                    AllowAnonymous                                   = $false
+                                    ClaimsAuthenticationRedirectionUrl               = ""
+                                    EnableClientIntegration                          = $true
+                                    ClientObjectModelRequiresUseRemoteAPIsPermission = $true
+                                }
+                                Custom  = @{
+                                    AllowAnonymous                                   = $false
+                                    ClaimsAuthenticationRedirectionUrl               = ""
+                                    EnableClientIntegration                          = $true
+                                    ClientObjectModelRequiresUseRemoteAPIsPermission = $true
+                                }
+                            }
+                        }
+                        $returnval = $returnval | Add-Member -MemberType ScriptMethod `
+                            -Name Update `
+                            -Value {
+                            $global:SPWebAppUpdateExecuted = $true
+                        } -PassThru -Force
+
+                        return $returnval
+                    }
+                    Mock -CommandName Get-SPAuthenticationProvider -MockWith {
+                        return @(
+                            @{
+                                DisplayName       = "Windows Authentication"
+                                ClaimProviderName = 'AD'
+                                DisableKerberos   = $true
+                            },
+                            @{
+                                DisplayName        = "Forms Authentication"
+                                ClaimProviderName  = 'Forms'
+                                RoleProvider       = "RoleProvider"
+                                MembershipProvider = "MemberProvider"
+                            }
+                        )
+                    }
+
+                    Mock -CommandName New-SPAuthenticationProvider -MockWith { return @{ } }
+                    Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith { return @{ } }
+                }
+
+                It "Should return null from the get method" {
+                    $result = Get-TargetResource @testParams
+                    $result.CustomSettings.AnonymousAuthentication | Should -Be $false
+                    $result.CustomSettings.CustomSignInPage | Should -Be ""
+                    $result.CustomSettings.EnableClientIntegration | Should -Be $true
+                    $result.CustomSettings.RequireUseRemoteInterfaces | Should -Be $true
+                }
+
+                It "Should return false from the test method" {
+                    Test-TargetResource @testParams | Should -Be $false
+                }
+
+                It "Should run the Set-SPWebApplication cmdlet in the set method" {
+                    $global:SPWebAppUpdateExecuted = $false
+                    Set-TargetResource @testParams
+                    $global:SPWebAppUpdateExecuted | Should -Be $true
+                }
+            }
         }
     }
 }

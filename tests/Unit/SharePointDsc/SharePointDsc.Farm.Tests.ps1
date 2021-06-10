@@ -15,10 +15,12 @@ $script:projectPath = "$PSScriptRoot\..\..\.." | Convert-Path
 $script:projectName = (Get-ChildItem -Path "$script:projectPath\*\*.psd1" | Where-Object -FilterScript {
         ($_.Directory.Name -match 'source|src' -or $_.Directory.Name -eq $_.BaseName) -and
         $(try
-            { Test-ModuleManifest -Path $_.FullName -ErrorAction Stop
+            {
+                Test-ModuleManifest -Path $_.FullName -ErrorAction Stop
             }
             catch
-            { $false
+            {
+                $false
             })
     }).BaseName
 
@@ -110,25 +112,30 @@ try
                         }
 
                         $returnval = $returnval | Add-Member -MemberType ScriptMethod `
-                            -name ExecuteScalar `
+                            -Name ExecuteScalar `
                             -Value {
                             $global:RunQuery++
                             switch ($global:RunQuery)
                             {
                                 1 # ConfigDB exists
-                                { return 1
+                                {
+                                    return 1
                                 }
                                 2 # Check permissions
-                                { return "0"
+                                {
+                                    return "0"
                                 }
                                 3 # Check permissions
-                                { return "1"
+                                {
+                                    return "1"
                                 }
                                 4 # Database empty
-                                { return 20
+                                {
+                                    return 20
                                 }
                                 5 # Locked
-                                { return 0
+                                {
+                                    return 0
                                 }
                             }
                         } -PassThru -Force
@@ -153,25 +160,30 @@ try
                         }
 
                         $returnval = $returnval | Add-Member -MemberType ScriptMethod `
-                            -name ExecuteScalar `
+                            -Name ExecuteScalar `
                             -Value {
                             $global:RunQuery++
                             switch ($global:RunQuery)
                             {
                                 1 # ConfigDB exists
-                                { return 1
+                                {
+                                    return 1
                                 }
                                 2 # Check permissions
-                                { return "1"
+                                {
+                                    return "1"
                                 }
                                 3 # Check permissions
-                                { return "1"
+                                {
+                                    return "1"
                                 }
                                 4 # Database empty
-                                { return 20
+                                {
+                                    return 20
                                 }
                                 5 # Locked
-                                { return 0
+                                {
+                                    return 0
                                 }
                             }
                         } -PassThru -Force
@@ -196,25 +208,30 @@ try
                         }
 
                         $returnval = $returnval | Add-Member -MemberType ScriptMethod `
-                            -name ExecuteScalar `
+                            -Name ExecuteScalar `
                             -Value {
                             $global:RunQuery++
                             switch ($global:RunQuery)
                             {
                                 1 # ConfigDB exists
-                                { return 1
+                                {
+                                    return 1
                                 }
                                 2 # Check permissions
-                                { return "1"
+                                {
+                                    return "1"
                                 }
                                 3 # Check permissions
-                                { return "1"
+                                {
+                                    return "1"
                                 }
                                 4 # Database empty
-                                { return 0
+                                {
+                                    return 0
                                 }
                                 5 # Locked
-                                { return 0
+                                {
+                                    return 0
                                 }
                             }
                         } -PassThru -Force
@@ -239,22 +256,26 @@ try
                         }
 
                         $returnval = $returnval | Add-Member -MemberType ScriptMethod `
-                            -name ExecuteScalar `
+                            -Name ExecuteScalar `
                             -Value {
                             $global:RunQuery++
                             switch ($global:RunQuery)
                             {
                                 1 # ConfigDB exists
-                                { return 0
+                                {
+                                    return 0
                                 }
                                 2 # Check permissions
-                                { return "1"
+                                {
+                                    return "1"
                                 }
                                 3 # Check permissions
-                                { return "1"
+                                {
+                                    return "1"
                                 }
                                 4 # Locked
-                                { return 0
+                                {
+                                    return 0
                                 }
                             }
                         } -PassThru -Force
@@ -309,7 +330,7 @@ try
                         }
 
                         $returnval = $returnval | Add-Member -MemberType ScriptMethod `
-                            -name ExecuteScalar `
+                            -Name ExecuteScalar `
                             -Value {
                             return 1
                         } -PassThru -Force
@@ -330,7 +351,7 @@ try
                         }
 
                         $returnval = $returnval | Add-Member -MemberType ScriptMethod `
-                            -name ExecuteScalar `
+                            -Name ExecuteScalar `
                             -Value {
                             return 0
                         } -PassThru -Force
@@ -381,7 +402,7 @@ try
                         }
 
                         $returnval = $returnval | Add-Member -MemberType ScriptMethod `
-                            -name ExecuteNonQuery `
+                            -Name ExecuteNonQuery `
                             -Value {
                             $global:ExecutedQuery = $true
                         } -PassThru -Force
@@ -399,6 +420,8 @@ try
 
             Context -Name "Validate Remove-SPDscConfigDBLock" -Fixture {
                 BeforeAll {
+                    $conn = New-Object -TypeName "System.Data.SqlClient.SqlConnection"
+
                     Mock -CommandName New-Object -MockWith {
                         $returnval = @{
                             ConnectionString = ''
@@ -424,16 +447,14 @@ try
                     } -ParameterFilter {
                         $TypeName -eq "System.Data.SqlClient.SqlConnection"
                     }
-                }
 
-                It "Should run query to create TempDB Lock table" {
                     Mock -CommandName New-Object -MockWith {
                         $returnval = @{
                             Connection = ''
                         }
 
                         $returnval = $returnval | Add-Member -MemberType ScriptMethod `
-                            -name ExecuteNonQuery `
+                            -Name ExecuteNonQuery `
                             -Value {
                             $global:ExecutedQuery = $true
                         } -PassThru -Force
@@ -442,9 +463,11 @@ try
                     } -ParameterFilter {
                         $TypeName -eq "System.Data.SqlClient.SqlCommand"
                     }
+                }
 
+                It "Should run query to create TempDB Lock table" {
                     $global:ExecutedQuery = $false
-                    $result = Remove-SPDscConfigDBLock -SQLServer 'sql01' -Database 'SP_Config'
+                    $result = Remove-SPDscConfigDBLock -SQLServer 'sql01' -Database 'SP_Config' -Connection $conn
                     $global:ExecutedQuery | Should -Be $true
                 }
             }

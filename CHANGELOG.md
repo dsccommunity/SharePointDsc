@@ -6,22 +6,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
+- SPSearchServiceApp
+  - Added ability to correct database permissions for the farm account, to prevent issue
+    as described in the Readme of the resource
 - SPSecurityTokenServiceConfig
   - Added support for LogonTokenCacheExpirationWindow, WindowsTokenLifetime and FormsTokenLifetime settings
 - SPService
   - New resource
-- SPUsageDefinition
-  - New resource
  - SPSecurityTokenServiceConfig
   - Added support for LogonTokenCacheExpirationWindow, WindowsTokenLifetime and FormsTokenLifetime settings
+- SPUsageDefinition
+  - New resource
+- SPUserProfileProperty
+  - Added check for unique ConnectionNames in PropertyMappings, which is required by SharePoint
+- SPWebAppAuthentication
+  - Added ability to configure generic authentication settings per zone, like allow
+    anonymous authentication or a custom signin page
 
 ### Fixed
+
 - SharePointDsc
-  - Fixed code coverage in pipeline.
+  - Fixed code coverage in pipeline
 - SPConfigWizard
   - Fixed issue with executing PSCONFIG remotely.
 - SPFarm
   - Fixed issue where developer dashboard could not be configured on first farm setup.
+  - Fixed issue with PSConfig in SharePoint 2019 when executed remotely
+  - Corrected issue where the setup account didn't have permissions to create the Lock
+    table in the TempDB. Updated to use a global temporary table, which users are always
+    allowed to create
 
 ## [4.6.0] - 2021-04-02
 
