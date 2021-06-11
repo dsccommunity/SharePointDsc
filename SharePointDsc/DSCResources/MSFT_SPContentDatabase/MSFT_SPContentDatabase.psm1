@@ -433,6 +433,7 @@ function Test-TargetResource
     Write-Verbose -Message "Testing content database configuration settings"
 
     $PSBoundParameters.Ensure = $Ensure
+    $PSBoundParameters.WebAppUrl = $WebAppUrl.TrimEnd("/")
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
