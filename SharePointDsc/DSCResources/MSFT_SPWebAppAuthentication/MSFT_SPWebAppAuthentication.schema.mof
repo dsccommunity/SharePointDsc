@@ -11,10 +11,10 @@ Class MSFT_SPWebAppAuthenticationMode
 [ClassVersion("1.0.0.0")]
 Class MSFT_SPWebAppZoneSettings
 {
-    [Write, Description("Use Basic Authentication (only for Windows Authentication)")] Boolean AnonymousAuthentication;
-    [Write, Description("Specifies the used authentication method")] String CustomSignInPage;
-    [Write, Description("Use Basic Authentication (only for Windows Authentication)")] Boolean EnableClientIntegration;
-    [Write, Description("Use Basic Authentication (only for Windows Authentication)")] Boolean RequireUseRemoteInterfaces;
+    [Write, Description("Use Anonymous Authentication for the zone")] Boolean AnonymousAuthentication;
+    [Write, Description("Specifies the URL to the custom signin page for the zone")] String CustomSignInPage;
+    [Write, Description("Enable the Client Integration features for the zone")] Boolean EnableClientIntegration;
+    [Write, Description("Enable the Require Use Remote Interfaces for the zone")] Boolean RequireUseRemoteInterfaces;
 };
 [ClassVersion("1.0.0.0"), FriendlyName("SPWebAppAuthentication")]
 class MSFT_SPWebAppAuthentication : OMI_BaseResource

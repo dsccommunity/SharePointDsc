@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - SPFarm
   - Added parameter SkipRegisterAsDistributedCacheHost
+- SPWebAppAuthentication
+  - Updated the description for the new zone setting parameters
+- SPWebAppClientCallableSettings
+  - Updated the description for the proxy library settings parameters
 
 ### Fixed
 
@@ -17,6 +21,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     in False.
 - SPInstallLanguagePack
   - Fixed detection of Norwegian language pack
+- SPManagedMetaDataServiceApp
+  - Fix issue where a missing Service App Proxy was not detected correctly and therefore not
+    created, resulting in other errors.
 
 ## [4.7.0] - 2021-06-10
 

@@ -1,6 +1,6 @@
 # Description
 
-**Type:** Specific
+**Type:** Distributed
 **Requires CredSSP:** No
 
 This resource is used to specify if a specific service should be provisioned

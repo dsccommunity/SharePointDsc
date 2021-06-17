@@ -348,7 +348,7 @@ function Set-TargetResource
     $result = Get-TargetResource @PSBoundParameters
 
     $pName = "$Name Proxy"
-    if ($null -ne $result.ProxyName)
+    if ([String]::IsNullOrEmpty($result.ProxyName))
     {
         $pName = $result.ProxyName
     }
