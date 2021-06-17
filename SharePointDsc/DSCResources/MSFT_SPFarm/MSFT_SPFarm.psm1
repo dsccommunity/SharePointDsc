@@ -92,7 +92,7 @@ function Get-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $SkipRegisterAsDistributedCacheHost = $false,
+        $SkipRegisterAsDistributedCacheHost = $true,
 
         [Parameter()]
         [System.Management.Automation.PSCredential]
@@ -455,7 +455,7 @@ function Set-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $SkipRegisterAsDistributedCacheHost = $false,
+        $SkipRegisterAsDistributedCacheHost = $true,
 
         [Parameter()]
         [System.Management.Automation.PSCredential]
@@ -474,6 +474,8 @@ function Set-TargetResource
             -Source $MyInvocation.MyCommand.Source
         throw $message
     }
+
+    $PSBoundParameters.SkipRegisterAsDistributedCacheHost = $SkipRegisterAsDistributedCacheHost
 
     if ($PSBoundParameters.ContainsKey("CentralAdministrationUrl"))
     {
@@ -1316,7 +1318,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $SkipRegisterAsDistributedCacheHost = $false,
+        $SkipRegisterAsDistributedCacheHost = $true,
 
         [Parameter()]
         [System.Management.Automation.PSCredential]
