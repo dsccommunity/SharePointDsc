@@ -24,6 +24,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SPManagedMetaDataServiceApp
   - Fix issue where a missing Service App Proxy was not detected correctly and therefore not
     created, resulting in other errors.
+- SPSearchTopology
+  - Fixed issue where an error was thrown if the specified RootDirectory didn't exist on the
+    current server but did exist on the target server. 
 
 ## [4.7.0] - 2021-06-10
 

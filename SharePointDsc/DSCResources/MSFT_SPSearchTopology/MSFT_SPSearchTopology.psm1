@@ -443,29 +443,10 @@ function Set-TargetResource
                     "IndexComponent"
                     {
                         Write-Verbose -Message "Adding $ComponentToAdd to run an IndexComponent"
-                        $installedVersion = Get-SPDscInstalledProductVersion
-                        if ($installedVersion.FileMajorPart -eq 15)
-                        {
-                            Write-Verbose -Message "Using SharePoint 2013"
-                            $indexServer = (Get-SPServer $ComponentToAdd).Name
-                            $indexComponent = (New-Object Microsoft.Office.Server.Search.Administration.Topology.IndexComponent $indexServer, 0);
-                            $indexComponent.RootDirectory = $params.FirstPartitionDirectory
-                            $newTopology.AddComponent($indexComponent)
-                        }
-                        else
-                        {
-                            Write-Verbose -Message "Using SharePoint 2016 or later"
-                            $NewComponentParams.Add("IndexPartition", 0)
-                            if ($params.ContainsKey("FirstPartitionDirectory") -eq $true)
-                            {
-                                if ([string]::IsNullOrEmpty($params.FirstPartitionDirectory) -eq $false)
-                                {
-                                    $dir = $params.FirstPartitionDirectory
-                                    $NewComponentParams.Add("RootDirectory", $dir)
-                                }
-                            }
-                            $null = New-SPEnterpriseSearchIndexComponent @NewComponentParams
-                        }
+                        $indexServer = (Get-SPServer $ComponentToAdd).Name
+                        $indexComponent = (New-Object Microsoft.Office.Server.Search.Administration.Topology.IndexComponent $indexServer, 0);
+                        $indexComponent.RootDirectory = $params.FirstPartitionDirectory
+                        $newTopology.AddComponent($indexComponent)
                     }
                 }
             }
