@@ -5,6 +5,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- SPInstallLanguagePack
+  - Fixed detection of Norwegian language pack
+
 ## [4.7.0] - 2021-06-10
 
 ### Added
