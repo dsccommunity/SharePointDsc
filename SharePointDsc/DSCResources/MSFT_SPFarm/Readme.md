@@ -57,6 +57,9 @@ The application credential key will only be set during initial farm creation and
 when joining the farm. The ApplicationCredentialKey needs to be the same on each
 server in the farm. ApplicationCredentialKey is only supported for SharePoint 2019.
 
+If SkipRegisterAsDistributedCacheHost is set to true, the server is not registered
+as a distributed cache host.
+
 NOTE:
 When using SharePoint 2016 and later and enabling the Developer Dashboard,
 please make sure you also provision the Usage and Health service application

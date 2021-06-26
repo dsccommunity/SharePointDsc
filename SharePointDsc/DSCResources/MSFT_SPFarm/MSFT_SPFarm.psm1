@@ -91,6 +91,10 @@ function Get-TargetResource
         $ApplicationCredentialKey,
 
         [Parameter()]
+        [System.Boolean]
+        $SkipRegisterAsDistributedCacheHost = $true,
+
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -450,6 +454,10 @@ function Set-TargetResource
         $ApplicationCredentialKey,
 
         [Parameter()]
+        [System.Boolean]
+        $SkipRegisterAsDistributedCacheHost = $true,
+
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -466,6 +474,8 @@ function Set-TargetResource
             -Source $MyInvocation.MyCommand.Source
         throw $message
     }
+
+    $PSBoundParameters.SkipRegisterAsDistributedCacheHost = $SkipRegisterAsDistributedCacheHost
 
     if ($PSBoundParameters.ContainsKey("CentralAdministrationUrl"))
     {
@@ -828,7 +838,7 @@ function Set-TargetResource
                 DatabaseServer                     = $params.DatabaseServer
                 DatabaseName                       = $params.FarmConfigDatabaseName
                 Passphrase                         = $params.Passphrase.Password
-                SkipRegisterAsDistributedCacheHost = $true
+                SkipRegisterAsDistributedCacheHost = $params.SkipRegisterAsDistributedCacheHost
             }
 
             $supportsSettingApplicationCredentialKey = $false
@@ -1305,6 +1315,10 @@ function Test-TargetResource
         [Parameter()]
         [System.Management.Automation.PSCredential]
         $ApplicationCredentialKey,
+
+        [Parameter()]
+        [System.Boolean]
+        $SkipRegisterAsDistributedCacheHost = $true,
 
         [Parameter()]
         [System.Management.Automation.PSCredential]

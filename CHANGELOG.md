@@ -5,6 +5,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- SPFarm
+  - Added parameter SkipRegisterAsDistributedCacheHost
+
+### Fixed
+
 - SPInstallLanguagePack
   - Fixed detection of Norwegian language pack
 
@@ -28,8 +35,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SPWebAppAuthentication
   - Added ability to configure generic authentication settings per zone, like allow
     anonymous authentication or a custom signin page
-
-### Fixed
 
 - SharePointDsc
   - Fixed code coverage in pipeline
