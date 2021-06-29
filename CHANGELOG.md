@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SPSearchTopology
   - Fixed issue where an error was thrown if the specified RootDirectory didn't exist on the
     current server but did exist on the target server. 
+  - Fixed issue with using FQDNs instead of NetBIOS server names.
 
 ## [4.7.0] - 2021-06-10
 
