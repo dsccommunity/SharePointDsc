@@ -1011,7 +1011,7 @@ function Set-TargetResource
                     # Server 2019
                     $WindowsFeatures = Get-WindowsFeature -Name $Script:SPvNextFeatures
                 }
-                if ($osVersion.Build -ge 20000)
+                elseif ($osVersion.Build -ge 20000)
                 {
                     # Server 2022
                     $WindowsFeatures = Get-WindowsFeature -Name $Script:SPvNextFeatures
