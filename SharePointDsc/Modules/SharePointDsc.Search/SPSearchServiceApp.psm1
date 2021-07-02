@@ -43,7 +43,7 @@ function Confirm-UserIsDBOwner
         $command.Connection = $connection
 
         $command.CommandText = @"
-USE $Database
+USE [$Database]
 
 SELECT DP1.name AS DatabaseRoleName,
    isnull (DP2.name, 'No members') AS DatabaseUserName
@@ -116,7 +116,7 @@ function Set-UserAsDBOwner
         $command.Connection = $connection
 
         $command.CommandText = @"
-USE $Database
+USE [$Database]
 
 DECLARE @NewUserName sysname;
 

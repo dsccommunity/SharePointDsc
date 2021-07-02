@@ -161,12 +161,15 @@ function Get-TargetResource
                     -User $farmAccount) -eq $false
 
             Write-Verbose -Message "Checking Analytics reporting Database"
-            $analyticsDB = "$($adminDB)_AnalyticsReportingStore"
-            if ($farmAccountPermissionsNeedCorrecting -eq $false)
+            foreach ($database in $serviceApp.AnalyticsReportingDatabases)
             {
-                $farmAccountPermissionsNeedCorrecting = (Confirm-UserIsDBOwner -SQLServer $dbServer `
-                        -Database $analyticsDB `
-                        -User $farmAccount) -eq $false
+                $analyticsDB = $database.Name
+                if ($farmAccountPermissionsNeedCorrecting -eq $false)
+                {
+                    $farmAccountPermissionsNeedCorrecting = (Confirm-UserIsDBOwner -SQLServer $dbServer `
+                            -Database $analyticsDB `
+                            -User $farmAccount) -eq $false
+                }
             }
 
             Write-Verbose -Message "Checking Crawl Database(s)"
@@ -539,14 +542,17 @@ function Set-TargetResource
             }
 
             Write-Verbose -Message "Checking and correcting Analytics reporting Database"
-            $analyticsDB = "$($adminDB)_AnalyticsReportingStore"
-            if ((Confirm-UserIsDBOwner -SQLServer $dbServer `
-                        -Database $analyticsDB `
-                        -User $farmAccount) -eq $false)
+            foreach ($database in $serviceApp.AnalyticsReportingDatabases)
             {
-                Set-UserAsDBOwner -SQLServer $dbServer `
-                    -Database $analyticsDB `
-                    -User $farmAccount
+                $analyticsDB = $database.Name
+                if ((Confirm-UserIsDBOwner -SQLServer $dbServer `
+                            -Database $analyticsDB `
+                            -User $farmAccount) -eq $false)
+                {
+                    Set-UserAsDBOwner -SQLServer $dbServer `
+                        -Database $analyticsDB `
+                        -User $farmAccount
+                }
             }
 
             Write-Verbose -Message "Checking and correcting Crawl Database(s)"
