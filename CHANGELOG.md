@@ -5,6 +5,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- SPWebAppHttpThrottlingMonitor
+  - Added new resource to manage web application Http Throttling Monitor settings
+
 ### Changed
 
 - SPFarm
