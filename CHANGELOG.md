@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - SPContentDatabase
-  - Fixed issue where WebAppUrl in the Desired State would could the test to fail, always resulting
+  - Fixed issue where WebAppUrl in the Desired State would cause the test to fail, always resulting
     in False.
 - SPInstallLanguagePack
   - Fixed detection of Norwegian language pack
