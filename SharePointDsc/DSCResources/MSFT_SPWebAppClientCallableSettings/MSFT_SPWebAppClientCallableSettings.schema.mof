@@ -1,8 +1,8 @@
 [ClassVersion("1.0.0.0")]
 Class MSFT_SPProxyLibraryEntry
 {
-    [Required, Description("Name of the account")] String AssemblyName;
-    [Write, Description("Permission level of the account")] Boolean SupportAppAuthentication;
+    [Required, Description("Name of the assembly to be configured")] String AssemblyName;
+    [Write, Description("Specify if App Authentication should be supported")] Boolean SupportAppAuthentication;
 };
 [ClassVersion("1.0.0"), FriendlyName("SPWebAppClientCallableSettings")]
 class MSFT_SPWebAppClientCallableSettings : OMI_BaseResource

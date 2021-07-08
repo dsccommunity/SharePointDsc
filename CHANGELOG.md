@@ -9,11 +9,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - SPFarm
   - Added parameter SkipRegisterAsDistributedCacheHost
+- SPWebAppAuthentication
+  - Updated the description for the new zone setting parameters
+- SPWebAppClientCallableSettings
+  - Updated the description for the proxy library settings parameters
 
 ### Fixed
 
+- SPContentDatabase
+  - Fixed issue where WebAppUrl in the Desired State would cause the test to fail, always resulting
+    in False.
 - SPInstallLanguagePack
   - Fixed detection of Norwegian language pack
+- SPManagedMetaDataServiceApp
+  - Fix issue where a missing Service App Proxy was not detected correctly and therefore not
+    created, resulting in other errors.
+- SPSearchTopology
+  - Fixed issue where an error was thrown if the specified RootDirectory didn't exist on the
+    current server but did exist on the target server. 
+  - Fixed issue with using FQDNs instead of NetBIOS server names.
 
 ## [4.7.0] - 2021-06-10
 
@@ -35,6 +49,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SPWebAppAuthentication
   - Added ability to configure generic authentication settings per zone, like allow
     anonymous authentication or a custom signin page
+
+### Fixed
 
 - SharePointDsc
   - Fixed code coverage in pipeline

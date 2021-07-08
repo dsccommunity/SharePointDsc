@@ -382,6 +382,8 @@ function Set-TargetResource
             IndexPartition      = "IndexComponent"
         }
 
+        $domain = "." + (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
+
         # Build up the topology changes for each object type
         @("Admin",
             "Crawler",
@@ -400,18 +402,43 @@ function Set-TargetResource
             else
             {
                 $ComponentsToAdd = $params.$CurrentSearchProperty | Where-Object -FilterScript {
-                    $CurrentValues.$CurrentSearchProperty -contains $_ -eq $false
+                    ($CurrentValues.$CurrentSearchProperty -contains $_ -eq $false) -and `
+                    ($CurrentValues.$CurrentSearchProperty -contains ($_ -replace $domain) -eq $false)
                 }
 
                 $ComponentsToRemove = $CurrentValues.$CurrentSearchProperty | Where-Object -FilterScript {
-                    $params.$CurrentSearchProperty -contains $_ -eq $false
+                    ($params.$CurrentSearchProperty -contains $_ -eq $false) -and `
+                    ($params.$CurrentSearchProperty -contains ($_ + $domain) -eq $false)
                 }
             }
+
             foreach ($ComponentToAdd in $ComponentsToAdd)
             {
+                Write-Verbose -Message "Processing Search Topology roles for '$ComponentToAdd'"
+
+                # FIND SERVICE INSTANCE
+                if ($AllSearchServiceInstances.ContainsKey($ComponentToAdd))
+                {
+                    $serviceInstance = $AllSearchServiceInstances.$ComponentToAdd
+                }
+                elseif ($AllSearchServiceInstances.ContainsKey($ComponentToAdd + $domain))
+                {
+                    $serviceInstance = $AllSearchServiceInstances.($ComponentToAdd + $domain)
+                }
+                else
+                {
+                    $message = ("Search service instance for component '$ComponentToAdd' was not " + `
+                            "found. Only found components on '$($ComponentsToAdd.Keys -join ", ")'")
+                    Add-SPDscEvent -Message $message `
+                        -EntryType 'Error' `
+                        -EventID 100 `
+                        -Source $eventSource
+                    throw $message
+                }
+
                 $NewComponentParams = @{
                     SearchTopology        = $newTopology
-                    SearchServiceInstance = $AllSearchServiceInstances.$ComponentToAdd
+                    SearchServiceInstance = $serviceInstance
                 }
                 switch ($componentTypes.$CurrentSearchProperty)
                 {
@@ -443,29 +470,10 @@ function Set-TargetResource
                     "IndexComponent"
                     {
                         Write-Verbose -Message "Adding $ComponentToAdd to run an IndexComponent"
-                        $installedVersion = Get-SPDscInstalledProductVersion
-                        if ($installedVersion.FileMajorPart -eq 15)
-                        {
-                            Write-Verbose -Message "Using SharePoint 2013"
-                            $indexServer = (Get-SPServer $ComponentToAdd).Name
-                            $indexComponent = (New-Object Microsoft.Office.Server.Search.Administration.Topology.IndexComponent $indexServer, 0);
-                            $indexComponent.RootDirectory = $params.FirstPartitionDirectory
-                            $newTopology.AddComponent($indexComponent)
-                        }
-                        else
-                        {
-                            Write-Verbose -Message "Using SharePoint 2016 or later"
-                            $NewComponentParams.Add("IndexPartition", 0)
-                            if ($params.ContainsKey("FirstPartitionDirectory") -eq $true)
-                            {
-                                if ([string]::IsNullOrEmpty($params.FirstPartitionDirectory) -eq $false)
-                                {
-                                    $dir = $params.FirstPartitionDirectory
-                                    $NewComponentParams.Add("RootDirectory", $dir)
-                                }
-                            }
-                            $null = New-SPEnterpriseSearchIndexComponent @NewComponentParams
-                        }
+                        $indexServer = (Get-SPServer $ComponentToAdd).Name
+                        $indexComponent = (New-Object Microsoft.Office.Server.Search.Administration.Topology.IndexComponent $indexServer, 0);
+                        $indexComponent.RootDirectory = $params.FirstPartitionDirectory
+                        $newTopology.AddComponent($indexComponent)
                     }
                 }
             }
@@ -477,7 +485,8 @@ function Set-TargetResource
                     $component = Get-SPEnterpriseSearchComponent -SearchTopology $newTopology | `
                             Where-Object -FilterScript {
                             ($_.GetType().Name -eq $componentTypes.$CurrentSearchProperty) `
-                                -and ($_.ServerName -eq $ComponentToRemove) `
+                                -and (($_.ServerName -eq $ComponentToRemove) `
+                                    -or ($_.ServerName -eq ($ComponentToRemove -replace $domain))) `
                                 -and ($_.IndexPartitionOrdinal -eq 0)
                         }
                     }
@@ -486,7 +495,8 @@ function Set-TargetResource
                         $component = Get-SPEnterpriseSearchComponent -SearchTopology $newTopology | `
                                 Where-Object -FilterScript {
                                 ($_.GetType().Name -eq $componentTypes.$CurrentSearchProperty) `
-                                    -and ($_.ServerName -eq $ComponentToRemove)
+                                    -and (($_.ServerName -eq $ComponentToRemove) `
+                                        -or ($_.ServerName -eq ($ComponentToRemove -replace $domain)))
                             }
                         }
 
@@ -565,6 +575,14 @@ function Set-TargetResource
             Write-Verbose -Message "Testing Search Topology for '$ServiceAppName'"
 
             $CurrentValues = Get-TargetResource @PSBoundParameters
+
+            $domain = "." + (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
+            $PSBoundParameters.Admin = $PSBoundParameters.Admin -replace $domain
+            $PSBoundParameters.Crawler = $PSBoundParameters.Crawler -replace $domain
+            $PSBoundParameters.ContentProcessing = $PSBoundParameters.ContentProcessing -replace $domain
+            $PSBoundParameters.AnalyticsProcessing = $PSBoundParameters.AnalyticsProcessing -replace $domain
+            $PSBoundParameters.QueryProcessing = $PSBoundParameters.QueryProcessing -replace $domain
+            $PSBoundParameters.IndexPartition = $PSBoundParameters.IndexPartition -replace $domain
 
             Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
             Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
