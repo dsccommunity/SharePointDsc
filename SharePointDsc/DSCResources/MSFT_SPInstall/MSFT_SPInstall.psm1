@@ -114,7 +114,7 @@ function Get-TargetResource
     $installedItems = $installedItemsX86 + $installedItemsX64
     $installedItems = $installedItems.DisplayName | Select-Object -Unique
     $spInstall = $installedItems | Where-Object -FilterScript {
-        $_ -match "^Microsoft SharePoint Server (2013|2016|2019)$"
+        $_ -match "^Microsoft SharePoint Server (2013|2016|2019|Subscription Edition Preview)$"
     }
 
     if ($spInstall)

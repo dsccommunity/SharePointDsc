@@ -3,18 +3,18 @@
 The format is based on and uses the types of changes according to [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [vNext]
+## [SharePoint Server Subscription Edition]
 
 ### Added (v5.0)
 
 - SharePointDsc
-  - Added support for SharePoint vNext unit tests
+  - Added support for SharePoint Server Subscription Edition in Util module and unit tests stubs
 - SPFarm
-  - Added support for SharePoint vNext
+  - Added support for SharePoint Server Subscription Edition
 - SPInstall
-  - Added support for SharePoint vNext
+  - Added support for SharePoint Server Subscription Edition
 - SPInstallPrereqs
-  - Added support for SharePoint vNext
+  - Added support for SharePoint Server Subscription Edition
 
 ## [Unreleased]
 
