@@ -146,7 +146,7 @@ function Write-SPDscStubFile
     }
     else
     {
-        # SharePoint [vNext]
+        # SharePoint Server Subscription Edition
         $sourceModule = "SharePointServer"
     }
 

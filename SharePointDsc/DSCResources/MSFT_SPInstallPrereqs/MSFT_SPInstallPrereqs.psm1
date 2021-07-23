@@ -96,7 +96,7 @@ $Script:SP2019Win19Features = @("Web-Server", "Web-WebServer",
     "Windows-Identity-Foundation", "WAS", "WAS-Process-Model",
     "WAS-NET-Environment", "WAS-Config-APIs", "XPS-Viewer")
 
-$Script:SPvNextFeatures = @("NET-WCF-Pipe-Activation45",
+$Script:SPSEFeatures = @("NET-WCF-Pipe-Activation45",
     "NET-WCF-HTTP-Activation45", "NET-WCF-TCP-Activation45",
     "Web-Server", "Web-WebServer", "Web-Common-Http",
     "Web-Static-Content", "Web-Default-Doc", "Web-Dir-Browsing",
@@ -299,7 +299,7 @@ function Get-TargetResource
         }
         elseif ($buildVersion -ge 13000)
         {
-            Write-Verbose -Message "Version: SharePoint [vNext]"
+            Write-Verbose -Message "Version: SharePoint Server Subscription Edition"
         }
     }
 
@@ -379,7 +379,7 @@ function Get-TargetResource
                 throw $message
             }
         }
-        # SharePoint [vNext]
+        # SharePoint Server Subscription Edition
         elseif ($buildVersion -ge 13000)
         {
             if ($osVersion.Major -eq 10)
@@ -387,16 +387,16 @@ function Get-TargetResource
                 if ($osVersion.Build -eq 17763)
                 {
                     Write-Verbose -Message "OS Version: Windows Server 2019"
-                    $WindowsFeatures = Get-WindowsFeature -Name $Script:SPvNextFeatures
+                    $WindowsFeatures = Get-WindowsFeature -Name $Script:SPSEFeatures
                 }
                 elseif ($osVersion.Build -ge 20000)
                 {
                     Write-Verbose -Message "OS Version: Windows Server 2022"
-                    $WindowsFeatures = Get-WindowsFeature -Name $Script:SPvNextFeatures
+                    $WindowsFeatures = Get-WindowsFeature -Name $Script:SPSEFeatures
                 }
                 else
                 {
-                    $message = "SharePoint [vNext] only supports Windows Server 2019 or Windows Server 2022"
+                    $message = "SharePoint Server Subscription Edition only supports Windows Server 2019 or Windows Server 2022"
                     Add-SPDscEvent -Message $message `
                         -EntryType 'Error' `
                         -EventID 100 `
@@ -406,7 +406,7 @@ function Get-TargetResource
             }
             else
             {
-                $message = "SharePoint [vNext] only supports Windows Server 2019 or Windows Server 2022"
+                $message = "SharePoint Server Subscription Edition only supports Windows Server 2019 or Windows Server 2022"
                 Add-SPDscEvent -Message $message `
                     -EntryType 'Error' `
                     -EventID 100 `
@@ -592,13 +592,13 @@ function Get-TargetResource
         }
         elseif ($buildVersion -ge 13000)
         {
-            #SP [vNext] prereqs
+            #SharePoint Server Subscription Edition prereqs
             $prereqsToTest += @(
                 [PSObject]@{
                     Name                   = "Microsoft Visual C++ 2015-2019 Redistributable (x64)"
                     SearchType             = "BundleUpgradeCode"
                     SearchValue            = "{C146EF48-4D31-3C3D-A2C5-1E91AF8A0A9B}"
-                    MinimumRequiredVersion = "14.27.29016.0"
+                    MinimumRequiredVersion = "14.29.30040.0"
                 }
             )
         }
@@ -998,10 +998,10 @@ function Set-TargetResource
                 throw $message
             }
         }
-        # SharePoint [vNext]
+        # SharePoint Server Subscription Edition
         elseif ($buildVersion -ge 13000)
         {
-            Write-Verbose -Message "Version: SharePoint [vNext]"
+            Write-Verbose -Message "Version: SharePoint Server Subscription Edition"
             $requiredParams = @("WCFDataServices56", "DotNet48", "MSVCRT142")
 
             if ($osVersion.Major -eq 10)
@@ -1009,16 +1009,16 @@ function Set-TargetResource
                 if ($osVersion.Build -eq 17763)
                 {
                     # Server 2019
-                    $WindowsFeatures = Get-WindowsFeature -Name $Script:SPvNextFeatures
+                    $WindowsFeatures = Get-WindowsFeature -Name $Script:SPSEFeatures
                 }
                 elseif ($osVersion.Build -ge 20000)
                 {
                     # Server 2022
-                    $WindowsFeatures = Get-WindowsFeature -Name $Script:SPvNextFeatures
+                    $WindowsFeatures = Get-WindowsFeature -Name $Script:SPSEFeatures
                 }
                 else
                 {
-                    $message = "SharePoint [vNext] only supports Windows Server 2019 or Windows Server 2022"
+                    $message = "SharePoint Server Subscription Edition only supports Windows Server 2019 or Windows Server 2022"
                     Add-SPDscEvent -Message $message `
                         -EntryType 'Error' `
                         -EventID 100 `
@@ -1028,7 +1028,7 @@ function Set-TargetResource
             }
             else
             {
-                $message = "SharePoint [vNext] only supports Windows Server 2019 or Windows Server 2022"
+                $message = "SharePoint Server Subscription Edition only supports Windows Server 2019 or Windows Server 2022"
                 Add-SPDscEvent -Message $message `
                     -EntryType 'Error' `
                     -EventID 100 `

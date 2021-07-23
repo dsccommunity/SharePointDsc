@@ -22,8 +22,8 @@ class MSFT_SPInstallPrereqs : OMI_BaseResource
     [Write, Description("The path to the installer for this prerequisite (SP2016 only)")] String ODBC;
     [Write, Description("The path to the installer for this prerequisite (SP2016 only)")] String DotNetFx;
     [Write, Description("The path to the installer for this prerequisite (SP2019 only)")] String DotNet472;
-    [Write, Description("The path to the installer for this prerequisite (SPvNext only)")] String DotNet48;
+    [Write, Description("The path to the installer for this prerequisite (SP Subscription Edition only)")] String DotNet48;
     [Write, Description("The path to the installer for this prerequisite (SP2019 only)")] String MSVCRT141;
-    [Write, Description("The path to the installer for this prerequisite (SPvNext only)")] String MSVCRT142;
+    [Write, Description("The path to the installer for this prerequisite (SP Subscription Edition only)")] String MSVCRT142;
     [Write, Description("Present to install the prerequisites. Absent is currently not supported"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
 };
