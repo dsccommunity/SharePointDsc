@@ -27,6 +27,20 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting Access 2010 Service app '$Name'"
 
+    $productVersion = Get-SPDscInstalledProductVersion
+    if ($productVersion.FileMajorPart -eq 16 `
+            -and $productVersion.FileBuildPart -gt 13000)
+    {
+        $message = ("Since SharePoint Server Subscription Edition the Access Services 2010 does no longer " + `
+            "exists. See https://docs.microsoft.com/en-us/sharepoint/what-s-new/what-s-deprecated-or-removed-from-sharepoint-server-2019#access-services-2013 " + `
+            "for more info.")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
+    }
+
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
         -Arguments $PSBoundParameters `
         -ScriptBlock {
@@ -89,6 +103,21 @@ function Set-TargetResource
     )
 
     Write-Verbose -Message "Setting Access 2010 Services app '$Name'"
+
+    $productVersion = Get-SPDscInstalledProductVersion
+    if ($productVersion.FileMajorPart -eq 16 `
+            -and $productVersion.FileBuildPart -gt 13000)
+    {
+        $message = ("Since SharePoint Server Subscription Edition the Access Services 2010 does no longer " + `
+            "exists. See https://docs.microsoft.com/en-us/sharepoint/what-s-new/what-s-deprecated-or-removed-from-sharepoint-server-2019#access-services-2013 " + `
+            "for more info.")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
+    }
+
     $result = Get-TargetResource @PSBoundParameters
 
     if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present")
