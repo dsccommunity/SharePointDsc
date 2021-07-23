@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - SharePointDsc
   - Added support for SharePoint Server Subscription Edition in Util module and unit tests stubs
+- SPAccessServiceApp
+  - Service app no longer exists in SharePoint Server Subscription Edition. Added logic to check for SPSE.
+- SPAccessServices2010
+  - Service app no longer exists in SharePoint Server Subscription Edition. Added logic to check for SPSE.
 - SPFarm
   - Added support for SharePoint Server Subscription Edition
 - SPInstall
