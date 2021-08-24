@@ -21,9 +21,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- SPAppDomain
+  - Corrected Verbose logging in Test method
+  - Corrected issue in Get method where ErrorAction had to be SilentlyContinue
 - SPContentDatabase
   - Fixed issue where WebAppUrl in the Desired State would cause the test to fail, always resulting
     in False.
+- SPExcelServiceApp
+  - Updated links to Docs instead of old TechNet
 - SPInstallLanguagePack
   - Fixed detection of Norwegian language pack
 - SPManagedMetaDataServiceApp
@@ -33,6 +38,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Fixed issue where an error was thrown if the specified RootDirectory didn't exist on the
     current server but did exist on the target server. 
   - Fixed issue with using FQDNs instead of NetBIOS server names.
+- SPWorkManagementServiceApp
+  - Updated links to Docs instead of old TechNet
 
 ## [4.7.0] - 2021-06-10
 

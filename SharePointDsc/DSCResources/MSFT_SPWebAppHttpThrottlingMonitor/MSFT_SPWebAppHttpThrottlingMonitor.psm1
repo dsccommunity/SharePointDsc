@@ -43,6 +43,33 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting web application '$WebAppUrl' HTTP Throttling Monitoring settings"
 
+    if ($Ensure -eq 'Present')
+    {
+        if ($PSBoundParameters.ContainsKey("HealthScoreBuckets") -eq $false)
+        {
+            Write-Verbose -Message 'NOTE: The HealthScoreBuckets parameter is required when Ensure=Present'
+        }
+    }
+
+    if ($PSBoundParameters.ContainsKey("HealthScoreBuckets"))
+    {
+        if ($HealthScoreBuckets[0] -gt $HealthScoreBuckets[1])
+        {
+            Write-Verbose -Message "Order of HealthScoreBuckets is Descending"
+            $bucketsDescending = $true
+        }
+        else
+        {
+            Write-Verbose -Message "Order of HealthScoreBuckets is Ascending"
+            $bucketsDescending = $false
+        }
+
+        if ($bucketsDescending -ne $IsDescending)
+        {
+            Write-Verbose -Message 'NOTE: The order of HealthScoreBuckets and IsDescending do not match. Make sure they do.'
+        }
+    }
+
     $PSBoundParameters.IsDescending = $IsDescending
     $PSBoundParameters.CounterInstance = $CounterInstance
 
@@ -56,8 +83,8 @@ function Get-TargetResource
             Category           = $params.Category
             Counter            = $params.Counter
             CounterInstance    = $params.CounterInstance
+            IsDescending       = $params.IsDescending
             HealthScoreBuckets = $null
-            IsDescending       = $null
             Ensure             = "Absent"
         }
 
@@ -67,6 +94,7 @@ function Get-TargetResource
             return $nullReturn
         }
 
+        [Array]$httpTM = $null
         if ([String]::IsNullOrEmpty($CounterInstance))
         {
             $httpTM = (Get-SPWebApplicationHttpThrottlingMonitor $params.webappUrl) | Where-Object -FilterScript {
@@ -358,7 +386,7 @@ function Export-TargetResource
             Write-Host "Scanning HTTP Throttling Monitoring for Web App [$i/$total] {$($webApp.Url)}"
             $params.WebAppUrl = $webApp.Url
 
-            $monitors = Get-SPWebAppHttpThrottlingMonitor -Identity $webApp.Url
+            $monitors = Get-SPWebApplicationHttpThrottlingMonitor -Identity $webApp.Url
             foreach ($monitor in $monitors)
             {
                 $params.Category = $monitor.Category

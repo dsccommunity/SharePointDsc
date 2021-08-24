@@ -128,7 +128,7 @@ function Get-TargetResource
         $message = ("Only SharePoint 2013 is supported to deploy Excel Services " + `
                 "service applications via DSC, as SharePoint 2016 and SharePoint 2019 deprecated " + `
                 "this service. See " + `
-                "https://technet.microsoft.com/en-us/library/mt346112(v=office.16).aspx " + `
+                "https://docs.microsoft.com/en-us/SharePoint/what-s-new/what-s-deprecated-or-removed-from-sharepoint-server-2016 " + `
                 "for more info.")
         Add-SPDscEvent -Message $message `
             -EntryType 'Error' `
@@ -324,7 +324,7 @@ function Set-TargetResource
         $message = ("Only SharePoint 2013 is supported to deploy Excel Services " + `
                 "service applications via DSC, as SharePoint 2016 and SharePoint 2019 deprecated " + `
                 "this service. See " + `
-                "https://technet.microsoft.com/en-us/library/mt346112(v=office.16).aspx " + `
+                "https://docs.microsoft.com/en-us/SharePoint/what-s-new/what-s-deprecated-or-removed-from-sharepoint-server-2016 " + `
                 "for more info.")
         Add-SPDscEvent -Message $message `
             -EntryType 'Error' `
@@ -591,7 +591,7 @@ function Test-TargetResource
         $message = ("Only SharePoint 2013 is supported to deploy Excel Services " + `
                 "service applications via DSC, as SharePoint 2016 and SharePoint 2019 deprecated " + `
                 "this service. See " + `
-                "https://technet.microsoft.com/en-us/library/mt346112(v=office.16).aspx " + `
+                "https://docs.microsoft.com/en-us/SharePoint/what-s-new/what-s-deprecated-or-removed-from-sharepoint-server-2016 " + `
                 "for more info.")
         Add-SPDscEvent -Message $message `
             -EntryType 'Error' `

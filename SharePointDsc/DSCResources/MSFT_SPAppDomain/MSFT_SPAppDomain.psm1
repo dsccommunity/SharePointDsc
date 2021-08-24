@@ -27,7 +27,7 @@ function Get-TargetResource
         -ScriptBlock {
         $params = $args[0]
         $appDomain = Get-SPAppDomain
-        $prefix = Get-SPAppSiteSubscriptionName -ErrorAction Continue
+        $prefix = Get-SPAppSiteSubscriptionName -ErrorAction SilentlyContinue
 
         return @{
             AppDomain = $appDomain
@@ -86,7 +86,7 @@ function Test-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Getting app domain settings"
+    Write-Verbose -Message "Testing app domain settings"
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 

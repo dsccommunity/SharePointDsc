@@ -35,8 +35,8 @@ Updated author, copyright notice, and URLs.
 <#
 
 .DESCRIPTION
- This example shows how to apply some of the available general settings to the
- specified web app
+ This example shows how to configure the Processor counter to the
+ Throttling Settings of the specified web app
 
 #>
 
@@ -56,10 +56,10 @@ Configuration Example
         SPWebAppHttpThrottlingMonitor PrimaryWebAppHTTPThrottlingSettings
         {
             WebAppUrl            = 'http://example.contoso.local'
-            Category             = 'Memory'
-            Counter              = 'Available Mbytes'
-            HealthScoreBuckets   = @(1000, 500, 400, 300, 200, 100, 80, 60, 40, 20)
-            IsDescending         = $true
+            Category             = 'Processor'
+            Counter              = '% Processor Time'
+            Instance             = '_Total'
+            HealthScoreBuckets   = @(10, 20, 30, 40, 50, 60, 70, 80, 90, 100)
             Ensure               = 'Present'
             PsDscRunAsCredential = $SetupAccount
         }
