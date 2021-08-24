@@ -12,5 +12,5 @@ parameter, the service application is provisioned.
 
 Only SharePoint 2013 is supported to deploy Excel Services service applications via DSC,
 as SharePoint 2016 and SharePoint 2019 have deprecated this service. See
-[What's deprecated or removed from SharePoint Server 2016](https://technet.microsoft.com/en-us/library/mt346112(v=office.16).aspx)
+[What's deprecated or removed from SharePoint Server 2016](https://docs.microsoft.com/en-us/SharePoint/what-s-new/what-s-deprecated-or-removed-from-sharepoint-server-2016)
 for more info.

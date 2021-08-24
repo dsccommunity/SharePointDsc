@@ -1,0 +1,12 @@
+[ClassVersion("1.0.0"), FriendlyName("SPWebAppHttpThrottlingMonitor")]
+class MSFT_SPWebAppHttpThrottlingMonitor : OMI_BaseResource
+{
+    [Key, Description("The URL of the web app to set the throttling monitor for")] string WebAppUrl;
+    [Required, Description("Specifies the name of the performance counter category")] string Category;
+    [Required, Description("Specifies the name of the performance counter")] string Counter;
+    [Write, Description("Specifies bucket ranges to use in determining the calculation of the server Health Score for this counter")] uint32 HealthScoreBuckets[];
+    [Write, Description("Specifies the instance of the performance counter")] string CounterInstance;
+    [Write, Description("Specifies that this counter is interpreted in descending order")] boolean IsDescending;
+    [Write, Description("Present if the throttling monitor should exist, absent if it should not"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
+    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] string InstallAccount;
+};

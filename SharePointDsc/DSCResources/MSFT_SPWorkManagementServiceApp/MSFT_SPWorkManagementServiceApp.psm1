@@ -60,7 +60,7 @@ function Get-TargetResource
     {
         $message = ("Work Management Service Application is no longer available " + `
                 "in SharePoint 2016/2019: " + `
-                "https://technet.microsoft.com/en-us/library/mt346112(v=office.16).aspx")
+                "https://docs.microsoft.com/en-us/SharePoint/what-s-new/what-s-deprecated-or-removed-from-sharepoint-server-2016")
         Add-SPDscEvent -Message $message `
             -EntryType 'Error' `
             -EventID 100 `
@@ -185,7 +185,7 @@ function Set-TargetResource
     {
         $message = ("Work Management Service Application is no longer available " + `
                 "in SharePoint 2016/2019: " + `
-                "https://technet.microsoft.com/en-us/library/mt346112(v=office.16).aspx")
+                "https://docs.microsoft.com/en-us/SharePoint/what-s-new/what-s-deprecated-or-removed-from-sharepoint-server-2016")
         Add-SPDscEvent -Message $message `
             -EntryType 'Error' `
             -EventID 100 `
@@ -410,7 +410,7 @@ function Test-TargetResource
     {
         $message = ("Work Management Service Application is no longer available " + `
                 "in SharePoint 2016/2019: " + `
-                "https://technet.microsoft.com/en-us/library/mt346112(v=office.16).aspx")
+                "https://docs.microsoft.com/en-us/SharePoint/what-s-new/what-s-deprecated-or-removed-from-sharepoint-server-2016")
         Add-SPDscEvent -Message $message `
             -EntryType 'Error' `
             -EventID 100 `

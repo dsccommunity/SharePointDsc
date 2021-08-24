@@ -23,4 +23,4 @@ NOTE:
 You cannot use this resource with SharePoint 2016/2019, since the Work
 Management functionality has been removed in SharePoint 2016/2019.
 More information:
-https://technet.microsoft.com/en-us/library/mt346112(v=office.16).aspx
+https://docs.microsoft.com/en-us/SharePoint/what-s-new/what-s-deprecated-or-removed-from-sharepoint-server-2016
