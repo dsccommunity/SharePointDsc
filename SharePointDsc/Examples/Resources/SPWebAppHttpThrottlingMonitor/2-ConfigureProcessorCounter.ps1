@@ -58,7 +58,7 @@ Configuration Example
             WebAppUrl            = 'http://example.contoso.local'
             Category             = 'Processor'
             Counter              = '% Processor Time'
-            Instance             = '_Total'
+            CounterInstance      = '_Total'
             HealthScoreBuckets   = @(10, 20, 30, 40, 50, 60, 70, 80, 90, 100)
             Ensure               = 'Present'
             PsDscRunAsCredential = $SetupAccount
