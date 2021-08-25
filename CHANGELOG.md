@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - SPFarm
   - Added parameter SkipRegisterAsDistributedCacheHost
+- SPSearchServiceApp
+  - Fixed an issue if the analytics database where not provisioned with a
+    hardcoded name
+  - Fixed an issue if search databases had names containing one or more spaces
 - SPWebAppAuthentication
   - Updated the description for the new zone setting parameters
 - SPWebAppClientCallableSettings
