@@ -306,16 +306,20 @@ try
 
                     Mock -CommandName Get-SPServiceApplication -MockWith {
                         $spServiceApp = [PSCustomObject]@{
-                            TypeName            = "Search Service Application"
-                            DisplayName         = $testParams.Name
-                            Name                = $testParams.Name
-                            ApplicationPool     = @{ Name = $testParams.ApplicationPool }
-                            Database            = @{
+                            TypeName                    = "Search Service Application"
+                            DisplayName                 = $testParams.Name
+                            Name                        = $testParams.Name
+                            ApplicationPool             = @{ Name = $testParams.ApplicationPool }
+                            Database                    = @{
                                 Name                 = $testParams.DatabaseName
                                 NormalizedDataSource = 'SQL01'
                             }
-                            SearchAdminDatabase = @{
+                            SearchAdminDatabase         = @{
                                 Name                 = $testParams.DatabaseName
+                                NormalizedDataSource = 'SQL01'
+                            }
+                            AnalyticsReportingDatabases = @{
+                                Name                 = $testParams.DatabaseName + '_AnalyticsReportingStore'
                                 NormalizedDataSource = 'SQL01'
                             }
                         }
