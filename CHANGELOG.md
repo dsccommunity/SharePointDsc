@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added (v5.0)
 
+- SharePointDsc
+  - Added support for SharePoint vNext unit tests
+- SPFarm
+  - Added support for SharePoint vNext
+- SPInstall
+  - Added support for SharePoint vNext
 - SPInstallPrereqs
   - Added support for SharePoint vNext
 
