@@ -76,7 +76,7 @@ function Get-TargetResource
             $description = $spTrust.Description
             $realm = $spTrust.DefaultProviderRealm
             $signInUrl = $spTrust.ProviderUri.OriginalString
-            $identifierClaim = $spTrust.IdentityClaimTypeInformation.MappedClaimType
+            $identifierClaim = $spTrust.IdentityClaimTypeInformation.InputClaimType
             $SigningCertificateThumbprint = $spTrust.SigningCertificate.Thumbprint
             $currentState = "Present"
             $claimProviderName = $sptrust.ClaimProviderName
@@ -299,7 +299,7 @@ function Set-TargetResource
                 }
 
                 $mappings = ($claimsMappingsArray | Where-Object -FilterScript {
-                        $_.MappedClaimType -like $params.IdentifierClaim
+                        $_.InputClaimType -like $params.IdentifierClaim
                     })
                 if ($null -eq $mappings)
                 {

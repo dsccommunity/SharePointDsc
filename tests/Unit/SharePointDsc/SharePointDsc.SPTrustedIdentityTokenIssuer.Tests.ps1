@@ -50,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Mocks for all contexts
                 Mock -CommandName Get-ChildItem -MockWith {
@@ -73,7 +73,7 @@ try
 
                 Mock -CommandName New-SPClaimTypeMapping -MockWith {
                     return [pscustomobject]@{
-                        MappedClaimType = $testParams.IdentifierClaim
+                        InputClaimType = $testParams.IdentifierClaim
                     }
                 }
 
@@ -543,7 +543,7 @@ try
 
                     Mock -CommandName New-SPClaimTypeMapping -MockWith {
                         return [pscustomobject]@{
-                            MappedClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                            InputClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
                         }
                     }
                 }
