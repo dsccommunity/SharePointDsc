@@ -299,7 +299,46 @@ function Set-TargetResource
         {
             Write-Verbose -Message ("Starting New-SPSite with the following parameters: " + `
                     "$(Convert-SPDscHashtableToString $params)")
-            $site = New-SPSite @params
+            #$site = New-SPSite @params
+
+            $paramsList = $params.GetEnumerator() | Where-Object {
+                $_.Key -ne "Verbose"
+            } | ForEach-Object {
+                if ($_.Key -is [Switch])
+                {
+                    "-$($_.Key):$($_.Value)"
+                }
+                else
+                {
+                    "-$($_.Key) '$($_.Value)'"
+                }
+            }
+            $paramsStr = $paramsList -join " "
+            $installedVersion = Get-SPDscInstalledProductVersion
+            if ($installedVersion.ProductMajorPart -eq 15 -or $installedVersion.ProductBuildPart -le 12999)
+            {
+                $newSPSiteCmd = "Add-PSSnapin Microsoft.SharePoint.PowerShell;"
+            }
+            else
+            {
+                $newSPSiteCmd = "Import-Module SharePointServer -Verbose:`$false -WarningAction SilentlyContinue;"
+            }
+
+            $newSPSiteCmd += "New-SPSite " + $paramsStr
+            Write-Verbose "Running command: $newSPSiteCmd"
+
+            $result = Start-Process -Wait `
+                -NoNewWindow `
+                -FilePath "powershell.exe" `
+                -ArgumentList @("-command", "$newSPSiteCmd") `
+                -PassThru
+            if ($result.ExitCode -ne 0)
+            {
+                throw ("[ERROR] An error during site creation. Exit code '$($result.ExitCode)' " + `
+                        "was returned. Please check ULS log for more info")
+            }
+            $site = Get-SPSite -Identity $params.Url -ErrorAction SilentlyContinue
+
             if ($CreateDefaultGroups -eq $true)
             {
                 $doCreateDefaultGroups = $true
