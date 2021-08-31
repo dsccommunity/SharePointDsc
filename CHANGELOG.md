@@ -47,6 +47,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SPSite
   - Implemented workaround to prevent issue with creating site collections immediately after
     farm creation (Error "Invalid field name. {cbb92da4-fd46-4c7d-af6c-3128c2a5576e}")
+- SPTrustedIdentityTokenIssuer
+  - Fixed issue where the IdentifierClaim was not properly detected in the Set method
 - SPWorkManagementServiceApp
   - Updated links to Docs instead of old TechNet
 
