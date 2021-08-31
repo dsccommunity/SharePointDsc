@@ -50,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
                 try
@@ -185,6 +185,12 @@ try
                     }
 
                     Mock -CommandName Get-SPSite -MockWith { return $null }
+
+                    Mock -CommandName Start-Process -MockWith {
+                        return @{
+                            ExitCode = 0
+                        }
+                    }
                 }
 
                 It "Should return OwnerAlias=Null from the get method" {
@@ -197,7 +203,7 @@ try
 
                 It "Should create a new site from the set method" {
                     Set-TargetResource @testParams
-                    Assert-MockCalled New-SPSite
+                    Assert-MockCalled Start-Process
                 }
             }
 

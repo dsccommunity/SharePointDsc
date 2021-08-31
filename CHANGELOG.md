@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- SPSearchServiceApp
+  - Added additional logging at checking db permissions
 - SPWebAppHttpThrottlingMonitor
   - Added new resource to manage web application Http Throttling Monitor settings
 
@@ -42,6 +44,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Fixed issue where an error was thrown if the specified RootDirectory didn't exist on the
     current server but did exist on the target server. 
   - Fixed issue with using FQDNs instead of NetBIOS server names.
+- SPSite
+  - Implemented workaround to prevent issue with creating site collections immediately after
+    farm creation (Error "Invalid field name. {cbb92da4-fd46-4c7d-af6c-3128c2a5576e}")
 - SPWorkManagementServiceApp
   - Updated links to Docs instead of old TechNet
 
