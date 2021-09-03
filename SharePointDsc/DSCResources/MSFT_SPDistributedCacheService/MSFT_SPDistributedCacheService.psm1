@@ -65,7 +65,7 @@ function Get-TargetResource
                 -CachePort $cachePort `
                 -ErrorAction SilentlyContinue
 
-            $windowsService = Get-CimInstance -Class Win32_Service -Filter "Name='AppFabricCachingService'"
+            $windowsService = Get-CimInstance -Class Win32_Service -Filter "Name='AppFabricCachingService' OR Name='SPCache'"
             $firewallRule = Get-NetFirewallRule -DisplayName "SharePoint Distributed Cache" `
                 -ErrorAction SilentlyContinue
 
@@ -319,7 +319,7 @@ function Set-TargetResource
 
                 $farm = Get-SPFarm
                 $cacheService = $farm.Services | Where-Object -FilterScript {
-                    $_.Name -eq "AppFabricCachingService"
+                    $_.Name -in @("AppFabricCachingService", "SPCache")
                 }
 
                 if ($cacheService.ProcessIdentity.ManagedAccount.Username -ne $params.ServiceAccount)
@@ -351,7 +351,7 @@ function Set-TargetResource
                     $params = $args[0]
                     $farm = Get-SPFarm
                     $cacheService = $farm.Services | Where-Object -FilterScript {
-                        $_.Name -eq "AppFabricCachingService"
+                        $_.Name -in @("AppFabricCachingService", "SPCache")
                     }
 
                     if ($cacheService.ProcessIdentity.ManagedAccount.Username -ne $params.ServiceAccount)
