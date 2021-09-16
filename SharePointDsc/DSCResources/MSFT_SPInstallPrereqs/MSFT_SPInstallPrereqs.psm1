@@ -436,19 +436,10 @@ function Get-TargetResource
 
     $installedItems = $installedItemsX86 + $installedItemsX64 | Select-Object -Property DisplayName, BundleUpgradeCode, DisplayVersion -Unique
 
-    # Common prereqs
-    $prereqsToTest = @(
-        [PSObject]@{
-            Name        = "WCF Data Services 5.6.0 Runtime"
-            SearchType  = "Equals"
-            SearchValue = "WCF Data Services 5.6.0 Runtime"
-        }
-    )
-
     #SP2013 prereqs
     if ($majorVersion -eq 15)
     {
-        $prereqsToTest += @(
+        $prereqsToTest = @(
             [PSObject]@{
                 Name        = "Active Directory Rights Management Services Client 2.*"
                 SearchType  = "Like"
@@ -483,17 +474,22 @@ function Get-TargetResource
                 Name        = "WCF Data Services 5.0 (for OData v3) Primary Components"
                 SearchType  = "Equals"
                 SearchValue = "WCF Data Services 5.0 (for OData v3) Primary Components"
+            },
+            [PSObject]@{
+                Name        = "WCF Data Services 5.6.0 Runtime"
+                SearchType  = "Equals"
+                SearchValue = "WCF Data Services 5.6.0 Runtime"
             }
         )
     }
 
-    #SP2016/SP2019 prereqs
+    #SP2016/SP2019/SE prereqs
     if ($majorVersion -eq 16)
     {
         if ($buildVersion -lt 10000)
         {
             #SP2016 prereqs
-            $prereqsToTest += @(
+            $prereqsToTest = @(
                 [PSObject]@{
                     Name        = "Active Directory Rights Management Services Client 2.1"
                     SearchType  = "Equals"
@@ -544,6 +540,11 @@ function Get-TargetResource
                     SearchType             = "BundleUpgradeCode"
                     SearchValue            = "{C146EF48-4D31-3C3D-A2C5-1E91AF8A0A9B}"
                     MinimumRequiredVersion = "14.0.23026.0"
+                },
+                [PSObject]@{
+                    Name        = "WCF Data Services 5.6.0 Runtime"
+                    SearchType  = "Equals"
+                    SearchValue = "WCF Data Services 5.6.0 Runtime"
                 }
             )
         }
@@ -551,7 +552,7 @@ function Get-TargetResource
             $buildVersion -le 12999)
         {
             #SP2019 prereqs
-            $prereqsToTest += @(
+            $prereqsToTest = @(
                 [PSObject]@{
                     Name        = "Active Directory Rights Management Services Client 2.1"
                     SearchType  = "Equals"
@@ -587,13 +588,18 @@ function Get-TargetResource
                     SearchType             = "BundleUpgradeCode"
                     SearchValue            = "{C146EF48-4D31-3C3D-A2C5-1E91AF8A0A9B}"
                     MinimumRequiredVersion = "14.13.26020.0"
+                },
+                [PSObject]@{
+                    Name        = "WCF Data Services 5.6.0 Runtime"
+                    SearchType  = "Equals"
+                    SearchValue = "WCF Data Services 5.6.0 Runtime"
                 }
             )
         }
         elseif ($buildVersion -ge 13000)
         {
             #SharePoint Server Subscription Edition prereqs
-            $prereqsToTest += @(
+            $prereqsToTest = @(
                 [PSObject]@{
                     Name                   = "Microsoft Visual C++ 2015-2019 Redistributable (x64)"
                     SearchType             = "BundleUpgradeCode"
@@ -629,6 +635,7 @@ function Get-TargetResource
         ODBC              = $ODBC
         DotNetFx          = $DotNetFx
         DotNet472         = $DotNet472
+        DotNet48          = $DotNet48
     }
 
     if ($prereqsInstalled -eq $true -and $windowsFeaturesInstalled -eq $true)
@@ -1002,7 +1009,7 @@ function Set-TargetResource
         elseif ($buildVersion -ge 13000)
         {
             Write-Verbose -Message "Version: SharePoint Server Subscription Edition"
-            $requiredParams = @("WCFDataServices56", "DotNet48", "MSVCRT142")
+            $requiredParams = @("DotNet48", "MSVCRT142")
 
             if ($osVersion.Major -eq 10)
             {
