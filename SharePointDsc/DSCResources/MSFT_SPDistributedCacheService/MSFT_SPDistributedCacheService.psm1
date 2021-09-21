@@ -175,20 +175,28 @@ function Set-TargetResource
                 }
                 Enable-NetFirewallRule -DisplayName $icmpRuleName
 
-                $spRuleName = "SharePoint Distributed Cache"
-                $firewallRule = Get-NetFirewallRule -DisplayName $spRuleName `
-                    -ErrorAction SilentlyContinue
-                if ($null -eq $firewallRule)
+                if (Get-Module -ListAvailable -Name SharePointServer)
                 {
-                    New-NetFirewallRule -Name "SPDistCache" `
-                        -DisplayName $spRuleName `
-                        -Protocol TCP `
-                        -LocalPort 22233-22236 `
-                        -Group "SharePoint"
+                    Write-Verbose -Message 'Skipping Firewall Rule creation because Add-SPDistributedCacheServiceInstance will add the Rule "SharePoint Caching Service (TCP-In)"'
                 }
-                Enable-NetFirewallRule -DisplayName $spRuleName
+                else
+                {
+                    Write-Verbose -Message 'Detected SharePoint Server 2013 - 2019'
+                    $spRuleName = "SharePoint Distributed Cache"
+                    $firewallRule = Get-NetFirewallRule -DisplayName $spRuleName `
+                        -ErrorAction SilentlyContinue
+                    if ($null -eq $firewallRule)
+                    {
+                        New-NetFirewallRule -Name "SPDistCache" `
+                            -DisplayName $spRuleName `
+                            -Protocol TCP `
+                            -LocalPort 22233-22236 `
+                            -Group "SharePoint"
+                    }
+                    Enable-NetFirewallRule -DisplayName $spRuleName
+                    Write-Verbose -Message "Firewall rule added"
+                }
             }
-            Write-Verbose -Message "Firewall rule added"
         }
 
         Write-Verbose -Message ("Current state is '$($CurrentState.Ensure)' " + `
