@@ -50,32 +50,19 @@ function Get-TargetResource
 
         try
         {
-            if (Get-Command -Name "Use-CacheCluster" -ErrorAction SilentlyContinue)
-            {
-                Use-CacheCluster -ErrorAction SilentlyContinue
-            }
-            else # Use new cmdlet for SP SE
+            $productVersion = Get-SPDscInstalledProductVersion
+            if ($productVersion.FileMajorPart -eq 16 `
+                    -and $productVersion.FileBuildPart -gt 13000)
             {
                 Write-Verbose -Message "'Use-CacheCluster' cmdlet not required for SPSE"
-            }
-            if (Get-Command -Name "Get-CacheHost" -ErrorAction SilentlyContinue)
-            {
-                $cacheHost = Get-CacheHost -ErrorAction SilentlyContinue
-            }
-            else # Use new cmdlet for SP SE
-            {
                 Write-Verbose -Message "Using newer 'Get-SPCacheHostConfig' cmdlet for SPSE"
                 $cacheHostConfig = Get-SPCacheHostConfig -HostName $env:COMPUTERNAME -ErrorAction SilentlyContinue
                 $cacheHost = Get-SPCacheHost -HostName $cacheHostConfig.HostName -CachePort $cacheHostConfig.CachePort
             }
-
-            if ($null -eq $cacheHost)
+            else
             {
-                return $nullReturnValue
-            }
-
-            if (Get-Command -Name "Get-AFCacheHostConfiguration" -ErrorAction SilentlyContinue)
-            {
+                Use-CacheCluster -ErrorAction SilentlyContinue
+                $cacheHost = Get-CacheHost -ErrorAction SilentlyContinue
                 $computerName = ([System.Net.Dns]::GetHostByName($env:computerName)).HostName
                 $cachePort = ($cacheHost | Where-Object -FilterScript {
                         $_.HostName -eq $computerName
@@ -83,6 +70,11 @@ function Get-TargetResource
                 $cacheHostConfig = Get-AFCacheHostConfiguration -ComputerName $computerName `
                     -CachePort $cachePort `
                     -ErrorAction SilentlyContinue
+            }
+
+            if ($null -eq $cacheHost)
+            {
+                return $nullReturnValue
             }
 
             $windowsService = Get-CimInstance -Class Win32_Service -Filter "Name='AppFabricCachingService' OR Name='SPCache'"
