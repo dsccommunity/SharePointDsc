@@ -24,7 +24,7 @@ function Get-TargetResource
     $installedVersion = Get-SPDscInstalledProductVersion
     if ($installedVersion.FileMajorPart -ne 16)
     {
-        $message = "MinRole is only supported in SharePoint 2016 and 2019."
+        $message = "MinRole is only supported in SharePoint 2016, 2019 and Subscription Edition."
         Add-SPDscEvent -Message $message `
             -EntryType 'Error' `
             -EventID 100 `
@@ -91,7 +91,7 @@ function Set-TargetResource
     $installedVersion = Get-SPDscInstalledProductVersion
     if ($installedVersion.FileMajorPart -ne 16)
     {
-        $message = "MinRole is only supported in SharePoint 2016 and 2019."
+        $message = "MinRole is only supported in SharePoint 2016, 2019 and Subscription Edition."
         Add-SPDscEvent -Message $message `
             -EntryType 'Error' `
             -EventID 100 `

@@ -47,22 +47,42 @@ function Get-TargetResource
 
         try
         {
-            Use-CacheCluster -ErrorAction SilentlyContinue
-            $cacheHost = Get-CacheHost -ErrorAction SilentlyContinue
+            if (Get-Command -Name "Use-CacheCluster" -ErrorAction SilentlyContinue)
+            {
+                Use-CacheCluster -ErrorAction SilentlyContinue
+            }
+            else # Use new cmdlet for SP SE
+            {
+                Write-Verbose -Message "'Use-CacheCluster' cmdlet not required for SPSE"
+            }
+            if (Get-Command -Name "Get-CacheHost" -ErrorAction SilentlyContinue)
+            {
+                $cacheHost = Get-CacheHost -ErrorAction SilentlyContinue
+            }
+            else # Use new cmdlet for SP SE
+            {
+                Write-Verbose -Message "Using newer 'Get-SPCacheHostConfig' cmdlet for SPSE"
+                $cacheHostConfig = Get-SPCacheHostConfig -HostName $env:COMPUTERNAME -ErrorAction SilentlyContinue
+                $cacheHost = Get-SPCacheHost -HostName $cacheHostConfig.HostName -CachePort $cacheHostConfig.CachePort
+            }
 
             if ($null -eq $cacheHost)
             {
                 return $nullReturnValue
             }
-            $computerName = ([System.Net.Dns]::GetHostByName($env:computerName)).HostName
-            $cachePort = ($cacheHost | Where-Object -FilterScript {
-                    $_.HostName -eq $computerName
-                }).PortNo
-            $cacheHostConfig = Get-AFCacheHostConfiguration -ComputerName $computerName `
-                -CachePort $cachePort `
-                -ErrorAction SilentlyContinue
 
-            $windowsService = Get-CimInstance -Class Win32_Service -Filter "Name='AppFabricCachingService'"
+            if (Get-Command -Name "Get-AFCacheHostConfiguration" -ErrorAction SilentlyContinue)
+            {
+                $computerName = ([System.Net.Dns]::GetHostByName($env:computerName)).HostName
+                $cachePort = ($cacheHost | Where-Object -FilterScript {
+                        $_.HostName -eq $computerName
+                    }).PortNo
+                $cacheHostConfig = Get-AFCacheHostConfiguration -ComputerName $computerName `
+                    -CachePort $cachePort `
+                    -ErrorAction SilentlyContinue
+            }
+
+            $windowsService = Get-CimInstance -Class Win32_Service -Filter "Name='AppFabricCachingService' OR Name='SPCache'"
             $firewallRule = Get-NetFirewallRule -DisplayName "SharePoint Distributed Cache" `
                 -ErrorAction SilentlyContinue
 
@@ -316,7 +336,7 @@ function Set-TargetResource
 
                 $farm = Get-SPFarm
                 $cacheService = $farm.Services | Where-Object -FilterScript {
-                    $_.Name -eq "AppFabricCachingService"
+                    $_.Name -eq "AppFabricCachingService" -or $_.Name -eq "SPCache"
                 }
 
                 if ($cacheService.ProcessIdentity.ManagedAccount.Username -ne $params.ServiceAccount)
@@ -348,7 +368,7 @@ function Set-TargetResource
                     $params = $args[0]
                     $farm = Get-SPFarm
                     $cacheService = $farm.Services | Where-Object -FilterScript {
-                        $_.Name -eq "AppFabricCachingService"
+                        $_.Name -eq "AppFabricCachingService" -or $_.Name -eq "SPCache"
                     }
 
                     if ($cacheService.ProcessIdentity.ManagedAccount.Username -ne $params.ServiceAccount)
