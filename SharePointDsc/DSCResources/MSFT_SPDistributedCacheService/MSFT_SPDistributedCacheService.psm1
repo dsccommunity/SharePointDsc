@@ -47,6 +47,7 @@ function Get-TargetResource
 
         try
         {
+<<<<<<< HEAD
             $productVersion = Get-SPDscInstalledProductVersion
             if ($productVersion.FileMajorPart -eq 16 `
                     -and $productVersion.FileBuildPart -gt 13000)
@@ -70,13 +71,50 @@ function Get-TargetResource
             }
 
             if ($null -eq $cacheHost)
+=======
+            if (Get-Module -ListAvailable -Name SharePointServer)
             {
-                return $nullReturnValue
+                Write-Verbose -Message 'Detected SharePoint Server Subscription Edition'
+                $cacheHost = Get-SPCacheHost -HostName $env:computerName -CachePort 22233 -ErrorAction SilentlyContinue
+                if ($null -eq $cacheHost)
+                {
+                    return $nullReturnValue
+                }
+                $cacheHostConfig = Get-SPCacheHostConfig -HostName $env:computerName
+                $windowsService = Get-CimInstance -Class Win32_Service -Filter "Name='SPCache'"
+                $firewallRule = Get-NetFirewallRule -DisplayName "SharePoint Caching Service (TCP-In)" `
+                    -ErrorAction SilentlyContinue
             }
+            else
+>>>>>>> 2a26d086 (Adds: SPSSE Support for Get-Target)
+            {
+                Write-Verbose -Message 'Detected SharePoint Server 2013 - 2019'
+
+                Use-CacheCluster -ErrorAction SilentlyContinue
+                $cacheHost = Get-CacheHost -ErrorAction SilentlyContinue
+
+                if ($null -eq $cacheHost)
+                {
+                    return $nullReturnValue
+                }
+                $computerName = ([System.Net.Dns]::GetHostByName($env:computerName)).HostName
+                $cachePort = ($cacheHost | Where-Object -FilterScript {
+                        $_.HostName -eq $computerName
+                    }).PortNo
+                $cacheHostConfig = Get-AFCacheHostConfiguration -ComputerName $computerName `
+                    -CachePort $cachePort `
+                    -ErrorAction SilentlyContinue
+                $windowsService = Get-CimInstance -Class Win32_Service -Filter "Name='AppFabricCachingService'"
+                $firewallRule = Get-NetFirewallRule -DisplayName "SharePoint Distributed Cache" `
+                    -ErrorAction SilentlyContinue
+            }
+<<<<<<< HEAD
 
             $windowsService = Get-CimInstance -Class Win32_Service -Filter "Name='AppFabricCachingService' OR Name='SPCache'"
             $firewallRule = Get-NetFirewallRule -DisplayName "SharePoint Distributed Cache" `
                 -ErrorAction SilentlyContinue
+=======
+>>>>>>> 2a26d086 (Adds: SPSSE Support for Get-Target)
 
             return @{
                 Name                 = $params.Name
