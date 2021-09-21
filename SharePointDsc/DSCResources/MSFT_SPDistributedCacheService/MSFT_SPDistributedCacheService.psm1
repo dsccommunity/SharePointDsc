@@ -53,6 +53,7 @@ function Get-TargetResource
             if (Get-Module -ListAvailable -Name SharePointServer)
             {
                 Write-Verbose -Message 'Detected SharePoint Server Subscription Edition'
+                Use-SPCacheCluster -ErrorAction SilentlyContinue
                 $cacheHost = Get-SPCacheHost -HostName $env:computerName -CachePort 22233 -ErrorAction SilentlyContinue
                 if ($null -eq $cacheHost)
                 {
