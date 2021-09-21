@@ -74,7 +74,25 @@ function Get-TargetResource
 
             if ($null -eq $cacheHost)
             {
-                return $nullReturnValue
+                Write-Verbose -Message 'Detected SharePoint Server 2013 - 2019'
+
+                Use-CacheCluster -ErrorAction SilentlyContinue
+                $cacheHost = Get-CacheHost -ErrorAction SilentlyContinue
+
+                if ($null -eq $cacheHost)
+                {
+                    return $nullReturnValue
+                }
+                $computerName = ([System.Net.Dns]::GetHostByName($env:computerName)).HostName
+                $cachePort = ($cacheHost | Where-Object -FilterScript {
+                        $_.HostName -eq $computerName
+                    }).PortNo
+                $cacheHostConfig = Get-AFCacheHostConfiguration -ComputerName $computerName `
+                    -CachePort $cachePort `
+                    -ErrorAction SilentlyContinue
+                $windowsService = Get-CimInstance -Class Win32_Service -Filter "Name='AppFabricCachingService'"
+                $firewallRule = Get-NetFirewallRule -DisplayName "SharePoint Distributed Cache" `
+                    -ErrorAction SilentlyContinue
             }
 
             $windowsService = Get-CimInstance -Class Win32_Service -Filter "Name='AppFabricCachingService' OR Name='SPCache'"
