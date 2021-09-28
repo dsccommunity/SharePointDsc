@@ -299,8 +299,9 @@ function Set-TargetResource
         {
             Write-Verbose -Message ("Starting New-SPSite with the following parameters: " + `
                     "$(Convert-SPDscHashtableToString $params)")
-            #$site = New-SPSite @params
 
+            # Implemented alternative solution (not using New-SPSite) to mitigate a timing
+            # issue which exists shortly after creating a new farm.
             $paramsList = $params.GetEnumerator() | Where-Object {
                 $_.Key -ne "Verbose"
             } | ForEach-Object {
@@ -334,10 +335,25 @@ function Set-TargetResource
                 -PassThru
             if ($result.ExitCode -ne 0)
             {
-                throw ("[ERROR] An error during site creation. Exit code '$($result.ExitCode)' " + `
+                $message = ("[ERROR] An error during site creation. Exit code '$($result.ExitCode)' " + `
                         "was returned. Please check ULS log for more info")
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $eventSource
+                throw $message
             }
+
             $site = Get-SPSite -Identity $params.Url -ErrorAction SilentlyContinue
+            if ($null -eq $site)
+            {
+                $message = "Cannot find created site collection, please check ULS log for any error messages!"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $eventSource
+                throw $message
+            }
 
             if ($CreateDefaultGroups -eq $true)
             {

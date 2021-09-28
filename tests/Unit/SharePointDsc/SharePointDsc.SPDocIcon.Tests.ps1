@@ -50,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
                 $mockPassword = ConvertTo-SecureString -String 'password' -AsPlainText -Force
@@ -165,7 +165,7 @@ try
 
                     Mock -CommandName Test-Path -MockWith {
                         return $false
-                    } -ParameterFilter { $Path -eq 'C:\Program Files\Common Files\microsoft shared\Web Server Extensions\16\TEMPLATE\XML\docicon.xml' }
+                    } -ParameterFilter { $Path -eq "C:\Program Files\Common Files\microsoft shared\Web Server Extensions\$($Global:SPDscHelper.CurrentStubBuildNumber.Major)\TEMPLATE\XML\docicon.xml" }
                 }
 
                 It 'Should return Ensure=Absent from the Get method' {
@@ -173,7 +173,7 @@ try
                 }
 
                 It 'Should throw parameter validation exception in the Set method' {
-                    { Set-TargetResource @testParams } | Should -Throw "Docicon.xml file is not found: C:\Program Files\Common Files\microsoft shared\Web Server Extensions\16\TEMPLATE\XML\docicon.xml"
+                    { Set-TargetResource @testParams } | Should -Throw "Docicon.xml file is not found: C:\Program Files\Common Files\microsoft shared\Web Server Extensions\$($Global:SPDscHelper.CurrentStubBuildNumber.Major)\TEMPLATE\XML\docicon.xml"
                 }
 
                 It 'Should return false from the Test method' {
@@ -197,7 +197,7 @@ try
 
                     Mock -CommandName Test-Path -MockWith {
                         return $false
-                    } -ParameterFilter { $Path -eq 'C:\Program Files\Common Files\microsoft shared\Web Server Extensions\16\TEMPLATE\IMAGES\icpdf.png' }
+                    } -ParameterFilter { $Path -eq "C:\Program Files\Common Files\microsoft shared\Web Server Extensions\$($Global:SPDscHelper.CurrentStubBuildNumber.Major)\TEMPLATE\IMAGES\icpdf.png" }
 
                     Mock -CommandName Copy-Item -MockWith {}
 
@@ -215,7 +215,7 @@ try
 '@
                     Mock -CommandName Join-Path -MockWith {
                         return $dociconFile
-                    } -ParameterFilter { $Path -eq 'C:\Program Files\Common Files\microsoft shared\Web Server Extensions\16\TEMPLATE\XML' }
+                    } -ParameterFilter { $Path -eq "C:\Program Files\Common Files\microsoft shared\Web Server Extensions\$($Global:SPDscHelper.CurrentStubBuildNumber.Major)\TEMPLATE\XML" }
                 }
 
                 It 'Should return Ensure=Absent from the Get method' {
@@ -260,7 +260,7 @@ try
                         return @{
                             Hash = "gfedcba"
                         }
-                    } -ParameterFilter { $Path -eq 'C:\Program Files\Common Files\microsoft shared\Web Server Extensions\16\TEMPLATE\IMAGES\icpdf.png' }
+                    } -ParameterFilter { $Path -eq "C:\Program Files\Common Files\microsoft shared\Web Server Extensions\$($Global:SPDscHelper.CurrentStubBuildNumber.Major)\TEMPLATE\IMAGES\icpdf.png" }
 
                     Mock -CommandName Copy-Item -MockWith {}
 
@@ -278,7 +278,7 @@ try
 '@
                     Mock -CommandName Join-Path -MockWith {
                         return $dociconFile
-                    } -ParameterFilter { $Path -eq 'C:\Program Files\Common Files\microsoft shared\Web Server Extensions\16\TEMPLATE\XML' }
+                    } -ParameterFilter { $Path -eq "C:\Program Files\Common Files\microsoft shared\Web Server Extensions\$($Global:SPDscHelper.CurrentStubBuildNumber.Major)\TEMPLATE\XML" }
                 }
 
                 It 'Should return Ensure=Absent from the Get method' {
@@ -334,7 +334,7 @@ try
 '@
                     Mock -CommandName Join-Path -MockWith {
                         return $dociconFile
-                    } -ParameterFilter { $Path -eq 'C:\Program Files\Common Files\microsoft shared\Web Server Extensions\16\TEMPLATE\XML' }
+                    } -ParameterFilter { $Path -eq "C:\Program Files\Common Files\microsoft shared\Web Server Extensions\$($Global:SPDscHelper.CurrentStubBuildNumber.Major)\TEMPLATE\XML" }
                 }
 
                 It 'Should return Ensure=Absent from the Get method' {
@@ -390,7 +390,7 @@ try
 '@
                     Mock -CommandName Join-Path -MockWith {
                         return $dociconFile
-                    } -ParameterFilter { $Path -eq 'C:\Program Files\Common Files\microsoft shared\Web Server Extensions\16\TEMPLATE\XML' }
+                    } -ParameterFilter { $Path -eq "C:\Program Files\Common Files\microsoft shared\Web Server Extensions\$($Global:SPDscHelper.CurrentStubBuildNumber.Major)\TEMPLATE\XML" }
                 }
 
                 It 'Should return Ensure=Present from the Get method' {
@@ -460,7 +460,7 @@ try
 '@
                     Mock -CommandName Join-Path -MockWith {
                         return $dociconFile
-                    } -ParameterFilter { $Path -eq 'C:\Program Files\Common Files\microsoft shared\Web Server Extensions\16\TEMPLATE\XML' }
+                    } -ParameterFilter { $Path -eq "C:\Program Files\Common Files\microsoft shared\Web Server Extensions\$($Global:SPDscHelper.CurrentStubBuildNumber.Major)\TEMPLATE\XML" }
                 }
 
                 It 'Should return Ensure=Present from the Get method' {
@@ -504,7 +504,7 @@ try
 '@
                     Mock -CommandName Join-Path -MockWith {
                         return $dociconFile
-                    } -ParameterFilter { $Path -eq 'C:\Program Files\Common Files\microsoft shared\Web Server Extensions\16\TEMPLATE\XML' }
+                    } -ParameterFilter { $Path -eq "C:\Program Files\Common Files\microsoft shared\Web Server Extensions\$($Global:SPDscHelper.CurrentStubBuildNumber.Major)\TEMPLATE\XML" }
                 }
 
                 It 'Should return Ensure=Present from the Get method' {
@@ -551,7 +551,7 @@ try
 
                     Mock -CommandName Join-Path -MockWith {
                         return $dociconFile
-                    } -ParameterFilter { $Path -eq 'C:\Program Files\Common Files\microsoft shared\Web Server Extensions\16\TEMPLATE\XML' }
+                    } -ParameterFilter { $Path -eq "C:\Program Files\Common Files\microsoft shared\Web Server Extensions\$($Global:SPDscHelper.CurrentStubBuildNumber.Major)\TEMPLATE\XML" }
                 }
 
                 It 'Should return Ensure=Absent from the Get method' {
@@ -598,7 +598,7 @@ try
 
                     Mock -CommandName Join-Path -MockWith {
                         return $dociconFile
-                    } -ParameterFilter { $Path -eq 'C:\Program Files\Common Files\microsoft shared\Web Server Extensions\16\TEMPLATE\XML' }
+                    } -ParameterFilter { $Path -eq "C:\Program Files\Common Files\microsoft shared\Web Server Extensions\$($Global:SPDscHelper.CurrentStubBuildNumber.Major)\TEMPLATE\XML" }
 
                     if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
                     {

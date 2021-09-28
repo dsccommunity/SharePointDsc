@@ -160,7 +160,8 @@ function Get-TargetResource
             Write-Verbose -Message "Checking Admin Database: $adminDB"
             $farmAccountPermissionsNeedCorrecting = (Confirm-UserIsDBOwner -SQLServer $dbServer `
                     -Database $adminDB `
-                    -User $farmAccount) -eq $false
+                    -User $farmAccount `
+                    -DatabaseCredentials $params.DatabaseCredentials) -eq $false
             Write-Verbose -Message "Farm Account Permissions Need Correcting: $farmAccountPermissionsNeedCorrecting"
 
             Write-Verbose -Message "Checking Analytics reporting Database"
@@ -173,7 +174,8 @@ function Get-TargetResource
                 {
                     $farmAccountPermissionsNeedCorrecting = (Confirm-UserIsDBOwner -SQLServer $dbServer `
                             -Database $analyticsDB `
-                            -User $farmAccount) -eq $false
+                            -User $farmAccount `
+                            -DatabaseCredentials $params.DatabaseCredentials) -eq $false
                 }
                 Write-Verbose -Message "Farm Account Permissions Need Correcting: $farmAccountPermissionsNeedCorrecting"
             }
@@ -189,7 +191,8 @@ function Get-TargetResource
                     Write-Verbose -Message "Checking Crawl Database: $crawlDB"
                     $farmAccountPermissionsNeedCorrecting = (Confirm-UserIsDBOwner -SQLServer $dbServer `
                             -Database $crawlDB `
-                            -User $farmAccount) -eq $false
+                            -User $farmAccount `
+                            -DatabaseCredentials $params.DatabaseCredentials) -eq $false
                     Write-Verbose -Message "Farm Account Permissions Need Correcting: $farmAccountPermissionsNeedCorrecting"
                 }
             }
@@ -205,7 +208,8 @@ function Get-TargetResource
                     Write-Verbose -Message "Checking Links Database: $linksDB"
                     $farmAccountPermissionsNeedCorrecting = (Confirm-UserIsDBOwner -SQLServer $dbServer `
                             -Database $linksDB `
-                            -User $farmAccount) -eq $false
+                            -User $farmAccount `
+                            -DatabaseCredentials $params.DatabaseCredentials) -eq $false
                     Write-Verbose -Message "Farm Account Permissions Need Correcting: $farmAccountPermissionsNeedCorrecting"
                 }
             }
@@ -546,11 +550,13 @@ function Set-TargetResource
             $adminDB = $serviceApp.SearchAdminDatabase.Name
             if ((Confirm-UserIsDBOwner -SQLServer $dbServer `
                         -Database $adminDB `
-                        -User $farmAccount) -eq $false)
+                        -User $farmAccount `
+                        -DatabaseCredentials $params.DatabaseCredentials) -eq $false)
             {
                 Set-UserAsDBOwner -SQLServer $dbServer `
                     -Database $adminDB `
-                    -User $farmAccount
+                    -User $farmAccount `
+                    -DatabaseCredentials $params.DatabaseCredentials
             }
 
             Write-Verbose -Message "Checking and correcting Analytics reporting Database"
@@ -559,11 +565,13 @@ function Set-TargetResource
                 $analyticsDB = $database.Name
                 if ((Confirm-UserIsDBOwner -SQLServer $dbServer `
                             -Database $analyticsDB `
-                            -User $farmAccount) -eq $false)
+                            -User $farmAccount `
+                            -DatabaseCredentials $params.DatabaseCredentials) -eq $false)
                 {
                     Set-UserAsDBOwner -SQLServer $dbServer `
                         -Database $analyticsDB `
-                        -User $farmAccount
+                        -User $farmAccount `
+                        -DatabaseCredentials $params.DatabaseCredentials
                 }
             }
 
@@ -576,11 +584,13 @@ function Set-TargetResource
                 $dbServer = $database.Database.NormalizedDataSource
                 if ((Confirm-UserIsDBOwner -SQLServer $dbServer `
                             -Database $crawlDB `
-                            -User $farmAccount) -eq $false)
+                            -User $farmAccount `
+                            -DatabaseCredentials $params.DatabaseCredentials) -eq $false)
                 {
                     Set-UserAsDBOwner -SQLServer $dbServer `
                         -Database $crawlDB `
-                        -User $farmAccount
+                        -User $farmAccount `
+                        -DatabaseCredentials $params.DatabaseCredentials
                 }
             }
 
@@ -593,11 +603,13 @@ function Set-TargetResource
                 $dbServer = $database.Database.NormalizedDataSource
                 if ((Confirm-UserIsDBOwner -SQLServer $dbServer `
                             -Database $linksDB `
-                            -User $farmAccount) -eq $false)
+                            -User $farmAccount `
+                            -DatabaseCredentials $params.DatabaseCredentials) -eq $false)
                 {
                     Set-UserAsDBOwner -SQLServer $dbServer `
                         -Database $linksDB `
-                        -User $farmAccount
+                        -User $farmAccount `
+                        -DatabaseCredentials $params.DatabaseCredentials
                 }
             }
         }

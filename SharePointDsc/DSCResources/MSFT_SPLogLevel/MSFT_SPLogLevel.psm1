@@ -89,69 +89,54 @@ function Get-TargetResource
                 return $null
             }
 
-            #TraceLevels
-            #if we desire defaults, we will check for default for each item and return as such
-            if ($DesiredSetting.TraceLevel -eq "Default")
+            foreach ($currentItem in $CurrentLogItemSettings)
             {
-                $SettingAtDefault = $true #assume they are all at default until we find otherwise
-                foreach ($setting in $CurrentLogItemSettings) #default values can vary for each area/name, need to check each one.
+                #TraceLevels
+                #if we desire defaults, we will check for default for each item and return as such
+                if ($DesiredSetting.TraceLevel -eq "Default")
                 {
-                    if ($setting.TraceSeverity -ne $setting.DefaultTraceSeverity)
+                    if ($currentItem.TraceSeverity -eq $currentItem.DefaultTraceSeverity)
                     {
-                        $SettingAtDefault = $false
+                        $Tracelevel = 'Default'
+                    }
+                    else
+                    {
+                        #return a csv list of current unique trace level settings for the provided Area/Name
+                        $Tracelevel = $currentItem.TraceSeverity
                     }
                 }
-
-                if ($SettingAtDefault)
-                {
-                    $Tracelevel = 'Default'
-                }
+                #default was not specified, so we return the unique current trace severity across all provided settings.
                 else
                 {
-                    #return a csv list of current unique trace level settings for the provided Area/Name
-                    $Tracelevel = [System.String]::Join(",", (($CurrentLogItemSettings.traceseverity) | Select-Object -Unique))
+                    $Tracelevel = $currentItem.TraceSeverity
                 }
-            }
-            #default was not specified, so we return the unique current trace severity across all provided settings.
-            else
-            {
-                $Tracelevel = [System.String]::Join(",", (($CurrentLogItemSettings.traceseverity) | Select-Object -Unique))
-            }
 
-            #EventLevels
-            #if we desire defaults, we will check for default and return as such
-            if ($DesiredSetting.EventLevel -eq "Default")
-            {
-                $SettingAtDefault = $true #assume they are all at default until we find otherwise
-                foreach ($setting in $CurrentLogItemSettings) #default values can vary for each area/name, need to check each one.
+                #EventLevels
+                #if we desire defaults, we will check for default and return as such
+                if ($DesiredSetting.EventLevel -eq "Default")
                 {
-                    if ($setting.EventSeverity -ne $setting.DefaultEventSeverity)
+                    if ($currentItem.EventSeverity -eq $currentItem.DefaultEventSeverity)
                     {
-                        $SettingAtDefault = $false
+                        $Eventlevel = 'Default'
+                    }
+                    else
+                    {
+                        #return a csv list of current unique Event level settings for the provided Area/Name
+                        $Eventlevel = $currentItem.Eventseverity
                     }
                 }
-
-                if ($SettingAtDefault)
-                {
-                    $Eventlevel = 'Default'
-                }
+                #default was not specified, so we return the unique current Event severity across all provided settings.
                 else
                 {
-                    #return a csv list of current unique Event level settings for the provided Area/Name
-                    $Eventlevel = [System.String]::Join(",", (($CurrentLogItemSettings.Eventseverity) | Select-Object -Unique))
+                    $Eventlevel = $currentItem.Eventseverity
                 }
-            }
-            #default was not specified, so we return the unique current Event severity across all provided settings.
-            else
-            {
-                $Eventlevel = [System.String]::Join(",", (($CurrentLogItemSettings.Eventseverity) | Select-Object -Unique))
-            }
 
-            $CurrentLogLevelSettings += New-Object -TypeName PSObject -Property @{
-                Area       = $DesiredSetting.Area
-                Name       = $DesiredSetting.Name
-                TraceLevel = $TraceLevel
-                EventLevel = $EventLevel
+                $CurrentLogLevelSettings += New-Object -TypeName PSObject -Property @{
+                    Area       = $currentItem.Area
+                    Name       = $currentItem.Name
+                    TraceLevel = $TraceLevel
+                    EventLevel = $EventLevel
+                }
             }
         }
 
@@ -336,17 +321,41 @@ function Test-TargetResource
     {
         Write-Verbose -Message "Testing SP Log Level setting for $($DesiredSetting.Area):$($DesiredSetting.Name)"
 
-        $CurrentSetting = $CurrentValues.SPLogLevelSetting | Where-Object -FilterScript { $_.Area -eq $DesiredSetting.Area -and $_.Name -eq $DesiredSetting.Name }
-
-        if (($null -ne $DesiredSetting.TraceLevel -and $CurrentSetting.TraceLevel -ne $DesiredSetting.TraceLevel) -or ($null -ne $DesiredSetting.EventLevel -and $CurrentSetting.EventLevel -ne $DesiredSetting.EventLevel))
+        if ($DesiredSetting.Area -eq "*")
         {
-            $mismatchedSettings += @{
-                Name            = $Name
-                DesiredSetting  = $DesiredSetting
-                $CurrentSetting = $CurrentSetting
+            if ($DesiredSetting.Name -eq "*")
+            {
+                $CurrentSettings = $CurrentValues.SPLogLevelSetting
             }
-            Write-Verbose -Message "SP Log Level setting for $($DesiredSetting.Area):$($DesiredSetting.Name) is not in the desired state"
-            $mismatchedSettingFound = $true
+            else
+            {
+                $CurrentSettings = $CurrentValues.SPLogLevelSetting | Where-Object -FilterScript { $_.Name -eq $DesiredSetting.Name }
+            }
+        }
+        else
+        {
+            if ($DesiredSetting.Name -eq "*")
+            {
+                $CurrentSettings = $CurrentValues.SPLogLevelSetting | Where-Object -FilterScript { $_.Area -eq $DesiredSetting.Area }
+            }
+            else
+            {
+                $CurrentSettings = $CurrentValues.SPLogLevelSetting | Where-Object -FilterScript { $_.Area -eq $DesiredSetting.Area -and $_.Name -eq $DesiredSetting.Name }
+            }
+        }
+
+        foreach ($currentSetting in $CurrentSettings)
+        {
+            if (($null -ne $DesiredSetting.TraceLevel -and $currentSetting.TraceLevel -ne $DesiredSetting.TraceLevel) -or ($null -ne $DesiredSetting.EventLevel -and $currentSetting.EventLevel -ne $DesiredSetting.EventLevel))
+            {
+                $mismatchedSettings += @{
+                    Name           = $Name
+                    DesiredSetting = $DesiredSetting
+                    CurrentSetting = $currentSetting
+                }
+                Write-Verbose -Message "SP Log Level setting for $($currentSetting.Area):$($currentSetting.Name) is not in the desired state"
+                $mismatchedSettingFound = $true
+            }
         }
     }
 
@@ -384,3 +393,48 @@ function Test-TargetResource
 
     return $result
 }
+
+function Export-TargetResource
+{
+    $VerbosePreference = "SilentlyContinue"
+    $ParentModuleBase = Get-Module "SharePointDsc" -ListAvailable | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath "\DSCResources\MSFT_SPLogLevel\MSFT_SPLogLevel.psm1" -Resolve
+
+    $Content = ''
+    $params = Get-DSCFakeParameters -ModulePath $module
+    $PartialContent = "        SPLogLevel AllLogLevels`r`n"
+    $PartialContent += "        {`r`n"
+
+    try
+    {
+        $params.SPLogLevelSetting = @()
+        $params.SPLogLevelSetting += New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
+            Area       = "*"
+            Name       = "*"
+            TraceLevel = "Default"
+            EventLevel = "Default"
+        } -ClientOnly
+        $results = Get-TargetResource @params
+
+        $results = Repair-Credentials -results $results
+
+        $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+        $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+
+        # Change hashtable format into CIM Instance format
+        $currentBlock = $currentBlock -replace "@{", "`r`n                MSFT_SPLogLevelItem {" -replace "}", "}," -replace ",\);", "`r`n            );" -replace "=", "=`"" -replace "; ", "`"; " -replace "}", "`"}"
+
+        $PartialContent += $currentBlock
+        $PartialContent += "        }`r`n"
+        $Content += $PartialContent
+    }
+    catch
+    {
+        $Global:ErrorLog += "[Diagnostic Logging Level]`r`n"
+        $Global:ErrorLog += "$_`r`n`r`n"
+    }
+
+    return $Content
+}
+
+Export-ModuleMember -Function *-TargetResource

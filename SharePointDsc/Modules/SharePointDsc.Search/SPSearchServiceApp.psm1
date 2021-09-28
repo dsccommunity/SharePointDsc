@@ -26,7 +26,8 @@ function Confirm-UserIsDBOwner
     $command = New-Object -TypeName "System.Data.SqlClient.SqlCommand"
 
     # If we specified SQL credentials then try to use them
-    if ($PSBoundParameters.ContainsKey("DatabaseCredentials"))
+    if ($PSBoundParameters.ContainsKey("DatabaseCredentials") -and `
+            [System.String]::IsNullOrEmpty($DatabaseCredentials) -eq $false)
     {
         $marshal = [Runtime.InteropServices.Marshal]
         $dbCredentialsPlainPassword = $marshal::PtrToStringAuto($marshal::SecureStringToBSTR($DatabaseCredentials.Password))
@@ -99,7 +100,8 @@ function Set-UserAsDBOwner
     $command = New-Object -TypeName "System.Data.SqlClient.SqlCommand"
 
     # If we specified SQL credentials then try to use them
-    if ($PSBoundParameters.ContainsKey("DatabaseCredentials"))
+    if ($PSBoundParameters.ContainsKey("DatabaseCredentials") -and `
+        [System.String]::IsNullOrEmpty($DatabaseCredentials) -eq $false)
     {
         $marshal = [Runtime.InteropServices.Marshal]
         $dbCredentialsPlainPassword = $marshal::PtrToStringAuto($marshal::SecureStringToBSTR($DatabaseCredentials.Password))
