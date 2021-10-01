@@ -1,10 +1,7 @@
-$script:SPDscUtilModulePath = Join-Path -Path $PSScriptRoot -ChildPath '..\..\Modules\SharePointDsc.Util'
-Import-Module -Name $script:SPDscUtilModulePath
-
 $dociconPath = Join-Path -Path $env:CommonProgramFiles -ChildPath 'microsoft shared\Web Server Extensions\{0}\TEMPLATE\XML'
 $iconPath = Join-Path -Path $env:CommonProgramFiles -ChildPath 'microsoft shared\Web Server Extensions\{0}\TEMPLATE\IMAGES'
+
 $dociconFileName = 'DOCICON.XML'
-$backupFileName = 'DOCICON_Backup_{0}.XML'
 
 function Get-TargetResource
 {
