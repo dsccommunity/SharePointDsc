@@ -1,8 +1,8 @@
 $script:SPDscUtilModulePath = Join-Path -Path $PSScriptRoot -ChildPath '..\..\Modules\SharePointDsc.Util'
 Import-Module -Name $script:SPDscUtilModulePath
 
-$dociconPath = Join-Path -Path $env:CommonProgramFiles -ChildPath 'microsoft shared\Web Server Extensions\16\TEMPLATE\XML'
-$iconPath = Join-Path -Path $env:CommonProgramFiles -ChildPath 'microsoft shared\Web Server Extensions\16\TEMPLATE\IMAGES'
+$dociconPath = Join-Path -Path $env:CommonProgramFiles -ChildPath 'microsoft shared\Web Server Extensions\{0}\TEMPLATE\XML'
+$iconPath = Join-Path -Path $env:CommonProgramFiles -ChildPath 'microsoft shared\Web Server Extensions\{0}\TEMPLATE\IMAGES'
 $dociconFileName = 'DOCICON.XML'
 $backupFileName = 'DOCICON_Backup_{0}.XML'
 
@@ -55,6 +55,7 @@ function Get-TargetResource
         return $nullReturn
     }
 
+    $dociconPath = $dociconPath -f (Get-SPDscInstalledProductVersion).FileMajorPart
     $docIconFilePath = Join-Path -Path $dociconPath -ChildPath $dociconFileName
 
     if ((Test-Path -Path $docIconFilePath) -eq $false)
@@ -76,6 +77,7 @@ function Get-TargetResource
     {
         Write-Verbose -Message "Specifed file type ($FileType) exists in docicon.xml"
 
+        $iconPath = $iconPath -f (Get-SPDscInstalledProductVersion).FileMajorPart
         $iconFilePath = Join-Path -Path $iconPath -ChildPath $xmlNode.Value
         if (Test-Path -Path $iconFilePath)
         {
@@ -150,6 +152,7 @@ function Set-TargetResource
         throw $message
     }
 
+    $dociconPath = $dociconPath -f (Get-SPDscInstalledProductVersion).FileMajorPart
     $docIconFilePath = Join-Path -Path $dociconPath -ChildPath $dociconFileName
 
     if ((Test-Path -Path $docIconFilePath) -eq $false)
@@ -165,6 +168,8 @@ function Set-TargetResource
     $xmlDoc = New-Object -TypeName 'System.Xml.XmlDocument'
     $xmlDoc.Load($docIconFilePath)
     $xmlNode = $xmlDoc.SelectSingleNode("//Mapping[@Key='$($FileType.ToLower())']")
+
+    $iconPath = $iconPath -f (Get-SPDscInstalledProductVersion).FileMajorPart
 
     $changed = $false
     if ($Ensure -eq 'Present')
@@ -335,6 +340,7 @@ function Export-TargetResource
     $Content = ''
     $params = Get-DSCFakeParameters -ModulePath $module
 
+    $dociconPath = $dociconPath -f (Get-SPDscInstalledProductVersion).FileMajorPart
     $docIconFilePath = Join-Path -Path $dociconPath -ChildPath $dociconFileName
 
     if ((Test-Path -Path $docIconFilePath) -eq $false)

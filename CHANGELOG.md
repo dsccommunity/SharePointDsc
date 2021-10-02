@@ -5,6 +5,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- SPLogLevel
+  - Added ReverseDsc export support to this resource
+- SPWebApplication
+  - Added logic to check if specified content database exists in the web
+    application
+  - Added possibility to update application pool
+
+### Fixed
+
+- ReverseDsc
+  - Fixed issue where the export would contain duplicate configuration
+  - Fixed issue where the example export cmdlets was in the incorrect format
+- SPDocIcon
+  - Fixed issue where the resource was using hardcoded SP2016 and later paths
+    and therefore didn't work in SP2013
+- SPSearchServiceApp
+  - Fix SQL authentication support with updating DB ownership functions
+- SPServiceAppPool
+  - Fixed issue in Export method where the PsDscRunAsCredential was stored as
+    a string instead of a PsCredential object
+- SPSite
+  - Fixed issue where the code continues when the creation of the site failed,
+    throwing even more errors
+
 ## [4.8.0] - 2021-08-31
 
 ### Added
