@@ -69,7 +69,8 @@ function Get-TargetResource
                 $cacheHostConfig = Get-AFCacheHostConfiguration -ComputerName $computerName `
                     -CachePort $cachePort `
                     -ErrorAction SilentlyContinue
-                return $result
+                $firewallRule = Get-NetFirewallRule -DisplayName "SharePoint Distributed Cache" `
+                    -ErrorAction SilentlyContinue
             }
 
             if ($null -eq $cacheHost)
