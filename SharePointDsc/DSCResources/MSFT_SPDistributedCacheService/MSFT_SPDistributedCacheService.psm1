@@ -72,7 +72,8 @@ function Get-TargetResource
                 $cacheHostConfig = Get-AFCacheHostConfiguration -ComputerName $computerName `
                     -CachePort $cachePort `
                     -ErrorAction SilentlyContinue
-                return $result
+                $firewallRule = Get-NetFirewallRule -DisplayName "SharePoint Distributed Cache" `
+                    -ErrorAction SilentlyContinue
             }
 
             if ($null -eq $cacheHost)
@@ -160,20 +161,29 @@ function Set-TargetResource
                 }
                 Enable-NetFirewallRule -DisplayName $icmpRuleName
 
-                $spRuleName = "SharePoint Distributed Cache"
-                $firewallRule = Get-NetFirewallRule -DisplayName $spRuleName `
-                    -ErrorAction SilentlyContinue
-                if ($null -eq $firewallRule)
+                $productVersion = Get-SPDscInstalledProductVersion
+                if ($productVersion.FileMajorPart -eq 16 `
+                        -and $productVersion.FileBuildPart -gt 13000)
                 {
-                    New-NetFirewallRule -Name "SPDistCache" `
-                        -DisplayName $spRuleName `
-                        -Protocol TCP `
-                        -LocalPort 22233-22236 `
-                        -Group "SharePoint"
+                    Write-Verbose -Message 'Skipping Firewall Rule creation on SharePoint Server Subscription Edition because Add-SPDistributedCacheServiceInstance will add the Rule "SharePoint Caching Service (TCP-In)"'
                 }
-                Enable-NetFirewallRule -DisplayName $spRuleName
+                else
+                {
+                    $spRuleName = "SharePoint Distributed Cache"
+                    $firewallRule = Get-NetFirewallRule -DisplayName $spRuleName `
+                        -ErrorAction SilentlyContinue
+                    if ($null -eq $firewallRule)
+                    {
+                        New-NetFirewallRule -Name "SPDistCache" `
+                            -DisplayName $spRuleName `
+                            -Protocol TCP `
+                            -LocalPort 22233-22236 `
+                            -Group "SharePoint"
+                    }
+                    Enable-NetFirewallRule -DisplayName $spRuleName
+                    Write-Verbose -Message "Firewall rule added"
+                }
             }
-            Write-Verbose -Message "Firewall rule added"
         }
 
         Write-Verbose -Message ("Current state is '$($CurrentState.Ensure)' " + `
