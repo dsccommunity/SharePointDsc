@@ -50,31 +50,21 @@ function Get-TargetResource
 
         try
         {
-            if (Get-Module -ListAvailable -Name SharePointServer)
+            $productVersion = Get-SPDscInstalledProductVersion
+            if ($productVersion.FileMajorPart -eq 16 `
+                    -and $productVersion.FileBuildPart -gt 13000)
             {
-                Write-Verbose -Message 'Detected SharePoint Server Subscription Edition'
-                Use-SPCacheCluster -ErrorAction SilentlyContinue
-                $cacheHost = Get-SPCacheHost -HostName $env:computerName -CachePort 22233 -ErrorAction SilentlyContinue
-                if ($null -eq $cacheHost)
-                {
-                    return $nullReturnValue
-                }
-                $cacheHostConfig = Get-SPCacheHostConfig -HostName $env:computerName
-                $windowsService = Get-CimInstance -Class Win32_Service -Filter "Name='SPCache'"
+                Write-Verbose -Message "'Use-CacheCluster' cmdlet not required for SPSE"
+                Write-Verbose -Message "Using newer 'Get-SPCacheHostConfig' cmdlet for SPSE"
+                $cacheHostConfig = Get-SPCacheHostConfig -HostName $env:COMPUTERNAME -ErrorAction SilentlyContinue
+                $cacheHost = Get-SPCacheHost -HostName $cacheHostConfig.HostName -CachePort $cacheHostConfig.CachePort
                 $firewallRule = Get-NetFirewallRule -DisplayName "SharePoint Caching Service (TCP-In)" `
                     -ErrorAction SilentlyContinue
             }
             else
             {
-                Write-Verbose -Message 'Detected SharePoint Server 2013 - 2019'
-
                 Use-CacheCluster -ErrorAction SilentlyContinue
                 $cacheHost = Get-CacheHost -ErrorAction SilentlyContinue
-
-                if ($null -eq $cacheHost)
-                {
-                    return $nullReturnValue
-                }
                 $computerName = ([System.Net.Dns]::GetHostByName($env:computerName)).HostName
                 $cachePort = ($cacheHost | Where-Object -FilterScript {
                         $_.HostName -eq $computerName
@@ -82,10 +72,16 @@ function Get-TargetResource
                 $cacheHostConfig = Get-AFCacheHostConfiguration -ComputerName $computerName `
                     -CachePort $cachePort `
                     -ErrorAction SilentlyContinue
-                $windowsService = Get-CimInstance -Class Win32_Service -Filter "Name='AppFabricCachingService'"
                 $firewallRule = Get-NetFirewallRule -DisplayName "SharePoint Distributed Cache" `
                     -ErrorAction SilentlyContinue
             }
+
+            if ($null -eq $cacheHost)
+            {
+                return $nullReturnValue
+            }
+
+            $windowsService = Get-CimInstance -Class Win32_Service -Filter "Name='AppFabricCachingService' OR Name='SPCache'"
 
             return @{
                 Name                 = $params.Name
@@ -166,13 +162,14 @@ function Set-TargetResource
                 }
                 Enable-NetFirewallRule -DisplayName $icmpRuleName
 
-                if (Get-Module -ListAvailable -Name SharePointServer)
+                $productVersion = Get-SPDscInstalledProductVersion
+                if ($productVersion.FileMajorPart -eq 16 `
+                        -and $productVersion.FileBuildPart -gt 13000)
                 {
-                    Write-Verbose -Message 'Skipping Firewall Rule creation because Add-SPDistributedCacheServiceInstance will add the Rule "SharePoint Caching Service (TCP-In)"'
+                    Write-Verbose -Message 'Skipping Firewall Rule creation on SharePoint Server Subscription Edition because Add-SPDistributedCacheServiceInstance will add the Rule "SharePoint Caching Service (TCP-In)"'
                 }
                 else
                 {
-                    Write-Verbose -Message 'Detected SharePoint Server 2013 - 2019'
                     $spRuleName = "SharePoint Distributed Cache"
                     $firewallRule = Get-NetFirewallRule -DisplayName $spRuleName `
                         -ErrorAction SilentlyContinue
@@ -345,7 +342,7 @@ function Set-TargetResource
 
                 $farm = Get-SPFarm
                 $cacheService = $farm.Services | Where-Object -FilterScript {
-                    $_.Name -in @("AppFabricCachingService", "SPCache")
+                    $_.Name -eq "AppFabricCachingService" -or $_.Name -eq "SPCache"
                 }
 
                 if ($cacheService.ProcessIdentity.ManagedAccount.Username -ne $params.ServiceAccount)
@@ -377,7 +374,7 @@ function Set-TargetResource
                     $params = $args[0]
                     $farm = Get-SPFarm
                     $cacheService = $farm.Services | Where-Object -FilterScript {
-                        $_.Name -in @("AppFabricCachingService", "SPCache")
+                        $_.Name -eq "AppFabricCachingService" -or $_.Name -eq "SPCache"
                     }
 
                     if ($cacheService.ProcessIdentity.ManagedAccount.Username -ne $params.ServiceAccount)
