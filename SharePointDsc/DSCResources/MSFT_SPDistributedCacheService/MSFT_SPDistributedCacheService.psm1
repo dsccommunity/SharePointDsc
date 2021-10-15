@@ -78,11 +78,6 @@ function Get-TargetResource
 
                 Use-CacheCluster -ErrorAction SilentlyContinue
                 $cacheHost = Get-CacheHost -ErrorAction SilentlyContinue
-
-                if ($null -eq $cacheHost)
-                {
-                    return $nullReturnValue
-                }
                 $computerName = ([System.Net.Dns]::GetHostByName($env:computerName)).HostName
                 $cachePort = ($cacheHost | Where-Object -FilterScript {
                         $_.HostName -eq $computerName
@@ -90,7 +85,6 @@ function Get-TargetResource
                 $cacheHostConfig = Get-AFCacheHostConfiguration -ComputerName $computerName `
                     -CachePort $cachePort `
                     -ErrorAction SilentlyContinue
-                $windowsService = Get-CimInstance -Class Win32_Service -Filter "Name='AppFabricCachingService'"
                 $firewallRule = Get-NetFirewallRule -DisplayName "SharePoint Distributed Cache" `
                     -ErrorAction SilentlyContinue
             }
@@ -175,13 +169,14 @@ function Set-TargetResource
                 }
                 Enable-NetFirewallRule -DisplayName $icmpRuleName
 
-                if (Get-Module -ListAvailable -Name SharePointServer)
+                $productVersion = Get-SPDscInstalledProductVersion
+                if ($productVersion.FileMajorPart -eq 16 `
+                        -and $productVersion.FileBuildPart -gt 13000)
                 {
-                    Write-Verbose -Message 'Skipping Firewall Rule creation because Add-SPDistributedCacheServiceInstance will add the Rule "SharePoint Caching Service (TCP-In)"'
+                    Write-Verbose -Message 'Skipping Firewall Rule creation on SharePoint Server Subscription Edition because Add-SPDistributedCacheServiceInstance will add the Rule "SharePoint Caching Service (TCP-In)"'
                 }
                 else
                 {
-                    Write-Verbose -Message 'Detected SharePoint Server 2013 - 2019'
                     $spRuleName = "SharePoint Distributed Cache"
                     $firewallRule = Get-NetFirewallRule -DisplayName $spRuleName `
                         -ErrorAction SilentlyContinue
