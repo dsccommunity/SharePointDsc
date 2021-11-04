@@ -145,69 +145,76 @@ function Get-TargetResource
                 }
             }
 
-            Write-Verbose -Message "Checking Farm account permissions"
-            $farmAccountPermissionsNeedCorrecting = $false
-
-            $farmAccount = (Get-SPFarm).DefaultServiceAccount.Name
-            $dbServer = $serviceApp.SearchAdminDatabase.NormalizedDataSource
-
-            Write-Verbose -Message "Checking Admin Database"
-            $adminDB = $serviceApp.SearchAdminDatabase.Name
-
-            Write-Verbose -Message "Checking Admin Database: $adminDB"
-            $farmAccountPermissionsNeedCorrecting = (Confirm-UserIsDBOwner -SQLServer $dbServer `
-                    -Database $adminDB `
-                    -User $farmAccount `
-                    -DatabaseCredentials $params.DatabaseCredentials) -eq $false
-            Write-Verbose -Message "Farm Account Permissions Need Correcting: $farmAccountPermissionsNeedCorrecting"
-
-            Write-Verbose -Message "Checking Analytics reporting Database"
-            foreach ($database in $serviceApp.AnalyticsReportingDatabases)
+            if ($params.useSQLAuthentication -eq $true)
             {
-                $analyticsDB = $database.Name
+                $farmAccountPermissionsNeedCorrecting = $false
+            }
+            else
+            {
+                Write-Verbose -Message "Checking Farm account permissions"
+                $farmAccountPermissionsNeedCorrecting = $false
 
-                Write-Verbose -Message "Checking Analytics reporting Database: $analyticsDB"
+                $farmAccount = (Get-SPFarm).DefaultServiceAccount.Name
+                $dbServer = $serviceApp.SearchAdminDatabase.NormalizedDataSource
+
+                Write-Verbose -Message "Checking Admin Database"
+                $adminDB = $serviceApp.SearchAdminDatabase.Name
+
+                Write-Verbose -Message "Checking Admin Database: $adminDB"
+                $farmAccountPermissionsNeedCorrecting = (Confirm-UserIsDBOwner -SQLServer $dbServer `
+                        -Database $adminDB `
+                        -User $farmAccount `
+                        -DatabaseCredentials $params.DatabaseCredentials) -eq $false
+                Write-Verbose -Message "Farm Account Permissions Need Correcting: $farmAccountPermissionsNeedCorrecting"
+
+                Write-Verbose -Message "Checking Analytics reporting Database"
+                foreach ($database in $serviceApp.AnalyticsReportingDatabases)
+                {
+                    $analyticsDB = $database.Name
+
+                    Write-Verbose -Message "Checking Analytics reporting Database: $analyticsDB"
+                    if ($farmAccountPermissionsNeedCorrecting -eq $false)
+                    {
+                        $farmAccountPermissionsNeedCorrecting = (Confirm-UserIsDBOwner -SQLServer $dbServer `
+                                -Database $analyticsDB `
+                                -User $farmAccount `
+                                -DatabaseCredentials $params.DatabaseCredentials) -eq $false
+                    }
+                    Write-Verbose -Message "Farm Account Permissions Need Correcting: $farmAccountPermissionsNeedCorrecting"
+                }
+
+                Write-Verbose -Message "Checking Crawl Database(s)"
                 if ($farmAccountPermissionsNeedCorrecting -eq $false)
                 {
-                    $farmAccountPermissionsNeedCorrecting = (Confirm-UserIsDBOwner -SQLServer $dbServer `
-                            -Database $analyticsDB `
-                            -User $farmAccount `
-                            -DatabaseCredentials $params.DatabaseCredentials) -eq $false
+                    foreach ($database in (Get-SPEnterpriseSearchCrawlDatabase -SearchApplication $serviceApp))
+                    {
+                        $crawlDB = $database.Database.Name
+                        $dbServer = $database.Database.NormalizedDataSource
+
+                        Write-Verbose -Message "Checking Crawl Database: $crawlDB"
+                        $farmAccountPermissionsNeedCorrecting = (Confirm-UserIsDBOwner -SQLServer $dbServer `
+                                -Database $crawlDB `
+                                -User $farmAccount `
+                                -DatabaseCredentials $params.DatabaseCredentials) -eq $false
+                        Write-Verbose -Message "Farm Account Permissions Need Correcting: $farmAccountPermissionsNeedCorrecting"
+                    }
                 }
-                Write-Verbose -Message "Farm Account Permissions Need Correcting: $farmAccountPermissionsNeedCorrecting"
-            }
 
-            Write-Verbose -Message "Checking Crawl Database(s)"
-            if ($farmAccountPermissionsNeedCorrecting -eq $false)
-            {
-                foreach ($database in (Get-SPEnterpriseSearchCrawlDatabase -SearchApplication $serviceApp))
+                Write-Verbose -Message "Checking Links Database(s)"
+                if ($farmAccountPermissionsNeedCorrecting -eq $false)
                 {
-                    $crawlDB = $database.Database.Name
-                    $dbServer = $database.Database.NormalizedDataSource
+                    foreach ($database in (Get-SPEnterpriseSearchLinksDatabase -SearchApplication $serviceApp))
+                    {
+                        $linksDB = $database.Database.Name
+                        $dbServer = $database.Database.NormalizedDataSource
 
-                    Write-Verbose -Message "Checking Crawl Database: $crawlDB"
-                    $farmAccountPermissionsNeedCorrecting = (Confirm-UserIsDBOwner -SQLServer $dbServer `
-                            -Database $crawlDB `
-                            -User $farmAccount `
-                            -DatabaseCredentials $params.DatabaseCredentials) -eq $false
-                    Write-Verbose -Message "Farm Account Permissions Need Correcting: $farmAccountPermissionsNeedCorrecting"
-                }
-            }
-
-            Write-Verbose -Message "Checking Links Database(s)"
-            if ($farmAccountPermissionsNeedCorrecting -eq $false)
-            {
-                foreach ($database in (Get-SPEnterpriseSearchLinksDatabase -SearchApplication $serviceApp))
-                {
-                    $linksDB = $database.Database.Name
-                    $dbServer = $database.Database.NormalizedDataSource
-
-                    Write-Verbose -Message "Checking Links Database: $linksDB"
-                    $farmAccountPermissionsNeedCorrecting = (Confirm-UserIsDBOwner -SQLServer $dbServer `
-                            -Database $linksDB `
-                            -User $farmAccount `
-                            -DatabaseCredentials $params.DatabaseCredentials) -eq $false
-                    Write-Verbose -Message "Farm Account Permissions Need Correcting: $farmAccountPermissionsNeedCorrecting"
+                        Write-Verbose -Message "Checking Links Database: $linksDB"
+                        $farmAccountPermissionsNeedCorrecting = (Confirm-UserIsDBOwner -SQLServer $dbServer `
+                                -Database $linksDB `
+                                -User $farmAccount `
+                                -DatabaseCredentials $params.DatabaseCredentials) -eq $false
+                        Write-Verbose -Message "Farm Account Permissions Need Correcting: $farmAccountPermissionsNeedCorrecting"
+                    }
                 }
             }
 
@@ -295,7 +302,17 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting Search service application '$Name'"
 
-    $PSBoundParameters.FixFarmAccountPermissions = $FixFarmAccountPermissions
+    if ($UseSQLAuthentication -eq $true)
+    {
+        Write-Verbose ("Cannot check Farm Account permissions when SQL " + `
+                "DatabaseCredentials are specified.")
+        Write-Verbose "Setting FixFarmAccountPermissions to False"
+        $PSBoundParameters.FixFarmAccountPermissions = $false
+    }
+    else
+    {
+        $PSBoundParameters.FixFarmAccountPermissions = $FixFarmAccountPermissions
+    }
 
     $result = Get-TargetResource @PSBoundParameters
 
