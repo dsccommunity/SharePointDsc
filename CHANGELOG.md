@@ -16,6 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- SharePointDsc
+  - Fixed issue where the snapin was generating the "An item with the same
+    key has already been added" error
 - ReverseDsc
   - Fixed issue where the export would contain duplicate configuration
   - Fixed issue where the example export cmdlets was in the incorrect format

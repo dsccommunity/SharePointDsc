@@ -1556,10 +1556,6 @@ function Export-SPConfiguration
         $Standalone,
 
         [Parameter()]
-        [Boolean]
-        $Confirm = $true,
-
-        [Parameter()]
         [String]
         $OutputFile = $null,
 
