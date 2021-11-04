@@ -1,3 +1,6 @@
+$script:SPDscUtilModulePath = Join-Path -Path $PSScriptRoot -ChildPath '..\..\Modules\SharePointDsc.Util'
+Import-Module -Name $script:SPDscUtilModulePath
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -75,19 +78,7 @@ function Get-TargetResource
 
             if ($null -eq $cacheHost)
             {
-                Write-Verbose -Message 'Detected SharePoint Server 2013 - 2019'
-
-                Use-CacheCluster -ErrorAction SilentlyContinue
-                $cacheHost = Get-CacheHost -ErrorAction SilentlyContinue
-                $computerName = ([System.Net.Dns]::GetHostByName($env:computerName)).HostName
-                $cachePort = ($cacheHost | Where-Object -FilterScript {
-                        $_.HostName -eq $computerName
-                    }).PortNo
-                $cacheHostConfig = Get-AFCacheHostConfiguration -ComputerName $computerName `
-                    -CachePort $cachePort `
-                    -ErrorAction SilentlyContinue
-                $firewallRule = Get-NetFirewallRule -DisplayName "SharePoint Distributed Cache" `
-                    -ErrorAction SilentlyContinue
+                return $nullReturnValue
             }
 
             $windowsService = Get-CimInstance -Class Win32_Service -Filter "Name='AppFabricCachingService' OR Name='SPCache'"
@@ -625,180 +616,6 @@ function Export-TargetResource
         $Content += $PartialContent
     }
     return $Content
-}
-
-Export-M                o
-$convertToVariable = $true
-$results.ServiceAccount = (Resolve-Credentials -UserName $results.ServiceAccount) + ".UserName"
-}
-$currentBlock = Get-DSCBlock -Params $results -ModulePath $module
-$currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
-if ($convertToVariable)
-{
-    $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "ServiceAccount"
-}
-$PartialContent += $currentBlock
-$PartialContent += "        }`r`n"
-$Content += $PartialContent
-}
-return $Content
-}
-
-$Content += $PartialContent
-}
-return $Content
-E
-
-Export-ModuleMember -Funt-*TTsogeoetRed-nesource
-$Content = ''
-$params = Get-DSCFakeParameters -ModulePath $module
-$params.Name = "DistributedCache"
-$results = Get-TargetResource @params
-if ($results.Get_Item("Ensure").ToLower() -eq "present" -and $results.Contains("CacheSizeInMB"))
-{
-    $PartialContent = "        SPDistributedCacheService " + [System.Guid]::NewGuid().ToString() + "`r`n"
-    $PartialContent += "        {`r`n"
-    $results = Repair-Credentials -results $results
-    $results.Remove("ServerProvisionOrder")
-
-    $serviceAccount = Get-Credentials -UserName $results.ServiceAccount
-    $convertToVariable = $false
-    if ($serviceAccount)
-    {
-        $convertToVariable = $true
-        $results.ServiceAccount = (Resolve-Credentials -UserName $results.ServiceAccount) + ".UserName"
-    }
-    $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
-    $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
-    if ($convertToVariable)
-    {
-        $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "ServiceAccount"
-    }
-    $PartialContent += $currentBlock
-    $PartialContent += "        }`r`n"
-    $Content += $PartialContent
-}
-return $Content
-}
-
-Export-ModuleMember -Function *-TargetResource
-$ParentModuleBase = Get-Module "SharePointDsc" -ListAvailable | Select-Object -ExpandProperty Modulebase
-$module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPDistributedCacheService\MSFT_SPDistributedCacheService.psm1" -Resolve
-$Content = ''
-$params = Get-DSCFakeParameters -ModulePath $module
-$params.Name = "DistributedCache"
-$results = Get-TargetResource @params
-if ($results.Get_Item("Ensure").ToLower() -eq "present" -and $results.Contains("CacheSizeInMB"))
-{
-    $PartialContent = "        SPDistributedCacheService " + [System.Guid]::NewGuid().ToString() + "`r`n"
-    $PartialContent += "        {`r`n"
-    $results = Repair-Credentials -results $results
-    $results.Remove("ServerProvisionOrder")
-
-    $serviceAccount = Get-Credentials -UserName $results.ServiceAccount
-    $convertToVariable = $false
-    if ($serviceAccount)
-    {
-        $convertToVariable = $true
-        $results.ServiceAccount = (Resolve-Credentials -UserName $results.ServiceAccount) + ".UserName"
-    }
-    $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
-    $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
-    if ($convertToVariable)
-    {
-        $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "ServiceAccount"
-    }
-    $PartialContent += $currentBlock
-    $PartialContent += "        }`r`n"
-    $Content += $PartialContent
-}
-return $Content
-}
-
-Export-ModuleMember -Function * -TargetResource
-Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
-
-Write-Verbose -Message "Test-TargetResource returned false"
-return $false
-}
-}
-
-$result = Test-SPDscParameterState -CurrentValues $CurrentValues `
-    -Source $($MyInvocation.MyCommand.Source) `
-    -DesiredValues $PSBoundParameters `
-    -ValuesToCheck @("Ensure", `
-        "CreateFirewallRules", `
-        "CacheSizeInMB")
-}
-else
-{
-    $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
-        -Source $($MyInvocation.MyCommand.Source) `
-        -DesiredValues $PSBoundParameters `
-        -ValuesToCheck @("Ensure")
-}
-
-Write-Verbose -Message "Test-TargetResource returned $result"
-
-return $result
-}
-
-function Export-TargetResource
-{
-    $VerbosePreference = "SilentlyContinue"
-    $ParentModuleBase = Get-Module "SharePointDsc" -ListAvailable | Select-Object -ExpandProperty Modulebase
-    $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPDistributedCacheService\MSFT_SPDistributedCacheService.psm1" -Resolve
-    $Content = ''
-    $params = Get-DSCFakeParameters -ModulePath $module
-    $params.Name = "DistributedCache"
-    $results = Get-TargetResource @params
-    if ($results.Get_Item("Ensure").ToLower() -eq "present" -and $results.Contains("CacheSizeInMB"))
-    {
-        $PartialContent = "        SPDistributedCacheService " + [System.Guid]::NewGuid().ToString() + "`r`n"
-        $PartialContent += "        {`r`n"
-        $results = Repair-Credentials -results $results
-        $results.Remove("ServerProvisionOrder")
-
-        $serviceAccount = Get-Credentials -UserName $results.ServiceAccount
-        $convertToVariable = $false
-        if ($serviceAccount)
-        {
-            $convertToVariable = $true
-            $results.ServiceAccount = (Resolve-Credentials -UserName $results.ServiceAccount) + ".UserName"
-        }
-        $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
-        $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
-        if ($convertToVariable)
-        {
-            $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "ServiceAccount"
-        }
-        $PartialContent += $currentBlock
-        $PartialContent += "        }`r`n"
-        $Content += $PartialContent
-    }
-    return $Content
-}
-
-Export-ModuleMember -Function *-TargetResource
-
-$serviceAccount = Get-Credentials -UserName $results.ServiceAccount
-$convertToVariable = $false
-if ($serviceAccount)
-{
-    $convertToVariable = $true
-    $results.ServiceAccount = (Resolve-Credentials -UserName $results.ServiceAccount) + ".UserName"
-}
-$currentBlock = Get-DSCBlock -Params $results -ModulePath $module
-$currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
-if ($convertToVariable)
-{
-    $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "ServiceAccount"
-}
-$PartialContent += $currentBlock
-$PartialContent += "        }`r`n"
-$Content += $PartialContent
-}
-return $Content
 }
 
 Export-ModuleMember -Function *-TargetResource
