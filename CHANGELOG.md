@@ -14,8 +14,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     application
   - Added possibility to update application pool
 
+### Changed
+
+- SharePointDsc
+  - Updated build pipeline to use the correct vm image
+
 ### Fixed
 
+- SharePointDsc
+  - Fixed issue where the snapin was generating the "An item with the same
+    key has already been added" error
 - ReverseDsc
   - Fixed issue where the export would contain duplicate configuration
   - Fixed issue where the example export cmdlets was in the incorrect format
@@ -23,7 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Fixed issue where the resource was using hardcoded SP2016 and later paths
     and therefore didn't work in SP2013
 - SPSearchServiceApp
-  - Fix SQL authentication support with updating DB ownership functions
+  - Disabled Farm account DB ownership updating functions when using SQL Auth
 - SPServiceAppPool
   - Fixed issue in Export method where the PsDscRunAsCredential was stored as
     a string instead of a PsCredential object
