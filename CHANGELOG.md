@@ -14,6 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     application
   - Added possibility to update application pool
 
+### Changed
+
+- SharePointDsc
+  - Updated build pipeline to use the correct vm image
+
 ### Fixed
 
 - SharePointDsc
