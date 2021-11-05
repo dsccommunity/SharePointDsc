@@ -1511,22 +1511,25 @@ function DisplayGUI()
         )
     }
 
-    #region Global
-    $firstColumnLeft = 10
-    $secondColumnLeft = 280
-    $thirdColumnLeft = 540
-    $topBannerHeight = 70
+    
     #endregion
 
     $Global:liteComponents = @()
     $Global:defaultComponents = @()
-
+    $padding=20
     $form = New-Object System.Windows.Forms.Form
     $screens = [System.Windows.Forms.Screen]::AllScreens
-    $form.Width = ($screens[0].Bounds.Width) / 2
-    $form.Height = ($screens[0].Bounds.Height) / 2
+    $form.Width = ($screens[0].Bounds.Width)
+    $form.Height = ($screens[0].Bounds.Height)
+	
     #$form.WindowState = [System.Windows.Forms.FormWindowState]::Maximized
-
+	#region Global
+    $firstColumnLeft = 1+$padding
+   
+    $secondColumnLeft = (($screens[0].Bounds.Width) /3)+$firstColumnLeft +$padding
+    $thirdColumnLeft = (($screens[0].Bounds.Width) /3)+$secondColumnLeft +$padding
+    $topBannerHeight = 70
+    
     $panelMain = New-Object System.Windows.Forms.Panel
     $panelMain.Width = $form.Width
     $panelMain.Height = $form.Height
@@ -1546,7 +1549,7 @@ function DisplayGUI()
     $panelInformationArchitecture.Left = $firstColumnLeft
     $panelInformationArchitecture.AutoSize = $true
     $panelInformationArchitecture.Height = 80
-    $panelInformationArchitecture.Width = 220
+    $panelInformationArchitecture.Width = (($screens[0].Bounds.Width)/3) -$padding
     $panelInformationArchitecture.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
 
     $align = 0
@@ -1590,7 +1593,7 @@ function DisplayGUI()
     $panelSecurity.Top = $panelInformationArchitecture.Top + $panelInformationArchitecture.Height + 40
     $panelSecurity.Left = $firstColumnLeft
     $panelSecurity.AutoSize = $true
-    $panelSecurity.Width = 220
+    $panelSecurity.Width = (($screens[0].Bounds.Width)/3) -$padding
     $panelSecurity.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
 
     $align = 0
@@ -1635,7 +1638,7 @@ function DisplayGUI()
     $panelSA.Top = $panelSecurity.Top + $panelSecurity.Height + 40
     $panelSA.Left = $firstColumnLeft
     $panelSA.AutoSize = $true
-    $panelSA.Width = 220
+    $panelSA.Width = (($screens[0].Bounds.Width)/3) -$padding
     $panelSA.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
 
     $align = 0
@@ -1680,7 +1683,7 @@ function DisplayGUI()
     $panelSearch.Top = 30 + $topBannerHeight
     $panelSearch.Left = $secondColumnLeft
     $panelSearch.AutoSize = $true
-    $panelSearch.Width = 220
+    $panelSearch.Width = (($screens[0].Bounds.Width)/3) -$padding
     $panelSearch.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
 
     $align = 0
@@ -1725,7 +1728,7 @@ function DisplayGUI()
     $panelWebApp.Top = $panelSearch.Top + $panelSearch.Height + 40
     $panelWebApp.Left = $secondColumnLeft
     $panelWebApp.AutoSize = $true
-    #$panelWebApp.Width = 220
+    $panelWebApp.Width = (($screens[0].Bounds.Width)/3) -$padding
     $panelWebApp.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
 
     $align = 0
@@ -1771,7 +1774,7 @@ function DisplayGUI()
     $panelCustomization.Left = $secondColumnLeft
     $panelCustomization.AutoSize = $true
     $panelCustomization.Height = 80
-    $panelCustomization.Width = 220
+    $panelCustomization.Width = (($screens[0].Bounds.Width)/3) -$padding
     $panelCustomization.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
 
     $align = 0
@@ -1816,7 +1819,7 @@ function DisplayGUI()
     $panelConfig.Top = 30 + $topBannerHeight
     $panelConfig.Left = $thirdColumnLeft
     $panelConfig.AutoSize = $true
-    $panelConfig.Width = 400
+    $panelConfig.Width = (($screens[0].Bounds.Width)/3) -$padding
     $panelConfig.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
 
     $align = 0
@@ -1861,7 +1864,7 @@ function DisplayGUI()
     $panelUPS.Top = $panelConfig.Top + $panelConfig.Height + 40
     $panelUPS.Left = $thirdColumnLeft
     $panelUPS.AutoSize = $true
-    $panelUPS.Width = 400
+    $panelUPS.Width = (($screens[0].Bounds.Width)/3) -$padding
     $panelUPS.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
 
     $align = 0
