@@ -53,8 +53,19 @@ try
                 Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Mocks for all contexts
-                Mock -CommandName Add-DatabaseToAvailabilityGroup -MockWith { }
-                Mock -CommandName Remove-DatabaseFromAvailabilityGroup -MockWith { }
+                # Check for SPSE, where cmdlets are renamed
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16 -and
+                    $Global:SPDscHelper.CurrentStubBuildNumber.Build -gt 13000)
+                {
+                    Mock -CommandName Add-SPDatabaseToAvailabilityGroup -MockWith { }
+                    Mock -CommandName Remove-SPDatabaseFromAvailabilityGroup -MockWith { }
+                }
+                else
+                {
+                    Mock -CommandName Add-DatabaseToAvailabilityGroup -MockWith { }
+                    Mock -CommandName Remove-DatabaseFromAvailabilityGroup -MockWith { }
+                }
+
                 if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
                 {
                     Mock -CommandName Get-SPDscInstalledProductVersion {
@@ -117,7 +128,16 @@ try
 
                 It "Should call the add cmdlet in the set method" {
                     Set-TargetResource @testParams
-                    Assert-MockCalled Add-DatabaseToAvailabilityGroup
+                    # Check for SPSE, where cmdlets are renamed
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16 -and
+                        $Global:SPDscHelper.CurrentStubBuildNumber.Build -gt 13000)
+                    {
+                        Assert-MockCalled Add-SPDatabaseToAvailabilityGroup
+                    }
+                    else
+                    {
+                        Assert-MockCalled Add-DatabaseToAvailabilityGroup
+                    }
                 }
             }
 
@@ -153,7 +173,16 @@ try
 
                 It "Should call the add cmdlet in the set method" {
                     Set-TargetResource @testParams
-                    Assert-MockCalled Add-DatabaseToAvailabilityGroup
+                    # Check for SPSE, where cmdlets are renamed
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16 -and
+                        $Global:SPDscHelper.CurrentStubBuildNumber.Build -gt 13000)
+                    {
+                        Assert-MockCalled Add-SPDatabaseToAvailabilityGroup
+                    }
+                    else
+                    {
+                        Assert-MockCalled Add-DatabaseToAvailabilityGroup
+                    }
                 }
             }
 
@@ -191,7 +220,16 @@ try
 
                 It "Should call the add cmdlet in the set method" {
                     Set-TargetResource @testParams
-                    Assert-MockCalled Add-DatabaseToAvailabilityGroup
+                    # Check for SPSE, where cmdlets are renamed
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16 -and
+                        $Global:SPDscHelper.CurrentStubBuildNumber.Build -gt 13000)
+                    {
+                        Assert-MockCalled Add-SPDatabaseToAvailabilityGroup
+                    }
+                    else
+                    {
+                        Assert-MockCalled Add-DatabaseToAvailabilityGroup
+                    }
                 }
             }
 
@@ -347,7 +385,16 @@ try
 
                 It "Should call the remove cmdlet in the set method" {
                     Set-TargetResource @testParams
-                    Assert-MockCalled Remove-DatabaseFromAvailabilityGroup
+                    # Check for SPSE, where cmdlets are renamed
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16 -and
+                        $Global:SPDscHelper.CurrentStubBuildNumber.Build -gt 13000)
+                    {
+                        Assert-MockCalled Remove-SPDatabaseFromAvailabilityGroup
+                    }
+                    else
+                    {
+                        Assert-MockCalled Remove-DatabaseFromAvailabilityGroup
+                    }
                 }
             }
 
@@ -387,7 +434,16 @@ try
 
                 It "Should call the remove cmdlet in the set method" {
                     Set-TargetResource @testParams
-                    Assert-MockCalled Remove-DatabaseFromAvailabilityGroup
+                    # Check for SPSE, where cmdlets are renamed
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16 -and
+                        $Global:SPDscHelper.CurrentStubBuildNumber.Build -gt 13000)
+                    {
+                        Assert-MockCalled Remove-SPDatabaseFromAvailabilityGroup
+                    }
+                    else
+                    {
+                        Assert-MockCalled Remove-DatabaseFromAvailabilityGroup
+                    }
                 }
             }
 
@@ -427,7 +483,16 @@ try
 
                 It "Should call the remove cmdlet in the set method" {
                     Set-TargetResource @testParams
-                    Assert-MockCalled Remove-DatabaseFromAvailabilityGroup
+                    # Check for SPSE, where cmdlets are renamed
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16 -and
+                        $Global:SPDscHelper.CurrentStubBuildNumber.Build -gt 13000)
+                    {
+                        Assert-MockCalled Remove-SPDatabaseFromAvailabilityGroup
+                    }
+                    else
+                    {
+                        Assert-MockCalled Remove-DatabaseFromAvailabilityGroup
+                    }
                 }
             }
 
@@ -461,8 +526,18 @@ try
 
                 It "Should call the remove and add cmdlets in the set method" {
                     Set-TargetResource @testParams
-                    Assert-MockCalled Remove-DatabaseFromAvailabilityGroup
-                    Assert-MockCalled Add-DatabaseToAvailabilityGroup
+                    # Check for SPSE, where cmdlets are renamed
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16 -and
+                        $Global:SPDscHelper.CurrentStubBuildNumber.Build -gt 13000)
+                    {
+                        Assert-MockCalled Remove-SPDatabaseFromAvailabilityGroup
+                        Assert-MockCalled Add-SPDatabaseToAvailabilityGroup
+                    }
+                    else
+                    {
+                        Assert-MockCalled Remove-DatabaseFromAvailabilityGroup
+                        Assert-MockCalled Add-DatabaseToAvailabilityGroup
+                    }
                 }
             }
 
@@ -502,8 +577,18 @@ try
 
                 It "Should call the remove and add cmdlets in the set method" {
                     Set-TargetResource @testParams
-                    Assert-MockCalled Remove-DatabaseFromAvailabilityGroup
-                    Assert-MockCalled Add-DatabaseToAvailabilityGroup
+                    # Check for SPSE, where cmdlets are renamed
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16 -and
+                        $Global:SPDscHelper.CurrentStubBuildNumber.Build -gt 13000)
+                    {
+                        Assert-MockCalled Remove-SPDatabaseFromAvailabilityGroup
+                        Assert-MockCalled Add-SPDatabaseToAvailabilityGroup
+                    }
+                    else
+                    {
+                        Assert-MockCalled Remove-DatabaseFromAvailabilityGroup
+                        Assert-MockCalled Add-DatabaseToAvailabilityGroup
+                    }
                 }
             }
 

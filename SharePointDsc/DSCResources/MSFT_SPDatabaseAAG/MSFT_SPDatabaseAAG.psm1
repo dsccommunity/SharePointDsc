@@ -182,6 +182,19 @@ function Set-TargetResource
             $params = $args[0]
             $eventSource = $args[1]
 
+            # Check for SPSE, where cmdlets are renamed
+            if ((Get-SPDscInstalledProductVersion).FileMajorPart -eq 16 -and `
+                (Get-SPDscInstalledProductVersion).FileBuildPart -gt 13000)
+            {
+                $addCmd = 'Add-SPDatabaseToAvailabilityGroup'
+                $removeCmd = 'Remove-SPDatabaseFromAvailabilityGroup'
+            }
+            else
+            {
+                $addCmd = 'Add-DatabaseToAvailabilityGroup'
+                $removeCmd = 'Remove-DatabaseFromAvailabilityGroup'
+            }
+
             $databases = Get-SPDatabase | Where-Object -FilterScript {
                 $_.Name -like $params.DatabaseName
             }
@@ -196,7 +209,7 @@ function Set-TargetResource
                         if ($ag.Name -ne $params.AGName)
                         {
                             # Remove it from the current AAG first
-                            Remove-DatabaseFromAvailabilityGroup -AGName $params.AGName `
+                            &$removeCmd -AGName $params.AGName `
                                 -DatabaseName $database.Name `
                                 -Force
 
@@ -209,7 +222,7 @@ function Set-TargetResource
                             {
                                 $addParams.Add("FileShare", $params.FileShare)
                             }
-                            Add-DatabaseToAvailabilityGroup @addParams
+                            &$addCmd @addParams
                         }
                     }
                     else
@@ -223,7 +236,7 @@ function Set-TargetResource
                         {
                             $cmdParams.Add("FileShare", $params.FileShare)
                         }
-                        Add-DatabaseToAvailabilityGroup @cmdParams
+                        &$addCmd @cmdParams
                     }
                 }
             }
@@ -247,6 +260,17 @@ function Set-TargetResource
             $params = $args[0]
             $eventSource = $args[1]
 
+            # Check for SPSE, where cmdlets are renamed
+            if ((Get-SPDscInstalledProductVersion).FileMajorPart -eq 16 -and `
+                (Get-SPDscInstalledProductVersion).FileBuildPart -gt 13000)
+            {
+                $removeCmd = 'Remove-SPDatabaseFromAvailabilityGroup'
+            }
+            else
+            {
+                $removeCmd = 'Remove-DatabaseFromAvailabilityGroup'
+            }
+
             $databases = Get-SPDatabase | Where-Object -FilterScript {
                 $_.Name -like $params.DatabaseName
             }
@@ -255,7 +279,7 @@ function Set-TargetResource
             {
                 foreach ($database in $databases)
                 {
-                    Remove-DatabaseFromAvailabilityGroup -AGName $params.AGName `
+                    &$removeCmd -AGName $params.AGName `
                         -DatabaseName $database.Name `
                         -Force
                 }

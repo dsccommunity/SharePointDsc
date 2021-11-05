@@ -117,7 +117,7 @@ function Set-TargetResource
     if ($productVersion.FileMajorPart -eq 16 `
             -and $productVersion.FileBuildPart -gt 13000)
     {
-        $message = ("Since SharePoint Server Subscription Edition the Access Services does no longer" + `
+        $message = ("Since SharePoint Server Subscription Edition the Access Services does no longer " + `
             "exists. See https://docs.microsoft.com/en-us/sharepoint/what-s-new/what-s-deprecated-or-removed-from-sharepoint-server-2019#access-services-2013" + `
             "for more info.")
         Add-SPDscEvent -Message $message `

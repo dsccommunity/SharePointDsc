@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Service app no longer exists in SharePoint Server Subscription Edition. Added logic to check for SPSE.
 - SPAccessServices2010
   - Service app no longer exists in SharePoint Server Subscription Edition. Added logic to check for SPSE.
+- SPCertificateSettings
+  - New resource
+- SPDatabaseAAG
+  - Updated code to cater for updated cmdlet names in SPSE
 - SPFarm
   - Added support for SharePoint Server Subscription Edition
 - SPInstall

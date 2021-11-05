@@ -1,0 +1,19 @@
+[ClassVersion("1.0.0.0"), FriendlyName("SPCertificateSettings")]
+class MSFT_SPCertificateSettings : OMI_BaseResource
+{
+    [Key, Description("Specifies the resource is a single instance, the value must be 'Yes'"), ValueMap{"Yes"}, Values{"Yes"}] String IsSingleInstance;
+    [Write, Description("Specifies the default organizational unit")] String OrganizationalUnit;
+    [Write, Description("Specifies the default organization")] String Organization;
+    [Write, Description("Specifies the default locality")] String Locality;
+    [Write, Description("Specifies the default state")] String State;
+    [Write, Description("Specifies the default country")] String Country;
+    [Write, Description("Specifies the default key algorithm"), ValueMap{"ECC","RSA"}, Values{"ECC","RSA"}] String KeyAlgorithm;
+    [Write, Description("Specifies the default key size (Default=2048)"), ValueMap{"0","2048","4096","8192","16384"}, Values{"0","2048","4096","8192","16384"}] Uint16 KeySize;
+    [Write, Description("Specifies the default elliptic curve (Default=nistP256)"), ValueMap{"nistP256","nistP384","nistP521"}, Values{"nistP256","nistP384","nistP521"}] String EllipticCurve;
+    [Write, Description("Specifies the default hash algorithm (Default=SHA256"), ValueMap{"SHA256","SHA384","SHA512"}, Values{"SHA256","SHA384","SHA512"}] String HashAlgorithm;
+    [Write, Description("Specifies the default RSA signature padding (Default=Pkcs1)"), ValueMap{"Pkcs1","Pss"}, Values{"Pkcs1","Pss"}] String RsaSignaturePadding;
+    [Write, Description("Specifies the certificate expiration attention threshold")] Uint32 CertificateExpirationAttentionThreshold;
+    [Write, Description("Specifies the certificate expiration warning threshold")] Uint32 CertificateExpirationWarningThreshold;
+    [Write, Description("Specifies the certificate expiration error threshold")] Uint32 CertificateExpirationErrorThreshold;
+    [Write, Description("Specifies the certificate notification contacts")] String CertificateNotificationContacts[];
+};

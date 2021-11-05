@@ -148,6 +148,7 @@ function Write-SPDscStubFile
     {
         # SharePoint Server Subscription Edition
         $sourceModule = "SharePointServer"
+        Import-Module $sourceModule
     }
 
     $SPStubContent = ((Get-Command | Where-Object -FilterScript {
