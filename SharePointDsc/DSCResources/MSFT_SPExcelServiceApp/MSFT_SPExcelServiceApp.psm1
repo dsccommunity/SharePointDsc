@@ -1,6 +1,3 @@
-$script:SPDscUtilModulePath = Join-Path -Path $PSScriptRoot -ChildPath '..\..\Modules\SharePointDsc.Util'
-Import-Module -Name $script:SPDscUtilModulePath
-
 $Script:TrustLocationProperties = @(
     "Address",
     "LocationType",

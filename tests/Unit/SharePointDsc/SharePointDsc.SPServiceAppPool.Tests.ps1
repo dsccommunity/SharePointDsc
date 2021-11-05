@@ -50,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
 
@@ -225,7 +225,7 @@ try
         {
             Ensure               = "Present";
             Name                 = "SharePoint Service Applications";
-            PsDscRunAsCredential = "$Credsspfarm";
+            PsDscRunAsCredential = $Credsspfarm;
             ServiceAccount       = "Demo\ServiceAccount";
         }
 

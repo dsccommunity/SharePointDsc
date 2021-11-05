@@ -436,7 +436,7 @@ function Get-SPDscFarmVersionInfo
                 ($patchableUnit -notmatch "XMUI") -and
                 ($patchableUnit -notmatch "Project Server") -and
                 (($patchableUnit -notmatch "Microsoft SharePoint Server (2013|2016|2019)" -or `
-                            $patchableUnit -match "Core")))
+                        $patchableUnit -match "Core")))
             {
                 $patchableUnitsInfo = $singleProductInfo.GetPatchableUnitInfoByDisplayName($patchableUnit)
                 $currentVersion = ""
@@ -1556,10 +1556,6 @@ function Export-SPConfiguration
         $Standalone,
 
         [Parameter()]
-        [Boolean]
-        $Confirm = $true,
-
-        [Parameter()]
         [String]
         $OutputFile = $null,
 
@@ -1620,6 +1616,7 @@ function Export-SPConfiguration
     <## Scripts Variables #>
     $Script:DH_SPQUOTATEMPLATE = @{}
     $Script:dscConfigContent = ""
+    $Global:CredsRepo = @()
     $Global:AllUsers = @()
     $Script:ErrorLog = ""
     $Script:configName = ""

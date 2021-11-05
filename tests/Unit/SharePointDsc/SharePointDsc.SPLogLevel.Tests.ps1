@@ -84,11 +84,11 @@ try
                         Name              = "My LogLevel Settings"
                         SPLogLevelSetting = @(
                             (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
-                                    Area       = "SharePoint Server", "Excel Services Application"
-                                    Name       = "*"
-                                    TraceLevel = "Medium"
-                                    EventLevel = "Information"
-                                } -ClientOnly)
+                                Area       = "SharePoint Server", "Excel Services Application"
+                                Name       = "*"
+                                TraceLevel = "Medium"
+                                EventLevel = "Information"
+                            } -ClientOnly)
                         )
                     }
                 }
@@ -112,11 +112,11 @@ try
                         Name              = "My LogLevel Settings"
                         SPLogLevelSetting = @(
                             (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
-                                    Area       = "SharePointServer"
-                                    Name       = "Database", "UserProfile"
-                                    TraceLevel = "Medium"
-                                    EventLevel = "Information"
-                                } -ClientOnly)
+                                Area       = "SharePointServer"
+                                Name       = "Database", "UserProfile"
+                                TraceLevel = "Medium"
+                                EventLevel = "Information"
+                            } -ClientOnly)
                         )
                     }
                 }
@@ -140,9 +140,9 @@ try
                         Name              = "My LogLevel Settings"
                         SPLogLevelSetting = @(
                             (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
-                                    Area = "SharePointServer"
-                                    Name = "Database"
-                                } -ClientOnly)
+                                Area = "SharePointServer"
+                                Name = "Database"
+                            } -ClientOnly)
                         )
                     }
                 }
@@ -166,11 +166,11 @@ try
                         Name              = "My LogLevel Settings"
                         SPLogLevelSetting = @(
                             (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
-                                    Area       = "SharePointServer"
-                                    Name       = "Database"
-                                    TraceLevel = "detailed"
-                                    EventLevel = "Information"
-                                } -ClientOnly)
+                                Area       = "SharePointServer"
+                                Name       = "Database"
+                                TraceLevel = "detailed"
+                                EventLevel = "Information"
+                            } -ClientOnly)
                         )
                     }
                 }
@@ -194,11 +194,11 @@ try
                         Name              = "My LogLevel Settings"
                         SPLogLevelSetting = @(
                             (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
-                                    Area       = "SharePoint Server"
-                                    Name       = "Database"
-                                    TraceLevel = "Medium"
-                                    EventLevel = "detailed"
-                                } -ClientOnly)
+                                Area       = "SharePoint Server"
+                                Name       = "Database"
+                                TraceLevel = "Medium"
+                                EventLevel = "detailed"
+                            } -ClientOnly)
                         )
                     }
                 }
@@ -222,11 +222,11 @@ try
                         Name              = "My LogLevel Settings"
                         SPLogLevelSetting = @(
                             (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
-                                    Area       = "SharePoint Server"
-                                    Name       = "Database"
-                                    TraceLevel = "Default"
-                                    EventLevel = "Default"
-                                } -ClientOnly)
+                                Area       = "SharePoint Server"
+                                Name       = "Database"
+                                TraceLevel = "Default"
+                                EventLevel = "Default"
+                            } -ClientOnly)
                         )
                     }
 
@@ -262,11 +262,11 @@ try
                         Name              = "My LogLevel Settings"
                         SPLogLevelSetting = @(
                             (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
-                                    Area       = "SharePoint Server"
-                                    Name       = "Database"
-                                    TraceLevel = "Default"
-                                    EventLevel = "Default"
-                                } -ClientOnly)
+                                Area       = "SharePoint Server"
+                                Name       = "Database"
+                                TraceLevel = "Default"
+                                EventLevel = "Default"
+                            } -ClientOnly)
                         )
                     }
 
@@ -304,11 +304,11 @@ try
                         Name              = "My LogLevel Settings"
                         SPLogLevelSetting = @(
                             (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
-                                    Area       = "SharePoint Server"
-                                    Name       = "Database"
-                                    TraceLevel = "Unexpected"
-                                    EventLevel = "Error"
-                                } -ClientOnly)
+                                Area       = "SharePoint Server"
+                                Name       = "Database"
+                                TraceLevel = "Unexpected"
+                                EventLevel = "Error"
+                            } -ClientOnly)
                         )
                     }
 
@@ -342,11 +342,11 @@ try
                         Name              = "My LogLevel Settings"
                         SPLogLevelSetting = @(
                             (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
-                                    Area       = "SharePoint Server"
-                                    Name       = "Database"
-                                    TraceLevel = "Unexpected"
-                                    EventLevel = "Error"
-                                } -ClientOnly)
+                                Area       = "SharePoint Server"
+                                Name       = "Database"
+                                TraceLevel = "Unexpected"
+                                EventLevel = "Error"
+                            } -ClientOnly)
                         )
                     }
 
@@ -384,11 +384,11 @@ try
                         Name              = "My LogLevel Settings"
                         SPLogLevelSetting = @(
                             (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
-                                    Area       = "SharePoint Server"
-                                    Name       = "*"
-                                    TraceLevel = "Medium"
-                                    EventLevel = "Information"
-                                } -ClientOnly)
+                                Area       = "SharePoint Server"
+                                Name       = "*"
+                                TraceLevel = "Medium"
+                                EventLevel = "Information"
+                            } -ClientOnly)
                         )
                     }
 
@@ -424,8 +424,8 @@ try
 
                 It "Should return values from the get method [TraceLevel] and [EventLevel]" {
                     $result = Get-TargetResource @testParams
-                    $result.SPLogLevelSetting.TraceLevel | Should -Be "Medium"
-                    $result.SPLogLevelSetting.EventLevel | Should -Be "Information"
+                    $result.SPLogLevelSetting.TraceLevel | Should -Be @("Medium", "Medium", "Medium")
+                    $result.SPLogLevelSetting.EventLevel | Should -Be @("Information", "Information", "Information")
                 }
 
                 It "Should return true from the test method" {
@@ -439,11 +439,11 @@ try
                         Name              = "My LogLevel Settings"
                         SPLogLevelSetting = @(
                             (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
-                                    Area       = "SharePoint Server"
-                                    Name       = "*"
-                                    TraceLevel = "Medium"
-                                    EventLevel = "Information"
-                                } -ClientOnly)
+                                Area       = "SharePoint Server"
+                                Name       = "*"
+                                TraceLevel = "Medium"
+                                EventLevel = "Information"
+                            } -ClientOnly)
                         )
                     }
 
@@ -479,8 +479,8 @@ try
 
                 It "Should return values from the get method [TraceLevel] and [EventLevel]" {
                     $result = Get-TargetResource @testParams
-                    $result.SPLogLevelSetting.TraceLevel | Should -Be "Medium,Verbose"
-                    $result.SPLogLevelSetting.EventLevel | Should -Be "Information"
+                    $result.SPLogLevelSetting.TraceLevel | Should -Be @("Medium", "Medium", "Verbose")
+                    $result.SPLogLevelSetting.EventLevel | Should -Be @("Information", "Information", "Information")
                 }
 
                 It "Should return false from the test method" {
@@ -500,11 +500,11 @@ try
                         Name              = "My LogLevel Settings"
                         SPLogLevelSetting = @(
                             (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
-                                    Area       = "*"
-                                    Name       = "*"
-                                    TraceLevel = "Default"
-                                    EventLevel = "Default"
-                                } -ClientOnly)
+                                Area       = "*"
+                                Name       = "*"
+                                TraceLevel = "Default"
+                                EventLevel = "Default"
+                            } -ClientOnly)
                         )
                     }
 
@@ -564,8 +564,8 @@ try
 
                 It "Should return values from the get method [TraceLevel] and [EventLevel]" {
                     $result = Get-TargetResource @testParams
-                    $result.SPLogLevelSetting.TraceLevel | Should -Be "Default"
-                    $result.SPLogLevelSetting.EventLevel | Should -Be "Default"
+                    $result.SPLogLevelSetting.TraceLevel | Should -Be @("Default", "Default", "Default", "Default", "Default", "Default")
+                    $result.SPLogLevelSetting.EventLevel | Should -Be @("Default", "Default", "Default", "Default", "Default", "Default")
                 }
 
                 It "Should return true from the test method" {
@@ -579,11 +579,11 @@ try
                         Name              = "My LogLevel Settings"
                         SPLogLevelSetting = @(
                             (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
-                                    Area       = "*"
-                                    Name       = "*"
-                                    TraceLevel = "Medium"
-                                    EventLevel = "Verbose"
-                                } -ClientOnly)
+                                Area       = "*"
+                                Name       = "*"
+                                TraceLevel = "Medium"
+                                EventLevel = "Verbose"
+                            } -ClientOnly)
                         )
                     }
 
@@ -643,8 +643,8 @@ try
 
                 It "Should return values from the get method [TraceLevel] and [EventLevel]" {
                     $result = Get-TargetResource @testParams
-                    $result.SPLogLevelSetting.TraceLevel | Should -Be "Medium"
-                    $result.SPLogLevelSetting.EventLevel | Should -Be "Information"
+                    $result.SPLogLevelSetting.TraceLevel | Should -Be @("Medium", "Medium", "Medium", "Medium", "Medium", "Medium")
+                    $result.SPLogLevelSetting.EventLevel | Should -Be @("Information", "Information", "Information", "Information", "Information", "Information")
                 }
 
                 It "Should return false from the test method" {
@@ -663,17 +663,17 @@ try
                         Name              = "My LogLevel Settings"
                         SPLogLevelSetting = @(
                             (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
-                                    Area       = "SharePoint Server"
-                                    Name       = "Database"
-                                    TraceLevel = "Unexpected"
-                                    EventLevel = "Error"
-                                } -ClientOnly)
+                                Area       = "SharePoint Server"
+                                Name       = "Database"
+                                TraceLevel = "Unexpected"
+                                EventLevel = "Error"
+                            } -ClientOnly)
                             (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
-                                    Area       = "SharePoint Server"
-                                    Name       = "User Profile"
-                                    TraceLevel = "None"
-                                    EventLevel = "Warning"
-                                } -ClientOnly)
+                                Area       = "SharePoint Server"
+                                Name       = "User Profile"
+                                TraceLevel = "None"
+                                EventLevel = "Warning"
+                            } -ClientOnly)
 
                         )
                     }
@@ -681,15 +681,28 @@ try
                     Mock -CommandName Get-SPLogLevel -MockWith {
                         return @(
                             @{
-                                Area                 = "placeholder"
-                                Name                 = "placeholder"
+                                Area                 = "SharePoint Server"
+                                Name                 = "Database"
                                 TraceSeverity        = "Medium"
                                 EventSeverity        = "Information"
                                 DefaultTraceSeverity = "Medium"
                                 DefaultEventSeverity = "Information"
                             }
                         )
-                    }
+                    } -ParameterFilter { $Identity -eq "SharePoint Server:Database" }
+
+                    Mock -CommandName Get-SPLogLevel -MockWith {
+                        return @(
+                            @{
+                                Area                 = "SharePoint Server"
+                                Name                 = "User Profile"
+                                TraceSeverity        = "Medium"
+                                EventSeverity        = "Information"
+                                DefaultTraceSeverity = "Medium"
+                                DefaultEventSeverity = "Information"
+                            }
+                        )
+                    } -ParameterFilter { $Identity -eq "SharePoint Server:User Profile" }
                 }
 
                 It "Should return values from the get method [TraceLevel and EventLevel, first and second item]" {
@@ -716,17 +729,17 @@ try
                         Name              = "My LogLevel Settings"
                         SPLogLevelSetting = @(
                             (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
-                                    Area       = "SharePoint Server"
-                                    Name       = "Database"
-                                    TraceLevel = "Medium"
-                                    EventLevel = "Information"
-                                } -ClientOnly)
+                                Area       = "SharePoint Server"
+                                Name       = "Database"
+                                TraceLevel = "Medium"
+                                EventLevel = "Information"
+                            } -ClientOnly)
                             (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
-                                    Area       = "SharePoint Server"
-                                    Name       = "User Profile"
-                                    TraceLevel = "Medium"
-                                    EventLevel = "Information"
-                                } -ClientOnly)
+                                Area       = "SharePoint Server"
+                                Name       = "User Profile"
+                                TraceLevel = "Medium"
+                                EventLevel = "Information"
+                            } -ClientOnly)
 
                         )
                     }
@@ -734,15 +747,28 @@ try
                     Mock -CommandName Get-SPLogLevel -MockWith {
                         return @(
                             @{
-                                Area                 = "placeholder"
-                                Name                 = "placeholder"
+                                Area                 = "SharePoint Server"
+                                Name                 = "Database"
                                 TraceSeverity        = "Medium"
                                 EventSeverity        = "Information"
                                 DefaultTraceSeverity = "Medium"
                                 DefaultEventSeverity = "Information"
                             }
                         )
-                    }
+                    } -ParameterFilter { $Identity -eq "SharePoint Server:Database" }
+
+                    Mock -CommandName Get-SPLogLevel -MockWith {
+                        return @(
+                            @{
+                                Area                 = "SharePoint Server"
+                                Name                 = "User Profile"
+                                TraceSeverity        = "Medium"
+                                EventSeverity        = "Information"
+                                DefaultTraceSeverity = "Medium"
+                                DefaultEventSeverity = "Information"
+                            }
+                        )
+                    } -ParameterFilter { $Identity -eq "SharePoint Server:User Profile" }
                 }
 
                 It "Should return values from the get method [TraceLevel and EventLevel, first and second item]" {
@@ -764,17 +790,17 @@ try
                         Name              = "My LogLevel Settings"
                         SPLogLevelSetting = @(
                             (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
-                                    Area       = "SharePoint Server"
-                                    Name       = "Database"
-                                    TraceLevel = "Default"
-                                    EventLevel = "Default"
-                                } -ClientOnly)
+                                Area       = "SharePoint Server"
+                                Name       = "Database"
+                                TraceLevel = "Default"
+                                EventLevel = "Default"
+                            } -ClientOnly)
                             (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
-                                    Area       = "SharePoint Server"
-                                    Name       = "User Profile"
-                                    TraceLevel = "Default"
-                                    EventLevel = "Default"
-                                } -ClientOnly)
+                                Area       = "SharePoint Server"
+                                Name       = "User Profile"
+                                TraceLevel = "Default"
+                                EventLevel = "Default"
+                            } -ClientOnly)
 
                         )
                     }
@@ -782,15 +808,28 @@ try
                     Mock -CommandName Get-SPLogLevel -MockWith {
                         return @(
                             @{
-                                Area                 = "placeholder"
-                                Name                 = "placeholder"
+                                Area                 = "SharePoint Server"
+                                Name                 = "Database"
                                 TraceSeverity        = "Medium"
                                 EventSeverity        = "Information"
                                 DefaultTraceSeverity = "Medium"
                                 DefaultEventSeverity = "Information"
                             }
                         )
-                    }
+                    } -ParameterFilter { $Identity -eq "SharePoint Server:Database" }
+
+                    Mock -CommandName Get-SPLogLevel -MockWith {
+                        return @(
+                            @{
+                                Area                 = "SharePoint Server"
+                                Name                 = "User Profile"
+                                TraceSeverity        = "Medium"
+                                EventSeverity        = "Information"
+                                DefaultTraceSeverity = "Medium"
+                                DefaultEventSeverity = "Information"
+                            }
+                        )
+                    } -ParameterFilter { $Identity -eq "SharePoint Server:User Profile" }
                 }
 
                 It "Should return Default from the get method [TraceLevel and EventLevel, first and second item]" {
@@ -812,17 +851,17 @@ try
                         Name              = "My LogLevel Settings"
                         SPLogLevelSetting = @(
                             (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
-                                    Area       = "SharePoint Server"
-                                    Name       = "Database"
-                                    TraceLevel = "Default"
-                                    EventLevel = "Default"
-                                } -ClientOnly)
+                                Area       = "SharePoint Server"
+                                Name       = "Database"
+                                TraceLevel = "Default"
+                                EventLevel = "Default"
+                            } -ClientOnly)
                             (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
-                                    Area       = "SharePoint Server"
-                                    Name       = "User Profile"
-                                    TraceLevel = "Default"
-                                    EventLevel = "Default"
-                                } -ClientOnly)
+                                Area       = "SharePoint Server"
+                                Name       = "User Profile"
+                                TraceLevel = "Default"
+                                EventLevel = "Default"
+                            } -ClientOnly)
 
                         )
                     }
@@ -830,15 +869,28 @@ try
                     Mock -CommandName Get-SPLogLevel -MockWith {
                         return @(
                             @{
-                                Area                 = "placeholder"
-                                Name                 = "placeholder"
+                                Area                 = "SharePoint Server"
+                                Name                 = "Database"
                                 TraceSeverity        = "Verbose"
                                 EventSeverity        = "Warning"
                                 DefaultTraceSeverity = "Medium"
                                 DefaultEventSeverity = "Information"
                             }
                         )
-                    }
+                    } -ParameterFilter { $Identity -eq "SharePoint Server:Database" }
+
+                    Mock -CommandName Get-SPLogLevel -MockWith {
+                        return @(
+                            @{
+                                Area                 = "SharePoint Server"
+                                Name                 = "User Profile"
+                                TraceSeverity        = "Verbose"
+                                EventSeverity        = "Warning"
+                                DefaultTraceSeverity = "Medium"
+                                DefaultEventSeverity = "Information"
+                            }
+                        )
+                    } -ParameterFilter { $Identity -eq "SharePoint Server:User Profile" }
                 }
 
                 It "Should return Default from the get method [TraceLevel and EventLevel, first and second item]" {
@@ -856,6 +908,74 @@ try
                 It "Should call Set-SPLogLevel for the set method" {
                     Set-TargetResource @testParams
                     Assert-MockCalled Set-SPLogLevel
+                }
+            }
+
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Import-Module (Join-Path -Path (Split-Path -Path (Get-Module SharePointDsc -ListAvailable).Path -Parent) -ChildPath "Modules\SharePointDSC.Reverse\SharePointDSC.Reverse.psm1")
+
+                    Mock -CommandName Write-Host -MockWith { }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        $CurrentLogLevelSettings = @()
+                        $CurrentLogLevelSettings += New-Object -TypeName PSObject -Property @{
+                            Area       = "Access Services"
+                            Name       = "Administration"
+                            TraceLevel = "Default"
+                            EventLevel = "Default"
+                        }
+                        $CurrentLogLevelSettings += New-Object -TypeName PSObject -Property @{
+                            Area       = "SharePoint Server"
+                            Name       = "General"
+                            TraceLevel = "Default"
+                            EventLevel = "Default"
+                        }
+
+                        return @{
+                            Name              = "Export"
+                            SPLogLevelSetting = $CurrentLogLevelSettings
+                        }
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'DynamicCompilation' -ErrorAction SilentlyContinue))
+                    {
+                        $DynamicCompilation = $false
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'StandAlone' -ErrorAction SilentlyContinue))
+                    {
+                        $StandAlone = $true
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'ExtractionModeValue' -ErrorAction SilentlyContinue))
+                    {
+                        $Global:ExtractionModeValue = 2
+                        $Global:ComponentsToExtract = @('SPFarm')
+                    }
+
+                    $result = @'
+        SPLogLevel AllLogLevels
+        {
+            Name                 =" "Export";
+            PsDscRunAsCredential =" $Credsspfarm;
+            SPLogLevelSetting    =" @(
+                MSFT_SPLogLevelItem {TraceLevel="Default"; Name="Administration"; EventLevel="Default"; Area="Access Services"},
+                MSFT_SPLogLevelItem {TraceLevel="Default"; Name="General"; EventLevel="Default"; Area="SharePoint Server"}
+            );
+        }
+
+'@
+                }
+
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource | Should -Be $result
                 }
             }
         }
