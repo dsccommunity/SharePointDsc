@@ -14,17 +14,12 @@ function Get-TargetResource
 
         [Parameter(Mandatory = $true)]
         [System.String]
-        $DefaultKeywordProxyName,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $DefaultKeywordProxyName
     )
 
     Write-Verbose -Message "Getting the default site collection and keyword term store settings"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+    $result = Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
 
         $params = $args[0]
@@ -135,17 +130,12 @@ function Set-TargetResource
 
         [Parameter(Mandatory = $true)]
         [System.String]
-        $DefaultKeywordProxyName,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $DefaultKeywordProxyName
     )
 
     Write-Verbose -Message "Setting the default site collection and keyword term store settings"
 
-    $null = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+    $null = Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
 
         $params = $args[0]
@@ -235,11 +225,7 @@ function Test-TargetResource
 
         [Parameter(Mandatory = $true)]
         [System.String]
-        $DefaultKeywordProxyName,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $DefaultKeywordProxyName
     )
 
     Write-Verbose -Message "Testing the default site collection and keyword term store settings"

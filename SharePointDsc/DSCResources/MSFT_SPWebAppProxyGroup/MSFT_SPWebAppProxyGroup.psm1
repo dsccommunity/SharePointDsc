@@ -10,17 +10,12 @@ function Get-TargetResource
 
         [Parameter(Mandatory = $true)]
         [System.String]
-        $ServiceAppProxyGroup,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $ServiceAppProxyGroup
     )
 
     Write-Verbose -Message "Getting $WebAppUrl Service Proxy Group Association"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
@@ -62,17 +57,12 @@ function Set-TargetResource
 
         [Parameter(Mandatory = $true)]
         [System.String]
-        $ServiceAppProxyGroup,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $ServiceAppProxyGroup
     )
 
     Write-Verbose -Message "Setting $WebAppUrl Service Proxy Group Association"
 
-    Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
@@ -98,11 +88,7 @@ function Test-TargetResource
 
         [Parameter(Mandatory = $true)]
         [System.String]
-        $ServiceAppProxyGroup,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $ServiceAppProxyGroup
     )
 
     Write-Verbose -Message "Testing $WebAppUrl Service Proxy Group Association"
@@ -162,10 +148,6 @@ function Export-TargetResource
                 $PartialContent += "        {`r`n"
                 $results = Get-TargetResource @params
 
-                if ($results.Contains("InstallAccount"))
-                {
-                    $results.Remove("InstallAccount")
-                }
                 $results = Repair-Credentials -results $results
                 $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
                 $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"

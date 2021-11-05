@@ -89,11 +89,7 @@ function Get-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $SkipRegisterAsDistributedCacheHost = $true,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $SkipRegisterAsDistributedCacheHost = $true
     )
 
     Write-Verbose -Message "Getting the settings of the current local SharePoint Farm (if any)"
@@ -197,7 +193,7 @@ function Get-TargetResource
         $installedVersion.FileMajorPart -eq 16 -and
         $installedVersion.FileBuildPart -lt 4456 -and
         ($ServerRole -eq "ApplicationWithSearch" -or
-            $ServerRole -eq "WebFrontEndWithDistributedCache"))
+        $ServerRole -eq "WebFrontEndWithDistributedCache"))
     {
         $message = ("ServerRole values of 'ApplicationWithSearch' or " +
             "'WebFrontEndWithDistributedCache' require the SharePoint 2016 " +
@@ -219,8 +215,7 @@ function Get-TargetResource
     if ($null -ne $dsnValue)
     {
         Write-Verbose -Message "This node has already been connected to a farm"
-        $result = Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+        $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
             -ScriptBlock {
             $params = $args[0]
 
@@ -462,11 +457,7 @@ function Set-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $SkipRegisterAsDistributedCacheHost = $true,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $SkipRegisterAsDistributedCacheHost = $true
     )
 
     Write-Verbose -Message "Setting local SP Farm settings"
@@ -552,8 +543,7 @@ function Set-TargetResource
 
         if ($CurrentValues.RunCentralAdmin -ne $RunCentralAdmin)
         {
-            Invoke-SPDscCommand -Credential $InstallAccount `
-                -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+            Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
                 -ScriptBlock {
                 $params = $args[0]
                 $eventSource = $args[1]
@@ -636,8 +626,7 @@ function Set-TargetResource
                 #           match desired url and port
 
                 Write-Verbose -Message "Updating Central Admin URL configuration"
-                Invoke-SPDscCommand -Credential $InstallAccount `
-                    -Arguments $PSBoundParameters `
+                Invoke-SPDscCommand -Arguments $PSBoundParameters `
                     -ScriptBlock {
                     $params = $args[0]
 
@@ -718,8 +707,7 @@ function Set-TargetResource
             elseif ($CurrentValues.CentralAdministrationPort -ne $CentralAdministrationPort)
             {
                 Write-Verbose -Message "Updating CentralAdmin port to $CentralAdministrationPort"
-                Invoke-SPDscCommand -Credential $InstallAccount `
-                    -Arguments $PSBoundParameters `
+                Invoke-SPDscCommand -Arguments $PSBoundParameters `
                     -ScriptBlock {
                     $params = $args[0]
 
@@ -733,8 +721,7 @@ function Set-TargetResource
             {
                 Write-Verbose -Message ("Updating CentralAdmin authentication method from " + `
                         "$($CurrentValues.CentralAdministrationAuth) to $CentralAdministrationAuth")
-                Invoke-SPDscCommand -Credential $InstallAccount `
-                    -Arguments $PSBoundParameters `
+                Invoke-SPDscCommand -Arguments $PSBoundParameters `
                     -ScriptBlock {
                     $params = $args[0]
 
@@ -750,8 +737,7 @@ function Set-TargetResource
         if ($CurrentValues.DeveloperDashboard -ne $DeveloperDashboard)
         {
             Write-Verbose -Message "Updating DeveloperDashboard to $DeveloperDashboard"
-            Invoke-SPDscCommand -Credential $InstallAccount `
-                -Arguments $PSBoundParameters `
+            Invoke-SPDscCommand -Arguments $PSBoundParameters `
                 -ScriptBlock {
                 $params = $args[0]
 
@@ -769,8 +755,7 @@ function Set-TargetResource
     {
         Write-Verbose -Message "Server not part of farm, creating or joining farm"
 
-        $actionResult = Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $PSScriptRoot) `
+        $actionResult = Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $PSScriptRoot) `
             -ScriptBlock {
             $params = $args[0]
             $eventSource = $args[1]
@@ -1025,16 +1010,16 @@ function Set-TargetResource
                     try
                     {
                         Write-Verbose -Message "Connecting to existing Config database"
-                        Write-Verbose -Message "executeArgs is:"
+                        Write-Verbose -Message "Used parameters are:"
                         foreach ($arg in $executeArgs.Keys)
                         {
                             if ($executeArgs.$arg -is [System.Management.Automation.PSCredential])
                             {
-                                Write-Verbose -Message "$arg : $($executeArgs.$arg.UserName)"
+                                Write-Verbose -Message "  $arg : $($executeArgs.$arg.UserName)"
                             }
                             else
                             {
-                                Write-Verbose -Message "$arg : $($executeArgs.$arg)"
+                                Write-Verbose -Message "  $arg : $($executeArgs.$arg)"
                             }
                         }
 
@@ -1347,11 +1332,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $SkipRegisterAsDistributedCacheHost = $true,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $SkipRegisterAsDistributedCacheHost = $true
     )
 
     Write-Verbose -Message "Testing local SP Farm settings"
@@ -1448,12 +1429,6 @@ function Export-TargetResource
     if ($spMajorVersion -lt 19)
     {
         $params.Remove("ApplicationCredentialKey")
-    }
-
-    <# Can't have both the InstallAccount and PsDscRunAsCredential variables present. Remove InstallAccount if both are there. #>
-    if ($params.Contains("InstallAccount"))
-    {
-        $params.Remove("InstallAccount")
     }
 
     $params.FarmAccount = $Global:spFarmAccount

@@ -19,11 +19,7 @@ function Get-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $AutoReactivateUsers = $false,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $AutoReactivateUsers = $false
     )
 
     Write-Verbose -Message "Getting AD Resource Pool Sync settings for $Url"
@@ -39,8 +35,7 @@ function Get-TargetResource
         throw $message
     }
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $PSScriptRoot) `
+    $result = Invoke-SPDscCommand -Arguments @($PSBoundParameters, $PSScriptRoot) `
         -ScriptBlock {
         $params = $args[0]
         $scriptRoot = $args[1]
@@ -123,11 +118,7 @@ function Set-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $AutoReactivateUsers = $false,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $AutoReactivateUsers = $false
     )
 
     Write-Verbose -Message "Setting AD Resource Pool Sync settings for $Url"
@@ -145,8 +136,7 @@ function Set-TargetResource
 
     if ($Ensure -eq "Present")
     {
-        Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+        Invoke-SPDscCommand -Arguments $PSBoundParameters `
             -ScriptBlock {
 
             $params = $args[0]
@@ -179,8 +169,7 @@ function Set-TargetResource
     }
     else
     {
-        Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+        Invoke-SPDscCommand -Arguments $PSBoundParameters `
             -ScriptBlock {
 
             $params = $args[0]
@@ -212,11 +201,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $AutoReactivateUsers = $false,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $AutoReactivateUsers = $false
     )
 
     Write-Verbose -Message "Testing AD Resource Pool Sync settings for $Url"

@@ -24,17 +24,12 @@ function Get-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $FixAutomatically,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $FixAutomatically
     )
 
     Write-Verbose -Message "Getting Health Rule configuration settings"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
@@ -145,17 +140,12 @@ function Set-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $FixAutomatically,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $FixAutomatically
     )
 
     Write-Verbose -Message "Setting Health Analyzer Rule configuration settings"
 
-    Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+    Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
         $eventSource = $args[1]
@@ -276,11 +266,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $FixAutomatically,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $FixAutomatically
     )
 
     Write-Verbose -Message "Testing Health Analyzer rule configuration settings"

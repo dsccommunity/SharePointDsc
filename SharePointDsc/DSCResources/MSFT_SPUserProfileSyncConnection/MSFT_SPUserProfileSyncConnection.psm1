@@ -56,17 +56,12 @@ function Get-TargetResource
         [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
-        $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Ensure = "Present"
     )
 
     Write-Verbose -Message "Getting user profile service sync connection $Name"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
@@ -274,11 +269,7 @@ function Set-TargetResource
         [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
-        $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Ensure = "Present"
     )
 
     Write-Verbose -Message "Setting user profile service sync connection $Name"
@@ -328,8 +319,7 @@ function Set-TargetResource
         }
     }
 
-    Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $PSScriptRoot) `
+    Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $PSScriptRoot) `
         -ScriptBlock {
 
         $params = $args[0]
@@ -338,10 +328,6 @@ function Set-TargetResource
 
         Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath "MSFT_SPUserProfileSyncConnection.psm1")
 
-        if ($params.ContainsKey("InstallAccount"))
-        {
-            $params.Remove("InstallAccount") | Out-Null
-        }
         $ups = Get-SPServiceApplication | Where-Object -FilterScript {
             $_.Name -eq $params.UserProfileService
         }
@@ -622,11 +608,7 @@ function Test-TargetResource
         [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
-        $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Ensure = "Present"
     )
 
     Write-Verbose -Message "Testing for user profile service sync connection $Name"

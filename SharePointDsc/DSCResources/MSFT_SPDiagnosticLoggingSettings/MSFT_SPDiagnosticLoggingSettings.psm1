@@ -79,17 +79,12 @@ function Get-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $ScriptErrorReportingRequireAuth,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $ScriptErrorReportingRequireAuth
     )
 
     Write-Verbose -Message "Getting diagnostic configuration settings"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
@@ -228,17 +223,12 @@ function Set-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $ScriptErrorReportingRequireAuth,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $ScriptErrorReportingRequireAuth
     )
 
     Write-Verbose -Message "Setting diagnostic configuration settings"
 
-    Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
@@ -247,10 +237,6 @@ function Set-TargetResource
             $params.Remove("IsSingleInstance") | Out-Null
         }
 
-        if ($params.ContainsKey("InstallAccount"))
-        {
-            $params.Remove("InstallAccount") | Out-Null
-        }
         $params = $params | Rename-SPDscParamValue -OldName "LogPath" `
             -NewName "LogLocation" `
         | Rename-SPDscParamValue -OldName "LogSpaceInGB" `
@@ -341,11 +327,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $ScriptErrorReportingRequireAuth,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $ScriptErrorReportingRequireAuth
     )
 
     Write-Verbose -Message "Testing diagnostic configuration settings"

@@ -23,11 +23,7 @@ function Get-TargetResource
 
         [Parameter()]
         [System.String[]]
-        $DenyPermissions,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $DenyPermissions
     )
 
     Write-Verbose -Message "Getting global permissions for $EntityType '$EntityName' at '$Url'"
@@ -43,8 +39,7 @@ function Get-TargetResource
         throw $message
     }
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $PSScriptRoot) `
+    $result = Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $PSScriptRoot) `
         -ScriptBlock {
         $params = $args[0]
         $eventSource = $args[1]
@@ -148,19 +143,14 @@ function Set-TargetResource
 
         [Parameter()]
         [System.String[]]
-        $DenyPermissions,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $DenyPermissions
     )
 
     Write-Verbose -Message "Setting global permissions for $EntityType '$EntityName' at '$Url'"
 
     $currentValues = Get-TargetResource @PSBoundParameters
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $PSScriptRoot, $currentValues) `
+    $result = Invoke-SPDscCommand -Arguments @($PSBoundParameters, $PSScriptRoot, $currentValues) `
         -ScriptBlock {
         $params = $args[0]
         $scriptRoot = $args[1]
@@ -345,11 +335,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.String[]]
-        $DenyPermissions,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $DenyPermissions
     )
 
     Write-Verbose -Message "Testing global permissions for $EntityType '$EntityName' at '$Url'"

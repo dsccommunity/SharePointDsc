@@ -14,10 +14,6 @@ function Get-TargetResource
         $Ensure = "Present",
 
         [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
-
-        [Parameter()]
         [System.UInt32]
         $EmailNotification,
 
@@ -36,8 +32,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting managed account $AccountName"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
@@ -83,10 +78,6 @@ function Set-TargetResource
         $Ensure = "Present",
 
         [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
-
-        [Parameter()]
         [System.UInt32]
         $EmailNotification,
 
@@ -121,8 +112,7 @@ function Set-TargetResource
     {
         Write-Verbose -Message ("Managed account does not exist but should, creating " + `
                 "the managed account")
-        Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+        Invoke-SPDscCommand -Arguments $PSBoundParameters `
             -ScriptBlock {
             $params = $args[0]
             New-SPManagedAccount -Credential $params.Account
@@ -132,8 +122,7 @@ function Set-TargetResource
     if ($Ensure -eq "Present")
     {
         Write-Verbose -Message "Updating settings for managed account"
-        Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+        Invoke-SPDscCommand -Arguments $PSBoundParameters `
             -ScriptBlock {
             $params = $args[0]
 
@@ -158,8 +147,7 @@ function Set-TargetResource
     else
     {
         Write-Verbose -Message "Removing managed account"
-        Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+        Invoke-SPDscCommand -Arguments $PSBoundParameters `
             -ScriptBlock {
             $params = $args[0]
             Remove-SPManagedAccount -Identity $params.AccountName -Confirm:$false
@@ -181,10 +169,6 @@ function Test-TargetResource
         [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
 
         [Parameter()]
         [System.UInt32]

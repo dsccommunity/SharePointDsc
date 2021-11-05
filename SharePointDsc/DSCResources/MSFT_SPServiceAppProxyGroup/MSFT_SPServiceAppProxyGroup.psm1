@@ -23,11 +23,7 @@ function Get-TargetResource
 
         [Parameter()]
         [System.String[]]
-        $ServiceAppProxiesToExclude,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $ServiceAppProxiesToExclude
     )
 
     Write-Verbose -Message "Getting Service Application Proxy Group $Name"
@@ -61,8 +57,7 @@ function Get-TargetResource
         return $nullReturn
     }
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
@@ -123,11 +118,7 @@ function Set-TargetResource
 
         [Parameter()]
         [System.String[]]
-        $ServiceAppProxiesToExclude,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $ServiceAppProxiesToExclude
     )
 
     Write-Verbose -Message "Setting Service Application Proxy Group $Name"
@@ -161,8 +152,7 @@ function Set-TargetResource
         throw $message
     }
 
-    Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+    Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
         $eventSource = $args[1]
@@ -415,11 +405,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.String[]]
-        $ServiceAppProxiesToExclude,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $ServiceAppProxiesToExclude
     )
 
     Write-Verbose -Message "Testing Service Application Proxy Group $Name"

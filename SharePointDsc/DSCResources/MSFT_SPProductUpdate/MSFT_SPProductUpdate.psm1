@@ -24,11 +24,7 @@ function Get-TargetResource
         [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
-        $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Ensure = "Present"
     )
 
     if ($Ensure -eq "Absent")
@@ -295,11 +291,7 @@ function Set-TargetResource
         [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
-        $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Ensure = "Present"
     )
 
     Write-Verbose -Message "Setting install status of SP Update binaries"
@@ -473,8 +465,7 @@ function Set-TargetResource
 
     Write-Verbose -Message "Try to load local Farm"
 
-    $farmIsAvailable = Invoke-SPDscCommand -Credential $InstallAccount `
-        -ScriptBlock {
+    $farmIsAvailable = Invoke-SPDscCommand -ScriptBlock {
         try
         {
             $null = Get-SPFarm
@@ -506,8 +497,7 @@ function Set-TargetResource
         $osearchSvc = Get-Service -Name $searchServiceName
         $hostControllerSvc = Get-Service -Name "SPSearchHostController"
 
-        Invoke-SPDscCommand -Credential $InstallAccount `
-            -ScriptBlock {
+        Invoke-SPDscCommand -ScriptBlock {
             $searchSAs = Get-SPEnterpriseSearchServiceApplication
             foreach ($searchSA in $searchSAs)
             {
@@ -560,8 +550,7 @@ function Set-TargetResource
 
     Write-Verbose -Message "Beginning installation of the SharePoint update"
 
-    Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($SetupFile, $MyInvocation.MyCommand.Source) `
+    Invoke-SPDscCommand -Arguments @($SetupFile, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $setupFile = $args[0]
         $eventSource = $args[1]
@@ -671,8 +660,7 @@ function Set-TargetResource
         if ($searchPaused -eq $true)
         {
             # Resuming Search Service Application if paused###
-            Invoke-SPDscCommand -Credential $InstallAccount `
-                -ScriptBlock {
+            Invoke-SPDscCommand -ScriptBlock {
                 $searchSAs = Get-SPEnterpriseSearchServiceApplication
                 foreach ($searchSA in $searchSAs)
                 {
@@ -714,11 +702,7 @@ function Test-TargetResource
         [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
-        $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Ensure = "Present"
     )
 
     Write-Verbose -Message "Testing install status of SP Update binaries"

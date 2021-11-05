@@ -31,17 +31,12 @@ function Get-TargetResource
 
         [Parameter()]
         [System.Management.Automation.PSCredential]
-        $DatabaseCredentials,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $DatabaseCredentials
     )
 
     Write-Verbose -Message "Getting state service application '$Name'"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
@@ -113,11 +108,7 @@ function Set-TargetResource
 
         [Parameter()]
         [System.Management.Automation.PSCredential]
-        $DatabaseCredentials,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $DatabaseCredentials
 
     )
 
@@ -126,8 +117,7 @@ function Set-TargetResource
     if ($Ensure -eq "Present")
     {
         Write-Verbose -Message "Creating State Service Application $Name"
-        Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+        Invoke-SPDscCommand -Arguments $PSBoundParameters `
             -ScriptBlock {
 
             $params = $args[0]
@@ -171,7 +161,7 @@ function Set-TargetResource
     if ($Ensure -eq "Absent")
     {
         Write-Verbose -Message "Removing State Service Application $Name"
-        Invoke-SPDscCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDscCommand -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
 
             $serviceApp = Get-SPStateServiceApplication -Name $params.Name
@@ -225,11 +215,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.Management.Automation.PSCredential]
-        $DatabaseCredentials,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $DatabaseCredentials
     )
 
     Write-Verbose -Message "Testing for state service application $Name"

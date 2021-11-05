@@ -8,5 +8,4 @@ class MSFT_SPFarmSolution : OMI_BaseResource
     [Write, Description("The version of the package that is being modified")] string Version;
     [Write, Description("Should the solution be deployed to the farm, or just installed to the farm")] Boolean Deployed;
     [Write, Description("What compatability level should the WSP be deployed as?"), ValueMap{"14","15","All"}, Values{"14","15","All"}] string SolutionLevel;
-    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };

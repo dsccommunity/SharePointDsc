@@ -7,8 +7,8 @@ This resource will provision an instance of the user profile service to the
 farm. It creates the required databases using the parameters that are passed
 in to it (although these are only used during the initial provisioning).
 
-The specified InstallAccount or PSDSCRunAsCredential cannot be the Farm Account.
-The resource will throw an error when it is.
+The specified PSDSCRunAsCredential cannot be the Farm Account. The resource
+will throw an error when it is.
 
 To allow successful provisioning, the farm account must be in the local
 administrators group, however it is not best practice to leave this account in

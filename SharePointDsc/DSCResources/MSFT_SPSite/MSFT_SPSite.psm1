@@ -63,17 +63,12 @@ function Get-TargetResource
         [Parameter()]
         [ValidateSet("TenantAdministration", "None")]
         [System.String]
-        $AdministrationSiteType,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $AdministrationSiteType
     )
 
     Write-Verbose -Message "Getting site collection $Url"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
         $site = $null
@@ -261,11 +256,7 @@ function Set-TargetResource
         [Parameter()]
         [ValidateSet("TenantAdministration", "None")]
         [System.String]
-        $AdministrationSiteType,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $AdministrationSiteType
     )
 
     Write-Verbose -Message "Setting site collection $Url"
@@ -277,15 +268,12 @@ function Set-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    $null = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $CurrentValues) `
+    $null = Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $CurrentValues) `
         -ScriptBlock {
         $params = $args[0]
         $eventSource = $args[1]
         $CurrentValues = $args[2]
         $doCreateDefaultGroups = $false
-
-        $params.Remove("InstallAccount") | Out-Null
 
         $CreateDefaultGroups = $params.CreateDefaultGroups
         $params.Remove("CreateDefaultGroups") | Out-Null
@@ -541,11 +529,7 @@ function Test-TargetResource
         [Parameter()]
         [ValidateSet("TenantAdministration", "None")]
         [System.String]
-        $AdministrationSiteType,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $AdministrationSiteType
     )
 
     Write-Verbose -Message "Testing site collection $Url"

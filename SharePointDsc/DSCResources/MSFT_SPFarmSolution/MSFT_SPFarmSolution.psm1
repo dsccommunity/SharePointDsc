@@ -32,17 +32,12 @@ function Get-TargetResource
         [Parameter()]
         [ValidateSet("14", "15", "All")]
         [System.String]
-        $SolutionLevel,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $SolutionLevel
     )
 
     Write-Verbose -Message "Getting farm solution '$Name' settings"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
@@ -112,11 +107,7 @@ function Set-TargetResource
         [Parameter()]
         [ValidateSet("14", "15", "All")]
         [System.String]
-        $SolutionLevel,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $SolutionLevel
     )
 
     Write-Verbose -Message "Setting farm solution '$Name' settings"
@@ -133,8 +124,7 @@ function Set-TargetResource
         {
             Write-Verbose -Message "Upload solution to the farm."
 
-            $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                -Arguments $PSBoundParameters `
+            $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
                 -ScriptBlock {
                 $params = $args[0]
 
@@ -162,8 +152,7 @@ function Set-TargetResource
                 Write-Verbose -Message ("Remove current version " + `
                         "('$($CurrentValues.Version)') of solution...")
 
-                $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                    -Arguments $PSBoundParameters `
+                $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
                     -ScriptBlock {
                     $params = $args[0]
 
@@ -192,8 +181,7 @@ function Set-TargetResource
                 Write-Verbose -Message ("Update solution from " + `
                         "'$($CurrentValues.Version)' to $Version...")
 
-                $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                    -Arguments $PSBoundParameters `
+                $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
                     -ScriptBlock {
                     $params = $args[0]
 
@@ -233,8 +221,7 @@ function Set-TargetResource
         if ($CurrentValues.Deployed)
         {
             # Retract Solution globally
-            $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                -Arguments $PSBoundParameters `
+            $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
                 -ScriptBlock {
                 $params = $args[0]
 
@@ -272,8 +259,7 @@ function Set-TargetResource
         else
         {
             # Deploy solution
-            $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                -Arguments $PSBoundParameters `
+            $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
                 -ScriptBlock {
                 $params = $args[0]
 
@@ -343,15 +329,14 @@ function Set-TargetResource
     if ($Ensure -eq "Present")
     {
         Write-Verbose -Message "Waiting for farm solution '$Name' job"
-        Wait-SPDscSolutionJob -SolutionName $Name -InstallAccount $InstallAccount
+        Wait-SPDscSolutionJob -SolutionName $Name
     }
 
     if ($Ensure -eq "Absent" -and $CurrentValues.Ensure -ne "Absent")
     {
         Write-Verbose -Message "Removing farm solution '$Name'"
 
-        $result = Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+        $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
             -ScriptBlock {
             $params = $args[0]
 
@@ -401,11 +386,7 @@ function Test-TargetResource
         [Parameter()]
         [ValidateSet("14", "15", "All")]
         [System.String]
-        $SolutionLevel,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $SolutionLevel
     )
 
     Write-Verbose -Message "Testing farm solution '$Name' settings"
@@ -449,11 +430,7 @@ function Wait-SPDscSolutionJob
     (
         [Parameter(Mandatory = $true)]
         [string]
-        $SolutionName,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $SolutionName
     )
 
     Start-Sleep -Seconds 5
@@ -462,8 +439,7 @@ function Wait-SPDscSolutionJob
         Name = $SolutionName
     }
 
-    $null = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $args `
+    $null = Invoke-SPDscCommand -Arguments $args `
         -ScriptBlock {
         $params = $args[0]
 

@@ -16,11 +16,7 @@ function Get-TargetResource
 
         [Parameter()]
         [System.String]
-        $ProductKey,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $ProductKey
     )
 
     Write-Verbose -Message "Getting license status for Project Server"
@@ -36,8 +32,7 @@ function Get-TargetResource
         throw $message
     }
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
@@ -115,11 +110,7 @@ function Set-TargetResource
 
         [Parameter()]
         [System.String]
-        $ProductKey,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $ProductKey
     )
 
     Write-Verbose -Message "Setting Project Server License status"
@@ -152,8 +143,7 @@ function Set-TargetResource
         # License status does not match
         if ($Ensure -eq "Present")
         {
-            Invoke-SPDscCommand -Credential $InstallAccount `
-                -Arguments $PSBoundParameters `
+            Invoke-SPDscCommand -Arguments $PSBoundParameters `
                 -ScriptBlock {
 
                 $params = $args[0]
@@ -162,8 +152,7 @@ function Set-TargetResource
         }
         if ($Ensure -eq "Absent")
         {
-            Invoke-SPDscCommand -Credential $InstallAccount `
-                -Arguments $PSBoundParameters `
+            Invoke-SPDscCommand -Arguments $PSBoundParameters `
                 -ScriptBlock {
 
                 Disable-ProjectServerLicense
@@ -191,11 +180,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.String]
-        $ProductKey,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $ProductKey
     )
 
     Write-Verbose -Message "Testing Project Server License status"

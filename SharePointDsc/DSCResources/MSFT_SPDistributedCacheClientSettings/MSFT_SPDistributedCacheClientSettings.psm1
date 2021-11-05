@@ -187,11 +187,7 @@ function Get-TargetResource
 
         [Parameter()]
         [System.UInt32]
-        $DHSCChannelOpenTimeOut,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $DHSCChannelOpenTimeOut
     )
 
     Write-Verbose -Message "Getting the Distributed Cache Client Settings"
@@ -229,8 +225,7 @@ function Get-TargetResource
         }
     }
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
@@ -548,11 +543,7 @@ function Set-TargetResource
 
         [Parameter()]
         [System.UInt32]
-        $DHSCChannelOpenTimeOut = 20,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $DHSCChannelOpenTimeOut = 20
     )
 
     Write-Verbose -Message "Setting the Distributed Cache Client Settings"
@@ -590,8 +581,7 @@ function Set-TargetResource
         }
     }
 
-    Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
@@ -1032,11 +1022,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.UInt32]
-        $DHSCChannelOpenTimeOut,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $DHSCChannelOpenTimeOut
     )
 
     Write-Verbose -Message "Testing the Distributed Cache Client Settings"

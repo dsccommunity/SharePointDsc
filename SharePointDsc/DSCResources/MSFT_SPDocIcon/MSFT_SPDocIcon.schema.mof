@@ -6,5 +6,4 @@ class MSFT_SPDocIcon : OMI_BaseResource
     [Write, Description("Specifies the edit text for the file type")] String EditText;
     [Write, Description("Specifies the Open Control command for the file type")] String OpenControl;
     [Write, Description("Present to configure the file type. Absent is remove the file type"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
-    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };

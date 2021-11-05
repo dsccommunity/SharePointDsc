@@ -12,11 +12,7 @@ function Get-TargetResource
         [Parameter(Mandatory = $true)]
         [ValidateSet("Compliant", "NonCompliant")]
         [System.String]
-        $State,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $State
     )
 
     Write-Verbose -Message "Getting MinRole compliance for the current farm"
@@ -32,8 +28,7 @@ function Get-TargetResource
         throw $message
     }
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $nonCompliantServices = Get-SPService | Where-Object -FilterScript {
             $_.CompliantWithMinRole -eq $false
@@ -79,11 +74,7 @@ function Set-TargetResource
         [Parameter(Mandatory = $true)]
         [ValidateSet("Compliant", "NonCompliant")]
         [System.String]
-        $State,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $State
     )
 
     Write-Verbose -Message "Setting MinRole compliance for the current farm"
@@ -110,8 +101,7 @@ function Set-TargetResource
         throw $message
     }
 
-    Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $method = Get-SPDscRoleTestMethod
 
@@ -153,11 +143,7 @@ function Test-TargetResource
         [Parameter(Mandatory = $true)]
         [ValidateSet("Compliant", "NonCompliant")]
         [System.String]
-        $State,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $State
     )
 
     Write-Verbose -Message "Testing MinRole compliance for the current farm"

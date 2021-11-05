@@ -21,5 +21,4 @@ class MSFT_SPWebAppThrottlingSettings : OMI_BaseResource
     [Write, Description("Is the change log enabled for this web app")] boolean ChangeLogEnabled;
     [Write, Description("How many days does the change log store data for")] uint32 ChangeLogExpiryDays;
     [Write, Description("Are event handlers enabled in the web application")] boolean EventHandlersEnabled;
-    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] string InstallAccount;
 };

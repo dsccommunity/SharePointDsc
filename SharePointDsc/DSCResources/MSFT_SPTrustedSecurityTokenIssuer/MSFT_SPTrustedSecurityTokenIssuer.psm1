@@ -39,17 +39,12 @@ function Get-TargetResource
         [Parameter()]
         [ValidateSet("Present", "Absent")]
         [String]
-        $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Ensure = "Present"
     )
 
     Write-Verbose -Message "Getting SPTrustedSecurityTokenIssuer '$Name' settings"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+    $result = Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
         $eventSource = $args[1]
@@ -187,11 +182,7 @@ function Set-TargetResource
         [Parameter()]
         [ValidateSet("Present", "Absent")]
         [String]
-        $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Ensure = "Present"
     )
 
     Write-Verbose -Message "Setting SPTrustedSecurityTokenIssuer '$Name' settings"
@@ -262,8 +253,7 @@ function Set-TargetResource
         $PSBoundParameters.Add("CurrentValues", $CurrentValues)
 
 
-        $null = Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+        $null = Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
             -ScriptBlock {
             $params = $args[0]
             $eventSource = $args[1]
@@ -385,8 +375,7 @@ function Set-TargetResource
         if ($CurrentValues.Ensure -eq "Present")
         {
             Write-Verbose "Removing SPTrustedSecurityTokenIssuer '$Name'"
-            $null = Invoke-SPDscCommand -Credential $InstallAccount `
-                -Arguments $PSBoundParameters `
+            $null = Invoke-SPDscCommand -Arguments $PSBoundParameters `
                 -ScriptBlock {
                 $params = $args[0]
 
@@ -441,11 +430,7 @@ function Test-TargetResource
         [Parameter()]
         [ValidateSet("Present", "Absent")]
         [String]
-        $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Ensure = "Present"
     )
 
     Write-Verbose -Message "Testing SPTrustedSecurityTokenIssuer '$Name' settings"

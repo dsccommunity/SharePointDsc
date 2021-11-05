@@ -6,5 +6,4 @@ class MSFT_SPFeature : OMI_BaseResource
     [Key, Description("The URL to change the feature at")] string Url;
     [Write, Description("Present if the feature is to be enabled, Absent if it is to be disabled"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
     [Write, Description("The version of the feature to check against")] string Version;
-    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };

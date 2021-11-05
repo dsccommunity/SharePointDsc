@@ -17,5 +17,4 @@ class MSFT_SPInfoPathFormsServiceConfig : OMI_BaseResource
     [Write, Description("Maximum number of actions that can be triggered per postback")] Uint16 MaxUserActionsPerPostback;
     [Write, Description("Timeout in minutes for active sessions")] Uint16 ActiveSessionsTimeout;
     [Write, Description("Maximum size of user session data")] Uint16 MaxSizeOfUserFormState;
-    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };

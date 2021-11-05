@@ -18,17 +18,12 @@ function Get-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $AllowOAuthHttp,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $AllowOAuthHttp
     )
 
     Write-Verbose -Message "Getting the current Workflow Service Configuration(s)"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
@@ -91,18 +86,13 @@ function Set-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $AllowOAuthHttp,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $AllowOAuthHttp
     )
 
     Write-Verbose -Message "Registering the Workflow Service"
 
     ## Perform changes
-    Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+    Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
         $eventSource = $args[1]
@@ -156,11 +146,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $AllowOAuthHttp,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $AllowOAuthHttp
     )
 
     Write-Verbose -Message "Testing Workflow Service"

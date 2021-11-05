@@ -14,5 +14,4 @@ class MSFT_SPSelfServiceSiteCreation : OMI_BaseResource
     [Write, Description("Specifies the managed path in which site collections have to be created (SP2019 only)")] string ManagedPath;
     [Write, Description("Specifies the URL of the web application in which site collections have to be created (SP2019 only)")] string AlternateUrl;
     [Write, Description("Specifies the if the site collection has to be created as modern or classic site (SP2019 only)"), ValueMap{"Modern","Classic","Latest"}, Values{"Modern","Classic","Latest"}] string UserExperienceVersion;
-    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };

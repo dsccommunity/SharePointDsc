@@ -35,8 +35,8 @@ Updated author, copyright notice, and URLs.
 <#
 
 .DESCRIPTION
- This module will install the prerequisites for SharePoint. This resource will run in
- online mode, looking to download all prerequisites from the internet.
+ This module will install the prerequisites for SharePoint 2016/2019. This resource will run in
+ offline mode, running all prerequisite installations from the specified paths.
 
 #>
 
@@ -53,11 +53,14 @@ Configuration Example
 
     node localhost
     {
-        SPInstallPrereqs 'InstallPrerequisitesOnline'
+        SPInstallPrereqs 'InstallPrerequisitesSPSE'
         {
-            IsSingleInstance = "Yes"
-            InstallerPath    = "C:\SPInstall\Prerequisiteinstaller.exe"
-            OnlineMode       = $true
+            IsSingleInstance  = "Yes"
+            InstallerPath     = "C:\SPInstall\Prerequisiteinstaller.exe"
+            OnlineMode        = $false
+            SXSpath           = "C:\SPInstall\Windows2012r2-SXS"
+            DotNet48          = 'C:\SPInstall\ndp48-x86-x64-allos-enu.exe'
+            MSVCRT142         = 'C:\SPInstall\VC_redist.x64.exe'
         }
     }
 }

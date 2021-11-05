@@ -219,32 +219,6 @@ try
                         }
                     }
 
-                    Context -Name "When InstallAccount is the Farm Account" -Fixture {
-                        BeforeAll {
-                            $testParams = @{
-                                UserProfileServiceAppName = "User Profile Service Service App"
-                                Ensure                    = "Present"
-                                InstallAccount            = $mockFarmCredential
-                            }
-
-                            Mock -CommandName Get-SPServiceInstance -MockWith {
-                                return $null
-                            }
-                        }
-
-                        It "Should throw exception in the get method" {
-                            { Get-TargetResource @testParams } | Should -Throw "Specified InstallAccount "
-                        }
-
-                        It "Should throw exception in the test method" {
-                            { Test-TargetResource @testParams } | Should -Throw "Specified InstallAccount "
-                        }
-
-                        It "Should throw exception in the set method" {
-                            { Set-TargetResource @testParams } | Should -Throw "Specified InstallAccount "
-                        }
-                    }
-
                     Context -Name "User profile sync service is not found locally" -Fixture {
                         BeforeAll {
                             $testParams = @{

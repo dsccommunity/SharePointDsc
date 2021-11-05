@@ -21,10 +21,6 @@ function Get-TargetResource
         $Enabled,
 
         [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
-
-        [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present"
@@ -32,8 +28,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting the Diagnostics Provider"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
@@ -83,10 +78,6 @@ function Set-TargetResource
         $Enabled,
 
         [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
-
-        [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present"
@@ -104,8 +95,7 @@ function Set-TargetResource
         throw $message
     }
 
-    Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+    Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
         $eventSource = $args[1]
@@ -166,10 +156,6 @@ function Test-TargetResource
         [Parameter()]
         [System.Boolean]
         $Enabled,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
 
         [Parameter()]
         [ValidateSet("Present", "Absent")]

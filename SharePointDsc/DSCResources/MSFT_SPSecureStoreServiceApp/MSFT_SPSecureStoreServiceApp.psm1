@@ -59,17 +59,12 @@ function Get-TargetResource
 
         [Parameter()]
         [System.Management.Automation.PSCredential]
-        $DatabaseCredentials,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $DatabaseCredentials
     )
 
     Write-Verbose -Message "Getting secure store service application '$Name'"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
@@ -202,11 +197,7 @@ function Set-TargetResource
 
         [Parameter()]
         [System.Management.Automation.PSCredential]
-        $DatabaseCredentials,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $DatabaseCredentials
     )
 
     Write-Verbose -Message "Setting secure store service application '$Name'"
@@ -217,8 +208,7 @@ function Set-TargetResource
     if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present")
     {
         Write-Verbose -Message "Creating Secure Store Service Application $Name"
-        Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $params `
+        Invoke-SPDscCommand -Arguments $params `
             -ScriptBlock {
             $params = $args[0]
 
@@ -293,8 +283,7 @@ function Set-TargetResource
                 -and $ApplicationPool -ne $result.ApplicationPool)
         {
             Write-Verbose -Message "Updating Secure Store Service Application $Name"
-            Invoke-SPDscCommand -Credential $InstallAccount `
-                -Arguments $PSBoundParameters `
+            Invoke-SPDscCommand -Arguments $PSBoundParameters `
                 -ScriptBlock {
                 $params = $args[0]
 
@@ -312,8 +301,7 @@ function Set-TargetResource
     {
         # The service app should not exit
         Write-Verbose -Message "Removing Secure Store Service Application $Name"
-        Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+        Invoke-SPDscCommand -Arguments $PSBoundParameters `
             -ScriptBlock {
             $params = $args[0]
 
@@ -398,11 +386,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.Management.Automation.PSCredential]
-        $DatabaseCredentials,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $DatabaseCredentials
     )
 
     Write-Verbose -Message "Testing secure store service application $Name"
@@ -477,11 +461,6 @@ function Export-TargetResource
             $PartialContent = "        SPSecureStoreServiceApp " + $ssa.Name.Replace(" ", "") + "`r`n"
             $PartialContent += "        {`r`n"
             $results = Get-TargetResource @params
-
-            if ($results.Contains("InstallAccount"))
-            {
-                $results.Remove("InstallAccount")
-            }
 
             $results = Repair-Credentials -results $results
 

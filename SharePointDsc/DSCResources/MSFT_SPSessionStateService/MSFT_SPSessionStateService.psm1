@@ -27,17 +27,12 @@ function Get-TargetResource
 
         [Parameter()]
         [System.UInt32]
-        $SessionTimeout,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $SessionTimeout
     )
 
     Write-Verbose -Message "Getting SPSessionStateService info"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $svc = Get-SPSessionStateService
         $Ensure = "Absent"
@@ -83,11 +78,7 @@ function Set-TargetResource
 
         [Parameter()]
         [System.UInt32]
-        $SessionTimeout,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $SessionTimeout
     )
 
     Write-Verbose -Message "Setting SPSessionStateService info"
@@ -99,8 +90,7 @@ function Set-TargetResource
 
     if ($Ensure -eq "Present")
     {
-        Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+        Invoke-SPDscCommand -Arguments $PSBoundParameters `
             -ScriptBlock {
             $params = $args[0]
 
@@ -136,8 +126,7 @@ function Set-TargetResource
     }
     if ($Ensure -eq "Absent")
     {
-        Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+        Invoke-SPDscCommand -Arguments $PSBoundParameters `
             -ScriptBlock {
             $svc = Get-SPSessionStateService
             if ($svc.SessionStateEnabled)
@@ -182,11 +171,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.UInt32]
-        $SessionTimeout,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $SessionTimeout
     )
 
     Write-Verbose -Message "Testing SPSessionStateService info"
