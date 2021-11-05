@@ -31,7 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Fixed issue where the resource was using hardcoded SP2016 and later paths
     and therefore didn't work in SP2013
 - SPSearchServiceApp
-  - Disabled Farm account DB ownership updating functions when using SQL Auth
+  - Disabled the Farm account DB ownership check when using SQL Auth
 - SPServiceAppPool
   - Fixed issue in Export method where the PsDscRunAsCredential was stored as
     a string instead of a PsCredential object
