@@ -1149,27 +1149,27 @@ function DisplayGUI()
             @{
                 Name           = "SPManagedAccount"
                 Text           = "Managed Accounts"
-                ExtractionMode = 1 
+                ExtractionMode = 1
             },
             @{
                 Name           = "SPPasswordChangeSettings"
                 Text           = "Password Change Settings"
-                ExtractionMode = 2 
+                ExtractionMode = 2
             },
             @{
                 Name           = "SPRemoteFarmTrust"
                 Text           = "Remote Farm Trusts"
-                ExtractionMode = 2 
+                ExtractionMode = 2
             },
             @{
                 Name           = "SPServiceAppSecurity"
                 Text           = "Service App Security"
-                ExtractionMode = 2 
+                ExtractionMode = 2
             },
             @{
                 Name           = "SPTrustedIdentityTokenIssuer"
                 Text           = "Trusted Identity Token Issuers"
-                ExtractionMode = 2 
+                ExtractionMode = 2
             }
         )
         ServiceApplications     = @(
@@ -1511,7 +1511,7 @@ function DisplayGUI()
         )
     }
 
-    
+
     #endregion
 
     $Global:liteComponents = @()
@@ -1521,15 +1521,15 @@ function DisplayGUI()
     $screens = [System.Windows.Forms.Screen]::AllScreens
     $form.Width = ($screens[0].Bounds.Width)
     $form.Height = ($screens[0].Bounds.Height)
-	
+
     #$form.WindowState = [System.Windows.Forms.FormWindowState]::Maximized
-	#region Global
+    #region Global
     $firstColumnLeft = 1+$padding
-   
+
     $secondColumnLeft = (($screens[0].Bounds.Width) /3)+$firstColumnLeft +$padding
     $thirdColumnLeft = (($screens[0].Bounds.Width) /3)+$secondColumnLeft +$padding
     $topBannerHeight = 70
-    
+
     $panelMain = New-Object System.Windows.Forms.Panel
     $panelMain.Width = $form.Width
     $panelMain.Height = $form.Height
