@@ -1,6 +1,3 @@
-$script:SPDscUtilModulePath = Join-Path -Path $PSScriptRoot -ChildPath '..\..\Modules\SharePointDsc.Util'
-Import-Module -Name $script:SPDscUtilModulePath
-
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -222,8 +219,8 @@ function Export-TargetResource
             if ($convertToVariable)
             {
                 $currentDSCBlock = Convert-DSCStringParamToVariable -DSCBlock $currentDSCBlock -ParameterName "ServiceAccount"
-                $currentDSCBlock = Convert-DSCStringParamToVariable -DSCBlock $currentDSCBlock -ParameterName "PsDscRunAsCredential"
             }
+            $currentDSCBlock = Convert-DSCStringParamToVariable -DSCBlock $currentDSCBlock -ParameterName "PsDscRunAsCredential"
             $PartialContent += $currentDSCBlock
 
             $PartialContent += "        }`r`n"

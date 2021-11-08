@@ -304,7 +304,7 @@ function Orchestrator
             $i++
         }
     }
-    $Script:dscConfigContent += "<# Generated with SharePointDSC " + $script:version + " #>`r`n"
+    $Script:dscConfigContent = "<# Generated with SharePointDSC " + $script:version + " #>`r`n"
 
     Write-Host -Object "Scanning Operating System Version..." -BackgroundColor DarkGreen -ForegroundColor White
     $Script:dscConfigContent += Read-OperatingSystemVersion
@@ -381,6 +381,9 @@ function Orchestrator
 
                 Write-Host -Object "[$($spServer.Name)] Scanning Diagnostic Logging Settings..." -BackgroundColor DarkGreen -ForegroundColor White
                 $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPDiagnosticLoggingSettings'
+
+                Write-Host -Object "[$($spServer.Name)] Scanning Diagnostic Logging Levels..." -BackgroundColor DarkGreen -ForegroundColor White
+                $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPLogLevel'
 
                 Write-Host -Object "[$($spServer.Name)] Scanning Usage Service Application..." -BackgroundColor DarkGreen -ForegroundColor White
                 $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPUsageApplication'
@@ -1402,6 +1405,11 @@ function DisplayGUI()
                 ExtractionMode = 1
             },
             @{
+                Name           = "SPLogLevel"
+                Text           = "Diagnostic Logging Levels"
+                ExtractionMode = 1
+            },
+            @{
                 Name           = "SPDiagnosticLoggingSettings";
                 Text           = "Diagnostic Logging Settings"
                 ExtractionMode = 1
@@ -2034,7 +2042,7 @@ function DisplayGUI()
                     }
                 }
                 $form.Hide()
-                $componentsToString = "@(`"$($SelectedComponents -join "`",`"")`")"
+                $componentsToString = "@(`"" + ($SelectedComponents -join "`",`"") + "`")"
                 Write-Host -Object "To execute the same extraction process unattended, run the following command:" -BackgroundColor DarkGreen -ForegroundColor White
                 Write-Host -Object "Export-SPConfiguration -ComponentsToExtract $componentsToString -Credentials (Get-Credential)"
 

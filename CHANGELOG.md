@@ -4,14 +4,48 @@ The format is based on and uses the types of changes according to [Keep a Change
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+<<<<<<< HEAD
  
+=======
+
+### Added
+
+- SPLogLevel
+  - Added ReverseDsc export support to this resource
+- SPWebApplication
+  - Added logic to check if specified content database exists in the web
+    application
+  - Added possibility to update application pool
+
+>>>>>>> 529bad2f02269171d0dfa248f629e12caac285bf
 ### Changed
 
+- SharePointDsc
+  - Updated build pipeline to use the correct vm image
 - ReverseDsc
   - Changed form Size to dynamic Width
   - Change column width to calc /3 of Form.
   - Export form is now more dynamic / responsive
-  
+
+### Fixed
+
+- SharePointDsc
+  - Fixed issue where the snapin was generating the "An item with the same
+    key has already been added" error
+- ReverseDsc
+  - Fixed issue where the export would contain duplicate configuration
+  - Fixed issue where the example export cmdlets was in the incorrect format
+- SPDocIcon
+  - Fixed issue where the resource was using hardcoded SP2016 and later paths
+    and therefore didn't work in SP2013
+- SPSearchServiceApp
+  - Disabled the Farm account DB ownership check when using SQL Auth
+- SPServiceAppPool
+  - Fixed issue in Export method where the PsDscRunAsCredential was stored as
+    a string instead of a PsCredential object
+- SPSite
+  - Fixed issue where the code continues when the creation of the site failed,
+    throwing even more errors
 
 ## [4.8.0] - 2021-08-31
 

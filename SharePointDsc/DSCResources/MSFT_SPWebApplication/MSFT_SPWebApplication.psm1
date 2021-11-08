@@ -1,6 +1,3 @@
-$script:SPDscUtilModulePath = Join-Path -Path $PSScriptRoot -ChildPath '..\..\Modules\SharePointDsc.Util'
-Import-Module -Name $script:SPDscUtilModulePath
-
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -101,14 +98,24 @@ function Get-TargetResource
         {
             $IISPath = $IISPath.ToString()
         }
+
+        $contentDb = $wa.ContentDatabases | Where-Object -FilterScript {
+            $_.Name -eq $params.DatabaseName
+        }
+
+        if ($null -eq $contentDb)
+        {
+            $contentDb = $wa.ContentDatabases[0]
+        }
+
         return @{
             Name                   = $wa.DisplayName
             ApplicationPool        = $wa.ApplicationPool.Name
             ApplicationPoolAccount = $wa.ApplicationPool.Username
             WebAppUrl              = $wa.Url
             AllowAnonymous         = $authProvider.AllowAnonymous
-            DatabaseName           = $wa.ContentDatabases[0].Name
-            DatabaseServer         = $wa.ContentDatabases[0].Server
+            DatabaseName           = $contentDb.Name
+            DatabaseServer         = $contentDb.Server
             HostHeader             = (New-Object -TypeName System.Uri $wa.Url).Host
             Path                   = $IISPath
             Port                   = (New-Object -TypeName System.Uri $wa.Url).Port
@@ -202,6 +209,8 @@ function Set-TargetResource
             $wa = Get-SPWebApplication -Identity $params.Name -ErrorAction SilentlyContinue
             if ($null -eq $wa)
             {
+                Write-Verbose -Message "Creating new web application"
+
                 $newWebAppParams = @{
                     Name            = $params.Name
                     ApplicationPool = $params.ApplicationPool
@@ -292,7 +301,101 @@ function Set-TargetResource
                     Write-Verbose -Message "`$useSQLAuthentication is false or not specified; using default Windows authentication."
                 }
 
+                Write-Verbose -Message "Creating web application with these parameters: $(Convert-SPDscHashtableToString -Hashtable $newWebAppParams)"
                 New-SPWebApplication @newWebAppParams | Out-Null
+            }
+            else
+            {
+                Write-Verbose -Message "Update existing web application"
+                if ($params.ContainsKey("DatabaseName") -eq $true)
+                {
+                    Write-Verbose -Message "Checking content database '$($params.DatabaseName)'"
+                    $contentDb = $wa.ContentDatabases | Where-Object -FilterScript {
+                        $_.Name -eq $params.DatabaseName
+                    }
+
+                    if ($null -eq $contentDb)
+                    {
+                        Write-Verbose -Message "Specified content database does not exist, creating database"
+                        $dbParams = @{
+                            WebApplication = $params.WebAppUrl
+                            Name           = $params.DatabaseName
+                        }
+                        if ($params.ContainsKey("DatabaseServer") -eq $true)
+                        {
+                            $dbParams.Add("DatabaseServer", $params.DatabaseServer)
+                        }
+
+                        try
+                        {
+                            $null = Mount-SPContentDatabase @dbParams -ErrorAction Stop
+                        }
+                        catch
+                        {
+                            $message = ("Error occurred while mounting content database. " + `
+                                    "Content database is not mounted. " + `
+                                    "Error details: $($_.Exception.Message)")
+                            Add-SPDscEvent -Message $message `
+                                -EntryType 'Error' `
+                                -EventID 100 `
+                                -Source $eventSource
+                            throw $message
+                        }
+                    }
+                }
+
+                # Application Pool
+                if ($wa.ApplicationPool.Name -ne $params.ApplicationPool)
+                {
+                    Write-Verbose -Message "Updating application pool for web application"
+
+                    $admService = Get-SPDscContentService
+                    $newAppPool = $admService.ApplicationPools | Where-Object -FilterScript {
+                        $_.Name -eq $params.ApplicationPool
+                    }
+                    if ($null -eq $newAppPool)
+                    {
+                        Write-Verbose -Message "Checking Managed Account for specified Application Pool account"
+                        $managedAccount = Get-SPManagedAccount -Identity $params.ApplicationPoolAccount `
+                            -ErrorAction SilentlyContinue
+
+                        if ($null -eq $managedAccount)
+                        {
+                            $message = ("Specified ApplicationPoolAccount '$($params.ApplicationPoolAccount)' " + `
+                                    "is not a managed account")
+                            Add-SPDscEvent -Message $message `
+                                -EntryType 'Error' `
+                                -EventID 100 `
+                                -Source $eventSource
+                            throw $message
+                        }
+
+                        try
+                        {
+                            Write-Verbose -Message "Specified application pool doesn't exist. Creating new application pool."
+                            $newAppPool = New-Object Microsoft.SharePoint.Administration.SPApplicationPool($params.ApplicationPool, $admService)
+                            $newAppPool.CurrentIdentityType = "SpecificUser"
+                            $newAppPool.Username = $params.ApplicationPoolAccount
+                            $newAppPool.Update($true)
+                            $newAppPool.Provision()
+                        }
+                        catch
+                        {
+                            $message = ("Error while creating new application pool. " +
+                                "Error details: $($_.Exception.Message)")
+                            Add-SPDscEvent -Message $message `
+                                -EntryType 'Error' `
+                                -EventID 100 `
+                                -Source $eventSource
+                            throw $message
+                        }
+                    }
+
+                    Write-Verbose -Message "Applying new application pool"
+                    $wa.ApplicationPool = $newAppPool
+                    $wa.Update()
+                    $wa.ProvisionGlobally()
+                }
             }
         }
     }
@@ -307,6 +410,7 @@ function Set-TargetResource
             $wa = Get-SPWebApplication -Identity $params.Name -ErrorAction SilentlyContinue
             if ($null -ne $wa)
             {
+                Write-Verbose -Message "Deleting web application $($params.Name)"
                 $wa | Remove-SPWebApplication -Confirm:$false -DeleteIISSite
             }
         }
@@ -393,7 +497,7 @@ function Test-TargetResource
     $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
         -Source $($MyInvocation.MyCommand.Source) `
         -DesiredValues $PSBoundParameters `
-        -ValuesToCheck @("Ensure")
+        -ValuesToCheck @("ApplicationPool", "DatabaseName", "Ensure")
 
     Write-Verbose -Message "Test-TargetResource returned $result"
 

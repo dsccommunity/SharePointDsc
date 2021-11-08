@@ -50,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
 
@@ -408,7 +408,6 @@ try
                 }
             }
 
-
             Context -Name "The web application does exist and should that uses Claims" -Fixture {
                 BeforeAll {
                     $testParams = @{
@@ -590,12 +589,12 @@ try
                 It "Should return false from the test method" {
                     Test-TargetResource @testParams | Should -Be $false
                 }
+
                 It "Should call the new SPWebApplication cmdlet from the set method" {
                     Set-TargetResource @testParams
                     Assert-MockCalled New-SPWebApplication
                 }
             }
-
 
             Context -Name "The web application doesn't exist and shouldn't that uses Claims" -Fixture {
                 BeforeAll {
@@ -763,6 +762,136 @@ try
 
                 It "Should return false from the set method" {
                     Test-TargetResource @testParams | Should -Be $false
+                }
+            }
+
+            Context -Name "The web application does exist and should, but has incorrect settings" -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        Name                   = "SharePoint Sites"
+                        ApplicationPool        = "SharePoint Web Apps"
+                        ApplicationPoolAccount = "DEMO\ServiceAccount"
+                        DatabaseName           = "SP_Content_00"
+                        WebAppUrl              = "http://sites.sharepoint.com"
+                        Ensure                 = "Present"
+                    }
+
+                    try
+                    {
+                        [Microsoft.SharePoint.Administration.SPWebService] | Out-Null
+                    }
+                    catch
+                    {
+                        Add-Type -TypeDefinition @"
+                        namespace Microsoft.SharePoint.Administration
+                        {
+                            public class SPWebService {
+                                public SPWebService() { }
+                            }
+                        }
+"@
+                    }
+
+                    try
+                    {
+                        [Microsoft.SharePoint.Administration.SPApplicationPool] | Out-Null
+                    }
+                    catch
+                    {
+                        Add-Type -TypeDefinition @"
+                        namespace Microsoft.SharePoint.Administration
+                        {
+                            public class SPApplicationPool {
+                                public SPApplicationPool(System.String account, System.Object service) { }
+
+                                public string CurrentIdentityType { get; set; }
+                                public string Username { get; set; }
+                                public void Update(bool force) { }
+                                public void Provision() { }
+                            }
+                        }
+"@
+                    }
+
+                    Mock -CommandName Get-SPAuthenticationProvider -MockWith {
+                        return @{
+
+                            DisplayName               = "TestProvider"
+                            LoginProviderName         = "TestProvider"
+                            ClaimProviderName         = "TestClaimProvider"
+                            AuthenticationRedirectUrl = "/_trust/default.aspx?trust=TestProvider"
+                        }
+                    }
+
+                    Mock -CommandName Get-SPWebApplication -MockWith {
+                        $returnval = @(@{
+                                DisplayName             = $testParams.Name
+                                ApplicationPool         = @{
+                                    Name     = "SharePoint Old AppPool"
+                                    Username = $testParams.ApplicationPoolAccount
+                                }
+                                UseClaimsAuthentication = $true
+                                ContentDatabases        = @(
+                                    @{
+                                        Name   = "SP_Content_01"
+                                        Server = "sql.domain.local"
+                                    }
+                                )
+                                IisSettings             = @(
+                                    @{ Path = "C:\inetpub\wwwroot\something" }
+                                )
+                                Url                     = $testParams.WebAppUrl
+                            }
+                        )
+                        $returnval = $returnval | Add-Member -MemberType ScriptMethod `
+                            -Name Update `
+                            -Value {
+                            $global:SPDscRanWebAppUpdate = $true
+                        } -PassThru -Force | Add-Member -MemberType ScriptMethod `
+                            -Name ProvisionGlobally `
+                            -Value {
+                        } -PassThru -Force
+
+                        return $returnVal
+                    }
+
+                    Mock -CommandName Get-SPDscContentService -MockWith {
+                        $returnVal = @{
+                            ApplicationPools = @(
+                                @{
+                                    Name = "SharePoint Old AppPool"
+                                }
+                            )
+                        }
+                        $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name Update -Value {
+                            $Global:SPDscAntivirusUpdated = $true
+                        } -PassThru
+                        return $returnVal
+                    }
+
+                    Mock -CommandName Get-SPManagedAccount -MockWith {
+                        return ""
+                    }
+
+                    Mock -CommandName Mount-SPContentDatabase -MockWith { }
+                }
+
+                It "Should return present from the get method" {
+                    $result = Get-TargetResource @testParams
+                    $result.Ensure | Should -Be "Present"
+                    $result.DatabaseName | Should -Be "SP_Content_01"
+                    $result.ApplicationPool | Should -Be "SharePoint Old AppPool"
+                }
+
+                It "Should return true from the test method" {
+                    Test-TargetResource @testParams | Should -Be $false
+                }
+
+                It "Should call the new SPWebApplication cmdlet from the set method" {
+                    $global:SPDscRanWebAppUpdate = $false
+                    Set-TargetResource @testParams
+                    Assert-MockCalled Mount-SPContentDatabase
+                    $global:SPDscRanWebAppUpdate | Should -Be $true
                 }
             }
 

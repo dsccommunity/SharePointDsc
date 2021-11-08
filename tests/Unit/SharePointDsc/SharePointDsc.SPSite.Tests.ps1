@@ -184,7 +184,18 @@ try
                         $ArgumentList[1] -eq "CentralAdminSystemAccountUserToken"
                     }
 
-                    Mock -CommandName Get-SPSite -MockWith { return $null }
+                    $global:SPDscGetSPSiteCalled = $false
+                    Mock -CommandName Get-SPSite -MockWith {
+                        if ($global:SPDscGetSPSiteCalled)
+                        {
+                            return ""
+                        }
+                        else
+                        {
+                            $global:SPDscGetSPSiteCalled = $true
+                            return $null
+                        }
+                    }
 
                     Mock -CommandName Start-Process -MockWith {
                         return @{
