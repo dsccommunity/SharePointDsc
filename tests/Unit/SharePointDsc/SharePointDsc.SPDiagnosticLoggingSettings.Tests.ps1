@@ -263,11 +263,8 @@ try
                 }
             }
 
-            Context -Name "Diagnostic configuration needs updating and the InstallAccount option is used" {
+            Context -Name "Diagnostic configuration needs updating" {
                 BeforeAll {
-                    $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
-                    $mockAccount = New-Object -TypeName "System.Management.Automation.PSCredential" `
-                        -ArgumentList @("username", $mockPassword)
                     $testParams = @{
                         IsSingleInstance                            = "Yes"
                         LogPath                                     = "L:\ULSLogs"
@@ -288,7 +285,6 @@ try
                         EventLogFloodProtectionTriggerPeriod        = 5
                         EventLogFloodProtectionQuietPeriod          = 5
                         EventLogFloodProtectionNotifyInterval       = 5
-                        InstallAccount                              = $mockAccount
                     }
 
                     Mock -CommandName Get-SPDiagnosticConfig -MockWith {

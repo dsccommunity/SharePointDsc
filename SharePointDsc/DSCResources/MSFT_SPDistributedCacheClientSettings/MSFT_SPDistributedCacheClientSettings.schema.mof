@@ -47,5 +47,4 @@ class MSFT_SPDistributedCacheClientSettings : OMI_BaseResource
     [Write, Description("Maximum number of connections to the Distributed Health Score Cache (SP2016 and above)")] UInt32 DHSCMaxConnectionsToServer;
     [Write, Description("Request timeout for the Distributed Health Score Cache (SP2016 and above)")] UInt32 DHSCRequestTimeout;
     [Write, Description("Channel timeout for the Distributed Health Score Cache (SP2016 and above)")] UInt32 DHSCChannelOpenTimeOut;
-    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };

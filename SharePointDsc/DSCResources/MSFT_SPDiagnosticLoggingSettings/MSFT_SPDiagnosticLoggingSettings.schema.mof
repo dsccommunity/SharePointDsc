@@ -20,6 +20,4 @@ class MSFT_SPDiagnosticLoggingSettings : OMI_BaseResource
     [Write, Description("What delay will be set before script error reporting is triggered")] uint32 ScriptErrorReportingDelay;
     [Write, Description("Is script error reporting enabled in this farm")] boolean ScriptErrorReportingEnabled;
     [Write, Description("Require users to be authenticated to allow script errors to be reported")] boolean ScriptErrorReportingRequireAuth;
-    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
-

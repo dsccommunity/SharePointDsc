@@ -18,17 +18,12 @@ function Get-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $SetWebAppPolicy = $true,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $SetWebAppPolicy = $true
     )
 
     Write-Verbose -Message "Getting cache accounts for $WebAppUrl"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
@@ -156,18 +151,13 @@ function Set-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $SetWebAppPolicy = $true,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount    )
+        $SetWebAppPolicy = $true    )
 
     Write-Verbose -Message "Setting cache accounts for $WebAppUrl"
 
     $PSBoundParameters.SetWebAppPolicy = $SetWebAppPolicy
 
-    Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+    Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
         $eventSource = $args[1]
@@ -266,11 +256,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $SetWebAppPolicy = $true,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount    )
+        $SetWebAppPolicy = $true    )
 
     Write-Verbose -Message "Testing cache accounts for $WebAppUrl"
 

@@ -14,10 +14,6 @@ function Get-TargetResource
         $Ensure = "Present",
 
         [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
-
-        [Parameter()]
         [System.String]
         $DatabaseName,
 
@@ -52,8 +48,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting usage application '$Name'"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
@@ -123,10 +118,6 @@ function Set-TargetResource
         $Ensure = "Present",
 
         [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
-
-        [Parameter()]
         [System.String]
         $DatabaseName,
 
@@ -165,8 +156,7 @@ function Set-TargetResource
 
     if ($CurrentState.Ensure -eq "Absent" -and $Ensure -eq "Present")
     {
-        Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+        Invoke-SPDscCommand -Arguments $PSBoundParameters `
             -ScriptBlock {
             $params = $args[0]
 
@@ -202,8 +192,7 @@ function Set-TargetResource
     if ($Ensure -eq "Present")
     {
         Write-Verbose -Message "Configuring usage application $Name"
-        Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+        Invoke-SPDscCommand -Arguments $PSBoundParameters `
             -ScriptBlock {
             $params = $args[0]
 
@@ -241,8 +230,7 @@ function Set-TargetResource
     if ($Ensure -eq "Absent")
     {
         Write-Verbose -Message "Removing usage application $Name"
-        Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+        Invoke-SPDscCommand -Arguments $PSBoundParameters `
             -ScriptBlock {
             $params = $args[0]
 
@@ -269,10 +257,6 @@ function Test-TargetResource
         [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
 
         [Parameter()]
         [System.String]

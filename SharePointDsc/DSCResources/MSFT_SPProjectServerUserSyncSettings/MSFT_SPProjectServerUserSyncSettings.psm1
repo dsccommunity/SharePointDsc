@@ -18,11 +18,7 @@ function Get-TargetResource
 
         [Parameter(Mandatory = $true)]
         [System.Boolean]
-        $EnableProjectSiteSyncForSPTaskLists,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $EnableProjectSiteSyncForSPTaskLists
     )
 
     Write-Verbose -Message "Getting User Sync settings for $Url"
@@ -38,8 +34,7 @@ function Get-TargetResource
         throw $message
     }
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $PSScriptRoot) `
+    $result = Invoke-SPDscCommand -Arguments @($PSBoundParameters, $PSScriptRoot) `
         -ScriptBlock {
         $params = $args[0]
         $scriptRoot = $args[1]
@@ -106,17 +101,12 @@ function Set-TargetResource
 
         [Parameter(Mandatory = $true)]
         [System.Boolean]
-        $EnableProjectSiteSyncForSPTaskLists,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $EnableProjectSiteSyncForSPTaskLists
     )
 
     Write-Verbose -Message "Setting User Sync settings for $Url"
 
-    Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
 
         $params = $args[0]
@@ -169,11 +159,7 @@ function Test-TargetResource
 
         [Parameter(Mandatory = $true)]
         [System.Boolean]
-        $EnableProjectSiteSyncForSPTaskLists,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $EnableProjectSiteSyncForSPTaskLists
     )
 
     Write-Verbose -Message "Testing User Sync settings for $Url"

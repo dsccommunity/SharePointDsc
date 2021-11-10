@@ -21,7 +21,4 @@ class MSFT_SPProjectServerTimeSheetSettings : OMI_BaseResource
     [Write, Description("Enable single entry mode?")] boolean SingleEntryMode;
     [Write, Description("What is the default tracking mode for tasks?"), ValueMap{"PercentComplete","ActualDoneAndRemaining","HoursPerPeriod","FreeForm"}, Values{"PercentComplete","ActualDoneAndRemaining","HoursPerPeriod","FreeForm"}] string DefaultTrackingMode;
     [Write, Description("Force project managers to use the specified tracking mode for each project?")] boolean ForceTrackingModeForAllProjects;
-    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
-
-

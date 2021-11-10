@@ -10,11 +10,7 @@ function Get-TargetResource
 
         [Parameter(Mandatory = $true)]
         [Microsoft.Management.Infrastructure.CimInstance[]]
-        $SPLogLevelSetting,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $SPLogLevelSetting
     )
 
 
@@ -68,8 +64,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting SP Log Level Settings for provided Areas"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
@@ -155,11 +150,7 @@ function Set-TargetResource
 
         [Parameter(Mandatory = $true)]
         [Microsoft.Management.Infrastructure.CimInstance[]]
-        $SPLogLevelSetting,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $SPLogLevelSetting
     )
 
     foreach ($DesiredSetting in $SPLogLevelSetting)
@@ -217,8 +208,7 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting SP Log Level settings for the provided areas"
 
-    Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+    Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
         $eventSource = $args[1]
@@ -287,11 +277,7 @@ function Test-TargetResource
 
         [Parameter(Mandatory = $true)]
         [Microsoft.Management.Infrastructure.CimInstance[]]
-        $SPLogLevelSetting,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $SPLogLevelSetting
     )
 
     Write-Verbose -Message "Testing SP Log Level settings for the provided areas"

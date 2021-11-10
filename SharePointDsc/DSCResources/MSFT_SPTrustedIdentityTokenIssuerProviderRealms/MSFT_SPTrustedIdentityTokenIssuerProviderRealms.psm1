@@ -22,11 +22,7 @@ function Get-TargetResource
         [Parameter()]
         [ValidateSet("Present", "Absent")]
         [String]
-        $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Ensure = "Present"
     )
 
     if ($ProviderRealms.Count -gt 0 -and ($ProviderRealmsToInclude.Count -gt 0 -or $ProviderRealmsToExclude.Count -gt 0))
@@ -78,8 +74,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting SPTrustedIdentityTokenIssuer ProviderRealms"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
         $currentRealms = @{ }
@@ -155,11 +150,7 @@ function Set-TargetResource
         [Parameter()]
         [ValidateSet("Present", "Absent")]
         [String]
-        $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Ensure = "Present"
     )
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
@@ -169,8 +160,7 @@ function Set-TargetResource
         $PSBoundParameters.Add('RealmsToAdd', $CurrentValues.RealmsToAdd)
 
         Write-Verbose -Message "Setting SPTrustedIdentityTokenIssuer provider realms"
-        $null = Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+        $null = Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
             -ScriptBlock {
             $params = $args[0]
             $eventSource = $args[1]
@@ -223,11 +213,7 @@ function Test-TargetResource
         [Parameter()]
         [ValidateSet("Present", "Absent")]
         [String]
-        $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Ensure = "Present"
     )
 
     Write-Verbose -Message "Testing SPTrustedIdentityTokenIssuer provider realms"

@@ -6,5 +6,4 @@ class MSFT_SPWebApplicationAppDomain : OMI_BaseResource
     [Required, Description("The domain for apps in this web app zone")] string AppDomain;
     [Write, Description("The port to run apps on")] string Port;
     [Write, Description("Should apps run under SSL")] boolean SSL;
-    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };

@@ -20,17 +20,12 @@ function Get-TargetResource
 
         [Parameter()]
         [System.String]
-        $RMSserver,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $RMSserver
     )
 
     Write-Verbose "Getting SharePoint IRM Settings"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
@@ -94,17 +89,12 @@ function Set-TargetResource
 
         [Parameter()]
         [System.String]
-        $RMSserver,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $RMSserver
     )
 
     Write-Verbose "Setting SharePoint IRM Settings"
 
-    Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+    Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
         $eventSource = $args[1]
@@ -178,11 +168,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.String]
-        $RMSserver,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $RMSserver
     )
 
     Write-Verbose "Testing SharePoint IRM settings"

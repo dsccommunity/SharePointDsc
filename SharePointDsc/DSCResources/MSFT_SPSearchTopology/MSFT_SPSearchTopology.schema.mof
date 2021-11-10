@@ -9,5 +9,4 @@ class MSFT_SPSearchTopology : OMI_BaseResource
     [Required, Description("A list of servers that will run the query processing component")] String QueryProcessing[];
     [Required, Description("A list of servers that will host the first (0) index partition")] String IndexPartition[];
     [Required, Description("The local directory servers will use to store the first index partition")] String FirstPartitionDirectory;
-    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };

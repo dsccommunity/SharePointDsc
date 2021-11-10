@@ -18,11 +18,7 @@ function Get-TargetResource
 
         [Parameter()]
         [System.String]
-        $Schedule,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Schedule
     )
 
     Write-Verbose -Message "Getting timer job settings for job '$TypeName'"
@@ -38,8 +34,7 @@ function Get-TargetResource
         throw $message
     }
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+    $result = Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
         $eventSource = $args[1]
@@ -146,11 +141,7 @@ function Set-TargetResource
 
         [Parameter()]
         [System.String]
-        $Schedule,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Schedule
     )
 
     Write-Verbose -Message "Setting timer job settings for job '$TypeName'"
@@ -166,8 +157,7 @@ function Set-TargetResource
         throw $message
     }
 
-    Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+    Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
         $eventSource = $args[1]
@@ -413,11 +403,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.String]
-        $Schedule,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Schedule
     )
 
     Write-Verbose -Message "Testing timer job settings for job '$TypeName'"
@@ -482,10 +468,6 @@ function Export-TargetResource
                 $PartialContent += "        {`r`n"
                 $results = Get-TargetResource @params
 
-                if ($results.Contains("InstallAccount"))
-                {
-                    $results.Remove("InstallAccount")
-                }
                 $results = Repair-Credentials -results $results
                 $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
                 $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"

@@ -42,10 +42,6 @@ function Get-TargetResource
         $LogonTokenCacheExpirationWindow,
 
         [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
-
-        [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present"
@@ -83,8 +79,7 @@ function Get-TargetResource
         }
     }
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
@@ -167,10 +162,6 @@ function Set-TargetResource
         $LogonTokenCacheExpirationWindow,
 
         [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
-
-        [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present"
@@ -219,8 +210,7 @@ function Set-TargetResource
         }
     }
 
-    Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
         $config = Get-SPSecurityTokenServiceConfig
@@ -329,10 +319,6 @@ function Test-TargetResource
         [Parameter()]
         [System.UInt32]
         $LogonTokenCacheExpirationWindow,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
 
         [Parameter()]
         [ValidateSet("Present", "Absent")]

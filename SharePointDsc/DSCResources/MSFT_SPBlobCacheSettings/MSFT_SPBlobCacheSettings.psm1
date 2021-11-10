@@ -31,17 +31,12 @@ function Get-TargetResource
 
         [Parameter()]
         [System.String]
-        $FileTypes,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $FileTypes
     )
 
     Write-Verbose -Message "Getting blob cache settings for $WebAppUrl"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+    $result = Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
         $eventSource = $args[1]
@@ -182,11 +177,7 @@ function Set-TargetResource
 
         [Parameter()]
         [System.String]
-        $FileTypes,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $FileTypes
     )
 
     Write-Verbose -Message "Setting blob cache settings for $WebAppUrl"
@@ -238,8 +229,7 @@ function Set-TargetResource
     if ($changes.Count -ne 0)
     {
         ## Perform changes
-        Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $changes) `
+        Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $changes) `
             -ScriptBlock {
             $params = $args[0]
             $eventSource = $args[1]
@@ -389,11 +379,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.String]
-        $FileTypes,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $FileTypes
     )
 
     Write-Verbose -Message "Testing blob cache settings for $WebAppUrl"

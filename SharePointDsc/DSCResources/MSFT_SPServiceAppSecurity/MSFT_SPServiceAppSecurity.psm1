@@ -23,11 +23,7 @@ function Get-TargetResource
 
         [Parameter()]
         [System.String[]]
-        $MembersToExclude,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $MembersToExclude
     )
 
     Write-Verbose -Message "Getting all security options for $SecurityType in $ServiceAppName"
@@ -54,8 +50,7 @@ function Get-TargetResource
         throw $message
     }
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
@@ -232,11 +227,7 @@ function Set-TargetResource
 
         [Parameter()]
         [System.String[]]
-        $MembersToExclude,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $MembersToExclude
     )
 
     Write-Verbose -Message "Setting all security options for $SecurityType in $ServiceAppName"
@@ -265,8 +256,7 @@ function Set-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $CurrentValues) `
+    Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $CurrentValues) `
         -ScriptBlock {
         $params = $args[0]
         $eventSource = $args[1]
@@ -550,11 +540,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.String[]]
-        $MembersToExclude,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $MembersToExclude
     )
 
     Write-Verbose -Message "Testing all security options for $SecurityType in $ServiceAppName"
@@ -574,8 +560,7 @@ function Test-TargetResource
         return $false
     }
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $CurrentValues, $PSScriptRoot, $MyInvocation.MyCommand.Source) `
+    $result = Invoke-SPDscCommand -Arguments @($PSBoundParameters, $CurrentValues, $PSScriptRoot, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
         $CurrentValues = $args[1]

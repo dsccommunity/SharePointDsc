@@ -192,8 +192,6 @@ try
                             AllowSaveDeclarativeWorkflowAsTemplate = $true
                         }
                     }
-
-                    Mock -CommandName Test-SPDscRunAsCredential { return $true }
                 }
 
                 It "Should return values from the get method" {
@@ -206,47 +204,6 @@ try
 
                 It "Should update the SharePoint Designer settings" {
                     Set-TargetResource @testParams
-                }
-            }
-
-            Context -Name "The server is in a farm, target site collection and InstallAccount is used" -Fixture {
-                BeforeAll {
-                    $testParams = @{
-                        WebAppUrl                              = "https://intranet.sharepoint.contoso.com"
-                        SettingsScope                          = "SiteCollection"
-                        AllowSharePointDesigner                = $false
-                        AllowDetachPagesFromDefinition         = $false
-                        AllowCustomiseMasterPage               = $false
-                        AllowManageSiteURLStructure            = $false
-                        AllowCreateDeclarativeWorkflow         = $false
-                        AllowSavePublishDeclarativeWorkflow    = $false
-                        AllowSaveDeclarativeWorkflowAsTemplate = $false
-                    }
-                    Mock -CommandName Get-SPSite -MockWith {
-                        return @{
-                            Url                                    = "https://intranet.sharepoint.contoso.com"
-                            AllowDesigner                          = $true
-                            AllowRevertFromTemplate                = $true
-                            AllowMasterPageEditing                 = $true
-                            ShowURLStructure                       = $true
-                            AllowCreateDeclarativeWorkflow         = $true
-                            AllowSavePublishDeclarativeWorkflow    = $true
-                            AllowSaveDeclarativeWorkflowAsTemplate = $true
-                        }
-                    }
-                    Mock -CommandName Test-SPDscRunAsCredential { return $false }
-                }
-
-                It "Should throw an exception in the get method to say that this is not supported" {
-                    { Get-TargetResource @testParams } | Should -Throw "http://aka.ms/SharePointDscRemoteIssues"
-                }
-
-                It "Should throw an exception in the test method to say that this is not supported" {
-                    { Test-TargetResource @testParams } | Should -Throw "http://aka.ms/SharePointDscRemoteIssues"
-                }
-
-                It "Should throw an exception in the set method to say that this is not supported" {
-                    { Set-TargetResource @testParams } | Should -Throw "http://aka.ms/SharePointDscRemoteIssues"
                 }
             }
 
@@ -280,8 +237,6 @@ try
                         } -PassThru
                         return $returnVal
                     }
-
-                    Mock -CommandName Test-SPDscRunAsCredential { return $true }
 
                     Mock -CommandName Get-SPWebApplication -MockWith {
                         $result = @{ }
@@ -331,8 +286,6 @@ try
                         } -PassThru
                         return $returnVal
                     }
-
-                    Mock -CommandName Test-SPDscRunAsCredential -MockWith { return $true }
                 }
 
                 It "Should return values from the get method" {

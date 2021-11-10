@@ -26,17 +26,12 @@ function Get-TargetResource
 
         [Parameter()]
         [Microsoft.Management.Infrastructure.CimInstance[]]
-        $SearchActiveDirectoryDomains,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $SearchActiveDirectoryDomains
     )
 
     Write-Verbose -Message "Getting People Picker Settings for $WebAppUrl"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
@@ -105,18 +100,13 @@ function Set-TargetResource
 
         [Parameter()]
         [Microsoft.Management.Infrastructure.CimInstance[]]
-        $SearchActiveDirectoryDomains,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $SearchActiveDirectoryDomains
     )
 
     Write-Verbose -Message "Setting People Picker Settings for $WebAppUrl"
 
     ## Perform changes
-    Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+    Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
         $eventSource = $args[1]
@@ -262,11 +252,7 @@ function Test-TargetResource
 
         [Parameter()]
         [Microsoft.Management.Infrastructure.CimInstance[]]
-        $SearchActiveDirectoryDomains,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $SearchActiveDirectoryDomains
     )
 
     Write-Verbose -Message "Testing People Picker Settings for $WebAppUrl"

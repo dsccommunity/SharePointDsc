@@ -50,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 $mockSiteId = [Guid]::NewGuid()
 
@@ -262,8 +262,8 @@ try
                 It "Should throw an exception in the set method" {
                     { Set-TargetResource @testParams } | Should -Throw `
                     ("This resource must be run as the farm account (not a setup account). " + `
-                            "Please ensure either the PsDscRunAsCredential or InstallAccount " + `
-                            "credentials are set to the farm account and run this resource again")
+                            "Please ensure the PsDscRunAsCredential credentials are set " + `
+                            "to the farm account and run this resource again")
                 }
             }
 

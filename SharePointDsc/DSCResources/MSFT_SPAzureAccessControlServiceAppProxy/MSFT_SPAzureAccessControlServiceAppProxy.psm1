@@ -15,17 +15,12 @@ function Get-TargetResource
         [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
-        $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Ensure = "Present"
     )
 
     Write-Verbose -Message "Getting ACS service app proxy '$Name'"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
@@ -72,11 +67,7 @@ function Set-TargetResource
         [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
-        $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Ensure = "Present"
     )
 
     Write-Verbose -Message "Setting ACS service app proxy '$Name'"
@@ -87,8 +78,7 @@ function Set-TargetResource
     {
         # The service app proxy doesn't exist but should
         Write-Verbose -Message "Creating ACS service app proxy $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+        Invoke-SPDscCommand -Arguments $PSBoundParameters `
             -ScriptBlock {
             $params = $args[0]
 
@@ -103,8 +93,7 @@ function Set-TargetResource
         if ($MetadataServiceEndpointUri -ne $result.MetadataServiceEndpointUri)
         {
             Write-Verbose -Message "Recreating ACS service app proxy $Name"
-            Invoke-SPDSCCommand -Credential $InstallAccount `
-                -Arguments $PSBoundParameters `
+            Invoke-SPDscCommand -Arguments $PSBoundParameters `
                 -ScriptBlock {
                 $params = $args[0]
 
@@ -127,8 +116,7 @@ function Set-TargetResource
     {
         # The service app proxy should not exit
         Write-Verbose -Message "Removing ACS service app proxy $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+        Invoke-SPDscCommand -Arguments $PSBoundParameters `
             -ScriptBlock {
             $params = $args[0]
 
@@ -159,11 +147,7 @@ function Test-TargetResource
         [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
-        $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Ensure = "Present"
     )
 
     Write-Verbose -Message "Testing ACS service app proxy '$Name'"

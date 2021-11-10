@@ -6,17 +6,12 @@ function Get-TargetResource
     (
         [Parameter(Mandatory = $true)]
         [System.String]
-        $SiteUrl,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $SiteUrl
     )
 
     Write-Verbose -Message "Getting app catalog status of $SiteUrl"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
@@ -55,58 +50,35 @@ function Set-TargetResource
     (
         [Parameter(Mandatory = $true)]
         [System.String]
-        $SiteUrl,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $SiteUrl
     )
 
     Write-Verbose -Message "Setting app catalog status of $SiteUrl"
 
     Write-Verbose -Message "Retrieving farm account"
-    $farmAccount = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $farmAccount = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         return Get-SPDscFarmAccount
     }
 
-    Write-Verbose -Message "Check if InstallAccount or PsDscRunAsCredential is the farm account"
+    Write-Verbose -Message "Check if PsDscRunAsCredential is the farm account"
     if ($null -ne $farmAccount)
     {
-        if ($PSBoundParameters.ContainsKey("InstallAccount") -eq $true)
+        # PSDSCRunAsCredential or System
+        if (-not $Env:USERNAME.Contains("$"))
         {
-            # InstallAccount used
-            if ($InstallAccount.UserName -eq $farmAccount.UserName)
+            # PSDSCRunAsCredential used
+            $localaccount = "$($Env:USERDOMAIN)\$($Env:USERNAME)"
+            if ($localaccount -eq $farmAccount.UserName)
             {
-                $message = ("Specified InstallAccount ($($InstallAccount.UserName)) is the Farm " + `
-                        "Account. Make sure the specified InstallAccount isn't the Farm Account " + `
-                        "and try again")
+                $message = ("Specified PSDSCRunAsCredential ($localaccount) is the Farm " + `
+                        "Account. Make sure the specified PSDSCRunAsCredential isn't the " + `
+                        "Farm Account and try again")
                 Add-SPDscEvent -Message $message `
                     -EntryType 'Error' `
                     -EventID 100 `
                     -Source $MyInvocation.MyCommand.Source
                 throw $message
-            }
-        }
-        else
-        {
-            # PSDSCRunAsCredential or System
-            if (-not $Env:USERNAME.Contains("$"))
-            {
-                # PSDSCRunAsCredential used
-                $localaccount = "$($Env:USERDOMAIN)\$($Env:USERNAME)"
-                if ($localaccount -eq $farmAccount.UserName)
-                {
-                    $message = ("Specified PSDSCRunAsCredential ($localaccount) is the Farm " + `
-                            "Account. Make sure the specified PSDSCRunAsCredential isn't the " + `
-                            "Farm Account and try again")
-                    Add-SPDscEvent -Message $message `
-                        -EntryType 'Error' `
-                        -EventID 100 `
-                        -Source $MyInvocation.MyCommand.Source
-                    throw $message
-                }
             }
         }
     }
@@ -148,8 +120,8 @@ function Set-TargetResource
         catch [System.UnauthorizedAccessException]
         {
             $message = ("This resource must be run as the farm account (not a setup account). " + `
-                    "Please ensure either the PsDscRunAsCredential or InstallAccount " + `
-                    "credentials are set to the farm account and run this resource again")
+                    "Please ensure the PsDscRunAsCredential credentials are set " + `
+                    "to the farm account and run this resource again")
             Add-SPDscEvent -Message $message `
                 -EntryType 'Error' `
                 -EventID 100 `
@@ -180,11 +152,7 @@ function Test-TargetResource
     (
         [Parameter(Mandatory = $true)]
         [System.String]
-        $SiteUrl,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $SiteUrl
     )
 
     Write-Verbose -Message "Testing app catalog status of $SiteUrl"

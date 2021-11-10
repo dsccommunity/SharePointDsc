@@ -11,11 +11,7 @@ function Get-TargetResource
         [Parameter(Mandatory = $true)]
         [ValidateSet("SharePoint", "ProjectServer")]
         [System.String]
-        $PermissionMode,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $PermissionMode
     )
 
     Write-Verbose -Message "Getting Project Server permission mode for site '$Url'"
@@ -31,8 +27,7 @@ function Get-TargetResource
         throw $message
     }
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
@@ -65,11 +60,7 @@ function Set-TargetResource
         [Parameter(Mandatory = $true)]
         [ValidateSet("SharePoint", "ProjectServer")]
         [System.String]
-        $PermissionMode,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $PermissionMode
     )
 
     Write-Verbose -Message "Setting Project Server permission mode for site '$Url'"
@@ -85,8 +76,7 @@ function Set-TargetResource
         throw $message
     }
 
-    Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
@@ -107,11 +97,7 @@ function Test-TargetResource
         [Parameter(Mandatory = $true)]
         [ValidateSet("SharePoint", "ProjectServer")]
         [System.String]
-        $PermissionMode,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $PermissionMode
     )
 
     Write-Verbose -Message "Testing Project Server permission mode for site '$Url'"

@@ -11,11 +11,7 @@ function Get-TargetResource
         [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
-        $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Ensure = "Present"
     )
 
     Write-Verbose -Message "Getting status for service '$Name'"
@@ -31,8 +27,7 @@ function Get-TargetResource
         throw $message
     }
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters) `
+    $result = Invoke-SPDscCommand -Arguments @($PSBoundParameters) `
         -ScriptBlock {
         $params = $args[0]
 
@@ -75,11 +70,7 @@ function Set-TargetResource
         [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
-        $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Ensure = "Present"
     )
 
     Write-Verbose -Message "Setting status for service '$Name'"
@@ -96,8 +87,7 @@ function Set-TargetResource
     }
 
     $invokeArgs = @{
-        Credential = $InstallAccount
-        Arguments  = @($PSBoundParameters, $MyInvocation.MyCommand.Source)
+        Arguments = @($PSBoundParameters, $MyInvocation.MyCommand.Source)
     }
 
     if ($Ensure -eq "Present")
@@ -193,11 +183,7 @@ function Test-TargetResource
         [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
-        $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Ensure = "Present"
     )
 
     Write-Verbose -Message "Testing status for service '$Name'"
