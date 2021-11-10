@@ -5,6 +5,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- ReverseDsc
+  - Changed form Size to dynamic Width
+  - Change column width to calc /3 of Form.
+  - Export form is now more dynamic / responsive
+
 ## [4.9.0] - 2021-11-06
 
 ### Added
@@ -20,10 +27,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - SharePointDsc
   - Updated build pipeline to use the correct vm image
-- ReverseDsc
-  - Changed form Size to dynamic Width
-  - Change column width to calc /3 of Form.
-  - Export form is now more dynamic / responsive
 
 ### Fixed
 
