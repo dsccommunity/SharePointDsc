@@ -1519,9 +1519,7 @@ function DisplayGUI()
         )
     }
 
-
-    #endregion
-
+    #region Global
     $Global:liteComponents = @()
     $Global:defaultComponents = @()
     $padding=20
@@ -1531,7 +1529,6 @@ function DisplayGUI()
     $form.Height = ($screens[0].Bounds.Height)
 
     #$form.WindowState = [System.Windows.Forms.FormWindowState]::Maximized
-    #region Global
     $firstColumnLeft = 1+$padding
 
     $secondColumnLeft = (($screens[0].Bounds.Width) /3)+$firstColumnLeft +$padding
