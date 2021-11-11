@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - SharePointDsc
   - Added support for SharePoint Server Subscription Edition in Util module and unit tests stubs
+  - Added SPSE unit tests to the Azure pipeline definitions
 - SPAccessServiceApp
   - Service app no longer exists in SharePoint Server Subscription Edition. Added logic to check for SPSE.
 - SPAccessServices2010
@@ -17,13 +18,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - New resource
 - SPDatabaseAAG
   - Updated code to cater for updated cmdlet names in SPSE
+- SPDistributedCacheService
+  - Added support for SharePoint Server Subscription Edition
 - SPFarm
   - Added support for SharePoint Server Subscription Edition
 - SPInstall
   - Added support for SharePoint Server Subscription Edition
 - SPInstallPrereqs
-  - Added support for SharePoint Server Subscription Edition
-- SPDistributedCacheService
   - Added support for SharePoint Server Subscription Edition
 
 ## [Unreleased]

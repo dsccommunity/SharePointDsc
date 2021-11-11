@@ -195,12 +195,48 @@ stages:
               artifactName: 'CodeCoverage_2019'
               parallel: true
 
+      - job: Test_Unit_SPSE
+        displayName: 'Unit SPSE'
+        pool:
+          vmImage: 'windows-2022'
+        timeoutInMinutes: 0
+        steps:
+          - task: DownloadPipelineArtifact@2
+            displayName: 'Download Pipeline Artifact'
+            inputs:
+              buildType: 'current'
+              artifactName: $(buildArtifactName)
+              targetPath: '$(Build.SourcesDirectory)/$(buildArtifactName)'
+          - task: PowerShell@2
+            name: test
+            displayName: 'Run Unit Test for SPSE'
+            inputs:
+              filePath: './build.ps1'
+              arguments: "-Tasks test -PesterScript @(@{ Path = '$(Build.SourcesDirectory)/Tests/Unit'; Parameters = @{SharePointCmdletModule = '$(Build.SourcesDirectory)/Tests/Unit/Stubs/SharePoint/16.0.14326.20450/SharePointServer.psm1' }})"
+              pwsh: false
+
+          - task: PublishTestResults@2
+            displayName: 'Publish Test Results'
+            condition: succeededOrFailed()
+            inputs:
+              testResultsFormat: 'NUnit'
+              testResultsFiles: '$(buildFolderName)/$(testResultFolderName)/NUnit*.xml'
+              testRunTitle: 'Unit (SPSE)'
+
+          - task: PublishPipelineArtifact@1
+            displayName: 'Publish CodeCoverage Artifact'
+            inputs:
+              targetPath: '$(buildFolderName)/$(testResultFolderName)/'
+              artifactName: 'CodeCoverage_SPSE'
+              parallel: true
+
       - job: Code_Coverage
         displayName: 'Publish Code Coverage'
         dependsOn:
         - 'Test_Unit_2013'
         - 'Test_Unit_2016'
         - 'Test_Unit_2019'
+        - 'Test_Unit_SPSE'
         pool:
           vmImage: 'ubuntu-18.04'
         timeoutInMinutes: 0
