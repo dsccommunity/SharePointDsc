@@ -27,20 +27,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SPInstallPrereqs
   - Added support for SharePoint Server Subscription Edition
 
-### Removed
-
-- SharePointDsc
-  - [BREAKING CHANGE] Removed PowerShell v4.0 support by removing the InstallAccount parameter
-    from all resources.
-
-## [v4.9] - 2021-11-05 
-
 ### Changed
 
 - ReverseDsc
   - Changed form Size to dynamic Width
   - Change column width to calc /3 of Form.
   - Export form is now more dynamic / responsive
+
+### Removed
+
+- SharePointDsc
+  - [BREAKING CHANGE] Removed PowerShell v4.0 support by removing the InstallAccount parameter
+    from all resources.
 
 ## [4.9.0] - 2021-11-06
 
