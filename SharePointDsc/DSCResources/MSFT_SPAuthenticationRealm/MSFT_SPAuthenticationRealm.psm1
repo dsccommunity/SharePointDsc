@@ -2,7 +2,8 @@ function Get-TargetResource
 {
     [CmdletBinding()]
     [OutputType([System.Collections.HashTable])]
-    param (
+    param
+    (
         [Parameter(Mandatory = $true)]
         [ValidateSet('Yes')]
         [String]
@@ -10,17 +11,12 @@ function Get-TargetResource
 
         [Parameter(Mandatory = $true)]
         [String]
-        $AuthenticationRealm,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $AuthenticationRealm
     )
 
     Write-Verbose -Message "Getting farm authentication realm"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -ScriptBlock {
+    $result = Invoke-SPDscCommand -ScriptBlock {
         $currentRealm = Get-SPAuthenticationRealm
 
         Write-Verbose -Message "Current farm authentication realm is '$currentRealm'"
@@ -37,7 +33,8 @@ function Get-TargetResource
 function Set-TargetResource()
 {
     [CmdletBinding()]
-    param (
+    param
+    (
         [Parameter(Mandatory = $true)]
         [ValidateSet('Yes')]
         [String]
@@ -45,17 +42,12 @@ function Set-TargetResource()
 
         [Parameter(Mandatory = $true)]
         [String]
-        $AuthenticationRealm,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $AuthenticationRealm
     )
 
     Write-Verbose -Message "Setting farm authentication realm to $AuthenticationRealm"
 
-    Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
 
         $params = $args[0]
@@ -68,7 +60,8 @@ function Test-TargetResource()
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     [CmdletBinding()]
-    param (
+    param
+    (
         [Parameter(Mandatory = $true)]
         [ValidateSet('Yes')]
         [String]
@@ -76,11 +69,7 @@ function Test-TargetResource()
 
         [Parameter(Mandatory = $true)]
         [String]
-        $AuthenticationRealm,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $AuthenticationRealm
     )
 
     Write-Verbose -Message "Testing farm authentication realm"

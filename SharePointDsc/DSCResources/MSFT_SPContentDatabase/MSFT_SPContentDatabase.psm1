@@ -39,17 +39,12 @@ function Get-TargetResource
         [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
-        $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Ensure = "Present"
     )
 
     Write-Verbose -Message "Getting content database configuration settings"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
@@ -140,19 +135,14 @@ function Set-TargetResource
         [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
-        $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Ensure = "Present"
     )
 
     Write-Verbose -Message "Setting content database configuration settings"
 
     $PSBoundParameters.Ensure = $Ensure
 
-    Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+    Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
         $eventSource = $args[1]
@@ -205,7 +195,7 @@ function Set-TargetResource
                     $newParams = @{ }
                     foreach ($param in $params.GetEnumerator())
                     {
-                        $skipParams = @("Enabled", "Ensure", "InstallAccount", "MaximumSiteCount", "WebAppUrl")
+                        $skipParams = @("Enabled", "Ensure", "MaximumSiteCount", "WebAppUrl")
 
                         if ($skipParams -notcontains $param.Key)
                         {
@@ -306,7 +296,7 @@ function Set-TargetResource
                 $newParams = @{ }
                 foreach ($param in $params.GetEnumerator())
                 {
-                    $skipParams = @("Enabled", "Ensure", "InstallAccount", "MaximumSiteCount", "WebAppUrl")
+                    $skipParams = @("Enabled", "Ensure", "MaximumSiteCount", "WebAppUrl")
 
                     if ($skipParams -notcontains $param.Key)
                     {
@@ -420,11 +410,7 @@ function Test-TargetResource
         [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
-        $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Ensure = "Present"
     )
 
     Write-Verbose -Message "Testing content database configuration settings"

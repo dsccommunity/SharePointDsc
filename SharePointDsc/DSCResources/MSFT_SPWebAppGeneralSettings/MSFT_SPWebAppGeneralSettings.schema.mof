@@ -22,5 +22,4 @@ class MSFT_SPWebAppGeneralSettings : OMI_BaseResource
     [Write, Description("Should Self Service Site Creation be enabled")] boolean SelfServiceSiteCreationEnabled;
     [Write, Description("Is Skype for Business presence enabled for this web app")] boolean PresenceEnabled;
     [Write, Description("What is the default quota template for this web app")] string DefaultQuotaTemplate;
-    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] string InstallAccount;
 };

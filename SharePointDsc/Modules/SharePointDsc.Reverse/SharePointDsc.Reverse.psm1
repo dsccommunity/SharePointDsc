@@ -669,12 +669,6 @@ function Repair-Credentials
     )
     if ($null -ne $results)
     {
-        <## Cleanup the InstallAccount param first (even if we may be adding it back) #>
-        if ($null -ne $results.ContainsKey("InstallAccount"))
-        {
-            $results.Remove("InstallAccount")
-        }
-
         if ($null -ne $results.ContainsKey("PsDscRunAsCredential"))
         {
             $results.Remove("PsDscRunAsCredential")

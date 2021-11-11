@@ -7,5 +7,4 @@ class MSFT_SPWebAppSuiteBar : OMI_BaseResource
     [Write, Description("SP2016+: URL of the logo for the Suite Bar. This only works on classic pages for SP2019 and newer.")] String SuiteNavBrandingLogoUrl;
     [Write, Description("SP2016+: Text to display at the left hand side of the suite bar. No built in support of showing this on web pages in SP2019 and newer.")] String SuiteNavBrandingText;
     [Write, Description("SP2013+: HTML to inject in the left hand-side of the Suite Bar. Only works in classic pages with a SharePoint 2013 master page in SharePoint 2016 and newer.")] String SuiteBarBrandingElementHtml;
-    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };

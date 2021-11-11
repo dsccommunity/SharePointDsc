@@ -39,11 +39,7 @@ function Get-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $AllowSaveDeclarativeWorkflowAsTemplate,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $AllowSaveDeclarativeWorkflowAsTemplate
     )
 
     Write-Verbose -Message "Getting SharePoint Designer configuration settings"
@@ -52,8 +48,7 @@ function Get-TargetResource
     {
         "WebApplication"
         {
-            $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                -Arguments $PSBoundParameters `
+            $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
                 -ScriptBlock {
                 $params = $args[0]
 
@@ -115,79 +110,63 @@ function Get-TargetResource
         }
         "SiteCollection"
         {
-            if ((Test-SPDscRunAsCredential -Credential $InstallAccount) -eq $true)
-            {
-                $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                    -Arguments $PSBoundParameters `
-                    -ScriptBlock {
-                    $params = $args[0]
+            $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
+                -ScriptBlock {
+                $params = $args[0]
 
-                    $nullReturn = @{
+                $nullReturn = @{
+                    WebAppUrl                              = $params.WebAppUrl
+                    SettingsScope                          = $params.SettingsScope
+                    AllowSharePointDesigner                = $null
+                    AllowDetachPagesFromDefinition         = $null
+                    AllowCustomiseMasterPage               = $null
+                    AllowManageSiteURLStructure            = $null
+                    AllowCreateDeclarativeWorkflow         = $null
+                    AllowSavePublishDeclarativeWorkflow    = $null
+                    AllowSaveDeclarativeWorkflowAsTemplate = $null
+                }
+
+                try
+                {
+                    $null = Get-SPFarm
+                }
+                catch
+                {
+                    Write-Verbose -Message ("No local SharePoint farm was detected. " + `
+                            "SharePoint Designer settings will not be applied")
+                    return $nullReturn
+                }
+
+                # Check if site collections exists
+                $site = Get-SPSite -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
+                if ($null -eq $site)
+                {
+                    Write-Verbose -Message ("Site collection not found. SharePoint " + `
+                            "Designer settings will not be applied")
+                    return $nullReturn
+                }
+                else
+                {
+                    return @{
+                        # Set the SPD settings
                         WebAppUrl                              = $params.WebAppUrl
                         SettingsScope                          = $params.SettingsScope
-                        AllowSharePointDesigner                = $null
-                        AllowDetachPagesFromDefinition         = $null
-                        AllowCustomiseMasterPage               = $null
-                        AllowManageSiteURLStructure            = $null
-                        AllowCreateDeclarativeWorkflow         = $null
-                        AllowSavePublishDeclarativeWorkflow    = $null
-                        AllowSaveDeclarativeWorkflowAsTemplate = $null
-                    }
-
-                    try
-                    {
-                        $null = Get-SPFarm
-                    }
-                    catch
-                    {
-                        Write-Verbose -Message ("No local SharePoint farm was detected. " + `
-                                "SharePoint Designer settings will not be applied")
-                        return $nullReturn
-                    }
-
-                    # Check if site collections exists
-                    $site = Get-SPSite -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
-                    if ($null -eq $site)
-                    {
-                        Write-Verbose -Message ("Site collection not found. SharePoint " + `
-                                "Designer settings will not be applied")
-                        return $nullReturn
-                    }
-                    else
-                    {
-                        return @{
-                            # Set the SPD settings
-                            WebAppUrl                              = $params.WebAppUrl
-                            SettingsScope                          = $params.SettingsScope
-                            AllowSharePointDesigner                = $site.AllowDesigner
-                            AllowDetachPagesFromDefinition         = $site.AllowRevertFromTemplate
-                            AllowCustomiseMasterPage               = $site.AllowMasterPageEditing
-                            AllowManageSiteURLStructure            = $site.ShowURLStructure
-                            AllowCreateDeclarativeWorkflow         = $site.AllowCreateDeclarativeWorkflow
-                            AllowSavePublishDeclarativeWorkflow    = `
-                                $site.AllowSavePublishDeclarativeWorkflow
-                            AllowSaveDeclarativeWorkflowAsTemplate = `
-                                $site.AllowSaveDeclarativeWorkflowAsTemplate
-                        }
+                        AllowSharePointDesigner                = $site.AllowDesigner
+                        AllowDetachPagesFromDefinition         = $site.AllowRevertFromTemplate
+                        AllowCustomiseMasterPage               = $site.AllowMasterPageEditing
+                        AllowManageSiteURLStructure            = $site.ShowURLStructure
+                        AllowCreateDeclarativeWorkflow         = $site.AllowCreateDeclarativeWorkflow
+                        AllowSavePublishDeclarativeWorkflow    = `
+                            $site.AllowSavePublishDeclarativeWorkflow
+                        AllowSaveDeclarativeWorkflowAsTemplate = `
+                            $site.AllowSaveDeclarativeWorkflowAsTemplate
                     }
                 }
-            }
-            else
-            {
-                $message = ("A known issue exists that prevents these settings from being managed " + `
-                        "when InstallAccount is used instead of PsDscRunAsAccount. See " + `
-                        "http://aka.ms/SharePointDscRemoteIssues for details.")
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $MyInvocation.MyCommand.Source
-                throw $message
             }
         }
     }
     return $result
 }
-
 
 function Set-TargetResource
 {
@@ -229,11 +208,7 @@ function Set-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $AllowSaveDeclarativeWorkflowAsTemplate,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $AllowSaveDeclarativeWorkflowAsTemplate
     )
 
     Write-Verbose -Message "Setting SharePoint Designer configuration settings"
@@ -242,8 +217,7 @@ function Set-TargetResource
     {
         "WebApplication"
         {
-            Invoke-SPDscCommand -Credential $InstallAccount `
-                -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+            Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
                 -ScriptBlock {
                 $params = $args[0]
                 $eventSource = $args[1]
@@ -319,96 +293,79 @@ function Set-TargetResource
         }
         "SiteCollection"
         {
-            if ((Test-SPDscRunAsCredential -Credential $InstallAccount) -eq $true)
-            {
-                Invoke-SPDscCommand -Credential $InstallAccount `
-                    -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
-                    -ScriptBlock {
-                    $params = $args[0]
-                    $eventSource = $args[1]
+            Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+                -ScriptBlock {
+                $params = $args[0]
+                $eventSource = $args[1]
 
-                    try
-                    {
-                        $null = Get-SPFarm
-                    }
-                    catch
-                    {
-                        $message = ("No local SharePoint farm was detected. SharePoint Designer " + `
-                                "settings will not be applied")
-                        Add-SPDscEvent -Message $message `
-                            -EntryType 'Error' `
-                            -EventID 100 `
-                            -Source $eventSource
-                        throw $message
-                    }
+                try
+                {
+                    $null = Get-SPFarm
+                }
+                catch
+                {
+                    $message = ("No local SharePoint farm was detected. SharePoint Designer " + `
+                            "settings will not be applied")
+                    Add-SPDscEvent -Message $message `
+                        -EntryType 'Error' `
+                        -EventID 100 `
+                        -Source $eventSource
+                    throw $message
+                }
 
-                    Write-Verbose -Message "Start update SPD site collection settings"
+                Write-Verbose -Message "Start update SPD site collection settings"
 
-                    # Check if site collection exists
-                    $site = Get-SPSite -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
-                    if ($null -eq $site)
+                # Check if site collection exists
+                $site = Get-SPSite -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
+                if ($null -eq $site)
+                {
+                    $message = ("Site collection not found. SharePoint Designer settings " + `
+                            "will not be applied")
+                    Add-SPDscEvent -Message $message `
+                        -EntryType 'Error' `
+                        -EventID 100 `
+                        -Source $eventSource
+                    throw $message
+                }
+                else
+                {
+                    # Set the SharePoint Designer settings
+                    if ($params.ContainsKey("AllowSharePointDesigner"))
                     {
-                        $message = ("Site collection not found. SharePoint Designer settings " + `
-                                "will not be applied")
-                        Add-SPDscEvent -Message $message `
-                            -EntryType 'Error' `
-                            -EventID 100 `
-                            -Source $eventSource
-                        throw $message
+                        $site.AllowDesigner = $params.AllowSharePointDesigner
                     }
-                    else
+                    if ($params.ContainsKey("AllowDetachPagesFromDefinition"))
                     {
-                        # Set the SharePoint Designer settings
-                        if ($params.ContainsKey("AllowSharePointDesigner"))
-                        {
-                            $site.AllowDesigner = $params.AllowSharePointDesigner
-                        }
-                        if ($params.ContainsKey("AllowDetachPagesFromDefinition"))
-                        {
-                            $site.AllowRevertFromTemplate = $params.AllowDetachPagesFromDefinition
-                        }
-                        if ($params.ContainsKey("AllowCustomiseMasterPage"))
-                        {
-                            $site.AllowMasterPageEditing = $params.AllowCustomiseMasterPage
-                        }
-                        if ($params.ContainsKey("AllowManageSiteURLStructure"))
-                        {
-                            $site.ShowURLStructure = $params.AllowManageSiteURLStructure
-                        }
-                        if ($params.ContainsKey("AllowCreateDeclarativeWorkflow"))
-                        {
-                            $site.AllowCreateDeclarativeWorkflow = `
-                                $params.AllowCreateDeclarativeWorkflow
-                        }
-                        if ($params.ContainsKey("AllowSavePublishDeclarativeWorkflow"))
-                        {
-                            $site.AllowSavePublishDeclarativeWorkflow = `
-                                $params.AllowSavePublishDeclarativeWorkflow
-                        }
-                        if ($params.ContainsKey("AllowSaveDeclarativeWorkflowAsTemplate"))
-                        {
-                            $site.AllowSaveDeclarativeWorkflowAsTemplate = `
-                                $params.AllowSaveDeclarativeWorkflowAsTemplate
-                        }
+                        $site.AllowRevertFromTemplate = $params.AllowDetachPagesFromDefinition
+                    }
+                    if ($params.ContainsKey("AllowCustomiseMasterPage"))
+                    {
+                        $site.AllowMasterPageEditing = $params.AllowCustomiseMasterPage
+                    }
+                    if ($params.ContainsKey("AllowManageSiteURLStructure"))
+                    {
+                        $site.ShowURLStructure = $params.AllowManageSiteURLStructure
+                    }
+                    if ($params.ContainsKey("AllowCreateDeclarativeWorkflow"))
+                    {
+                        $site.AllowCreateDeclarativeWorkflow = `
+                            $params.AllowCreateDeclarativeWorkflow
+                    }
+                    if ($params.ContainsKey("AllowSavePublishDeclarativeWorkflow"))
+                    {
+                        $site.AllowSavePublishDeclarativeWorkflow = `
+                            $params.AllowSavePublishDeclarativeWorkflow
+                    }
+                    if ($params.ContainsKey("AllowSaveDeclarativeWorkflowAsTemplate"))
+                    {
+                        $site.AllowSaveDeclarativeWorkflowAsTemplate = `
+                            $params.AllowSaveDeclarativeWorkflowAsTemplate
                     }
                 }
-            }
-            else
-            {
-                $message = ("A known issue exists that prevents these settings from being " + `
-                        "managed when InstallAccount is used instead of PsDscRunAsAccount. " + `
-                        "See http://aka.ms/SharePointDscRemoteIssues for details.")
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $MyInvocation.MyCommand.Source
-                throw $message
             }
         }
     }
 }
-
-
 function Test-TargetResource
 {
     [CmdletBinding()]
@@ -450,11 +407,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $AllowSaveDeclarativeWorkflowAsTemplate,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $AllowSaveDeclarativeWorkflowAsTemplate
     )
 
     Write-Verbose -Message "Testing SharePoint Designer configuration settings"

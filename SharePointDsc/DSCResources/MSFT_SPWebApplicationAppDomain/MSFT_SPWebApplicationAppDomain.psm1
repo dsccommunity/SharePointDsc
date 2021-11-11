@@ -23,17 +23,12 @@ function Get-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $SSL,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $SSL
     )
 
     Write-Verbose -Message "Getting app domain settings for '$AppDomain'"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
         $webAppAppDomain = Get-SPWebApplicationAppDomain -WebApplication $params.WebAppUrl `
@@ -87,19 +82,14 @@ function Set-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $SSL,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $SSL
     )
 
     Write-Verbose -Message "Setting app domain settings for '$AppDomain'"
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $CurrentValues) `
+    Invoke-SPDscCommand -Arguments @($PSBoundParameters, $CurrentValues) `
         -ScriptBlock {
         $params = $args[0]
         $CurrentValues = $args[1]
@@ -154,11 +144,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $SSL,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $SSL
     )
 
     Write-Verbose -Message "Testing app domain settings for '$AppDomain'"

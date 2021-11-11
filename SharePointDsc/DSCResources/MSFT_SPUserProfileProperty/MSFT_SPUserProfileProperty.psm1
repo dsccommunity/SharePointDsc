@@ -109,11 +109,7 @@ function Get-TargetResource
 
         [Parameter()]
         [System.string]
-        $TermSet,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $TermSet
     )
 
     Write-Verbose -Message "Getting user profile property $Name"
@@ -142,8 +138,7 @@ function Get-TargetResource
         }
     }
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
@@ -430,11 +425,7 @@ function Set-TargetResource
 
         [Parameter()]
         [System.string]
-        $TermSet,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $TermSet
     )
 
     # Note for integration test: CA can take a couple of minutes to notice the change. don't try
@@ -466,8 +457,7 @@ function Set-TargetResource
 
     $PSBoundParameters.Ensure = $Ensure
 
-    Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+    Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
         $eventSource = $args[1]
@@ -895,11 +885,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.string]
-        $TermSet,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $TermSet
 
     )
 

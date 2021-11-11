@@ -10,5 +10,4 @@ class MSFT_SPTrustedSecurityTokenIssuer : OMI_BaseResource
     [Write, Description("URL that SharePoint will reach to download the JSON metadata file of the issuer")] String MetadataEndPoint;
     [Write, Description("Specifies whether the trust is established with a self-issuer partner app")] Boolean IsTrustBroker;
     [Write, Description("Present if the SPTrustedSecurityTokenIssuer should be created, or Absent if it should be removed"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
-    [Write, EmbeddedInstance("MSFT_Credential"), Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5")] String InstallAccount;
 };

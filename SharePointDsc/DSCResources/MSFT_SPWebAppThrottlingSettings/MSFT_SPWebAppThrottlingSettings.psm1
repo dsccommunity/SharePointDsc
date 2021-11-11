@@ -50,17 +50,13 @@ function Get-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $EventHandlersEnabled,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $EventHandlersEnabled
     )
 
     Write-Verbose -Message "Getting web application '$WebAppUrl' throttling settings"
 
     $paramArgs = @($PSBoundParameters, $PSScriptRoot)
-    $result = Invoke-SPDscCommand -Credential $InstallAccount -Arguments $paramArgs -ScriptBlock {
+    $result = Invoke-SPDscCommand -Arguments $paramArgs -ScriptBlock {
         $params = $args[0]
         $ScriptRoot = $args[1]
 
@@ -144,19 +140,14 @@ function Set-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $EventHandlersEnabled,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $EventHandlersEnabled
     )
 
     Write-Verbose -Message "Setting web application '$WebAppUrl' throttling settings"
 
     $paramArgs = @($PSBoundParameters, $MyInvocation.MyCommand.Source, $PSScriptRoot)
 
-    $null = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $paramArgs `
+    $null = Invoke-SPDscCommand -Arguments $paramArgs `
         -ScriptBlock {
         $params = $args[0]
         $eventSource = $args[1]
@@ -242,11 +233,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $EventHandlersEnabled,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $EventHandlersEnabled
     )
 
     Write-Verbose -Message "Testing web application '$WebAppUrl' throttling settings"
@@ -287,10 +274,6 @@ function Export-TargetResource
                 $PartialContent += "        {`r`n"
                 $results = Get-TargetResource @params
 
-                if ($results.Contains("InstallAccount"))
-                {
-                    $results.Remove("InstallAccount")
-                }
                 $results.HappyHour = Get-SPDscWebAppHappyHour -params $results.HappyHour
                 $results = Repair-Credentials -results $results
                 $currentBlock = Get-DSCBlock -Params $results -ModulePath $module

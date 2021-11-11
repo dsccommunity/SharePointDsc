@@ -19,11 +19,7 @@ function Get-TargetResource
 
         [Parameter()]
         [System.String[]]
-        $MembersToExclude,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $MembersToExclude
     )
 
     Write-Verbose -Message "Getting Farm Administrators configuration"
@@ -50,8 +46,7 @@ function Get-TargetResource
         throw $message
     }
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
@@ -115,11 +110,7 @@ function Set-TargetResource
 
         [Parameter()]
         [System.String[]]
-        $MembersToExclude,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $MembersToExclude
     )
 
     Write-Verbose -Message "Setting Farm Administrators configuration"
@@ -291,11 +282,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.String[]]
-        $MembersToExclude,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $MembersToExclude
     )
 
     Write-Verbose -Message "Testing Farm Administrators configuration"
@@ -418,8 +405,7 @@ function Merge-SPDscFarmAdminList
         $changeUsers
     )
 
-    $null = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($changeUsers, $MyInvocation.MyCommand.Source) `
+    $null = Invoke-SPDscCommand -Arguments @($changeUsers, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $changeUsers = $args[0]
         $eventSource = $args[1]

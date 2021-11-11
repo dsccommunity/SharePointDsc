@@ -54,7 +54,7 @@ Configuration Example
 
     node localhost
     {
-        SPInstall InstallBinaries
+        SPInstall 'InstallBinaries'
         {
             IsSingleInstance = "Yes"
             BinaryDir        = "C:\SPInstall"

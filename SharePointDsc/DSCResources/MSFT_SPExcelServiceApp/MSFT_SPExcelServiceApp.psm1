@@ -111,11 +111,7 @@ function Get-TargetResource
         [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
-        $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Ensure = "Present"
     )
 
     Write-Verbose -Message "Getting Excel Services Application '$Name'"
@@ -134,8 +130,7 @@ function Get-TargetResource
         throw $message
     }
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $Script:ServiceAppObjectType) `
+    $result = Invoke-SPDscCommand -Arguments @($PSBoundParameters, $Script:ServiceAppObjectType) `
         -ScriptBlock {
         $params = $args[0]
         $serviceAppObjectType = $args[1]
@@ -307,11 +302,7 @@ function Set-TargetResource
         [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
-        $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Ensure = "Present"
     )
 
     Write-Verbose -Message "Setting Excel Services Application '$Name'"
@@ -334,8 +325,7 @@ function Set-TargetResource
     if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present")
     {
         Write-Verbose -Message "Creating Excel Services Application $Name"
-        Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+        Invoke-SPDscCommand -Arguments $PSBoundParameters `
             -ScriptBlock {
             $params = $args[0]
 
@@ -348,8 +338,7 @@ function Set-TargetResource
     if ($Ensure -eq "Present")
     {
         Write-Verbose -Message "Updating settings for Excel Services Application $Name"
-        Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+        Invoke-SPDscCommand -Arguments $PSBoundParameters `
             -ScriptBlock {
             $params = $args[0]
 
@@ -359,7 +348,7 @@ function Set-TargetResource
 
             foreach ($key in $params.Keys)
             {
-                if ($key -notin @("InstallAccount", "Ensure", "TrustedFileLocations", "Name", "ApplicationPool"))
+                if ($key -notin @("Ensure", "TrustedFileLocations", "Name", "ApplicationPool"))
                 {
                     $newParams.Add($key, $params.$key)
                 }
@@ -380,8 +369,7 @@ function Set-TargetResource
                 if ($null -eq $matchingCurrentValue)
                 {
                     Write-Verbose -Message "Adding trusted location '$($desiredLocation.Address)' to service app"
-                    Invoke-SPDscCommand -Credential $InstallAccount `
-                        -Arguments @($PSBoundParameters, $desiredLocation, $Script:TrustLocationProperties, $Script:ServiceAppObjectType) `
+                    Invoke-SPDscCommand -Arguments @($PSBoundParameters, $desiredLocation, $Script:TrustLocationProperties, $Script:ServiceAppObjectType) `
                         -ScriptBlock {
                         $params = $args[0]
                         $desiredLocation = $args[1]
@@ -407,8 +395,7 @@ function Set-TargetResource
                 else
                 {
                     Write-Verbose -Message "Updating trusted location '$($desiredLocation.Address)' in service app"
-                    Invoke-SPDscCommand -Credential $InstallAccount `
-                        -Arguments @($PSBoundParameters, $desiredLocation, $Script:TrustLocationProperties, $Script:ServiceAppObjectType) `
+                    Invoke-SPDscCommand -Arguments @($PSBoundParameters, $desiredLocation, $Script:TrustLocationProperties, $Script:ServiceAppObjectType) `
                         -ScriptBlock {
                         $params = $args[0]
                         $desiredLocation = $args[1]
@@ -443,8 +430,7 @@ function Set-TargetResource
                 if ($null -eq $matchingDesiredValue)
                 {
                     Write-Verbose -Message "Removing trusted location '$($currentLocation.Address)' from service app"
-                    Invoke-SPDscCommand -Credential $InstallAccount `
-                        -Arguments @($Name, $currentLocation) `
+                    Invoke-SPDscCommand -Arguments @($Name, $currentLocation) `
                         -ScriptBlock {
                         $name = $args[0]
                         $currentLocation = $args[1]
@@ -459,8 +445,7 @@ function Set-TargetResource
     if ($Ensure -eq "Absent")
     {
         Write-Verbose -Message "Removing Excel Service Application $Name"
-        Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments @($PSBoundParameters, $Script:ServiceAppObjectType) `
+        Invoke-SPDscCommand -Arguments @($PSBoundParameters, $Script:ServiceAppObjectType) `
             -ScriptBlock {
             $params = $args[0]
             $serviceAppObjectType = $args[1]
@@ -572,11 +557,7 @@ function Test-TargetResource
         [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
-        $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Ensure = "Present"
     )
 
     Write-Verbose -Message "Testing Excel Services Application '$Name'"

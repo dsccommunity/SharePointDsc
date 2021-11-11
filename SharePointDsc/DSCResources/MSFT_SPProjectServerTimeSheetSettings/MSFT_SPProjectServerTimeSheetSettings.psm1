@@ -86,11 +86,7 @@ function Get-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $ForceTrackingModeForAllProjects,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $ForceTrackingModeForAllProjects
     )
 
     Write-Verbose -Message "Getting Timesheet settings for $Url"
@@ -106,8 +102,7 @@ function Get-TargetResource
         throw $message
     }
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $PSScriptRoot) `
+    $result = Invoke-SPDscCommand -Arguments @($PSBoundParameters, $PSScriptRoot) `
         -ScriptBlock {
         $params = $args[0]
         $scriptRoot = $args[1]
@@ -345,11 +340,7 @@ function Set-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $ForceTrackingModeForAllProjects,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $ForceTrackingModeForAllProjects
     )
 
     Write-Verbose -Message "Setting Timesheet settings for $Url"
@@ -365,8 +356,7 @@ function Set-TargetResource
         throw $message
     }
 
-    Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
 
         $params = $args[0]
@@ -613,11 +603,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $ForceTrackingModeForAllProjects,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $ForceTrackingModeForAllProjects
     )
 
     Write-Verbose -Message "Testing Timesheet settings for $Url"

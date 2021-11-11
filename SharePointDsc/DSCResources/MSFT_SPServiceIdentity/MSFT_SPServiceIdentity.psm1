@@ -8,10 +8,6 @@ function Get-TargetResource
         [System.String]
         $Name,
 
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
-
         [Parameter(Mandatory = $true)]
         [System.String]
         $ManagedAccount
@@ -19,7 +15,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting identity for service instance '$Name'"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
         if ($params.Name -eq "SharePoint Server Search")
@@ -78,10 +74,6 @@ function Set-TargetResource
         [System.String]
         $Name,
 
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
-
         [Parameter(Mandatory = $true)]
         [System.String]
         $ManagedAccount
@@ -89,8 +81,7 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting service instance '$Name' to '$ManagedAccount'"
 
-    Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+    Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
         $eventSource = $args[1]
@@ -165,10 +156,6 @@ function Test-TargetResource
         [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
 
         [Parameter(Mandatory = $true)]
         [System.String]

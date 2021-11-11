@@ -54,11 +54,7 @@ function Get-TargetResource
 
         [Parameter()]
         [Boolean]
-        $LogActionsIfHasRequestException,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $LogActionsIfHasRequestException
     )
 
     Write-Verbose -Message "Getting web application '$WebAppUrl' client callable settings"
@@ -74,8 +70,7 @@ function Get-TargetResource
         throw $message
     }
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters) `
+    $result = Invoke-SPDscCommand -Arguments @($PSBoundParameters) `
         -ScriptBlock {
         $params = $args[0]
 
@@ -200,11 +195,7 @@ function Set-TargetResource
 
         [Parameter()]
         [Boolean]
-        $LogActionsIfHasRequestException,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $LogActionsIfHasRequestException
     )
 
     Write-Verbose -Message "Setting web application '$WebAppUrl' client callable settings"
@@ -220,8 +211,7 @@ function Set-TargetResource
         throw $message
     }
 
-    Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+    Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
         $eventSource = $args[1]
@@ -470,11 +460,7 @@ function Test-TargetResource
 
         [Parameter()]
         [Boolean]
-        $LogActionsIfHasRequestException,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $LogActionsIfHasRequestException
     )
 
     Write-Verbose -Message "Testing for web application '$WebAppUrl' client callable settings"

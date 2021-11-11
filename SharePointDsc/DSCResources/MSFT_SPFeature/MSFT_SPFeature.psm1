@@ -18,10 +18,6 @@ function Get-TargetResource
         $FeatureScope,
 
         [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
-
-        [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
@@ -33,8 +29,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting feature $Name at $FeatureScope scope"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
@@ -91,10 +86,6 @@ function Set-TargetResource
         $FeatureScope,
 
         [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
-
-        [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
@@ -113,8 +104,7 @@ function Set-TargetResource
 
     if ($Ensure -eq "Present")
     {
-        Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+        Invoke-SPDscCommand -Arguments $PSBoundParameters `
             -ScriptBlock {
             $params = $args[0]
             $currentValues = $params["CurrentValues"]
@@ -144,8 +134,7 @@ function Set-TargetResource
     }
     if ($Ensure -eq "Absent")
     {
-        Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+        Invoke-SPDscCommand -Arguments $PSBoundParameters `
             -ScriptBlock {
 
             $params = $args[0]
@@ -186,10 +175,6 @@ function Test-TargetResource
         [ValidateSet("Farm", "WebApplication", "Site", "Web")]
         [System.String]
         $FeatureScope,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
 
         [Parameter()]
         [ValidateSet("Present", "Absent")]
@@ -271,12 +256,6 @@ function Export-TargetResource
                 $partialContent = "        SPFeature " + [System.Guid]::NewGuid().ToString() + "`r`n"
                 $partialContent += "        {`r`n"
 
-                <# Manually add the InstallAccount param due to a bug in 1.6.0.0 that returns a param named InstalAccount (typo) instead.
-                https://github.com/PowerShell/SharePointDsc/issues/481 #>
-                if ($results.ContainsKey("InstalAccount"))
-                {
-                    $results.Remove("InstalAccount")
-                }
                 $results = Repair-Credentials -results $results
                 if ($DependsOn)
                 {

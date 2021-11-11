@@ -23,11 +23,7 @@ function Get-TargetResource
 
         [Parameter()]
         [System.Management.Automation.PSCredential]
-        $WindowsServiceAccount,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $WindowsServiceAccount
     )
 
     Write-Verbose -Message "Getting Search service settings"
@@ -43,12 +39,10 @@ function Get-TargetResource
             PerformanceLevel      = $null
             ContactEmail          = $null
             WindowsServiceAccount = $null
-            InstallAccount        = $InstallAccount
         }
     }
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
@@ -106,11 +100,7 @@ function Set-TargetResource
 
         [Parameter()]
         [System.Management.Automation.PSCredential]
-        $WindowsServiceAccount,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $WindowsServiceAccount
     )
 
     Write-Verbose -Message "Setting Search service settings"
@@ -131,8 +121,7 @@ function Set-TargetResource
     $result = Get-TargetResource @PSBoundParameters
 
     # Update the service app that already exists
-    Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $result) `
+    Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $result) `
         -ScriptBlock {
         $params = $args[0]
         $eventSource = $args[1]
@@ -207,11 +196,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.Management.Automation.PSCredential]
-        $WindowsServiceAccount,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $WindowsServiceAccount
     )
 
     Write-Verbose -Message "Testing Search service settings"

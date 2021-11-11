@@ -58,17 +58,12 @@ function Get-TargetResource
 
         [Parameter()]
         [System.Management.Automation.PSCredential]
-        $DefaultContentAccessAccount,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $DefaultContentAccessAccount
     )
 
     Write-Verbose -Message "Getting Search service application '$Name'"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $PSScriptRoot) `
+    $result = Invoke-SPDscCommand -Arguments @($PSBoundParameters, $PSScriptRoot) `
         -ScriptBlock {
         $params = $args[0]
         $scriptRoot = $args[1]
@@ -293,11 +288,7 @@ function Set-TargetResource
 
         [Parameter()]
         [System.Management.Automation.PSCredential]
-        $DefaultContentAccessAccount,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $DefaultContentAccessAccount
     )
 
     Write-Verbose -Message "Setting Search service application '$Name'"
@@ -320,8 +311,7 @@ function Set-TargetResource
     {
         # Create the service app as it doesn't exist
         Write-Verbose -Message "Creating Search Service Application $Name"
-        Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+        Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
             -ScriptBlock {
             $params = $args[0]
             $eventSource = $args[1]
@@ -445,8 +435,7 @@ function Set-TargetResource
     {
         # Update the service app that already exists
         Write-Verbose -Message "Updating Search Service Application $Name"
-        Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments @($PSBoundParameters, $result) `
+        Invoke-SPDscCommand -Arguments @($PSBoundParameters, $result) `
             -ScriptBlock {
             $params = $args[0]
             $result = $args[1]
@@ -543,8 +532,7 @@ function Set-TargetResource
             $result.FixFarmAccountPermissions -eq $true)
     {
         Write-Verbose -Message "Fixing database permissions for Search Service Application $Name"
-        Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments @($PSBoundParameters, $PSScriptRoot) `
+        Invoke-SPDscCommand -Arguments @($PSBoundParameters, $PSScriptRoot) `
             -ScriptBlock {
             $params = $args[0]
             $scriptRoot = $args[1]
@@ -633,8 +621,7 @@ function Set-TargetResource
     {
         # The service app should not exit
         Write-Verbose -Message "Removing Search Service Application $Name"
-        Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+        Invoke-SPDscCommand -Arguments $PSBoundParameters `
             -ScriptBlock {
             $params = $args[0]
 
@@ -714,11 +701,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.Management.Automation.PSCredential]
-        $DefaultContentAccessAccount,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $DefaultContentAccessAccount
     )
 
     Write-Verbose -Message "Testing Search service application '$Name'"
@@ -823,11 +806,6 @@ function Export-TargetResource
                 if ($results.Get_Item("CloudIndex") -eq $false)
                 {
                     $results.Remove("CloudIndex")
-                }
-
-                if ($results.Contains("InstallAccount"))
-                {
-                    $results.Remove("InstallAccount")
                 }
 
                 if ($null -eq $results.SearchCenterUrl)

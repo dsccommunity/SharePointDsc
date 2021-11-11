@@ -22,11 +22,7 @@ function Get-TargetResource
 
         [Parameter()]
         [System.String]
-        $Custom,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Custom
     )
 
     Write-Verbose -Message "Getting site collection url for $Url"
@@ -39,8 +35,7 @@ function Get-TargetResource
         Write-Verbose -Message "No zone is specified"
     }
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
@@ -134,11 +129,7 @@ function Set-TargetResource
 
         [Parameter()]
         [System.String]
-        $Custom,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Custom
     )
 
     Write-Verbose -Message "Setting site collection url for $Url"
@@ -156,8 +147,7 @@ function Set-TargetResource
         throw $message
     }
 
-    Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+    Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
         $eventSource = $args[1]
@@ -331,11 +321,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.String]
-        $Custom,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Custom
     )
 
     Write-Verbose -Message "Testing site collection url for $Url"

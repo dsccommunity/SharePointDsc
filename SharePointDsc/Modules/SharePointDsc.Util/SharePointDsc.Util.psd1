@@ -70,7 +70,6 @@
         'Test-SPDscIsADUser',
         'Test-SPDscObjectHasProperty',
         'Test-SPDscParameterState',
-        'Test-SPDscRunAsCredential',
         'Test-SPDscRunningAsFarmAccount',
         'Test-SPDscUserIsLocalAdmin'
     )

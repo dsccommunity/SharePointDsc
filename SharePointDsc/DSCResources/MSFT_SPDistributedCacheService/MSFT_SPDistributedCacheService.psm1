@@ -27,17 +27,12 @@ function Get-TargetResource
 
         [Parameter()]
         [System.String[]]
-        $ServerProvisionOrder,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $ServerProvisionOrder
     )
 
     Write-Verbose -Message "Getting the cache host information"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
         $nullReturnValue = @{
@@ -126,11 +121,7 @@ function Set-TargetResource
 
         [Parameter()]
         [System.String[]]
-        $ServerProvisionOrder,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $ServerProvisionOrder
     )
     Write-Verbose -Message "Setting the cache host information"
 
@@ -142,7 +133,7 @@ function Set-TargetResource
         if ($createFirewallRules -eq $true)
         {
             Write-Verbose -Message "Create a firewall rule for AppFabric"
-            Invoke-SPDscCommand -Credential $InstallAccount -ScriptBlock {
+            Invoke-SPDscCommand -ScriptBlock {
                 $icmpRuleName = "File and Printer Sharing (Echo Request - ICMPv4-In)"
                 $icmpFirewallRule = Get-NetFirewallRule -DisplayName $icmpRuleName `
                     -ErrorAction SilentlyContinue
@@ -189,8 +180,7 @@ function Set-TargetResource
         if ($CurrentState.Ensure -ne $Ensure)
         {
             Write-Verbose -Message "Enabling distributed cache service"
-            Invoke-SPDscCommand -Credential $InstallAccount `
-                -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+            Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
                 -ScriptBlock {
                 $params = $args[0]
                 $eventSource = $args[1]
@@ -364,8 +354,7 @@ function Set-TargetResource
         {
             if ($CurrentState.ServiceAccount -ne $ServiceAccount.UserName)
             {
-                Invoke-SPDscCommand -Credential $InstallAccount `
-                    -Arguments $PSBoundParameters `
+                Invoke-SPDscCommand -Arguments $PSBoundParameters `
                     -ScriptBlock {
                     $params = $args[0]
                     $farm = Get-SPFarm
@@ -396,8 +385,7 @@ function Set-TargetResource
             if ($CurrentState.CacheSizeInMB -ne $CacheSizeInMB)
             {
                 Write-Verbose -Message "Updating distributed cache service cache size"
-                Invoke-SPDscCommand -Credential $InstallAccount `
-                    -Arguments $PSBoundParameters `
+                Invoke-SPDscCommand -Arguments $PSBoundParameters `
                     -ScriptBlock {
                     $params = $args[0]
 
@@ -459,7 +447,7 @@ function Set-TargetResource
     else
     {
         Write-Verbose -Message "Removing distributed cache to the server"
-        Invoke-SPDscCommand -Credential $InstallAccount -ScriptBlock {
+        Invoke-SPDscCommand -ScriptBlock {
             Remove-SPDistributedCacheServiceInstance
 
             $serviceInstance = Get-SPServiceInstance -Server $env:computername `
@@ -483,7 +471,7 @@ function Set-TargetResource
         }
         if ($CreateFirewallRules -eq $true)
         {
-            Invoke-SPDscCommand -Credential $InstallAccount -ScriptBlock {
+            Invoke-SPDscCommand -ScriptBlock {
                 $firewallRule = Get-NetFirewallRule -DisplayName "SharePoint Distribute Cache" `
                     -ErrorAction SilentlyContinue
                 if ($null -ne $firewallRule)
@@ -526,11 +514,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.String[]]
-        $ServerProvisionOrder,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $ServerProvisionOrder
     )
 
     Write-Verbose -Message "Testing the cache host information"

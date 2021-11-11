@@ -49,17 +49,12 @@ function Get-TargetResource
         [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.String]
-        $DropFolder,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $DropFolder
     )
 
     Write-Verbose -Message "Getting SharePoint Incoming Email Settings"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -ScriptBlock {
+    $result = Invoke-SPDscCommand -ScriptBlock {
         $spEmailServiceInstance = (Get-SPServiceInstance | Where-Object { $_.GetType().FullName -eq "Microsoft.SharePoint.Administration.SPIncomingEmailServiceInstance" }) | Select-Object -First 1
         $spEmailService = $spEmailServiceInstance.service
 
@@ -187,11 +182,7 @@ function Set-TargetResource
         [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.String]
-        $DropFolder,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $DropFolder
     )
 
     Write-Verbose -Message "Setting SharePoint Incoming Email Settings"
@@ -250,8 +241,7 @@ function Set-TargetResource
         }
     }
 
-    Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+    Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
         $eventSource = $args[1]
@@ -393,11 +383,7 @@ function Test-TargetResource
         [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.String]
-        $DropFolder,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $DropFolder
     )
 
     Write-Verbose -Message "Testing SharePoint Incoming Email Settings"
