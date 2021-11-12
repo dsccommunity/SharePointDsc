@@ -8,4 +8,4 @@ This resource will configured the supression settings for Office Online Server
 which extensions should Office Online Server not be used to open the file.
 
 The default value for the Ensure parameter is Present. When not specifying this
-parameter, the zone is configured.
+parameter, the supression settings are configured.
