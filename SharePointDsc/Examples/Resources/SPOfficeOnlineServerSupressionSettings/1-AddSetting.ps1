@@ -56,7 +56,7 @@ Configuration Example
         SPOfficeOnlineServerSupressionSettings 'PDF'
         {
             Extension            = "pdf"
-            Action               = "view", "edit"
+            Actions              = "view", "edit"
             Ensure               = "Present"
             PsDscRunAsCredential = $SetupAccount
         }
