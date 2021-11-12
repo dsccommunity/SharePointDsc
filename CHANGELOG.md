@@ -10,10 +10,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SharePointDsc
   - Added support for SharePoint Server Subscription Edition in Util module and unit tests stubs
   - Added SPSE unit tests to the Azure pipeline definitions
-- SPAccessServiceApp
-  - Service app no longer exists in SharePoint Server Subscription Edition. Added logic to check for SPSE.
-- SPAccessServices2010
-  - Service app no longer exists in SharePoint Server Subscription Edition. Added logic to check for SPSE.
 - SPCertificateSettings
   - New resource
 - SPDatabaseAAG
@@ -26,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added support for SharePoint Server Subscription Edition
 - SPInstallPrereqs
   - Added support for SharePoint Server Subscription Edition
+- SPOfficeOnlineServerSupressionSettings
+  - New resource
 
 ### Changed
 
@@ -33,6 +31,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Changed form Size to dynamic Width
   - Change column width to calc /3 of Form.
   - Export form is now more dynamic / responsive
+- SPAccessServiceApp
+  - Service app no longer exists in SharePoint Server Subscription Edition. Added logic to check for SPSE.
+- SPAccessServices2010
+  - Service app no longer exists in SharePoint Server Subscription Edition. Added logic to check for SPSE.
+- SPPerformancePointServiceApp
+  - Service app no longer exists in SharePoint Server Subscription Edition. Added logic to check for SPSE.
 
 ### Removed
 

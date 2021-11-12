@@ -51,7 +51,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Mocks for all contexts
                 Mock -CommandName Use-CacheCluster -MockWith { }
@@ -424,14 +424,36 @@ try
 
                     $Global:SPDscDCacheOnline = $true
 
-                    Mock -CommandName Get-AFCacheHostConfiguration -MockWith {
-                        return @{
-                            Size = $testParams.CacheSizeInMB
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16 -and
+                        $Global:SPDscHelper.CurrentStubBuildNumber.Build -gt 13000)
+                    {
+                        # SPSE mocks
+                        Mock -CommandName Get-SPCacheHostConfig -MockWith {
+                            return @{
+                                Size      = $testParams.CacheSizeInMB
+                                HostName  = $env:COMPUTERNAME
+                                CachePort = 22233
+                            }
+                        }
+
+                        Mock -CommandName Get-SPCacheHost -MockWith {
+                            return @{
+                                PortNo = 22233
+                            }
                         }
                     }
-                    Mock -CommandName Get-CacheHost -MockWith {
-                        return @{
-                            PortNo = 22233
+                    else
+                    {
+                        # Pre SPSE mocks
+                        Mock -CommandName Get-AFCacheHostConfiguration -MockWith {
+                            return @{
+                                Size = $testParams.CacheSizeInMB
+                            }
+                        }
+                        Mock -CommandName Get-CacheHost -MockWith {
+                            return @{
+                                PortNo = 22233
+                            }
                         }
                     }
 
@@ -459,14 +481,36 @@ try
 
                     $Global:SPDscDCacheOnline = $true
 
-                    Mock -CommandName Get-AFCacheHostConfiguration -MockWith {
-                        return @{
-                            Size = $testParams.CacheSizeInMB
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16 -and
+                        $Global:SPDscHelper.CurrentStubBuildNumber.Build -gt 13000)
+                    {
+                        # SPSE mocks
+                        Mock -CommandName Get-SPCacheHostConfig -MockWith {
+                            return @{
+                                Size      = $testParams.CacheSizeInMB
+                                HostName  = $env:COMPUTERNAME
+                                CachePort = 22233
+                            }
+                        }
+
+                        Mock -CommandName Get-SPCacheHost -MockWith {
+                            return @{
+                                PortNo = 22233
+                            }
                         }
                     }
-                    Mock -CommandName Get-CacheHost -MockWith {
-                        return @{
-                            PortNo = 22233
+                    else
+                    {
+                        # Pre SPSE mocks
+                        Mock -CommandName Get-AFCacheHostConfiguration -MockWith {
+                            return @{
+                                Size = $testParams.CacheSizeInMB
+                            }
+                        }
+                        Mock -CommandName Get-CacheHost -MockWith {
+                            return @{
+                                PortNo = 22233
+                            }
                         }
                     }
 
@@ -504,16 +548,39 @@ try
 
                     $Global:SPDscDCacheOnline = $true
 
-                    Mock -CommandName Get-AFCacheHostConfiguration -MockWith {
-                        return @{
-                            Size = 2048
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16 -and
+                        $Global:SPDscHelper.CurrentStubBuildNumber.Build -gt 13000)
+                    {
+                        # SPSE mocks
+                        Mock -CommandName Get-SPCacheHostConfig -MockWith {
+                            return @{
+                                Size      = 2048
+                                HostName  = $env:COMPUTERNAME
+                                CachePort = 22233
+                            }
+                        }
+
+                        Mock -CommandName Get-SPCacheHost -MockWith {
+                            return @{
+                                PortNo = 22233
+                            }
                         }
                     }
-                    Mock -CommandName Get-CacheHost -MockWith {
-                        return @{
-                            PortNo = 22233
+                    else
+                    {
+                        # Pre SPSE mocks
+                        Mock -CommandName Get-AFCacheHostConfiguration -MockWith {
+                            return @{
+                                Size = 2048
+                            }
+                        }
+                        Mock -CommandName Get-CacheHost -MockWith {
+                            return @{
+                                PortNo = 22233
+                            }
                         }
                     }
+
                     Mock -CommandName Start-Sleep -MockWith { }
 
                     Mock -CommandName Get-SPServiceInstance -MockWith {
@@ -639,16 +706,39 @@ try
 
                     $Global:SPDscDCacheOnline = $true
 
-                    Mock -CommandName Get-AFCacheHostConfiguration -MockWith {
-                        return @{
-                            Size = $testParams.CacheSizeInMB
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16 -and
+                        $Global:SPDscHelper.CurrentStubBuildNumber.Build -gt 13000)
+                    {
+                        # SPSE mocks
+                        Mock -CommandName Get-SPCacheHostConfig -MockWith {
+                            return @{
+                                Size      = $testParams.CacheSizeInMB
+                                HostName  = $env:COMPUTERNAME
+                                CachePort = 22233
+                            }
+                        }
+
+                        Mock -CommandName Get-SPCacheHost -MockWith {
+                            return @{
+                                PortNo = 22233
+                            }
                         }
                     }
-                    Mock -CommandName Get-CacheHost -MockWith {
-                        return @{
-                            PortNo = 22233
+                    else
+                    {
+                        # Pre SPSE mocks
+                        Mock -CommandName Get-AFCacheHostConfiguration -MockWith {
+                            return @{
+                                Size = $testParams.CacheSizeInMB
+                            }
+                        }
+                        Mock -CommandName Get-CacheHost -MockWith {
+                            return @{
+                                PortNo = 22233
+                            }
                         }
                     }
+
                     Mock -CommandName Get-NetFirewallRule -MockWith {
                         return @{ }
                     }

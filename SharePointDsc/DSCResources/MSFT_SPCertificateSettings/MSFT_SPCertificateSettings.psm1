@@ -86,8 +86,7 @@ function Get-TargetResource
         throw $message
     }
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
@@ -249,8 +248,7 @@ function Set-TargetResource
         throw $message
     }
 
-    Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+    Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
         $eventSource = $args[1]
@@ -273,10 +271,6 @@ function Set-TargetResource
         if ($params.ContainsKey("IsSingleInstance"))
         {
             $params.Remove("IsSingleInstance")
-        }
-        if ($params.ContainsKey("InstallAccount"))
-        {
-            $params.Remove("InstallAccount")
         }
         if ($params.ContainsKey("CertificateNotificationContacts"))
         {

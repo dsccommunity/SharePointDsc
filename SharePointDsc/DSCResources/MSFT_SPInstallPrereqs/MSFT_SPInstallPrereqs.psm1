@@ -601,7 +601,7 @@ function Get-TargetResource
                     Name                   = "Microsoft Visual C++ 2015-2019 Redistributable (x64)"
                     SearchType             = "BundleUpgradeCode"
                     SearchValue            = "{C146EF48-4D31-3C3D-A2C5-1E91AF8A0A9B}"
-                    MinimumRequiredVersion = "14.29.30040.0"
+                    MinimumRequiredVersion = "14.29.30133.0"
                 }
             )
         }

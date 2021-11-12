@@ -11512,7 +11512,8 @@ function New-SPTrustedIdentityTokenIssuer
     [Parameter(ParameterSetName = 'UPABackedParameterSet')]
     [Parameter(ParameterSetName = 'OIDCParameterSet', Mandatory = $true)]
     [ValidateNotNull()]
-    [System.Security.Cryptography.X509Certificates.X509Certificate2[]]
+    [object]
+    #[System.Security.Cryptography.X509Certificates.X509Certificate2[]]
     ${ImportTrustCertificate},
 
     [Parameter(ParameterSetName = 'MetadataEndPointParameterSet', Mandatory = $true)]
@@ -11638,7 +11639,8 @@ function New-SPTrustedRootAuthority
 
     [Parameter(ParameterSetName = 'ManualUpdateCertificateParameterSet', Mandatory = $true)]
     [ValidateNotNull()]
-    [System.Security.Cryptography.X509Certificates.X509Certificate2]
+    [object]
+    #[System.Security.Cryptography.X509Certificates.X509Certificate2]
     ${Certificate},
 
     [Parameter(ParameterSetName = 'MetadataEndPointParameterSet', Mandatory = $true)]
@@ -11677,7 +11679,8 @@ function New-SPTrustedSecurityTokenIssuer
 
     [Parameter(ParameterSetName = 'ImportCertificateParameterSet', Mandatory = $true)]
     [ValidateNotNull()]
-    [System.Security.Cryptography.X509Certificates.X509Certificate2]
+    [object]
+    #[System.Security.Cryptography.X509Certificates.X509Certificate2]
     ${Certificate},
 
     [Parameter(ParameterSetName = 'MetadataEndPointParameterSet', Mandatory = $true)]
@@ -11708,7 +11711,8 @@ function New-SPTrustedServiceTokenIssuer
 
     [Parameter(ParameterSetName = 'ImportCertificateParameterSet', Mandatory = $true)]
     [ValidateNotNull()]
-    [System.Security.Cryptography.X509Certificates.X509Certificate2]
+    [object]
+    #[System.Security.Cryptography.X509Certificates.X509Certificate2]
     ${Certificate},
 
     [Parameter(ParameterSetName = 'MetadataEndPointParameterSet', Mandatory = $true)]
@@ -17896,7 +17900,8 @@ function Set-SPIRMSettings
     ${CertificateServerUrl},
 
     [ValidateNotNull()]
-    [System.Security.Cryptography.X509Certificates.X509Certificate2]
+    [object]
+    #[System.Security.Cryptography.X509Certificates.X509Certificate2]
     ${ServiceAuthenticationCertificate},
 
     [ValidateNotNull()]
@@ -19224,7 +19229,8 @@ function Set-SPSecurityTokenServiceConfig
   param(
     [Parameter(ParameterSetName = 'SigningCertificateImport')]
     [ValidateNotNull()]
-    [System.Security.Cryptography.X509Certificates.X509Certificate2]
+    [object]
+    #[System.Security.Cryptography.X509Certificates.X509Certificate2]
     ${ImportSigningCertificate},
 
     [Parameter(ParameterSetName = 'SigningCertificateReference')]
@@ -19237,7 +19243,8 @@ function Set-SPSecurityTokenServiceConfig
 
     [Parameter(ParameterSetName = 'SigningCertificateQueue')]
     [ValidateNotNull()]
-    [System.Security.Cryptography.X509Certificates.X509Certificate2]
+    [object]
+    #[System.Security.Cryptography.X509Certificates.X509Certificate2]
     ${QueueSigningCertificate},
 
     [Parameter(ParameterSetName = 'SigningCertificateReference')]
@@ -19250,7 +19257,8 @@ function Set-SPSecurityTokenServiceConfig
 
     [Parameter(ParameterSetName = 'SigningCertificateRevoke')]
     [ValidateNotNull()]
-    [System.Security.Cryptography.X509Certificates.X509Certificate2]
+    [object]
+    #[System.Security.Cryptography.X509Certificates.X509Certificate2]
     ${RevokeSigningCertificate},
 
     [Parameter(ParameterSetName = 'RevokeSigningCertificateReference', Mandatory = $true)]
@@ -19531,7 +19539,8 @@ function Set-SPServiceHostConfig
 
     [Parameter(ParameterSetName = 'SslCertificateImport')]
     [ValidateNotNull()]
-    [System.Security.Cryptography.X509Certificates.X509Certificate2]
+    [object]
+    #[System.Security.Cryptography.X509Certificates.X509Certificate2]
     ${ImportSslCertificate},
 
     [Parameter(ParameterSetName = 'SslCertificateReference')]
@@ -20321,7 +20330,8 @@ function Set-SPTrustedRootAuthority
 
     [Parameter(ParameterSetName = 'ManualUpdateCertificateParameterSet')]
     [ValidateNotNull()]
-    [System.Security.Cryptography.X509Certificates.X509Certificate2]
+    [object]
+    #[System.Security.Cryptography.X509Certificates.X509Certificate2]
     ${Certificate},
 
     [Parameter(ParameterSetName = 'MetadataEndPointParameterSet')]
@@ -20360,7 +20370,8 @@ function Set-SPTrustedSecurityTokenIssuer
 
     [Parameter(ParameterSetName = 'ImportCertificateParameterSet')]
     [ValidateNotNull()]
-    [System.Security.Cryptography.X509Certificates.X509Certificate2]
+    [object]
+    #[System.Security.Cryptography.X509Certificates.X509Certificate2]
     ${Certificate},
 
     [ValidateNotNullOrEmpty()]
@@ -20390,7 +20401,8 @@ function Set-SPTrustedServiceTokenIssuer
 
     [Parameter(ParameterSetName = 'ImportCertificateParameterSet')]
     [ValidateNotNull()]
-    [System.Security.Cryptography.X509Certificates.X509Certificate2]
+    [object]
+    #[System.Security.Cryptography.X509Certificates.X509Certificate2]
     ${Certificate},
 
     [Parameter(ParameterSetName = 'MetadataEndPointParameterSet')]

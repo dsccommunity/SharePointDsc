@@ -49,7 +49,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
                 function New-SPDscMockPrereq
@@ -136,10 +136,11 @@ try
                     if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16 -and
                         $Global:SPDscHelper.CurrentStubBuildNumber.Build -gt 10000)
                     {
-                        # SharePoint 2019
+                        # SharePoint 2019 / SPSE
                         return @{
                             Major = 10
                             Minor = 0
+                            Build = 17763
                         }
                     }
                     else
@@ -304,7 +305,7 @@ try
                                     )
                                 }
                             }
-                            else
+                            elseif ($Global:SPDscHelper.CurrentStubBuildNumber.Build -lt 13000)
                             {
                                 # SharePoint 2019
                                 Mock -CommandName Get-ItemProperty -ParameterFilter {
@@ -319,6 +320,17 @@ try
                                         (New-SPDscMockPrereq -Name "Active Directory Rights Management Services Client 2.1"),
                                         (New-SPDscMockPrereq -Name "Microsoft SQL Server 2012 Native Client"),
                                         (New-SPDscMockPrereq -Name "Microsoft Visual C++ 2017 Redistributable (x64) - 14.13.26020" -BundleUpgradeCode @("{C146EF48-4D31-3C3D-A2C5-1E91AF8A0A9B}") -DisplayVersion "14.13.26020.0")
+                                    )
+                                }
+                            }
+                            else
+                            {
+                                # SharePoint SE
+                                Mock -CommandName Get-ItemProperty -ParameterFilter {
+                                    $Path -eq "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*"
+                                } -MockWith {
+                                    return @(
+                                        (New-SPDscMockPrereq -Name "Microsoft Visual C++ 2015-2019 Redistributable (x64)" -BundleUpgradeCode @("{C146EF48-4D31-3C3D-A2C5-1E91AF8A0A9B}") -DisplayVersion "14.29.30133.0")
                                     )
                                 }
                             }
@@ -535,10 +547,15 @@ try
                                 # SharePoint 2016
                                 $requiredParams = @("SQLNCli", "Sync", "AppFabric", "IDFX11", "MSIPCClient", "KB3092423", "WCFDataServices56", "DotNetFx", "MSVCRT11", "MSVCRT14", "ODBC")
                             }
-                            else
+                            elseif ($Global:SPDscHelper.CurrentStubBuildNumber.Build -lt 13000)
                             {
                                 # SharePoint 2019
                                 $requiredParams = @("SQLNCli", "Sync", "AppFabric", "IDFX11", "MSIPCClient", "KB3092423", "WCFDataServices56", "DotNet472", "MSVCRT11", "MSVCRT141")
+                            }
+                            else
+                            {
+                                # SharePoint SE
+                                $requiredParams = @("DotNet48", "MSVCRT142")
                             }
                         }
                         Default
@@ -600,10 +617,15 @@ try
                                 # SharePoint 2016
                                 $requiredParams = @("SQLNCli", "Sync", "AppFabric", "IDFX11", "MSIPCClient", "KB3092423", "WCFDataServices56", "DotNetFx", "MSVCRT11", "MSVCRT14", "ODBC")
                             }
-                            else
+                            elseif ($Global:SPDscHelper.CurrentStubBuildNumber.Build -lt 13000)
                             {
                                 # SharePoint 2019
                                 $requiredParams = @("SQLNCli", "Sync", "AppFabric", "IDFX11", "MSIPCClient", "KB3092423", "WCFDataServices56", "DotNet472", "MSVCRT11", "MSVCRT141")
+                            }
+                            else
+                            {
+                                # SharePoint SE
+                                $requiredParams = @("DotNet48", "MSVCRT142")
                             }
                         }
                         Default
@@ -665,10 +687,15 @@ try
                                 # SharePoint 2016
                                 $requiredParams = @("SQLNCli", "Sync", "AppFabric", "IDFX11", "MSIPCClient", "KB3092423", "WCFDataServices56", "DotNetFx", "MSVCRT11", "MSVCRT14", "ODBC")
                             }
-                            else
+                            elseif ($Global:SPDscHelper.CurrentStubBuildNumber.Build -lt 13000)
                             {
                                 # SharePoint 2019
                                 $requiredParams = @("SQLNCli", "Sync", "AppFabric", "IDFX11", "MSIPCClient", "KB3092423", "WCFDataServices56", "DotNet472", "MSVCRT11", "MSVCRT141")
+                            }
+                            else
+                            {
+                                # SharePoint SE
+                                $requiredParams = @("DotNet48", "MSVCRT142")
                             }
                         }
                         Default
