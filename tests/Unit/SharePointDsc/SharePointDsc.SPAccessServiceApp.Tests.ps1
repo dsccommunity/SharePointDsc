@@ -50,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15 -or
                     ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16 -and
@@ -89,7 +89,7 @@ try
             # Test contexts
             if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15 -or
                 ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16 -and
-                 $Global:SPDscHelper.CurrentStubBuildNumber.Build -lt 13000))
+                $Global:SPDscHelper.CurrentStubBuildNumber.Build -lt 13000))
             {
                 Context -Name "When no service applications exist in the current farm" -Fixture {
                     BeforeAll {
@@ -231,7 +231,6 @@ try
                     }
 
                     It "Should call the remove service application cmdlet in the set method" {
-                        Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope
                         Set-TargetResource @testParams
                         Assert-MockCalled Remove-SPServiceApplication
                     }
