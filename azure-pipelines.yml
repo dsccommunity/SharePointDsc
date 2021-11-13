@@ -256,25 +256,32 @@ stages:
               targetPath: '$(Build.SourcesDirectory)/$(buildArtifactName)'
 
           - task: DownloadPipelineArtifact@2
-            displayName: 'Download Test Artifact'
+            displayName: 'Download Test Artifact SP2013'
             inputs:
               buildType: 'current'
               artifactName: 'CodeCoverage_2013'
               targetPath: '$(Build.SourcesDirectory)/$(buildFolderName)/$(testResultFolderName)/CodeCov2013'
 
           - task: DownloadPipelineArtifact@2
-            displayName: 'Download Test Artifact'
+            displayName: 'Download Test Artifact SP2016'
             inputs:
               buildType: 'current'
               artifactName: 'CodeCoverage_2016'
               targetPath: '$(Build.SourcesDirectory)/$(buildFolderName)/$(testResultFolderName)/CodeCov2016'
 
           - task: DownloadPipelineArtifact@2
-            displayName: 'Download Test Artifact'
+            displayName: 'Download Test Artifact SP2019'
             inputs:
               buildType: 'current'
               artifactName: 'CodeCoverage_2019'
               targetPath: '$(Build.SourcesDirectory)/$(buildFolderName)/$(testResultFolderName)/CodeCov2019'
+
+          - task: DownloadPipelineArtifact@2
+            displayName: 'Download Test Artifact SPSE'
+            inputs:
+              buildType: 'current'
+              artifactName: 'CodeCoverage_SPSE'
+              targetPath: '$(Build.SourcesDirectory)/$(buildFolderName)/$(testResultFolderName)/CodeCovSPSE'
 
           - task: PowerShell@2
             name: merge
