@@ -9,18 +9,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - SharePointDsc
   - Added support for SharePoint Server Subscription Edition in Util module and unit tests stubs
-- SPAccessServiceApp
-  - Service app no longer exists in SharePoint Server Subscription Edition. Added logic to check for SPSE.
-- SPAccessServices2010
-  - Service app no longer exists in SharePoint Server Subscription Edition. Added logic to check for SPSE.
+  - Added SPSE unit tests to the Azure pipeline definitions
+- SPCertificateSettings
+  - New resource
+- SPDatabaseAAG
+  - Updated code to cater for updated cmdlet names in SPSE
+- SPDistributedCacheService
+  - Added support for SharePoint Server Subscription Edition
 - SPFarm
   - Added support for SharePoint Server Subscription Edition
 - SPInstall
   - Added support for SharePoint Server Subscription Edition
 - SPInstallPrereqs
   - Added support for SharePoint Server Subscription Edition
-- SPDistributedCacheService
-  - Added support for SharePoint Server Subscription Edition
+- SPOfficeOnlineServerSupressionSettings
+  - New resource
+
+### Changed
+
+- ReverseDsc
+  - Changed form Size to dynamic Width
+  - Change column width to calc /3 of Form.
+  - Export form is now more dynamic / responsive
+- SPAccessServiceApp
+  - Service app no longer exists in SharePoint Server Subscription Edition. Added logic to check for SPSE.
+- SPAccessServices2010
+  - Service app no longer exists in SharePoint Server Subscription Edition. Added logic to check for SPSE.
+- SPPerformancePointServiceApp
+  - Service app no longer exists in SharePoint Server Subscription Edition. Added logic to check for SPSE.
 
 ### Removed
 
@@ -28,7 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - [BREAKING CHANGE] Removed PowerShell v4.0 support by removing the InstallAccount parameter
     from all resources.
 
-## [v4.9] - 2021-11-05 
+## [4.9.0] - 2021-11-06
 
 ### Added
 
@@ -56,7 +72,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Fixed issue where the resource was using hardcoded SP2016 and later paths
     and therefore didn't work in SP2013
 - SPSearchServiceApp
-  - Disabled Farm account DB ownership updating functions when using SQL Auth
+  - Disabled the Farm account DB ownership check when using SQL Auth
 - SPServiceAppPool
   - Fixed issue in Export method where the PsDscRunAsCredential was stored as
     a string instead of a PsCredential object

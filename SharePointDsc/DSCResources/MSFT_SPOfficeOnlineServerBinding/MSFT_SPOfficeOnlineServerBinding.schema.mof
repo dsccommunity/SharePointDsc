@@ -1,15 +1,3 @@
-/*
-
-**Example**
-
-    SPOfficeOnlineServerBinding OosBinding
-    {
-        Zone                 = "internal-https"
-        DnsName              = "webapps.contoso.com"
-        Ensure               = "Present"
-        PsDscRunAsCredential = $SetupAccount
-    }
-*/
 [ClassVersion("1.0.0.0"), FriendlyName("SPOfficeOnlineServerBinding")]
 class MSFT_SPOfficeOnlineServerBinding : OMI_BaseResource
 {

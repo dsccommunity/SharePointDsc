@@ -707,7 +707,18 @@ function Test-TargetResource
     Write-Verbose -Message "Testing Search service application '$Name'"
 
     $PSBoundParameters.Ensure = $Ensure
-    $PSBoundParameters.FixFarmAccountPermissions = $FixFarmAccountPermissions
+
+    if ($UseSQLAuthentication -eq $true)
+    {
+        Write-Verbose ("Cannot check Farm Account permissions when SQL " + `
+                "DatabaseCredentials are specified.")
+        Write-Verbose "Setting FixFarmAccountPermissions to False"
+        $PSBoundParameters.FixFarmAccountPermissions = $false
+    }
+    else
+    {
+        $PSBoundParameters.FixFarmAccountPermissions = $FixFarmAccountPermissions
+    }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 

@@ -3,8 +3,8 @@
 [![Build Status](https://dev.azure.com/dsccommunity/SharePointDsc/_apis/build/status/dsccommunity.SharePointDsc?branchName=master)](https://dev.azure.com/dsccommunity/SharePointDsc/_build/latest?definitionId=14&branchName=master)
 ![Azure DevOps coverage (branch)](https://img.shields.io/azure-devops/coverage/dsccommunity/SharePointDsc/14/master)
 [![Azure DevOps tests](https://img.shields.io/azure-devops/tests/dsccommunity/SharePointDsc/14/master)](https://dsccommunity.visualstudio.com/SharePointDsc/_test/analytics?definitionId=14&contextType=build)
-[![PowerShell Gallery (with prereleases)](https://img.shields.io/powershellgallery/vpre/SharePointDsc?label=SharePointDsc%20Preview)](https://www.powershellgallery.com/packages/SharePointDsc/)
-[![PowerShell Gallery](https://img.shields.io/powershellgallery/v/SharePointDsc?label=SharePointDsc)](https://www.powershellgallery.com/packages/SharePointDsc/)
+[![PowerShell Gallery (with prereleases)](https://img.shields.io/powershellgallery/v/SharePointDsc.svg?include_prereleases&label=SharePointDsc%20Preview)](https://www.powershellgallery.com/packages/SharePointDsc/)
+[![PowerShell Gallery](https://img.shields.io/powershellgallery/v/SharePointDsc.svg?&label=SharePointDsc)](https://www.powershellgallery.com/packages/SharePointDsc/)
 
 The SharePointDsc PowerShell module (formerly known as xSharePoint) provides
 DSC resources that can be used to deploy and manage a SharePoint farm.
@@ -53,12 +53,10 @@ SharePoint DSC resoures available:
 
 ## Requirements
 
-The minimum PowerShell version required is 4.0, which ships in Windows 8.1
-or Windows Server 2012R2 (or higher versions). The preferred version is
-PowerShell 5.0 or higher, which ships with Windows 10 or Windows Server 2016.
-This is discussed [on the SharePointDsc wiki](https://github.com/dsccommunity/SharePointDsc/wiki/Remote%20sessions%20and%20the%20InstallAccount%20variable),
-but generally PowerShell 5 will run the SharePoint DSC resources faster and
-with improved verbose level logging.
+The minimum PowerShell version required is 5.0, available for all currently
+supported operating systems. The preferred version is PowerShell 5.1, which
+ships with Windows 10 or Windows Server 2016. This is discussed
+[on the SharePointDsc wiki](https://github.com/dsccommunity/SharePointDsc/wiki/Remote%20sessions%20and%20the%20InstallAccount%20variable).
 
 ## Documentation and examples
 

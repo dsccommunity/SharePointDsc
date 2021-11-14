@@ -1,0 +1,7 @@
+[ClassVersion("1.0.0.0"), FriendlyName("SPOfficeOnlineServerSupressionSettings")]
+class MSFT_SPOfficeOnlineServerSupressionSettings : OMI_BaseResource
+{
+    [Key, Description("The file extension that needs to be supressed")] string Extension;
+    [Write, Description("The action that needs to be supressed"), ValueMap{"attend", "attendservice", "convert", "edit", "editnew", "embedview", "formedit", "formsubmit", "imagepreview", "interactivepreview", "legacywebservice", "mobileView", "preloadedit", "preloadview", "present", "presentservice", "rest", "rtc", "syndicate", "view"}, Values{"attend", "attendservice", "convert", "edit", "editnew", "embedview", "formedit", "formsubmit", "imagepreview", "interactivepreview", "legacywebservice", "mobileView", "preloadedit", "preloadview", "present", "presentservice", "rest", "rtc", "syndicate", "view"}] string Actions[];
+    [Write, Description("Present ensures the supression for this extension exists, absent ensures it doesn't"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
+};

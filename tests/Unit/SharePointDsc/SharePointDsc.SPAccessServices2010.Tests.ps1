@@ -51,189 +51,225 @@ try
             BeforeAll {
                 Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-                # Initialize tests
-                $getTypeFullName = "Microsoft.Office.Access.Server.MossHost.AccessServerWebServiceApplication"
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15 -or
+                    ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16 -and
+                    $Global:SPDscHelper.CurrentStubBuildNumber.Build -lt 13000))
+                {
+                    # Initialize tests
+                    $getTypeFullName = "Microsoft.Office.Access.Server.MossHost.AccessServerWebServiceApplication"
 
-                # Mocks for all contexts
-                Mock -CommandName Get-SPServiceApplication -MockWith { }
-                Mock -CommandName New-SPAccessServiceApplication -MockWith { }
-                Mock -CommandName Remove-SPServiceApplication -MockWith { }
+                    # Mocks for all contexts
+                    Mock -CommandName Get-SPServiceApplication -MockWith { }
+                    Mock -CommandName New-SPAccessServiceApplication -MockWith { }
+                    Mock -CommandName Remove-SPServiceApplication -MockWith { }
+                }
             }
 
             # Test contexts
-            Context -Name "When Access 2010 Services doesn't exists and should exist" -Fixture {
-                BeforeAll {
-                    $testParams = @{
-                        Name            = "Access 2010 Services Service Application"
-                        ApplicationPool = "SharePoint Service Applications"
-                        Ensure          = "Present"
-                    }
-
-                    Mock -CommandName Remove-SPServiceApplication -MockWith { }
-                    Mock -CommandName New-SPAccessServiceApplication -MockWith { }
-                    Mock -CommandName Get-SPServiceApplication -MockWith {
-                        $spServiceApp = [PSCustomObject]@{
-                            DisplayName = $testParams.Name
+            if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15 -or
+                ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16 -and
+                 $Global:SPDscHelper.CurrentStubBuildNumber.Build -lt 13000))
+            {
+                Context -Name "When Access 2010 Services doesn't exists and should exist" -Fixture {
+                    BeforeAll {
+                        $testParams = @{
+                            Name            = "Access 2010 Services Service Application"
+                            ApplicationPool = "SharePoint Service Applications"
+                            Ensure          = "Present"
                         }
-                        $spServiceApp | Add-Member -MemberType ScriptMethod `
-                            -Name GetType `
-                            -Value {
-                            return @{
-                                FullName = "$($getTypeFullName).other"
-                            }
-                        } -PassThru -Force
-                        return @($spServiceApp)
-                    }
-                }
 
-                It "Should return absent from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
-                }
-                It "Should return true when the Test method is called" {
-                    Test-TargetResource @testParams | Should -Be $false
-                }
-                It "Should call Methods on Set-TargetResource" {
-                    Set-TargetResource @testParams
-                    Assert-MockCalled Get-SPServiceApplication
-                    Assert-MockCalled New-SPAccessServiceApplication -Times 1
-                    Assert-MockCalled Remove-SPServiceApplication -Times 0
-                }
-            }
-            Context -Name "When Access 2010 Services exists and should exist" -Fixture {
-                BeforeAll {
-                    $testParams = @{
-                        Name            = "Access 2010 Services Service Application"
-                        ApplicationPool = "SharePoint Service Applications"
-                        Ensure          = "Present"
-                    }
-
-                    Mock -CommandName Remove-SPServiceApplication -MockWith { }
-                    Mock -CommandName New-SPAccessServiceApplication -MockWith { }
-                    Mock -CommandName Get-SPServiceApplication -MockWith {
-                        $spServiceApp = [PSCustomObject]@{
-                            DisplayName     = $testParams.Name
-                            Name            = $testParams.Name
-                            ApplicationPool = [PSCustomObject]@{
-                                Name = $testParams.ApplicationPool
+                        Mock -CommandName Remove-SPServiceApplication -MockWith { }
+                        Mock -CommandName New-SPAccessServiceApplication -MockWith { }
+                        Mock -CommandName Get-SPServiceApplication -MockWith {
+                            $spServiceApp = [PSCustomObject]@{
+                                DisplayName = $testParams.Name
                             }
+                            $spServiceApp | Add-Member -MemberType ScriptMethod `
+                                -Name GetType `
+                                -Value {
+                                return @{
+                                    FullName = "$($getTypeFullName).other"
+                                }
+                            } -PassThru -Force
+                            return @($spServiceApp)
                         }
-                        $spServiceApp | Add-Member -MemberType ScriptMethod `
-                            -Name GetType `
-                            -Value {
-                            return @{
-                                FullName = "$($getTypeFullName)"
-                            }
-                        } -PassThru -Force
-                        return @($spServiceApp)
-                    }
-                }
-
-                It "Should return present from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
-                }
-                It "Should return true when the Test method is called" {
-                    Test-TargetResource @testParams | Should -Be $true
-                }
-                It "Should call Remove - Get - New on Set-TargetResource" {
-                    Set-TargetResource @testParams
-                    Assert-MockCalled Get-SPServiceApplication
-
-                }
-            }
-
-            Context -Name "When Access 2010 Services exists and shouldn't exist" -Fixture {
-                BeforeAll {
-                    $testParams = @{
-                        Name            = "Access 2010 Services Service Application"
-                        ApplicationPool = "SharePoint Service Applications"
-                        Ensure          = "Absent"
                     }
 
-                    Mock -CommandName Remove-SPServiceApplication -MockWith { }
-                    Mock -CommandName New-SPAccessServiceApplication -MockWith { }
-                    Mock -CommandName Get-SPServiceApplication -MockWith {
-                        $spServiceApp = [PSCustomObject]@{
-                            DisplayName     = $testParams.Name
-                            Name            = $testParams.Name
-                            ApplicationPool = [PSCustomObject]@{
-                                Name = $testParams.ApplicationPool
-                            }
+                    It "Should return absent from the get method" {
+                        (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
+                    }
+                    It "Should return true when the Test method is called" {
+                        Test-TargetResource @testParams | Should -Be $false
+                    }
+                    It "Should call Methods on Set-TargetResource" {
+                        Set-TargetResource @testParams
+                        Assert-MockCalled Get-SPServiceApplication
+                        Assert-MockCalled New-SPAccessServiceApplication -Times 1
+                        Assert-MockCalled Remove-SPServiceApplication -Times 0
+                    }
+                }
+                Context -Name "When Access 2010 Services exists and should exist" -Fixture {
+                    BeforeAll {
+                        $testParams = @{
+                            Name            = "Access 2010 Services Service Application"
+                            ApplicationPool = "SharePoint Service Applications"
+                            Ensure          = "Present"
                         }
-                        $spServiceApp | Add-Member -MemberType ScriptMethod `
-                            -Name GetType `
-                            -Value {
-                            return @{
-                                FullName = "$($getTypeFullName)"
+
+                        Mock -CommandName Remove-SPServiceApplication -MockWith { }
+                        Mock -CommandName New-SPAccessServiceApplication -MockWith { }
+                        Mock -CommandName Get-SPServiceApplication -MockWith {
+                            $spServiceApp = [PSCustomObject]@{
+                                DisplayName     = $testParams.Name
+                                Name            = $testParams.Name
+                                ApplicationPool = [PSCustomObject]@{
+                                    Name = $testParams.ApplicationPool
+                                }
                             }
-                        } -PassThru -Force
-                        return @($spServiceApp)
+                            $spServiceApp | Add-Member -MemberType ScriptMethod `
+                                -Name GetType `
+                                -Value {
+                                return @{
+                                    FullName = "$($getTypeFullName)"
+                                }
+                            } -PassThru -Force
+                            return @($spServiceApp)
+                        }
+                    }
+
+                    It "Should return present from the get method" {
+                        (Get-TargetResource @testParams).Ensure | Should -Be "Present"
+                    }
+                    It "Should return true when the Test method is called" {
+                        Test-TargetResource @testParams | Should -Be $true
+                    }
+                    It "Should call Remove - Get - New on Set-TargetResource" {
+                        Set-TargetResource @testParams
+                        Assert-MockCalled Get-SPServiceApplication
+
                     }
                 }
 
-                It "Should return present from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
+                Context -Name "When Access 2010 Services exists and shouldn't exist" -Fixture {
+                    BeforeAll {
+                        $testParams = @{
+                            Name            = "Access 2010 Services Service Application"
+                            ApplicationPool = "SharePoint Service Applications"
+                            Ensure          = "Absent"
+                        }
+
+                        Mock -CommandName Remove-SPServiceApplication -MockWith { }
+                        Mock -CommandName New-SPAccessServiceApplication -MockWith { }
+                        Mock -CommandName Get-SPServiceApplication -MockWith {
+                            $spServiceApp = [PSCustomObject]@{
+                                DisplayName     = $testParams.Name
+                                Name            = $testParams.Name
+                                ApplicationPool = [PSCustomObject]@{
+                                    Name = $testParams.ApplicationPool
+                                }
+                            }
+                            $spServiceApp | Add-Member -MemberType ScriptMethod `
+                                -Name GetType `
+                                -Value {
+                                return @{
+                                    FullName = "$($getTypeFullName)"
+                                }
+                            } -PassThru -Force
+                            return @($spServiceApp)
+                        }
+                    }
+
+                    It "Should return present from the get method" {
+                        (Get-TargetResource @testParams).Ensure | Should -Be "Present"
+                    }
+                    It "Should return false when the Test method is called" {
+                        Test-TargetResource @testParams | Should -Be $false
+                    }
+                    It "Should call Remove - Get - New on Set-TargetResource" {
+                        Set-TargetResource @testParams
+                        Assert-MockCalled Remove-SPServiceApplication
+                        Assert-MockCalled Get-SPServiceApplication
+                    }
                 }
-                It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should -Be $false
+
+                Context -Name "When Access 2010 Services doesn't exists and should exist" -Fixture {
+                    BeforeAll {
+                        $testParams = @{
+                            Name            = "Access 2010 Services Service Application"
+                            ApplicationPool = "SharePoint Service Applications"
+                            Ensure          = "Present"
+                        }
+
+                        Mock -CommandName Remove-SPServiceApplication -MockWith { }
+                        Mock -CommandName New-SPAccessServiceApplication -MockWith { }
+                        Mock -CommandName Get-SPServiceApplication -MockWith {
+                            return $null
+                        }
+                    }
+
+                    It "Should return absent from the get method" {
+                        (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
+                    }
+                    It "Should return false when the Test method is called" {
+                        Test-TargetResource @testParams | Should -Be $false
+                    }
+                    It "Should call New on Set-TargetResource" {
+                        Set-TargetResource @testParams
+                        Assert-MockCalled New-SPAccessServiceApplication
+                    }
                 }
-                It "Should call Remove - Get - New on Set-TargetResource" {
-                    Set-TargetResource @testParams
-                    Assert-MockCalled Remove-SPServiceApplication
-                    Assert-MockCalled Get-SPServiceApplication
+
+                Context -Name "When Access 2010 Services doesn't exists and shouldn't exist" -Fixture {
+                    BeforeAll {
+                        $testParams = @{
+                            Name            = "Access 2010 Services Service Application"
+                            ApplicationPool = "SharePoint Service Applications"
+                            Ensure          = "Absent"
+                        }
+
+                        Mock -CommandName Remove-SPServiceApplication -MockWith { }
+                        Mock -CommandName New-SPAccessServiceApplication -MockWith { }
+                        Mock -CommandName Get-SPServiceApplication -MockWith {
+                            return $null
+                        }
+                    }
+
+                    It "Should return absent from the get method" {
+                        (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
+                    }
+                    It "Should return true when the Test method is called" {
+                        Test-TargetResource @testParams | Should -Be $true
+                    }
+                    It "Should call New on Set-TargetResource" {
+                        Set-TargetResource @testParams
+                        Assert-MockCalled Get-SPServiceApplication
+                    }
                 }
             }
 
-            Context -Name "When Access 2010 Services doesn't exists and should exist" -Fixture {
-                BeforeAll {
-                    $testParams = @{
-                        Name            = "Access 2010 Services Service Application"
-                        ApplicationPool = "SharePoint Service Applications"
-                        Ensure          = "Present"
+            if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16 -and
+                $Global:SPDscHelper.CurrentStubBuildNumber.Build -gt 13000)
+            {
+                Context -Name "All methods throw exceptions as Access Services 2010 no longer exists in SharePoint Server Subscription Edition" -Fixture {
+                    BeforeAll {
+                        $testParams = @{
+                            Name            = "Access 2010 Services Service Application"
+                            ApplicationPool = "SharePoint Service Applications"
+                            Ensure          = "Present"
+                        }
                     }
 
-                    Mock -CommandName Remove-SPServiceApplication -MockWith { }
-                    Mock -CommandName New-SPAccessServiceApplication -MockWith { }
-                    Mock -CommandName Get-SPServiceApplication -MockWith {
-                        return $null
-                    }
-                }
-
-                It "Should return absent from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
-                }
-                It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should -Be $false
-                }
-                It "Should call New on Set-TargetResource" {
-                    Set-TargetResource @testParams
-                    Assert-MockCalled New-SPAccessServiceApplication
-                }
-            }
-
-            Context -Name "When Access 2010 Services doesn't exists and shouldn't exist" -Fixture {
-                BeforeAll {
-                    $testParams = @{
-                        Name            = "Access 2010 Services Service Application"
-                        ApplicationPool = "SharePoint Service Applications"
-                        Ensure          = "Absent"
+                    It "Should throw on the get method" {
+                        { Get-TargetResource @testParams } | Should -Throw "Since SharePoint Server Subscription Edition the Access Services 2010 does no longer exists."
                     }
 
-                    Mock -CommandName Remove-SPServiceApplication -MockWith { }
-                    Mock -CommandName New-SPAccessServiceApplication -MockWith { }
-                    Mock -CommandName Get-SPServiceApplication -MockWith {
-                        return $null
+                    It "Should throw on the test method" {
+                        { Test-TargetResource @testParams } | Should -Throw "Since SharePoint Server Subscription Edition the Access Services 2010 does no longer exists."
                     }
-                }
 
-                It "Should return absent from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
-                }
-                It "Should return true when the Test method is called" {
-                    Test-TargetResource @testParams | Should -Be $true
-                }
-                It "Should call New on Set-TargetResource" {
-                    Set-TargetResource @testParams
-                    Assert-MockCalled Get-SPServiceApplication
+                    It "Should throw on the set method" {
+                        { Set-TargetResource @testParams } | Should -Throw "Since SharePoint Server Subscription Edition the Access Services 2010 does no longer exists."
+                    }
                 }
             }
         }
