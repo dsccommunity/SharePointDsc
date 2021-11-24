@@ -841,6 +841,84 @@ function Get-SPWebPolicyPermissions
     return $permission
 }
 
+function Convert-SPDscHashtableToCIMInstanceString
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [System.Collections.Hashtable]
+        $Params,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $CIMInstanceName
+    )
+    $cimString = "`r`n                $CIMInstanceName {`r`n"
+    foreach ($key in $params.Keys)
+    {
+        try
+        {
+            $isCredentials = $false
+            <#
+            if ($key.ToLower() -eq "username")
+            {
+                if (!($params[$key].ToUpper() -like "NT AUTHORITY*"))
+                {
+                    $memberUserName = Get-Credentials -UserName $params[$key]
+                    if ($memberUserName)
+                    {
+                        $isCredentials = $true
+                    }
+                }
+            }
+            #>
+
+            if (($params[$key].ToString().ToLower() -eq "false" -or $params[$key].ToString().ToLower() -eq "true") -and !$isCredentials)
+            {
+                $cimString += "                    " + $key + " = `$" + $params[$key] + "`r`n"
+            }
+            elseif (!$isCredentials)
+            {
+                $cimString += "                    " + $key + " = '" + $params[$key] + "'`r`n"
+            }
+            else
+            {
+                $cimString += "                    " + $key + " =  " + (Resolve-Credentials -UserName $params[$key]) + ".UserName`r`n"
+            }
+        }
+        catch
+        {
+            $Global:ErrorLog += "[$CIMInstanceName]" + $key + "`r`n"
+            $Global:ErrorLog += "$_`r`n`r`n"
+        }
+    }
+    $cimString += "                }"
+    return $cimString
+}
+
+function Convert-SPDscArrayToCIMInstanceString
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [System.Array]
+        $Params,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $CIMInstanceName
+    )
+
+    $cimArray = @()
+    foreach ($param in $Params)
+    {
+        $cimArray += Convert-SPDscHashtableToCIMInstanceString -Params $param -CIMInstanceName $CIMInstanceName
+    }
+    return $cimArray
+}
+
 function Get-SPDscDBForAlias()
 {
     [CmdletBinding()]
@@ -1516,17 +1594,17 @@ function DisplayGUI()
     #region Global
     $Global:liteComponents = @()
     $Global:defaultComponents = @()
-    $padding=20
+    $padding = 20
     $form = New-Object System.Windows.Forms.Form
     $screens = [System.Windows.Forms.Screen]::AllScreens
     $form.Width = ($screens[0].Bounds.Width)
     $form.Height = ($screens[0].Bounds.Height)
 
     #$form.WindowState = [System.Windows.Forms.FormWindowState]::Maximized
-    $firstColumnLeft = 1+$padding
+    $firstColumnLeft = 1 + $padding
 
-    $secondColumnLeft = (($screens[0].Bounds.Width) /3)+$firstColumnLeft +$padding
-    $thirdColumnLeft = (($screens[0].Bounds.Width) /3)+$secondColumnLeft +$padding
+    $secondColumnLeft = (($screens[0].Bounds.Width) / 3) + $firstColumnLeft + $padding
+    $thirdColumnLeft = (($screens[0].Bounds.Width) / 3) + $secondColumnLeft + $padding
     $topBannerHeight = 70
 
     $panelMain = New-Object System.Windows.Forms.Panel
@@ -1548,7 +1626,7 @@ function DisplayGUI()
     $panelInformationArchitecture.Left = $firstColumnLeft
     $panelInformationArchitecture.AutoSize = $true
     $panelInformationArchitecture.Height = 80
-    $panelInformationArchitecture.Width = (($screens[0].Bounds.Width)/3) -$padding
+    $panelInformationArchitecture.Width = (($screens[0].Bounds.Width) / 3) - $padding
     $panelInformationArchitecture.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
 
     $align = 0
@@ -1592,7 +1670,7 @@ function DisplayGUI()
     $panelSecurity.Top = $panelInformationArchitecture.Top + $panelInformationArchitecture.Height + 40
     $panelSecurity.Left = $firstColumnLeft
     $panelSecurity.AutoSize = $true
-    $panelSecurity.Width = (($screens[0].Bounds.Width)/3) -$padding
+    $panelSecurity.Width = (($screens[0].Bounds.Width) / 3) - $padding
     $panelSecurity.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
 
     $align = 0
@@ -1637,7 +1715,7 @@ function DisplayGUI()
     $panelSA.Top = $panelSecurity.Top + $panelSecurity.Height + 40
     $panelSA.Left = $firstColumnLeft
     $panelSA.AutoSize = $true
-    $panelSA.Width = (($screens[0].Bounds.Width)/3) -$padding
+    $panelSA.Width = (($screens[0].Bounds.Width) / 3) - $padding
     $panelSA.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
 
     $align = 0
@@ -1682,7 +1760,7 @@ function DisplayGUI()
     $panelSearch.Top = 30 + $topBannerHeight
     $panelSearch.Left = $secondColumnLeft
     $panelSearch.AutoSize = $true
-    $panelSearch.Width = (($screens[0].Bounds.Width)/3) -$padding
+    $panelSearch.Width = (($screens[0].Bounds.Width) / 3) - $padding
     $panelSearch.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
 
     $align = 0
@@ -1727,7 +1805,7 @@ function DisplayGUI()
     $panelWebApp.Top = $panelSearch.Top + $panelSearch.Height + 40
     $panelWebApp.Left = $secondColumnLeft
     $panelWebApp.AutoSize = $true
-    $panelWebApp.Width = (($screens[0].Bounds.Width)/3) -$padding
+    $panelWebApp.Width = (($screens[0].Bounds.Width) / 3) - $padding
     $panelWebApp.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
 
     $align = 0
@@ -1773,7 +1851,7 @@ function DisplayGUI()
     $panelCustomization.Left = $secondColumnLeft
     $panelCustomization.AutoSize = $true
     $panelCustomization.Height = 80
-    $panelCustomization.Width = (($screens[0].Bounds.Width)/3) -$padding
+    $panelCustomization.Width = (($screens[0].Bounds.Width) / 3) - $padding
     $panelCustomization.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
 
     $align = 0
@@ -1818,7 +1896,7 @@ function DisplayGUI()
     $panelConfig.Top = 30 + $topBannerHeight
     $panelConfig.Left = $thirdColumnLeft
     $panelConfig.AutoSize = $true
-    $panelConfig.Width = (($screens[0].Bounds.Width)/3) -$padding
+    $panelConfig.Width = (($screens[0].Bounds.Width) / 3) - $padding
     $panelConfig.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
 
     $align = 0
@@ -1863,7 +1941,7 @@ function DisplayGUI()
     $panelUPS.Top = $panelConfig.Top + $panelConfig.Height + 40
     $panelUPS.Left = $thirdColumnLeft
     $panelUPS.AutoSize = $true
-    $panelUPS.Width = (($screens[0].Bounds.Width)/3) -$padding
+    $panelUPS.Width = (($screens[0].Bounds.Width) / 3) - $padding
     $panelUPS.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
 
     $align = 0

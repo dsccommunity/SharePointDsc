@@ -53,6 +53,18 @@ try
                 Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
+                try
+                {
+                    [Microsoft.SharePoint.Administration.SPUrlZone]
+                }
+                catch
+                {
+                    Add-Type -TypeDefinition @"
+        namespace Microsoft.SharePoint.Administration {
+            public enum SPUrlZone { Default, Intranet, Internet, Custom, Extranet };
+        }
+"@
+                }
 
                 # Mocks for all contexts
                 Mock -CommandName New-SPAuthenticationProvider -MockWith { }
@@ -233,6 +245,7 @@ try
                                     @{ Path = "C:\inetpub\wwwroot\something" }
                                 )
                                 Url              = $testParams.WebAppUrl
+                                SiteDataServers  = @()
                             }) }
                 }
 
@@ -278,6 +291,7 @@ try
                                     @{ Path = "C:\inetpub\wwwroot\something" }
                                 )
                                 Url              = $testParams.WebAppUrl
+                                SiteDataServers  = @()
                             }) }
                 }
 
@@ -323,6 +337,7 @@ try
                                     @{ Path = "C:\inetpub\wwwroot\something" }
                                 )
                                 Url              = $testParams.WebAppUrl
+                                SiteDataServers  = @()
                             }) }
                 }
 
@@ -369,6 +384,7 @@ try
                                     @{ Path = "C:\inetpub\wwwroot\something" }
                                 )
                                 Url              = $testParams.WebAppUrl
+                                SiteDataServers  = @()
                             }) }
                 }
 
@@ -445,6 +461,7 @@ try
                                     @{ Path = "C:\inetpub\wwwroot\something" }
                                 )
                                 Url                     = $testParams.WebAppUrl
+                                SiteDataServers         = @()
                             }
                         ) }
                 }
@@ -495,6 +512,7 @@ try
                                     @{ Path = "C:\inetpub\wwwroot\something" }
                                 )
                                 Url                     = $testParams.WebAppUrl
+                                SiteDataServers         = @()
                             }
                         ) }
                 }
@@ -698,6 +716,7 @@ try
                                     @{ Path = "C:\inetpub\wwwroot\something" }
                                 )
                                 Url                     = $testParams.WebAppUrl
+                                SiteDataServers         = @()
                             }
                         ) }
                 }
@@ -773,6 +792,16 @@ try
                         ApplicationPoolAccount = "DEMO\ServiceAccount"
                         DatabaseName           = "SP_Content_00"
                         WebAppUrl              = "http://sites.sharepoint.com"
+                        SiteDataServers        = @(
+                            (New-CimInstance -ClassName MSFT_SPWebAppSiteDataServers -Property @{
+                                Zone = "Default"
+                                Uri  = "http://spwfe"
+                            } -ClientOnly),
+                            (New-CimInstance -ClassName MSFT_SPWebAppSiteDataServers -Property @{
+                                Zone = "Internet"
+                                Uri  = "http://spwfe"
+                            } -ClientOnly)
+                        )
                         Ensure                 = "Present"
                     }
 
@@ -824,6 +853,18 @@ try
                     }
 
                     Mock -CommandName Get-SPWebApplication -MockWith {
+                        $sds = New-Object "System.Collections.Generic.Dictionary[[object],[System.Collections.Generic.List[System.Uri]]]"
+
+                        $uriList = New-Object System.Collections.Generic.List[System.Uri](1)
+                        $target = New-Object System.Uri("http://spbackend")
+                        $target2 = New-Object System.Uri("http://spbackend2")
+                        $uriList.Add($target)
+                        $uriList.Add($target2)
+                        $defaultZone = [Microsoft.SharePoint.Administration.SPUrlZone]"Default"
+                        $sds.Add($defaultZone, $uriList)
+                        $intranetZone = [Microsoft.SharePoint.Administration.SPUrlZone]"Intranet"
+                        $sds.Add($intranetZone, $uriList)
+
                         $returnval = @(@{
                                 DisplayName             = $testParams.Name
                                 ApplicationPool         = @{
@@ -841,6 +882,7 @@ try
                                     @{ Path = "C:\inetpub\wwwroot\something" }
                                 )
                                 Url                     = $testParams.WebAppUrl
+                                SiteDataServers         = $sds
                             }
                         )
                         $returnval = $returnval | Add-Member -MemberType ScriptMethod `
@@ -902,6 +944,16 @@ try
                     Mock -CommandName Write-Host -MockWith { }
 
                     Mock -CommandName Get-TargetResource -MockWith {
+                        $currentSDS = @()
+                        $currentSDS += New-Object -TypeName PSObject -Property @{
+                            Zone = "Default"
+                            Uri  = "http://spbackend"
+                        }
+                        $currentSDS += New-Object -TypeName PSObject -Property @{
+                            Zone = "Intranet"
+                            Uri  = "http://spfrontend"
+                        }
+
                         return @{
                             Name                   = "SharePoint Sites"
                             ApplicationPool        = "SharePoint Sites"
@@ -914,6 +966,16 @@ try
                             Path                   = "C:\InetPub\wwwroot"
                             Port                   = 80
                             UseClassic             = $false
+                            SiteDataServers        = @(
+                                @{
+                                    Zone = "Default"
+                                    Uri  = "http://spbackend"
+                                }
+                                @{
+                                    Zone = "Intranet"
+                                    Uri  = "http://spbackend2"
+                                }
+                            )
                             Ensure                 = "Present"
                         }
                     }
@@ -958,6 +1020,15 @@ try
             Path                   = "C:\InetPub\wwwroot";
             Port                   = 80;
             PsDscRunAsCredential   = $Credsspfarm;
+            SiteDataServers        = @(
+                MSFT_SPWebAppSiteDataServers {
+                    Zone = 'Default'
+                    Uri = 'http://spbackend'
+                },
+                MSFT_SPWebAppSiteDataServers {
+                    Zone = 'Intranet'
+                    Uri = 'http://spbackend2'
+                });
             UseClassic             = $False;
             WebAppUrl              = "http://example.contoso.local";
         }

@@ -963,9 +963,9 @@ try
                     $result = @'
         SPLogLevel AllLogLevels
         {
-            Name                 =" "Export";
-            PsDscRunAsCredential =" $Credsspfarm;
-            SPLogLevelSetting    =" @(
+            Name                 = "Export";
+            PsDscRunAsCredential = $Credsspfarm;
+            SPLogLevelSetting    = @(
                 MSFT_SPLogLevelItem {TraceLevel="Default"; Name="Administration"; EventLevel="Default"; Area="Access Services"},
                 MSFT_SPLogLevelItem {TraceLevel="Default"; Name="General"; EventLevel="Default"; Area="SharePoint Server"}
             );

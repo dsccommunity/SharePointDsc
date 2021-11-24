@@ -10,19 +10,27 @@ function Get-TargetResource
 
         [Parameter(Mandatory = $true)]
         [System.String]
+        $WebAppUrl,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $ApplicationPool,
 
         [Parameter(Mandatory = $true)]
         [System.String]
         $ApplicationPoolAccount,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter()]
         [System.String]
-        $WebAppUrl,
+        $Port,
 
         [Parameter()]
-        [System.Boolean]
-        $AllowAnonymous,
+        [System.String]
+        $HostHeader,
+
+        [Parameter()]
+        [System.String]
+        $Path,
 
         [Parameter()]
         [System.String]
@@ -41,20 +49,16 @@ function Get-TargetResource
         $DatabaseCredentials,
 
         [Parameter()]
-        [System.String]
-        $HostHeader,
-
-        [Parameter()]
-        [System.String]
-        $Path,
-
-        [Parameter()]
-        [System.String]
-        $Port,
+        [System.Boolean]
+        $AllowAnonymous,
 
         [Parameter()]
         [System.Boolean]
         $UseClassic = $false,
+
+        [Parameter()]
+        [Microsoft.Management.Infrastructure.CimInstance[]]
+        $SiteDataServers,
 
         [Parameter()]
         [ValidateSet("Present", "Absent")]
@@ -103,18 +107,30 @@ function Get-TargetResource
             $contentDb = $wa.ContentDatabases[0]
         }
 
+        $wa = Get-SPWebApplication https://root.portal.politie.local
+
+        $currSiteDataServers = @()
+        foreach ($entry in $wa.SiteDataServers.GetEnumerator())
+        {
+            $sdsEntry = @{
+                $entry.Key.ToString() = $entry.Value.AbsoluteUri.TrimEnd("/")
+            }
+            $currSiteDataServers += $sdsEntry
+        }
+
         return @{
             Name                   = $wa.DisplayName
+            WebAppUrl              = $wa.Url
             ApplicationPool        = $wa.ApplicationPool.Name
             ApplicationPoolAccount = $wa.ApplicationPool.Username
-            WebAppUrl              = $wa.Url
-            AllowAnonymous         = $authProvider.AllowAnonymous
-            DatabaseName           = $contentDb.Name
-            DatabaseServer         = $contentDb.Server
+            Port                   = (New-Object -TypeName System.Uri $wa.Url).Port
             HostHeader             = (New-Object -TypeName System.Uri $wa.Url).Host
             Path                   = $IISPath
-            Port                   = (New-Object -TypeName System.Uri $wa.Url).Port
+            DatabaseName           = $contentDb.Name
+            DatabaseServer         = $contentDb.Server
+            AllowAnonymous         = $authProvider.AllowAnonymous
             UseClassic             = $classicAuth
+            SiteDataServers        = $currSiteDataServers
             Ensure                 = "Present"
         }
     }
@@ -133,19 +149,27 @@ function Set-TargetResource
 
         [Parameter(Mandatory = $true)]
         [System.String]
+        $WebAppUrl,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $ApplicationPool,
 
         [Parameter(Mandatory = $true)]
         [System.String]
         $ApplicationPoolAccount,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter()]
         [System.String]
-        $WebAppUrl,
+        $Port,
 
         [Parameter()]
-        [System.Boolean]
-        $AllowAnonymous,
+        [System.String]
+        $HostHeader,
+
+        [Parameter()]
+        [System.String]
+        $Path,
 
         [Parameter()]
         [System.String]
@@ -164,20 +188,16 @@ function Set-TargetResource
         $DatabaseCredentials,
 
         [Parameter()]
-        [System.String]
-        $HostHeader,
-
-        [Parameter()]
-        [System.String]
-        $Path,
-
-        [Parameter()]
-        [System.String]
-        $Port,
+        [System.Boolean]
+        $AllowAnonymous,
 
         [Parameter()]
         [System.Boolean]
         $UseClassic = $false,
+
+        [Parameter()]
+        [Microsoft.Management.Infrastructure.CimInstance[]]
+        $SiteDataServers,
 
         [Parameter()]
         [ValidateSet("Present", "Absent")]
@@ -297,6 +317,8 @@ function Set-TargetResource
             else
             {
                 Write-Verbose -Message "Update existing web application"
+                $updateWebApplication = $false
+
                 if ($params.ContainsKey("DatabaseName") -eq $true)
                 {
                     Write-Verbose -Message "Checking content database '$($params.DatabaseName)'"
@@ -383,6 +405,62 @@ function Set-TargetResource
 
                     Write-Verbose -Message "Applying new application pool"
                     $wa.ApplicationPool = $newAppPool
+                    $updateWebApplication = $true
+                }
+
+                if ($params.ContainsKey("SiteDataServers") -eq $true)
+                {
+                    $currentSiteDataServers = $wa.SiteDataServers
+                    $currentZones = [array]$currentSiteDataServers.Keys
+                    foreach ($currentSDServerZone in $currentZones)
+                    {
+                        $targetSDServers = $params.SiteDataServers | Where-Object -FilterScript {
+                            $_.Zone -eq $currentSDServerZone
+                        }
+
+                        if ($null -eq $targetSDServers)
+                        {
+                            $null = $currentSiteDataServers.Remove($currentSDServerZone)
+                        }
+                    }
+
+                    foreach ($targetSDServer in $params.SiteDataServers)
+                    {
+                        $zone = [Microsoft.SharePoint.Administration.SPUrlZone]$targetSDServer.Zone #Specify zone name
+                        if ($currentSiteDataServers.ContainsKey($zone))
+                        {
+                            # Zone exists, check value
+                            if ($null -ne (Compare-Object -ReferenceObject $currentSiteDataServers[$zone].AbsoluteUri.TrimEnd("/") -DifferenceObject $targetSDServer.Uri))
+                            {
+                                $null = $currentSiteDataServers.Remove($zone)
+
+                                $uriList = New-Object System.Collections.Generic.List[System.Uri](1)
+                                foreach ($uri in $targetSDServer.Uri)
+                                {
+                                    $target = New-Object System.Uri($uri)
+                                    $uriList.Add($target)
+                                }
+                                $currentSiteDataServers.Add($zone, $uriList)
+                            }
+                        }
+                        else
+                        {
+                            # Zone does not exist, add value
+                            $uriList = New-Object System.Collections.Generic.List[System.Uri](1)
+                            foreach ($uri in $targetSDServer.Uri)
+                            {
+                                $target = New-Object System.Uri($uri)
+                                $uriList.Add($target)
+                            }
+                            $currentSiteDataServers.Add($zone, $uriList)
+                        }
+                    }
+
+                    $updateWebApplication = $true
+                }
+
+                if ($updateWebApplication -eq $true)
+                {
                     $wa.Update()
                     $wa.ProvisionGlobally()
                 }
@@ -418,19 +496,27 @@ function Test-TargetResource
 
         [Parameter(Mandatory = $true)]
         [System.String]
+        $WebAppUrl,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $ApplicationPool,
 
         [Parameter(Mandatory = $true)]
         [System.String]
         $ApplicationPoolAccount,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter()]
         [System.String]
-        $WebAppUrl,
+        $Port,
 
         [Parameter()]
-        [System.Boolean]
-        $AllowAnonymous,
+        [System.String]
+        $HostHeader,
+
+        [Parameter()]
+        [System.String]
+        $Path,
 
         [Parameter()]
         [System.String]
@@ -449,20 +535,16 @@ function Test-TargetResource
         $DatabaseCredentials,
 
         [Parameter()]
-        [System.String]
-        $HostHeader,
-
-        [Parameter()]
-        [System.String]
-        $Path,
-
-        [Parameter()]
-        [System.String]
-        $Port,
+        [System.Boolean]
+        $AllowAnonymous,
 
         [Parameter()]
         [System.Boolean]
         $UseClassic = $false,
+
+        [Parameter()]
+        [Microsoft.Management.Infrastructure.CimInstance[]]
+        $SiteDataServers,
 
         [Parameter()]
         [ValidateSet("Present", "Absent")]
@@ -478,6 +560,41 @@ function Test-TargetResource
 
     Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
+    if ($PSBoundParameters.ContainsKey("SiteDataServers"))
+    {
+        $inDesiredState = $true
+
+        $currentSiteDataServers = $CurrentValues.SiteDataServers
+        foreach ($currentSDServerZone in $currentSiteDataServers.Keys)
+        {
+            $targetSDServers = $PSBoundParameters.SiteDataServers | Where-Object { $_.Zone -eq $currentSDServerZone }
+            if ($null -eq $targetSDServers)
+            {
+                $inDesiredState = $false
+            }
+        }
+
+        foreach ($targetSDServer in $PSBoundParameters.SiteDataServers)
+        {
+            $currentZone = $currentSiteDataServers | Where-Object { $_.GetEnumerator().Name -eq $targetSDServer.Zone }
+            if ($null -ne $currentZone)
+            {
+                if ($null -ne (Compare-Object -ReferenceObject $currentZone.($targetSDServer.Zone) -DifferenceObject $targetSDServer.Uri))
+                {
+                    $inDesiredState = $false
+                }
+            }
+            else
+            {
+                $inDesiredState = $false
+            }
+        }
+
+        Write-Verbose -Message "Test-TargetResource returned $inDesiredState"
+
+        return $inDesiredState
+    }
 
     $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
         -Source $($MyInvocation.MyCommand.Source) `
@@ -527,6 +644,11 @@ function Export-TargetResource
                 $results.Remove("AllowAnonymous")
             }
 
+            if ($results.SiteDataServers.Count -ne 0)
+            {
+                $results.SiteDataServers = Convert-SPDscArrayToCIMInstanceString -Params $results.SiteDataServers -CIMInstanceName "MSFT_SPWebAppSiteDataServers"
+            }
+
             Add-ConfigurationDataEntry -Node "NonNodeData" -Key "DatabaseServer" -Value $results.DatabaseServer -Description "Name of the Database Server associated with the destination SharePoint Farm;"
             $results.DatabaseServer = "`$ConfigurationData.NonNodeData.DatabaseServer"
             $results["Path"] = $results["Path"].ToString()
@@ -536,7 +658,9 @@ function Export-TargetResource
                 $currentDSCBlock = Convert-DSCStringParamToVariable -DSCBlock $currentDSCBlock -ParameterName "ApplicationPoolAccount"
             }
             $currentDSCBlock = Convert-DSCStringParamToVariable -DSCBlock $currentDSCBlock -ParameterName "DatabaseServer"
+            $currentDSCBlock = Convert-DSCStringParamToVariable -DSCBlock $currentDSCBlock -ParameterName "SiteDataServers" -IsCIMArray $true
             $currentDSCBlock = Convert-DSCStringParamToVariable -DSCBlock $currentDSCBlock -ParameterName "PsDscRunAsCredential"
+
             $partialContent += $currentDSCBlock
             $partialContent += "        }`r`n"
 
