@@ -11,9 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added support for SharePoint Server Subscription Edition in Util module and unit tests stubs
   - Added SPSE unit tests to the Azure pipeline definitions
 - SPCertificateSettings
-  - New resource
+  - New resource for SharePoint Server Subscription Edition
 - SPDatabaseAAG
-  - Updated code to cater for updated cmdlet names in SPSE
+  - Added support for SharePoint Server Subscription Edition
 - SPDistributedCacheService
   - Added support for SharePoint Server Subscription Edition
 - SPFarm
@@ -24,6 +24,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added support for SharePoint Server Subscription Edition
 - SPOfficeOnlineServerSupressionSettings
   - New resource
+- SPWebApplication
+  - Added possibility to manage the SiteDataServers property
 
 ### Changed
 
@@ -37,6 +39,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Service app no longer exists in SharePoint Server Subscription Edition. Added logic to check for SPSE.
 - SPPerformancePointServiceApp
   - Service app no longer exists in SharePoint Server Subscription Edition. Added logic to check for SPSE.
+
+### Fixed
+
+- SPLogLevel
+  - Corrected issue in creating ReverseDsc export
 
 ### Removed
 
