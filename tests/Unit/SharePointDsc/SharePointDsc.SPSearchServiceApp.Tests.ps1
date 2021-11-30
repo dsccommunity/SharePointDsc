@@ -228,6 +228,9 @@ try
                             $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
                                 return @{ FullName = $getTypeFullName }
                             } -PassThru -Force
+                            $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetProperty -Value {
+                                return 0
+                            } -PassThru -Force
                             $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name IsConnected -Value {
                                 return $true
                             } -PassThru -Force
@@ -255,9 +258,10 @@ try
             Context -Name "When service applications exist in the current farm but the specific search app does not" -Fixture {
                 BeforeAll {
                     $testParams = @{
-                        Name            = "Search Service Application"
-                        ApplicationPool = "SharePoint Search Services"
-                        Ensure          = "Present"
+                        Name                        = "Search Service Application"
+                        ApplicationPool             = "SharePoint Search Services"
+                        DefaultContentAccessAccount = $mockCredential
+                        Ensure                      = "Present"
                     }
 
                     Mock Import-Module -MockWith { } -ParameterFilter { $_.Name -eq $ModuleName }
@@ -326,6 +330,9 @@ try
                         $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
                             return @{ FullName = $getTypeFullName }
                         } -PassThru -Force
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetProperty -Value {
+                            return 0
+                        } -PassThru -Force
                         return $spServiceApp
                     }
 
@@ -379,6 +386,9 @@ try
                         $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
                             return @{ FullName = $getTypeFullName }
                         } -PassThru -Force
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetProperty -Value {
+                            return 0
+                        } -PassThru -Force
                         return $spServiceApp
                     }
                 }
@@ -424,6 +434,9 @@ try
                         } -PassThru -Force
                         $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name IsConnected -Value {
                             return $true
+                        } -PassThru -Force
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetProperty -Value {
+                            return 0
                         } -PassThru -Force
                         return $spServiceApp
                     }
@@ -485,6 +498,9 @@ try
                         } -PassThru -Force
                         $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name IsConnected -Value {
                             return $true
+                        } -PassThru -Force
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetProperty -Value {
+                            return 0
                         } -PassThru -Force
                         return $spServiceApp
                     }
@@ -551,6 +567,9 @@ try
                         $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name IsConnected -Value {
                             return $false
                         } -PassThru -Force
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetProperty -Value {
+                            return 0
+                        } -PassThru -Force
                         return $spServiceApp
                     }
 
@@ -607,6 +626,9 @@ try
                         } -PassThru -Force
                         $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name IsConnected -Value {
                             return $true
+                        } -PassThru -Force
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetProperty -Value {
+                            return 0
                         } -PassThru -Force
                         return $spServiceApp
                     }
@@ -670,6 +692,9 @@ try
                         $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
                             return @{ FullName = $getTypeFullName }
                         } -PassThru -Force
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetProperty -Value {
+                            return 0
+                        } -PassThru -Force
                         return $spServiceApp
                     }
 
@@ -726,6 +751,9 @@ try
                         $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name IsConnected -Value {
                             return $true
                         } -PassThru -Force
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetProperty -Value {
+                            return 0
+                        } -PassThru -Force
                         return $spServiceApp
                     }
 
@@ -748,6 +776,10 @@ try
                             Name = "$($testParams.Name) Proxy"
                         }
                     }
+                }
+
+                It "Should return the current Deletion Policy Settings from the get method" {
+                    (Get-TargetResource @testParams).SearchCenterUrl | Should -Be "http://wrong.url.here"
                 }
 
                 It "Should return false from the test method" {
@@ -799,6 +831,9 @@ try
                         $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name IsConnected -Value {
                             return $true
                         } -PassThru -Force
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetProperty -Value {
+                            return 0
+                        } -PassThru -Force
                         return $spServiceApp
                     }
 
@@ -839,6 +874,7 @@ try
                         Name            = "Search Service Application"
                         ApplicationPool = "SharePoint Search Services"
                         DatabaseName    = "SP_Search"
+                        SearchCenterUrl = "http://search.sp.contoso.com"
                         Ensure          = "Present"
                     }
 
@@ -869,6 +905,9 @@ try
                         $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
                             return @{ FullName = $getTypeFullName }
                         } -PassThru -Force
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetProperty -Value {
+                            return 0
+                        } -PassThru -Force
                         return $spServiceApp
                     }
 
@@ -881,8 +920,97 @@ try
                     }
                 }
 
+                It "Should return the current Deletion Policy Settings from the get method" {
+                    (Get-TargetResource @testParams).SearchCenterUrl | Should -Be "http://search.sp.contoso.com"
+                }
+
                 It "Should return true from the test method" {
                     Test-TargetResource @testParams | Should -Be $true
+                }
+            }
+
+            Context -Name "When the Deletion Policy settings do not match" -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        Name                       = "Search Service Application"
+                        ApplicationPool            = "SharePoint Search Services"
+                        DatabaseName               = "SP_Search"
+                        ErrorDeleteCountAllowed    = 10
+                        ErrorDeleteIntervalAllowed = 240
+                        ErrorCountAllowed          = 15
+                        ErrorIntervalAllowed       = 360
+                        DeleteUnvisitedMethod      = 1
+                        RecrawlErrorCount          = 5
+                        RecrawlErrorInterval       = 120
+                        Ensure                     = "Present"
+                    }
+
+                    Mock Import-Module -MockWith { } -ParameterFilter { $_.Name -eq $ModuleName }
+
+                    Mock -CommandName Get-SPServiceApplicationPool -MockWith {
+                        return @{
+                            Name = $testParams.ApplicationPool
+                        }
+                    }
+
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        $spServiceApp = [PSCustomObject]@{
+                            TypeName            = "Search Service Application"
+                            DisplayName         = $testParams.Name
+                            Name                = $testParams.Name
+                            ApplicationPool     = @{ Name = $testParams.ApplicationPool }
+                            SearchCenterUrl     = "http://search.sp.contoso.com"
+                            Database            = @{
+                                Name                 = $testParams.DatabaseName
+                                NormalizedDataSource = 'SQL01'
+                            }
+                            SearchAdminDatabase = @{
+                                Name                 = $testParams.DatabaseName
+                                NormalizedDataSource = 'SQL01'
+                            }
+                        }
+                        $spServiceApp = $spServiceApp | Add-Member ScriptMethod Update {
+                            $Global:SPDscAlertsEnabledUpdated = $true
+                        } -PassThru
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                            return @{ FullName = $getTypeFullName }
+                        } -PassThru -Force
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetProperty -Value {
+                            return 0
+                        } -PassThru -Force
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name SetProperty -Value {
+                        } -PassThru -Force
+                        return $spServiceApp
+                    }
+
+                    Mock -CommandName New-Object {
+                        return @{
+                            DefaultGatheringAccount = "Domain\username"
+                        }
+                    } -ParameterFilter {
+                        $TypeName -eq "Microsoft.Office.Server.Search.Administration.Content"
+                    }
+                }
+
+                It "Should return the current Deletion Policy Settings from the get method" {
+                    $result = Get-TargetResource @testParams
+                    $result.ErrorDeleteCountAllowed | Should -Be 0
+                    $result.ErrorDeleteIntervalAllowed | Should -Be 0
+                    $result.ErrorCountAllowed | Should -Be 0
+                    $result.ErrorIntervalAllowed | Should -Be 0
+                    $result.DeleteUnvisitedMethod | Should -Be 0
+                    $result.RecrawlErrorCount | Should -Be 0
+                    $result.RecrawlErrorInterval | Should -Be 0
+                }
+
+                It "Should return false from the test method" {
+                    Test-TargetResource @testParams | Should -Be $false
+                }
+
+                It "Should update the service app Deletion Policy settings in the set method" {
+                    $Global:SPDscAlertsEnabledUpdated = $false
+                    Set-TargetResource @testParams
+                    $Global:SPDscAlertsEnabledUpdated | Should -Be $true
                 }
             }
 
@@ -916,6 +1044,9 @@ try
                         }
                         $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
                             return @{ FullName = $getTypeFullName }
+                        } -PassThru -Force
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetProperty -Value {
+                            return 0
                         } -PassThru -Force
                         return $spServiceApp
                     }
@@ -989,6 +1120,9 @@ try
                         }
                         $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
                             return @{ FullName = $getTypeFullName }
+                        } -PassThru -Force
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetProperty -Value {
+                            return 0
                         } -PassThru -Force
                         return $spServiceApp
                     }

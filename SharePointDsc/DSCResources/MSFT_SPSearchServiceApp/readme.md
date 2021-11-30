@@ -14,11 +14,14 @@ the admin database which matches the name, and then
 The default value for the Ensure parameter is Present. When not specifying this
 parameter, the service application is provisioned.
 
-NOTE: The WindowsServiceAccount parameter is deprecated and no longer does
-anything. The functionality for changing this account has been moved to
-SPSearchServiceSettings.
+For more information about the Deletion Policy settings, check the following
+article:
+https://docs.microsoft.com/en-us/previous-versions/office/sharepoint-server-2010/hh127009(v=office.14)?redirectedfrom=MSDN
 
-NOTE2: The resource is also able to add the Farm account as db_owner to all
+**NOTE:** Don't forget to configure a Search topology using the SPSearchTopology
+resource!
+
+**NOTE2:** The resource is also able to add the Farm account as db_owner to all
 Search databases, to prevent the issue described here:
 https://www.techmikael.com/2014/10/caution-if-you-have-used.html
 Use the FixFarmAccountPermissions parameter to implement this fix (default
