@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SharePointDsc
   - Added support for SharePoint Server Subscription Edition in Util module and unit tests stubs
   - Added SPSE unit tests to the Azure pipeline definitions
+- SPCertificate
+  - New resource for SharePoint Server Subscription Edition
 - SPCertificateSettings
   - New resource for SharePoint Server Subscription Edition
 - SPDatabaseAAG

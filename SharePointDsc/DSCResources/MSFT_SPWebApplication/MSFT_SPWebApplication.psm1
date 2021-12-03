@@ -107,8 +107,6 @@ function Get-TargetResource
             $contentDb = $wa.ContentDatabases[0]
         }
 
-        $wa = Get-SPWebApplication https://root.portal.politie.local
-
         $currSiteDataServers = @()
         foreach ($entry in $wa.SiteDataServers.GetEnumerator())
         {
