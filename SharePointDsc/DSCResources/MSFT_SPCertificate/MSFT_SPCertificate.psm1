@@ -65,7 +65,8 @@ function Get-TargetResource
             Write-Verbose "Specified CertificateFilePath is a PFX file"
             if ($PSBoundParameters.ContainsKey("CertificatePassword") -eq $false)
             {
-                throw "You have to specify a CertificatePassword when CertificateFilePath is a PFX file."
+                Write-Verbose ("CertificatePassword isn't specified, make sure '$PsDscRunAsCredential' " + `
+                        "has permissions to import the PFX file.")
             }
         }
         default
@@ -104,7 +105,14 @@ function Get-TargetResource
             ".pfx"
             {
                 $isPFX = $true
-                $certificateObject = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2 -ArgumentList $params.CertificateFilePath, $params.CertificatePassword.Password
+                if ($params.ContainsKey("CertificatePassword"))
+                {
+                    $certificateObject = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2 -ArgumentList $params.CertificateFilePath, $params.CertificatePassword.Password
+                }
+                else
+                {
+                    $certificateObject = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2 -ArgumentList $params.CertificateFilePath
+                }
             }
         }
 
@@ -250,13 +258,8 @@ function Set-TargetResource
             Write-Verbose "Specified CertificateFilePath is a PFX file"
             if ($PSBoundParameters.ContainsKey("CertificatePassword") -eq $false)
             {
-                $message = ("You have to specify a CertificatePassword when " + `
-                        "CertificateFilePath is a PFX file.")
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $MyInvocation.MyCommand.Source
-                throw $message
+                Write-Verbose ("CertificatePassword isn't specified, make sure '$PsDscRunAsCredential' " + `
+                        "has permissions to import the PFX file.")
             }
         }
         default
@@ -302,7 +305,14 @@ function Set-TargetResource
             ".pfx"
             {
                 $isPFX = $true
-                $certificateObject = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2 -ArgumentList $params.CertificateFilePath, $params.CertificatePassword.Password
+                if ($params.ContainsKey("CertificatePassword"))
+                {
+                    $certificateObject = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2 -ArgumentList $params.CertificateFilePath, $params.CertificatePassword.Password
+                }
+                else
+                {
+                    $certificateObject = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2 -ArgumentList $params.CertificateFilePath
+                }
             }
         }
 

@@ -153,28 +153,6 @@ try
                             }
                         }
 
-                        Context -Name "CertificateFilePath is a PFX, but CertificatePassword is not specified" -Fixture {
-                            BeforeAll {
-                                $testParams = @{
-                                    CertificateFilePath = 'C:\Certificate\Intranet.pfx'
-                                }
-
-                                Mock -CommandName Get-ChildItem -MockWith {
-                                    return @{
-                                        Extension = ".pfx"
-                                    }
-                                }
-                            }
-
-                            It "Should throw an exception in the get method" {
-                                { Get-TargetResource @testParams } | Should -Throw "You have to specify a CertificatePassword when CertificateFilePath is a PFX file."
-                            }
-
-                            It "Should throw an exception in the set method" {
-                                { Set-TargetResource @testParams } | Should -Throw "You have to specify a CertificatePassword when CertificateFilePath is a PFX file."
-                            }
-                        }
-
                         Context -Name "CertificateFilePath is not a PFX or CER" -Fixture {
                             BeforeAll {
                                 $testParams = @{
