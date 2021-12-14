@@ -61,7 +61,6 @@ Configuration Example
             Zone                 = "Intranet"
             HostHeader           = "intranet.contoso.local"
             Path                 = "c:\inetpub\wwwroot\wss\VirtualDirectories\intranet"
-            UseSSL               = $false
             Port                 = 80
             Ensure               = "Present"
             PsDscRunAsCredential = $SetupAccount

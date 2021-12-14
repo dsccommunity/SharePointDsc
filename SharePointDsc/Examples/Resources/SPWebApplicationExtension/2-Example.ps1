@@ -62,7 +62,6 @@ Configuration Example
             Zone                    = "Intranet"
             HostHeader              = "intranet.contoso.local"
             Path                    = "c:\inetpub\wwwroot\wss\VirtualDirectories\intranet"
-            UseSSL                  = $false
             Port                    = 80
             AllowLegacyEncryption   = $true
             CertificateThumbprint   = '7CF9E91F141FCA1049F56AB96BE2A1D7D3F9198D'
