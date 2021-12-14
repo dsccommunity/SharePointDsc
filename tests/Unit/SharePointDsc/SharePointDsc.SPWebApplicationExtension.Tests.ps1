@@ -50,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
 
@@ -73,6 +73,14 @@ try
                 Mock -CommandName Remove-SPWebApplication -MockWith { }
                 Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith { }
                 Mock -CommandName Set-SPWebApplication -MockWith { }
+
+                Mock -CommandName Get-SPDscOSVersion -MockWith {
+                    return @{
+                        Major = 10
+                        Minor = 0
+                        Build = 17763
+                    }
+                }
 
                 function Add-SPDscEvent
                 {
@@ -98,6 +106,61 @@ try
             }
 
             # Test contexts
+            Context -Name "AllowLegacyEncryption used with other OS than Windows Server 2022" -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl             = "http://nosuchwebapplication.sharepoint.com"
+                        Name                  = "Intranet Zone"
+                        Url                   = "http://intranet.sharepoint.com"
+                        Zone                  = "Intranet"
+                        AllowLegacyEncryption = $true
+                        Ensure                = "Present"
+                    }
+
+                    Mock -CommandName Get-SPDscOSVersion -MockWith {
+                        return @{
+                            Major = 10
+                            Minor = 0
+                            Build = 17763
+                        }
+                    }
+                }
+
+                It "return AllowLegacyEncryption=Null from the get method" {
+                    (Get-TargetResource @testParams).AllowLegacyEncryption | Should -BeNullOrEmpty
+                }
+
+                It "retrieving Managed Account fails in the set method" {
+                    { Set-TargetResource @testParams } | Should -Throw "You cannot specify the AllowLegacyEncryption parameter when using Windows Server 2019 or earlier."
+                }
+            }
+
+            if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16 -and
+                $Global:SPDscHelper.CurrentStubBuildNumber.Build -gt 10000 -and
+                $Global:SPDscHelper.CurrentStubBuildNumber.Build -lt 13000)
+            {
+                Context -Name "AllowLegacyEncryption used with SharePoint 2019" -Fixture {
+                    BeforeAll {
+                        $testParams = @{
+                            WebAppUrl               = "http://nosuchwebapplication.sharepoint.com"
+                            Name                    = "Intranet Zone"
+                            Url                     = "http://intranet.sharepoint.com"
+                            Zone                    = "Intranet"
+                            UseServerNameIndication = $true
+                            Ensure                  = "Present"
+                        }
+                    }
+
+                    It "return UseServerNameIndication=Null from the get method" {
+                        (Get-TargetResource @testParams).UseServerNameIndication | Should -BeNullOrEmpty
+                    }
+
+                    It "retrieving Managed Account fails in the set method" {
+                        { Set-TargetResource @testParams } | Should -Throw "The parameters AllowLegacyEncryption, CertificateThumbprint or UseServerNameIndication are only supported with SharePoint Server Subscription Edition."
+                    }
+                }
+            }
+
             Context -Name "The parent web application does not exist" -Fixture {
                 BeforeAll {
                     $testParams = @{
@@ -266,7 +329,6 @@ try
                         Name       = "Intranet Zone"
                         Url        = "https://intranet.sharepoint.com"
                         HostHeader = "intranet.sharepoint.com"
-                        UseSSL     = $true
                         Zone       = "Intranet"
                         Ensure     = "Present"
                     }
@@ -526,6 +588,7 @@ try
                                     HostHeader = "intranet.sharepoint.com"
                                     Port       = 80
                                 }
+                                Path           = "C:\Inetpub\wwwroot"
                                 AllowAnonymous = $false
                             })
 
@@ -633,6 +696,247 @@ try
 
                 It "Should return true from the test method" {
                     Test-TargetResource @testParams | Should -Be $true
+                }
+            }
+
+            if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16 -and
+                $Global:SPDscHelper.CurrentStubBuildNumber.Build -gt 13000)
+            {
+                Context -Name "The web application extension doesn't exist but should (SPSE)" -Fixture {
+                    BeforeAll {
+                        $testParams = @{
+                            WebAppUrl               = "http://company.sharepoint.com"
+                            Name                    = "Intranet Zone"
+                            Url                     = "https://intranet.sharepoint.com"
+                            Zone                    = "Intranet"
+                            HostHeader              = "intranet.sharepoint.com"
+                            AllowLegacyEncryption   = $true
+                            CertificateThumbprint   = '7CF9E91F141FCA1049F56AB96BE2A1D7D3F9198D'
+                            UseServerNameIndication = $false
+                            Path                    = "C:\inetpub\wwwroot\something"
+                            Ensure                  = "Present"
+                        }
+
+                        Mock -CommandName Get-SPWebapplication -MockWith {
+                            return @{
+                                DisplayName = "Company SharePoint"
+                                URL         = "http://company.sharepoint.com"
+                                IISSettings = @()
+                            }
+                        }
+
+                        Mock -CommandName Get-SPDscOSVersion -MockWith {
+                            return @{
+                                Major = 10
+                                Minor = 0
+                                Build = 20348
+                            }
+                        }
+
+                        Mock -CommandName Get-SPCertificate -MockWith {
+                            return @{
+                                Thumbprint = $testParams.CertificateThumbprint
+                            }
+                        }
+                    }
+
+                    It "Should return absent from the get method" {
+                        $result = Get-TargetResource @testParams
+                        $result.Ensure | Should -Be "Absent"
+                    }
+
+                    It "Should return false from the test method" {
+                        Test-TargetResource @testParams | Should -Be $false
+                    }
+
+                    It "Should call the new cmdlet from the set method" {
+                        Set-TargetResource @testParams
+                        Assert-MockCalled New-SPWebApplicationExtension
+                    }
+                }
+
+                Context -Name "The specified certificate does not exist in CertMgmt for web extension (SPSE)" -Fixture {
+                    BeforeAll {
+                        $testParams = @{
+                            WebAppUrl               = "http://company.sharepoint.com"
+                            Name                    = "Intranet Zone"
+                            Url                     = "https://intranet.sharepoint.com"
+                            Zone                    = "Intranet"
+                            AllowLegacyEncryption   = $true
+                            CertificateThumbprint   = '7CF9E91F141FCA1049F56AB96BE2A1D7D3F9198D'
+                            UseServerNameIndication = $false
+                            Ensure                  = "Present"
+                        }
+
+                        Mock -CommandName Get-SPWebapplication -MockWith {
+                            return @{
+                                DisplayName = "Company SharePoint"
+                                URL         = "http://company.sharepoint.com"
+                                IISSettings = @()
+                            }
+                        }
+
+                        Mock -CommandName Get-SPDscOSVersion -MockWith {
+                            return @{
+                                Major = 10
+                                Minor = 0
+                                Build = 20348
+                            }
+                        }
+
+                        Mock -CommandName Get-SPCertificate -MockWith {
+                            return $null
+                        }
+                    }
+
+                    It "Should throw an exception from the set method" {
+                        { Set-TargetResource @testParams } | Should -Throw "No certificate found with the specified thumbprint: $($testParams.CertificateThumbprint). Make sure the certificate is added to Certificate Management first!"
+                    }
+                }
+
+                Context -Name "The web application extension does exist but has mismatched Certificate settings (SPSE)" -Fixture {
+                    BeforeAll {
+                        $testParams = @{
+                            WebAppUrl               = "http://company.sharepoint.com"
+                            Name                    = "Intranet Zone"
+                            Url                     = "https://intranet.sharepoint.com"
+                            HostHeader              = "intranet.sharepoint.com"
+                            Zone                    = "Intranet"
+                            AllowLegacyEncryption   = $true
+                            CertificateThumbprint   = '7CF9E91F141FCA1049F56AB96BE2A1D7D3F9198D'
+                            UseServerNameIndication = $false
+                            Ensure                  = "Present"
+                        }
+
+                        Mock -CommandName Get-SPAuthenticationProvider -MockWith {
+                            return @{
+                                DisplayName     = "Windows Authentication"
+                                DisableKerberos = $true
+                            }
+                        }
+
+                        Mock -CommandName Get-SPWebapplication -MockWith {
+                            $IISSettings = @(
+                                @{ }
+                                @{
+                                    SecureBindings = @{ }
+                                    ServerBindings = @{
+                                        HostHeader = "intranet.sharepoint.com"
+                                        Port       = 80
+                                    }
+                                    Path           = "C:\Inetpub\wwwroot"
+                                    AllowAnonymous = $false
+                                })
+
+                            return (
+                                @{
+                                    DisplayName = "Company SharePoint"
+                                    URL         = "http://company.sharepoint.com"
+                                    IISSettings = $IISSettings
+                                } | Add-Member ScriptMethod Update { $Global:WebAppUpdateCalled = $true } -PassThru
+                            )
+                        }
+
+                        Mock -CommandName Get-SPAlternateUrl -MockWith {
+                            return @{
+                                PublicURL = $testParams.Url
+                            }
+                        }
+
+                        Mock -CommandName Get-SPDscOSVersion -MockWith {
+                            return @{
+                                Major = 10
+                                Minor = 0
+                                Build = 20348
+                            }
+                        }
+
+                        Mock -CommandName Get-SPCertificate -MockWith {
+                            return @{
+                                Thumbprint = $testParams.CertificateThumbprint
+                            }
+                        }
+                    }
+
+                    It "Should return present from the get method" {
+                        (Get-TargetResource @testParams).Ensure | Should -Be "Present"
+                    }
+
+                    It "Should return false from the test method" {
+                        Test-TargetResource @testParams | Should -Be $false
+                    }
+
+                    It "Should update the web application extension settings in the set method" {
+                        Set-TargetResource @testParams
+                        Assert-MockCalled -CommandName Set-SPWebApplication
+                    }
+                }
+
+                Context -Name "The specified certificate does not exist in CertMgmt for existing extension (SPSE)" -Fixture {
+                    BeforeAll {
+                        $testParams = @{
+                            WebAppUrl               = "http://company.sharepoint.com"
+                            Name                    = "Intranet Zone"
+                            Url                     = "https://intranet.sharepoint.com"
+                            HostHeader              = "intranet.sharepoint.com"
+                            Zone                    = "Intranet"
+                            AllowLegacyEncryption   = $true
+                            CertificateThumbprint   = '7CF9E91F141FCA1049F56AB96BE2A1D7D3F9198D'
+                            UseServerNameIndication = $false
+                            Ensure                  = "Present"
+                        }
+
+                        Mock -CommandName Get-SPAuthenticationProvider -MockWith {
+                            return @{
+                                DisplayName     = "Windows Authentication"
+                                DisableKerberos = $true
+                            }
+                        }
+
+                        Mock -CommandName Get-SPWebapplication -MockWith {
+                            $IISSettings = @(
+                                @{ }
+                                @{
+                                    SecureBindings = @{ }
+                                    ServerBindings = @{
+                                        HostHeader = "intranet.sharepoint.com"
+                                        Port       = 80
+                                    }
+                                    Path           = "C:\Inetpub\wwwroot"
+                                    AllowAnonymous = $false
+                                })
+
+                            return (
+                                @{
+                                    DisplayName = "Company SharePoint"
+                                    URL         = "http://company.sharepoint.com"
+                                    IISSettings = $IISSettings
+                                } | Add-Member ScriptMethod Update { $Global:WebAppUpdateCalled = $true } -PassThru
+                            )
+                        }
+
+                        Mock -CommandName Get-SPAlternateUrl -MockWith {
+                            return @{
+                                PublicURL = $testParams.Url
+                            }
+                        }
+
+                        Mock -CommandName Get-SPDscOSVersion -MockWith {
+                            return @{
+                                Major = 10
+                                Minor = 0
+                                Build = 20348
+                            }
+                        }
+
+                        Mock -CommandName Get-SPCertificate -MockWith {
+                            return $null
+                        }
+                    }
+
+                    It "Should throw an exception from the set method" {
+                        { Set-TargetResource @testParams } | Should -Throw "No certificate found with the specified thumbprint: $($testParams.CertificateThumbprint). Make sure the certificate is added to Certificate Management first!"
+                    }
                 }
             }
 

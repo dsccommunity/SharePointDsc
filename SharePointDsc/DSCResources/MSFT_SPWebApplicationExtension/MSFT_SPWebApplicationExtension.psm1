@@ -9,6 +9,11 @@ function Get-TargetResource
         $WebAppUrl,
 
         [Parameter(Mandatory = $true)]
+        [ValidateSet("Default", "Intranet", "Internet", "Extranet", "Custom")]
+        [System.String]
+        $Zone,
+
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
 
@@ -16,14 +21,9 @@ function Get-TargetResource
         [System.String]
         $Url,
 
-        [Parameter(Mandatory = $true)]
-        [ValidateSet("Default", "Intranet", "Internet", "Extranet", "Custom")]
-        [System.String]
-        $Zone,
-
         [Parameter()]
-        [System.Boolean]
-        $AllowAnonymous,
+        [System.String]
+        $Port,
 
         [Parameter()]
         [System.String]
@@ -31,15 +31,23 @@ function Get-TargetResource
 
         [Parameter()]
         [System.String]
-        $Path,
-
-        [Parameter()]
-        [System.String]
-        $Port,
+        $CertificateThumbprint,
 
         [Parameter()]
         [System.Boolean]
-        $UseSSL,
+        $UseServerNameIndication,
+
+        [Parameter()]
+        [System.Boolean]
+        $AllowLegacyEncryption,
+
+        [Parameter()]
+        [System.String]
+        $Path,
+
+        [Parameter()]
+        [System.Boolean]
+        $AllowAnonymous,
 
         [Parameter()]
         [ValidateSet("Present", "Absent")]
@@ -48,6 +56,38 @@ function Get-TargetResource
     )
 
     Write-Verbose -Message "Getting web application extension '$Name' config"
+
+    $osVersion = Get-SPDscOSVersion
+    if ($PSBoundParameters.ContainsKey("AllowLegacyEncryption") -and `
+        ($osVersion.Major -ne 10 -or $osVersion.Build -ne 20348))
+    {
+        Write-Verbose ("You cannot specify the AllowLegacyEncryption parameter when using " + `
+                "Windows Server 2019 or earlier.")
+
+        return @{
+            WebAppUrl = $WebAppUrl
+            Zone      = $Zone
+        }
+    }
+
+    if ($PSBoundParameters.ContainsKey("CertificateThumbprint") -or `
+            $PSBoundParameters.ContainsKey("UseServerNameIndication") -or `
+            $PSBoundParameters.ContainsKey("AllowLegacyEncryption"))
+    {
+        $productVersion = Get-SPDscInstalledProductVersion
+        if ($productVersion.FileMajorPart -ne 16 -or `
+                $productVersion.FileBuildPart -lt 13000)
+        {
+            Write-Verbose ("The parameters AllowLegacyEncryption, CertificateThumbprint or " + `
+                    "UseServerNameIndication are only supported with SharePoint Server " + `
+                    "Subscription Edition.")
+
+            return @{
+                WebAppUrl = $WebAppUrl
+                Zone      = $Zone
+            }
+        }
+    }
 
     $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
@@ -89,13 +129,11 @@ function Get-TargetResource
         {
             $HostHeader = $waExt.SecureBindings.HostHeader
             $Port = $waExt.SecureBindings.Port
-            $UseSSL = $true
         }
         else
         {
             $HostHeader = $waExt.ServerBindings.HostHeader
             $Port = $waExt.ServerBindings.Port
-            $UseSSL = $false
         }
 
         $waExtPath = $waExt.Path
@@ -103,17 +141,20 @@ function Get-TargetResource
         {
             $waExtPath = $waExtPath.ToString()
         }
+
         return @{
-            WebAppUrl      = $params.WebAppUrl
-            Name           = $waExt.ServerComment
-            Url            = $PublicURL
-            AllowAnonymous = $waExt.AllowAnonymous
-            HostHeader     = $HostHeader
-            Path           = $waExtPath
-            Port           = $Port
-            Zone           = $params.zone
-            UseSSL         = $UseSSL
-            Ensure         = "Present"
+            WebAppUrl               = $params.WebAppUrl
+            Zone                    = $params.zone
+            Name                    = $waExt.ServerComment
+            Url                     = $PublicURL
+            Port                    = $Port
+            HostHeader              = $HostHeader
+            CertificateThumbprint   = $waExt.SecureBindings[0].Certificate.Thumbprint
+            UseServerNameIndication = $waExt.SecureBindings[0].UseServerNameIndication
+            AllowLegacyEncryption   = -not $waExt.SecureBindings[0].DisableLegacyTls
+            Path                    = $waExtPath
+            AllowAnonymous          = $waExt.AllowAnonymous
+            Ensure                  = "Present"
         }
     }
     return $result
@@ -130,6 +171,11 @@ function Set-TargetResource
         $WebAppUrl,
 
         [Parameter(Mandatory = $true)]
+        [ValidateSet("Default", "Intranet", "Internet", "Extranet", "Custom")]
+        [System.String]
+        $Zone,
+
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
 
@@ -137,14 +183,9 @@ function Set-TargetResource
         [System.String]
         $Url,
 
-        [Parameter(Mandatory = $true)]
-        [ValidateSet("Default", "Intranet", "Internet", "Extranet", "Custom")]
-        [System.String]
-        $Zone,
-
         [Parameter()]
-        [System.Boolean]
-        $AllowAnonymous,
+        [System.String]
+        $Port,
 
         [Parameter()]
         [System.String]
@@ -152,15 +193,23 @@ function Set-TargetResource
 
         [Parameter()]
         [System.String]
-        $Path,
-
-        [Parameter()]
-        [System.String]
-        $Port,
+        $CertificateThumbprint,
 
         [Parameter()]
         [System.Boolean]
-        $UseSSL,
+        $UseServerNameIndication,
+
+        [Parameter()]
+        [System.Boolean]
+        $AllowLegacyEncryption,
+
+        [Parameter()]
+        [System.String]
+        $Path,
+
+        [Parameter()]
+        [System.Boolean]
+        $AllowAnonymous,
 
         [Parameter()]
         [ValidateSet("Present", "Absent")]
@@ -169,6 +218,43 @@ function Set-TargetResource
     )
 
     Write-Verbose -Message "Setting web application extension '$Name' config"
+
+    if ($PSBoundParameters.ContainsKey("Port") -eq $false)
+    {
+        $PSBoundParameters.Port = (New-Object -TypeName System.Uri $WebAppUrl).Port
+    }
+
+    $osVersion = Get-SPDscOSVersion
+    if ($PSBoundParameters.ContainsKey("AllowLegacyEncryption") -and `
+        ($osVersion.Major -ne 10 -or $osVersion.Build -ne 20348))
+    {
+        $message = ("You cannot specify the AllowLegacyEncryption parameter when using " + `
+                "Windows Server 2019 or earlier.")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
+    }
+
+    if ($PSBoundParameters.ContainsKey("CertificateThumbprint") -or `
+            $PSBoundParameters.ContainsKey("UseServerNameIndication") -or `
+            $PSBoundParameters.ContainsKey("AllowLegacyEncryption"))
+    {
+        $productVersion = Get-SPDscInstalledProductVersion
+        if ($productVersion.FileMajorPart -ne 16 -or `
+                $productVersion.FileBuildPart -lt 13000)
+        {
+            $message = ("The parameters AllowLegacyEncryption, CertificateThumbprint or " + `
+                    "UseServerNameIndication are only supported with SharePoint Server " + `
+                    "Subscription Edition.")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
+        }
+    }
 
     if ($Ensure -eq "Present")
     {
@@ -204,6 +290,30 @@ function Set-TargetResource
                 {
                     $newWebAppExtParams.Add("AllowAnonymousAccess", $params.AllowAnonymous)
                 }
+                if ($params.ContainsKey("CertificateThumbprint") -eq $true)
+                {
+                    $cert = Get-SPCertificate -Thumbprint $params.CertificateThumbprint -Store "EndEntity"
+                    if ($null -eq $cert)
+                    {
+                        $message = ("No certificate found with the specified thumbprint: " + `
+                                "$($params.CertificateThumbprint). Make sure the certificate " + `
+                                "is added to Certificate Management first!")
+                        Add-SPDscEvent -Message $message `
+                            -EntryType 'Error' `
+                            -EventID 100 `
+                            -Source $eventSource
+                        throw $message
+                    }
+                    $newWebAppExtParams.Add("Certificate", $cert)
+                }
+                if ($params.ContainsKey("UseServerNameIndication") -eq $true)
+                {
+                    $newWebAppExtParams.Add("UseServerNameIndication", $params.UseServerNameIndication)
+                }
+                if ($params.ContainsKey("AllowLegacyEncryption") -eq $true)
+                {
+                    $newWebAppExtParams.Add("AllowLegacyEncryption", $params.AllowLegacyEncryption)
+                }
                 if ($params.ContainsKey("HostHeader") -eq $true)
                 {
                     $newWebAppExtParams.Add("HostHeader", $params.HostHeader)
@@ -216,9 +326,9 @@ function Set-TargetResource
                 {
                     $newWebAppExtParams.Add("Port", $params.Port)
                 }
-                if ($params.ContainsKey("UseSSL") -eq $true)
+                if ((New-Object -TypeName System.Uri $params.Url).Scheme -eq "https")
                 {
-                    $newWebAppExtParams.Add("SecureSocketsLayer", $params.UseSSL)
+                    $newWebAppExtParams.Add("SecureSocketsLayer", $true)
                 }
 
                 $wa | New-SPWebApplicationExtension @newWebAppExtParams | Out-Null
@@ -228,8 +338,61 @@ function Set-TargetResource
                 if ($params.ContainsKey("AllowAnonymous") -eq $true)
                 {
                     $waExt.AllowAnonymous = $params.AllowAnonymous
-                    $wa.update()
+                    $wa.Update()
                 }
+
+                $updateWebAppParams = @{
+                    Identity = $params.WebAppUrl
+                    Zone     = $params.Zone
+                }
+
+                if ($params.ContainsKey("CertificateThumbprint") -eq $true)
+                {
+                    $cert = Get-SPCertificate -Thumbprint $params.CertificateThumbprint -Store "EndEntity"
+                    if ($null -eq $cert)
+                    {
+                        $message = ("No certificate found with the specified thumbprint: " + `
+                                "$($params.CertificateThumbprint). Make sure the certificate " + `
+                                "is added to Certificate Management first!")
+                        Add-SPDscEvent -Message $message `
+                            -EntryType 'Error' `
+                            -EventID 100 `
+                            -Source $eventSource
+                        throw $message
+                    }
+                    $updateWebAppParams.Add("Certificate", $cert)
+                }
+                if ($params.ContainsKey("UseServerNameIndication") -eq $true)
+                {
+                    $updateWebAppParams.Add("UseServerNameIndication", $params.UseServerNameIndication)
+                }
+                if ($params.ContainsKey("AllowLegacyEncryption") -eq $true)
+                {
+                    $updateWebAppParams.Add("AllowLegacyEncryption", $params.AllowLegacyEncryption)
+                }
+
+                if ((New-Object -TypeName System.Uri $params.Url).Scheme -eq "https")
+                {
+                    $updateWebAppParams.Add("SecureSocketsLayer", $true)
+                }
+
+                $productVersion = Get-SPDscInstalledProductVersion
+                if ($productVersion.FileMajorPart -eq 16 -and `
+                        $productVersion.FileBuildPart -ge 13000)
+                {
+                    if ($params.ContainsKey("HostHeader") -eq $true)
+                    {
+                        $updateWebAppParams.Add("HostHeader", $params.HostHeader)
+                    }
+
+                    if ($params.ContainsKey("Port") -eq $true)
+                    {
+                        $updateWebAppParams.Add("Port", $params.Port)
+                    }
+                }
+
+                Write-Verbose -Message "Updating web application extension with these parameters: $(Convert-SPDscHashtableToString -Hashtable $updateWebAppParams)"
+                Set-SPWebApplication @updateWebAppParams | Out-Null
             }
         }
     }
@@ -271,6 +434,11 @@ function Test-TargetResource
         $WebAppUrl,
 
         [Parameter(Mandatory = $true)]
+        [ValidateSet("Default", "Intranet", "Internet", "Extranet", "Custom")]
+        [System.String]
+        $Zone,
+
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
 
@@ -278,14 +446,9 @@ function Test-TargetResource
         [System.String]
         $Url,
 
-        [Parameter(Mandatory = $true)]
-        [ValidateSet("Default", "Intranet", "Internet", "Extranet", "Custom")]
-        [System.String]
-        $Zone,
-
         [Parameter()]
-        [System.Boolean]
-        $AllowAnonymous,
+        [System.String]
+        $Port,
 
         [Parameter()]
         [System.String]
@@ -293,15 +456,23 @@ function Test-TargetResource
 
         [Parameter()]
         [System.String]
-        $Path,
-
-        [Parameter()]
-        [System.String]
-        $Port,
+        $CertificateThumbprint,
 
         [Parameter()]
         [System.Boolean]
-        $UseSSL,
+        $UseServerNameIndication,
+
+        [Parameter()]
+        [System.Boolean]
+        $AllowLegacyEncryption,
+
+        [Parameter()]
+        [System.String]
+        $Path,
+
+        [Parameter()]
+        [System.Boolean]
+        $AllowAnonymous,
 
         [Parameter()]
         [ValidateSet("Present", "Absent")]
@@ -321,7 +492,13 @@ function Test-TargetResource
     $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
         -Source $($MyInvocation.MyCommand.Source) `
         -DesiredValues $PSBoundParameters `
-        -ValuesToCheck @("Ensure", "AllowAnonymous")
+        -ValuesToCheck @(
+        "AllowAnonymous",
+        "AllowLegacyEncryption",
+        "CertificateThumbprint",
+        "Ensure",
+        "UseServerNameIndication"
+    )
 
     Write-Verbose -Message "Test-TargetResource returned $result"
 

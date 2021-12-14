@@ -13,6 +13,9 @@ class MSFT_SPWebApplication : OMI_BaseResource
     [Required, Description("The name of the managed account to run the app pool with")] string ApplicationPoolAccount;
     [Write, Description("The port to run the site on")] string Port;
     [Write, Description("The host header to use for the web app")] string HostHeader;
+    [Write, Description("Specifies the certificate thumbprint of the SSL certificate to be used. Make sure the certificate is added to Certificate Management (SPSE only)")] String CertificateThumbprint;
+    [Write, Description("Specifies that the Secure Sockets Layer (SSL) binding of this IIS website should use Server Name Indication (SNI) (SPSE only)")] Boolean UseServerNameIndication;
+    [Write, Description("Specifies that older SSL and TLS protocol versions and cipher suites are allowed to be used with this IIS website (SPSE only and requires Windows Server 2022)")] Boolean AllowLegacyEncryption;
     [Write, Description("The path on the local servers to host the IIS web site from")] string Path;
     [Write, Description("The name of the first content database to be created with this web app")] string DatabaseName;
     [Write, Description("The name of the database server to host the default content DB")] string DatabaseServer;
