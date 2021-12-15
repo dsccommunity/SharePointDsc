@@ -22,11 +22,7 @@ function Get-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $SetCacheAccountsPolicy,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $SetCacheAccountsPolicy
     )
 
     Write-Verbose -Message "Getting web app policy for $WebAppUrl"
@@ -76,8 +72,7 @@ function Get-TargetResource
         }
     }
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
@@ -217,11 +212,7 @@ function Set-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $SetCacheAccountsPolicy,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $SetCacheAccountsPolicy
     )
 
     Write-Verbose -Message "Setting web app policy for $WebAppUrl"
@@ -311,8 +302,7 @@ function Set-TargetResource
     }
 
     # Determine the default identity type to use for entries that do not have it specified
-    $defaultIdentityType = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $defaultIdentityType = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
@@ -448,8 +438,7 @@ function Set-TargetResource
     }
 
     ## Perform changes
-    Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $PSScriptRoot, $changeUsers) `
+    Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $PSScriptRoot, $changeUsers) `
         -ScriptBlock {
         $params = $args[0]
         $eventSource = $args[1]
@@ -665,11 +654,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $SetCacheAccountsPolicy,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $SetCacheAccountsPolicy
     )
 
     Write-Verbose -Message "Testing web app policy for $WebAppUrl"
@@ -709,8 +694,7 @@ function Test-TargetResource
     }
 
     # Determine the default identity type to use for entries that do not have it specified
-    $defaultIdentityType = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $defaultIdentityType = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
@@ -948,8 +932,7 @@ function Get-SPDscCacheAccountConfiguration()
         $WebApplicationUrl
     )
 
-    $cacheAccounts = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($WebApplicationUrl, $MyInvocation.MyCommand.Source) `
+    $cacheAccounts = Invoke-SPDscCommand -Arguments @($WebApplicationUrl, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         Write-Verbose -Message "Retrieving CacheAccounts"
         $webApplicationUrl = $args[0]

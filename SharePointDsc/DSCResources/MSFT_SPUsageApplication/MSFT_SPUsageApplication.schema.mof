@@ -11,5 +11,4 @@ class MSFT_SPUsageApplication : OMI_BaseResource
     [Write, Description("The maximum file size for log files in KB")] uint32 UsageLogMaxFileSizeKB;
     [Write, Description("The total space of all log files on disk in GB")] uint32 UsageLogMaxSpaceGB;
     [Write, Description("Present if the service app should exist, absent if it should not"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
-    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };

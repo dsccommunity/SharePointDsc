@@ -19,17 +19,12 @@ function Get-TargetResource
         [Parameter()]
         [ValidateSet('Present', 'Absent')]
         [System.String]
-        $Ensure = 'Present',
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Ensure = 'Present'
     )
 
     Write-Verbose -Message "Looking for SPSite property '$Key'"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+    $result = Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
         $eventSource = $args[1]
@@ -88,17 +83,12 @@ function Set-TargetResource()
         [Parameter()]
         [ValidateSet('Present', 'Absent')]
         [System.String]
-        $Ensure = 'Present',
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Ensure = 'Present'
     )
 
     Write-Verbose -Message "Setting SPSite property '$Key'"
 
-    Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+    Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
         $eventSource = $args[1]
@@ -166,11 +156,7 @@ function Test-TargetResource()
         [Parameter()]
         [ValidateSet('Present', 'Absent')]
         [System.String]
-        $Ensure = 'Present',
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Ensure = 'Present'
     )
 
     Write-Verbose -Message "Testing SPSite property '$Key'"

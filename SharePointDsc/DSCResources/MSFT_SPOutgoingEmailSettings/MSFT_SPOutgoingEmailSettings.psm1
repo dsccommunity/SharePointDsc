@@ -30,11 +30,7 @@ function Get-TargetResource
 
         [Parameter()]
         [System.UInt32]
-        $SMTPPort,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $SMTPPort
     )
 
     Write-Verbose -Message "Getting outgoing email settings configuration for $WebAppUrl"
@@ -62,8 +58,7 @@ function Get-TargetResource
         throw $message
     }
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
         $webApp = Get-SPWebApplication -Identity $params.WebAppUrl `
@@ -134,11 +129,7 @@ function Set-TargetResource
 
         [Parameter()]
         [System.UInt32]
-        $SMTPPort,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $SMTPPort
     )
 
     Write-Verbose -Message "Setting outgoing email settings configuration for $WebAppUrl"
@@ -166,8 +157,7 @@ function Set-TargetResource
         throw $message
     }
 
-    $null = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+    $null = Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
         $eventSource = $args[1]
@@ -269,11 +259,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.UInt32]
-        $SMTPPort,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $SMTPPort
     )
 
     Write-Verbose -Message "Getting outgoing email settings configuration for $WebAppUrl"

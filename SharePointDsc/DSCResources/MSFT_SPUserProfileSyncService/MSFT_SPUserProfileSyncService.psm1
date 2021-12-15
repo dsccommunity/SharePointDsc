@@ -14,11 +14,7 @@ function Get-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $RunOnlyWhenWriteable,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $RunOnlyWhenWriteable
     )
 
     Write-Verbose -Message "Getting user profile sync service for $UserProfileServiceAppName"
@@ -34,47 +30,28 @@ function Get-TargetResource
         throw $message
     }
 
-    $farmAccount = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $farmAccount = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         return Get-SPDscFarmAccount
     }
 
     if ($null -ne $farmAccount)
     {
-        if ($PSBoundParameters.ContainsKey("InstallAccount") -eq $true)
+        # PSDSCRunAsCredential or System
+        if (-not $Env:USERNAME.Contains("$"))
         {
-            # InstallAccount used
-            if ($InstallAccount.UserName -eq $farmAccount.UserName)
+            # PSDSCRunAsCredential used
+            $localaccount = "$($Env:USERDOMAIN)\$($Env:USERNAME)"
+            if ($localaccount -eq $farmAccount.UserName)
             {
-                $message = ("Specified InstallAccount ($($InstallAccount.UserName)) is the Farm " + `
-                        "Account. Make sure the specified InstallAccount isn't the Farm Account " + `
-                        "and try again")
+                $message = ("Specified PSDSCRunAsCredential ($localaccount) is the Farm " + `
+                        "Account. Make sure the specified PSDSCRunAsCredential isn't the " + `
+                        "Farm Account and try again")
                 Add-SPDscEvent -Message $message `
                     -EntryType 'Error' `
                     -EventID 100 `
                     -Source $MyInvocation.MyCommand.Source
                 throw $message
-            }
-        }
-        else
-        {
-            # PSDSCRunAsCredential or System
-            if (-not $Env:USERNAME.Contains("$"))
-            {
-                # PSDSCRunAsCredential used
-                $localaccount = "$($Env:USERDOMAIN)\$($Env:USERNAME)"
-                if ($localaccount -eq $farmAccount.UserName)
-                {
-                    $message = ("Specified PSDSCRunAsCredential ($localaccount) is the Farm " + `
-                            "Account. Make sure the specified PSDSCRunAsCredential isn't the " + `
-                            "Farm Account and try again")
-                    Add-SPDscEvent -Message $message `
-                        -EntryType 'Error' `
-                        -EventID 100 `
-                        -Source $MyInvocation.MyCommand.Source
-                    throw $message
-                }
             }
         }
     }
@@ -88,8 +65,7 @@ function Get-TargetResource
         throw $message
     }
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
@@ -168,11 +144,7 @@ function Set-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $RunOnlyWhenWriteable,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $RunOnlyWhenWriteable
     )
 
     Write-Verbose -Message "Setting user profile sync service for $UserProfileServiceAppName"
@@ -190,47 +162,28 @@ function Set-TargetResource
         throw $message
     }
 
-    $farmAccount = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $farmAccount = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         return Get-SPDscFarmAccount
     }
 
     if ($null -ne $farmAccount)
     {
-        if ($PSBoundParameters.ContainsKey("InstallAccount") -eq $true)
+        # PSDSCRunAsCredential or System
+        if (-not $Env:USERNAME.Contains("$"))
         {
-            # InstallAccount used
-            if ($InstallAccount.UserName -eq $farmAccount.UserName)
+            # PSDSCRunAsCredential used
+            $localaccount = "$($Env:USERDOMAIN)\$($Env:USERNAME)"
+            if ($localaccount -eq $farmAccount.UserName)
             {
-                $message = ("Specified InstallAccount ($($InstallAccount.UserName)) is the Farm " + `
-                        "Account. Make sure the specified InstallAccount isn't the Farm Account " + `
-                        "and try again")
+                $message = ("Specified PSDSCRunAsCredential ($localaccount) is the Farm " + `
+                        "Account. Make sure the specified PSDSCRunAsCredential isn't the " + `
+                        "Farm Account and try again")
                 Add-SPDscEvent -Message $message `
                     -EntryType 'Error' `
                     -EventID 100 `
                     -Source $MyInvocation.MyCommand.Source
                 throw $message
-            }
-        }
-        else
-        {
-            # PSDSCRunAsCredential or System
-            if (-not $Env:USERNAME.Contains("$"))
-            {
-                # PSDSCRunAsCredential used
-                $localaccount = "$($Env:USERDOMAIN)\$($Env:USERNAME)"
-                if ($localaccount -eq $farmAccount.UserName)
-                {
-                    $message = ("Specified PSDSCRunAsCredential ($localaccount) is the Farm " + `
-                            "Account. Make sure the specified PSDSCRunAsCredential isn't the " + `
-                            "Farm Account and try again")
-                    Add-SPDscEvent -Message $message `
-                        -EntryType 'Error' `
-                        -EventID 100 `
-                        -Source $MyInvocation.MyCommand.Source
-                    throw $message
-                }
             }
         }
     }
@@ -247,8 +200,7 @@ function Set-TargetResource
     if ($PSBoundParameters.ContainsKey("RunOnlyWhenWriteable") -eq $true)
     {
         $databaseReadOnly = Test-SPDscUserProfileDBReadOnly `
-            -UserProfileServiceAppName $UserProfileServiceAppName `
-            -InstallAccount $InstallAccount
+            -UserProfileServiceAppName $UserProfileServiceAppName
 
         if ($databaseReadOnly)
         {
@@ -412,11 +364,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $RunOnlyWhenWriteable,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $RunOnlyWhenWriteable
     )
 
     Write-Verbose -Message "Testing user profile sync service for $UserProfileServiceAppName"
@@ -442,8 +390,7 @@ function Test-TargetResource
     if ($PSBoundParameters.ContainsKey("RunOnlyWhenWriteable") -eq $true)
     {
         $databaseReadOnly = Test-SPDscUserProfileDBReadOnly `
-            -UserProfileServiceAppName $UserProfileServiceAppName `
-            -InstallAccount $InstallAccount
+            -UserProfileServiceAppName $UserProfileServiceAppName
 
         if ($databaseReadOnly)
         {
@@ -473,15 +420,10 @@ function Test-SPDscUserProfileDBReadOnly()
     (
         [Parameter(Mandatory = $true)]
         [String]
-        $UserProfileServiceAppName,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $UserProfileServiceAppName
     )
 
-    $databaseReadOnly = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($UserProfileServiceAppName, $MyInvocation.MyCommand.Source) `
+    $databaseReadOnly = Invoke-SPDscCommand -Arguments @($UserProfileServiceAppName, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $UserProfileServiceAppName = $args[0]
         $eventSource = $args[1]
@@ -578,20 +520,13 @@ function Export-TargetResource
                         $Content = ''
                         $params = Get-DSCFakeParameters -ModulePath $module
                         $params.Ensure = $ensureValue
-                        if ($null -eq $params.InstallAccount)
-                        {
-                            $params.Remove("InstallAccount")
-                        }
+
                         $results = Get-TargetResource @params
                         if ($ensureValue -eq "Present")
                         {
                             $PartialContent = "        SPUserProfileSyncService " + $serviceTypeName.Replace(" ", "") + "Instance`r`n"
                             $PartialContent += "        {`r`n"
 
-                            if ($results.Contains("InstallAccount"))
-                            {
-                                $results.Remove("InstallAccount")
-                            }
                             $results = Repair-Credentials -results $results
                             $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
                             $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"

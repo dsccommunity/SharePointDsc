@@ -14,17 +14,12 @@ function Get-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $AllowAppsForOffice,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $AllowAppsForOffice
     )
 
     Write-Verbose -Message "Getting app store settings of $WebAppUrl"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
@@ -67,17 +62,12 @@ function Set-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $AllowAppsForOffice,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $AllowAppsForOffice
     )
 
     Write-Verbose -Message "Setting app store settings of $WebAppUrl"
 
-    Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+    Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
         $eventSource = $args[1]
@@ -133,11 +123,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $AllowAppsForOffice,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $AllowAppsForOffice
     )
 
     Write-Verbose -Message "Testing app store settings of $WebAppUrl"

@@ -17,5 +17,4 @@ class MSFT_SPSearchManagedProperty : OMI_BaseResource
     [Write, Description("Should the property be mapped to all crawled properties")] Boolean IncludeAllCrawledProperties;
     [Write, Description("List of crawled properties that the property is mapped with")] String CrawledProperties[];
     [Write, Description("Present if the source should exist, absent if it should not"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
-    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };

@@ -68,17 +68,12 @@ function Get-TargetResource
         [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
-        $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Ensure = "Present"
     )
 
     Write-Verbose -Message "Getting Managed Property Setting for '$Name'"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+    $result = Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
         $eventSource = $args[1]
@@ -217,11 +212,7 @@ function Set-TargetResource
         [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
-        $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Ensure = "Present"
     )
 
     Write-Verbose -Message "Setting Managed Property Setting for '$Name'"
@@ -230,8 +221,7 @@ function Set-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
     # Validate that the specified crawled properties are all valid and existing
-    Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $CurrentValues) `
+    Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $CurrentValues) `
         -ScriptBlock {
         $params = $args[0]
         $eventSource = $args[1]
@@ -442,11 +432,7 @@ function Test-TargetResource
         [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
-        $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Ensure = "Present"
     )
 
     Write-Verbose -Message "Testing Managed Property Setting for '$Name'"

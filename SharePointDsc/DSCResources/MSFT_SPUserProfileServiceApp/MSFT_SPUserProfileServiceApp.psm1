@@ -76,11 +76,7 @@ function Get-TargetResource
         [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
-        $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Ensure = "Present"
     )
 
     Write-Verbose -Message "Getting user profile service application $Name"
@@ -94,41 +90,22 @@ function Get-TargetResource
         Write-Verbose -Message $message
     }
 
-    $farmAccount = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $farmAccount = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         return Get-SPDscFarmAccount
     }
 
     if ($null -ne $farmAccount)
     {
-        if ($PSBoundParameters.ContainsKey("InstallAccount") -eq $true)
+        # PSDSCRunAsCredential or System
+        if (-not $Env:USERNAME.Contains("$"))
         {
-            # InstallAccount used
-            if ($InstallAccount.UserName -eq $farmAccount.UserName)
+            # PSDSCRunAsCredential used
+            $localaccount = "$($Env:USERDOMAIN)\$($Env:USERNAME)"
+            if ($localaccount -eq $farmAccount.UserName)
             {
-                $message = ("Specified InstallAccount ($($InstallAccount.UserName)) is the Farm " + `
-                        "Account. Make sure the specified InstallAccount isn't the Farm Account " + `
-                        "and try again")
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $MyInvocation.MyCommand.Source
-                throw $message
-            }
-        }
-        else
-        {
-            # PSDSCRunAsCredential or System
-            if (-not $Env:USERNAME.Contains("$"))
-            {
-                # PSDSCRunAsCredential used
-                $localaccount = "$($Env:USERDOMAIN)\$($Env:USERNAME)"
-                if ($localaccount -eq $farmAccount.UserName)
-                {
-                    Write-Verbose -Message ("The current user ($localaccount) is the Farm " + `
-                            "Account. Please note that this will cause issues when applying the configuration.")
-                }
+                Write-Verbose -Message ("The current user ($localaccount) is the Farm " + `
+                        "Account. Please note that this will cause issues when applying the configuration.")
             }
         }
     }
@@ -142,8 +119,7 @@ function Get-TargetResource
         throw $message
     }
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+    $result = Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
         $eventSource = $args[1]
@@ -343,11 +319,7 @@ function Set-TargetResource
         [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
-        $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Ensure = "Present"
     )
 
     Write-Verbose -Message "Setting user profile service application $Name"
@@ -370,50 +342,30 @@ function Set-TargetResource
 
         $PSBoundParameters.UpdateProxyGroup = $UpdateProxyGroup
 
-        $farmAccount = Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+        $farmAccount = Invoke-SPDscCommand -Arguments $PSBoundParameters `
             -ScriptBlock {
             return Get-SPDscFarmAccount
         }
 
         if ($null -ne $farmAccount)
         {
-            if ($PSBoundParameters.ContainsKey("InstallAccount") -eq $true)
+            # PSDSCRunAsCredential or System
+            if (-not $Env:USERNAME.Contains("$"))
             {
-                # InstallAccount used
-                if ($InstallAccount.UserName -eq $farmAccount.UserName)
+                # PSDSCRunAsCredential used
+                $localaccount = "$($Env:USERDOMAIN)\$($Env:USERNAME)"
+                if ($localaccount -eq $farmAccount.UserName)
                 {
-                    $message = ("Specified InstallAccount ($($InstallAccount.UserName)) is the Farm " + `
-                            "Account. Make sure the specified InstallAccount isn't the Farm Account " + `
-                            "and try again")
+                    $message = ("Specified PSDSCRunAsCredential ($localaccount) is the Farm " + `
+                            "Account. Make sure the specified PSDSCRunAsCredential isn't the " + `
+                            "Farm Account and try again")
                     Add-SPDscEvent -Message $message `
                         -EntryType 'Error' `
                         -EventID 100 `
                         -Source $MyInvocation.MyCommand.Source
                     throw $message
                 }
-                $setupAccount = $InstallAccount.UserName
-            }
-            else
-            {
-                # PSDSCRunAsCredential or System
-                if (-not $Env:USERNAME.Contains("$"))
-                {
-                    # PSDSCRunAsCredential used
-                    $localaccount = "$($Env:USERDOMAIN)\$($Env:USERNAME)"
-                    if ($localaccount -eq $farmAccount.UserName)
-                    {
-                        $message = ("Specified PSDSCRunAsCredential ($localaccount) is the Farm " + `
-                                "Account. Make sure the specified PSDSCRunAsCredential isn't the " + `
-                                "Farm Account and try again")
-                        Add-SPDscEvent -Message $message `
-                            -EntryType 'Error' `
-                            -EventID 100 `
-                            -Source $MyInvocation.MyCommand.Source
-                        throw $message
-                    }
-                    $setupAccount = $localaccount
-                }
+                $setupAccount = $localaccount
             }
         }
         else
@@ -477,10 +429,6 @@ function Set-TargetResource
                 $params.Remove("SiteNamingConflictResolution") | Out-Null
             }
 
-            if ($params.ContainsKey("InstallAccount"))
-            {
-                $params.Remove("InstallAccount") | Out-Null
-            }
             if ($params.ContainsKey("Ensure"))
             {
                 $params.Remove("Ensure") | Out-Null
@@ -620,7 +568,7 @@ function Set-TargetResource
             }
         }
 
-        # Remove the InstallAccount from the local Administrators group, if it was added above
+        # Remove the FarmAccount from the local Administrators group, if it was added above
         if (!$isLocalAdmin)
         {
             Write-Verbose -Message "Removing farm account from Local Administrators group"
@@ -637,15 +585,14 @@ function Set-TargetResource
     if ($Ensure -eq "Absent")
     {
         Write-Verbose -Message "Removing user profile service application $Name"
-        Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+        Invoke-SPDscCommand -Arguments $PSBoundParameters `
             -ScriptBlock {
 
             $params = $args[0]
 
             $app = Get-SPServiceApplication | Where-Object -FilterScript {
                 $_.Name -eq $params.Name -and `
-                $_.GetType().FullName -eq "Microsoft.Office.Server.Administration.UserProfileApplication"
+                    $_.GetType().FullName -eq "Microsoft.Office.Server.Administration.UserProfileApplication"
             }
 
             $proxies = Get-SPServiceApplicationProxy
@@ -740,11 +687,7 @@ function Test-TargetResource
         [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
-        $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Ensure = "Present"
     )
 
     Write-Verbose -Message "Testing for user profile service application $Name"
@@ -866,21 +809,12 @@ function Export-TargetResource
                     $currentBlock = "        SPUserProfileServiceApp " + ($serviceName -replace " ", "") + "`r`n"
                     $currentBlock += "        {`r`n"
 
-                    if ($null -eq $params.InstallAccount)
-                    {
-                        $params.Remove("InstallAccount")
-                    }
-
                     $results = Get-TargetResource @params
                     if ($results.Contains("MySiteHostLocation") -and $results.Get_Item("MySiteHostLocation") -eq "*")
                     {
                         $results.Remove("MySiteHostLocation")
                     }
 
-                    if ($results.Contains("InstallAccount"))
-                    {
-                        $results.Remove("InstallAccount")
-                    }
                     $results = Repair-Credentials -results $results
 
                     Add-ConfigurationDataEntry -Node "NonNodeData" -Key "SyncDBServer" -Value $results.SyncDBServer -Description "Name of the User Profile Service Sync Database Server;"

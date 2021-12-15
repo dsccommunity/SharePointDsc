@@ -87,17 +87,12 @@ function Get-TargetResource
 
         [Parameter()]
         [System.String]
-        $DefaultQuotaTemplate,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $DefaultQuotaTemplate
     )
 
     Write-Verbose -Message "Getting web application '$WebAppUrl' general settings"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $PSScriptRoot) `
+    $result = Invoke-SPDscCommand -Arguments @($PSBoundParameters, $PSScriptRoot) `
         -ScriptBlock {
         $params = $args[0]
         $ScriptRoot = $args[1]
@@ -228,17 +223,12 @@ function Set-TargetResource
 
         [Parameter()]
         [System.String]
-        $DefaultQuotaTemplate,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $DefaultQuotaTemplate
     )
 
     Write-Verbose -Message "Setting web application '$WebAppUrl' general settings"
 
-    Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $PSScriptRoot) `
+    Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $PSScriptRoot) `
         -ScriptBlock {
         $params = $args[0]
         $eventSource = $args[1]
@@ -368,11 +358,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.String]
-        $DefaultQuotaTemplate,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $DefaultQuotaTemplate
     )
 
     Write-Verbose -Message "Testing web application '$WebAppUrl' general settings"

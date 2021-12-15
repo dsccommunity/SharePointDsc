@@ -23,5 +23,4 @@ class MSFT_SPTrustedIdentityTokenIssuer : OMI_BaseResource
     [Write, Description("Sign-out URL")] String ProviderSignOutUri;
     [Write, Description("WReply parameter allows SharePoint to specify the return URL to the 3rd party STS upon successful authentication")] Boolean UseWReplyParameter;
     [Write, Description("Present if the SPTrustedIdentityTokenIssuer should be created, or Absent if it should be removed"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
-    [Write, EmbeddedInstance("MSFT_Credential"), Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5")] String InstallAccount;
 };

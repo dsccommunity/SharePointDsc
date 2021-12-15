@@ -34,19 +34,14 @@ function Get-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $AllPermissions,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $AllPermissions
     )
 
     Write-Verbose -Message "Getting permissions for Web Application '$WebAppUrl'"
 
     Test-SPDscInput @PSBoundParameters
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
@@ -261,11 +256,7 @@ function Set-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $AllPermissions,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $AllPermissions
     )
 
     Write-Verbose -Message "Setting permissions for Web Application '$WebAppUrl'"
@@ -276,8 +267,7 @@ function Set-TargetResource
 
     if ($AllPermissions)
     {
-        $result = Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+        $result = Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
             -ScriptBlock {
             $params = $args[0]
             $eventSource = $args[1]
@@ -301,8 +291,7 @@ function Set-TargetResource
     }
     else
     {
-        $result = Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+        $result = Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
             -ScriptBlock {
             $params = $args[0]
             $eventSource = $args[1]
@@ -515,11 +504,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $AllPermissions,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $AllPermissions
     )
 
     Write-Verbose -Message "Testing permissions for Web Application '$WebAppUrl'"
@@ -633,11 +618,7 @@ function Test-SPDscInput()
 
         [Parameter()]
         [System.Boolean]
-        $AllPermissions,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $AllPermissions
     )
 
     if ($AllPermissions)
@@ -934,11 +915,6 @@ function Export-TargetResource
                 $PartialContent = "        SPWebAppPermissions " + [System.Guid]::NewGuid().toString() + "`r`n"
                 $PartialContent += "        {`r`n"
                 $results = Get-TargetResource @params
-
-                if ($results.Contains("InstallAccount"))
-                {
-                    $results.Remove("InstallAccount")
-                }
 
                 <# Fix an issue with SP DSC (forward) 1.6.0.0 #>
                 if ($results.WebAppUrl -eq "url")

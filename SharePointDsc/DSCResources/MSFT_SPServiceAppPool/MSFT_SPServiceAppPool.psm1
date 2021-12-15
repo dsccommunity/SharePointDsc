@@ -15,17 +15,12 @@ function Get-TargetResource
         [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
-        $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Ensure = "Present"
     )
 
     Write-Verbose -Message "Getting service application pool '$Name'"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
@@ -64,11 +59,7 @@ function Set-TargetResource
         [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
-        $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Ensure = "Present"
     )
 
     Write-Verbose -Message "Setting service application pool '$Name'"
@@ -78,8 +69,7 @@ function Set-TargetResource
     if ($CurrentValues.Ensure -eq "Absent" -and $Ensure -eq "Present")
     {
         Write-Verbose -Message "Creating Service Application Pool $Name"
-        Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+        Invoke-SPDscCommand -Arguments $PSBoundParameters `
             -ScriptBlock {
             $params = $args[0]
 
@@ -101,8 +91,7 @@ function Set-TargetResource
     if ($CurrentValues.Ensure -eq "Present" -and $Ensure -eq "Present")
     {
         Write-Verbose -Message "Updating Service Application Pool $Name"
-        Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+        Invoke-SPDscCommand -Arguments $PSBoundParameters `
             -ScriptBlock {
             $params = $args[0]
 
@@ -118,8 +107,7 @@ function Set-TargetResource
     if ($Ensure -eq "Absent")
     {
         Write-Verbose -Message "Removing Service Application Pool $Name"
-        Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+        Invoke-SPDscCommand -Arguments $PSBoundParameters `
             -ScriptBlock {
             $params = $args[0]
             Remove-SPServiceApplicationPool -Identity $params.Name -Confirm:$false
@@ -144,11 +132,7 @@ function Test-TargetResource
         [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
-        $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Ensure = "Present"
     )
 
     Write-Verbose -Message "Testing service application pool '$Name'"

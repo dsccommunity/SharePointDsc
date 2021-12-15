@@ -31,11 +31,7 @@ function Get-TargetResource
 
         [Parameter()]
         [System.String[]]
-        $ExcludeDatabases,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $ExcludeDatabases
     )
 
     Write-Verbose -Message "Getting Shell Admins config"
@@ -102,8 +98,7 @@ function Get-TargetResource
         return $nullreturn
     }
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $PSScriptRoot) `
+    $result = Invoke-SPDscCommand -Arguments @($PSBoundParameters, $PSScriptRoot) `
         -ScriptBlock {
         $params = $args[0]
         $scriptRoot = $args[1]
@@ -189,11 +184,7 @@ function Set-TargetResource
 
         [Parameter()]
         [System.String[]]
-        $ExcludeDatabases,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $ExcludeDatabases
     )
 
     Write-Verbose -Message "Setting Shell Admin config"
@@ -277,8 +268,7 @@ function Set-TargetResource
         throw $message
     }
 
-    $null = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $PSScriptRoot) `
+    $null = Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $PSScriptRoot) `
         -ScriptBlock {
         $params = $args[0]
         $eventSource = $args[1]
@@ -867,11 +857,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.String[]]
-        $ExcludeDatabases,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $ExcludeDatabases
     )
 
     Write-Verbose -Message "Testing Shell Admin settings"

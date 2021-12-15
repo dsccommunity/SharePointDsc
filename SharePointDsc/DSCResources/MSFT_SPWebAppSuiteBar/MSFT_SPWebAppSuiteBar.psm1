@@ -26,17 +26,12 @@ function Get-TargetResource
 
         [Parameter()]
         [System.String]
-        $SuiteBarBrandingElementHtml,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $SuiteBarBrandingElementHtml
     )
 
     Write-Verbose -Message "Getting web app suite bar properties for $WebAppUrl"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
@@ -106,11 +101,7 @@ function Set-TargetResource
 
         [Parameter()]
         [System.String]
-        $SuiteBarBrandingElementHtml,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $SuiteBarBrandingElementHtml
     )
 
     Write-Verbose -Message "Setting web app suite bar properties for $WebAppUrl"
@@ -207,8 +198,7 @@ function Set-TargetResource
     }
 
     ## Perform changes
-    Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+    Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
         $eventSource = $args[1]
@@ -273,11 +263,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.String]
-        $SuiteBarBrandingElementHtml,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $SuiteBarBrandingElementHtml
     )
 
     Write-Verbose -Message "Testing web app suite bar properties for $WebAppUrl"

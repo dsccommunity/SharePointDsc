@@ -21,11 +21,6 @@ function Mount-SPDscContentDatabase()
         $params.Remove("Ensure")
     }
 
-    if ($params.ContainsKey("InstallAccount"))
-    {
-        $params.Remove("InstallAccount")
-    }
-
     if ($params.ContainsKey("MaximumSiteCount"))
     {
         $params.MaxSiteCount = $params.MaximumSiteCount

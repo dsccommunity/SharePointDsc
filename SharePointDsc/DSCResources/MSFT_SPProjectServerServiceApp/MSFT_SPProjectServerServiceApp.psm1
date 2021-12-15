@@ -19,11 +19,7 @@ function Get-TargetResource
         [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
-        $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Ensure = "Present"
     )
 
     Write-Verbose -Message "Getting Project Server service app '$Name'"
@@ -39,8 +35,7 @@ function Get-TargetResource
         throw $message
     }
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
@@ -111,11 +106,7 @@ function Set-TargetResource
         [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
-        $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Ensure = "Present"
     )
 
     Write-Verbose -Message "Setting Project Server service app '$Name'"
@@ -136,8 +127,7 @@ function Set-TargetResource
     if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present")
     {
         Write-Verbose -Message "Creating Project Server Service Application $Name"
-        Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+        Invoke-SPDscCommand -Arguments $PSBoundParameters `
             -ScriptBlock {
             $params = $args[0]
 
@@ -163,8 +153,7 @@ function Set-TargetResource
         if ($ApplicationPool -ne $result.ApplicationPool)
         {
             Write-Verbose -Message "Updating Project Server Service Application $Name"
-            Invoke-SPDscCommand -Credential $InstallAccount `
-                -Arguments $PSBoundParameters `
+            Invoke-SPDscCommand -Arguments $PSBoundParameters `
                 -ScriptBlock {
                 $params = $args[0]
 
@@ -181,14 +170,13 @@ function Set-TargetResource
     if ($Ensure -eq "Absent")
     {
         Write-Verbose -Message "Removing Project Server service application $Name"
-        Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+        Invoke-SPDscCommand -Arguments $PSBoundParameters `
             -ScriptBlock {
             $params = $args[0]
 
             $app = Get-SPServiceApplication | Where-Object -FilterScript {
                 $_.Name -eq $params.Name -and `
-                $_.GetType().FullName -eq "Microsoft.Office.Project.Server.Administration.PsiServiceApplication"
+                    $_.GetType().FullName -eq "Microsoft.Office.Project.Server.Administration.PsiServiceApplication"
             }
 
             $proxies = Get-SPServiceApplicationProxy
@@ -226,11 +214,7 @@ function Test-TargetResource
         [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
-        $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Ensure = "Present"
     )
 
     Write-Verbose -Message "Testing Project Server service app '$Name'"

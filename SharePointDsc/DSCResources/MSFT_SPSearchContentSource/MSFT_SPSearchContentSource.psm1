@@ -62,17 +62,12 @@ function Get-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $Force,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Force
     )
 
     Write-Verbose -Message "Getting Content Source Setting for '$Name'"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $PSScriptRoot) `
+    $result = Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $PSScriptRoot) `
         -ScriptBlock {
         $params = $args[0]
         $eventSource = $args[1]
@@ -289,11 +284,7 @@ function Set-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $Force,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Force
     )
 
     Write-Verbose -Message "Setting Content Source Setting for '$Name'"
@@ -436,8 +427,7 @@ function Set-TargetResource
             -or ($Ensure -eq "Absent" -and $CurrentValues.Ensure -ne $Ensure))
     {
         # Remove the existing content source
-        Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments @($PSBoundParameters) `
+        Invoke-SPDscCommand -Arguments @($PSBoundParameters) `
             -ScriptBlock {
             $params = $args[0]
             Remove-SPEnterpriseSearchCrawlContentSource -Identity $params.Name `
@@ -449,8 +439,7 @@ function Set-TargetResource
     if ($Ensure -eq "Present")
     {
         # Create the new content source and then apply settings to it
-        Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+        Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
             -ScriptBlock {
             $params = $args[0]
             $eventSource = $args[1]
@@ -844,11 +833,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $Force,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Force
     )
 
     Write-Verbose -Message "Testing Content Source Setting for '$Name'"

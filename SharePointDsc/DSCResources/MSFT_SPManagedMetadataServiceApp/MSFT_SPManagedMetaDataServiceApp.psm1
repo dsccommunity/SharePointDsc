@@ -59,17 +59,12 @@ function Get-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $ContentTypeSyndicationEnabled,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $ContentTypeSyndicationEnabled
     )
 
     Write-Verbose -Message "Getting managed metadata service application $Name"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+    $result = Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
         $eventSource = $args[1]
@@ -333,11 +328,7 @@ function Set-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $ContentTypeSyndicationEnabled,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $ContentTypeSyndicationEnabled
     )
 
     Write-Verbose -Message "Setting managed metadata service application $Name"
@@ -358,8 +349,7 @@ function Set-TargetResource
     if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present")
     {
         Write-Verbose -Message "Creating Managed Metadata Service Application $Name"
-        Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments ($PSBoundParameters, $pName) `
+        Invoke-SPDscCommand -Arguments ($PSBoundParameters, $pName) `
             -ScriptBlock {
             $params = $args[0]
             $pName = $args[1]
@@ -404,8 +394,7 @@ function Set-TargetResource
                 $ApplicationPool -ne $result.ApplicationPool)
         {
             Write-Verbose -Message "Updating application pool of Managed Metadata Service Application $Name"
-            Invoke-SPDscCommand -Credential $InstallAccount `
-                -Arguments $PSBoundParameters `
+            Invoke-SPDscCommand -Arguments $PSBoundParameters `
                 -ScriptBlock {
                 $params = $args[0]
 
@@ -422,8 +411,7 @@ function Set-TargetResource
         if ($pName -ne $result.ProxyName)
         {
             Write-Verbose -Message "Updating Managed Metadata Service Application Proxy"
-            Invoke-SPDscCommand -Credential $InstallAccount `
-                -Arguments @($PSBoundParameters, $pName) `
+            Invoke-SPDscCommand -Arguments @($PSBoundParameters, $pName) `
                 -ScriptBlock {
                 $params = $args[0]
                 $pName = $args[1]
@@ -464,8 +452,7 @@ function Set-TargetResource
                 -and ($ContentTypeHubUrl.TrimEnd('/') -ne $result.ContentTypeHubUrl.TrimEnd('/')))
         {
             Write-Verbose -Message "Updating Content type hub for Managed Metadata Service Application $Name"
-            Invoke-SPDscCommand -Credential $InstallAccount `
-                -Arguments $PSBoundParameters `
+            Invoke-SPDscCommand -Arguments $PSBoundParameters `
                 -ScriptBlock {
                 $params = $args[0]
 
@@ -483,8 +470,7 @@ function Set-TargetResource
         {
             Write-Verbose -Message "Updating the term store administrators"
             # Update the term store administrators
-            Invoke-SPDscCommand -Credential $InstallAccount `
-                -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $result, $pName) `
+            Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $result, $pName) `
                 -ScriptBlock {
 
                 $params = $args[0]
@@ -567,8 +553,7 @@ function Set-TargetResource
         {
             # The lanauge settings should be set to default
             Write-Verbose -Message "Updating the default language for Managed Metadata Service Application Proxy '$pName'"
-            Invoke-SPDscCommand -Credential $InstallAccount `
-                -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $pName) `
+            Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $pName) `
                 -ScriptBlock {
 
                 $params = $args[0]
@@ -617,8 +602,7 @@ function Set-TargetResource
         {
             Write-Verbose -Message "Updating working languages for Managed Metadata Service Application Proxy '$pName'"
             # Update the term store working languages
-            Invoke-SPDscCommand -Credential $InstallAccount `
-                -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $result, $pName) `
+            Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $result, $pName) `
                 -ScriptBlock {
 
                 $params = $args[0]
@@ -694,8 +678,7 @@ function Set-TargetResource
                 -and ($ContentTypePushdownEnabled -ne $result.ContentTypePushdownEnabled)
         )
         {
-            Invoke-SPDscCommand -Credential $InstallAccount `
-                -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $pName) `
+            Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $pName) `
                 -ScriptBlock {
                 $params = $args[0]
                 $eventSource = $args[1]
@@ -723,8 +706,7 @@ function Set-TargetResource
                 -and ($ContentTypeSyndicationEnabled -ne $result.ContentTypeSyndicationEnabled)
         )
         {
-            Invoke-SPDscCommand -Credential $InstallAccount `
-                -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $pName) `
+            Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $pName) `
                 -ScriptBlock {
                 $params = $args[0]
                 $eventSource = $args[1]
@@ -753,8 +735,7 @@ function Set-TargetResource
     {
         # The service app should not exit
         Write-Verbose -Message "Removing Managed Metadata Service Application $Name"
-        Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+        Invoke-SPDscCommand -Arguments $PSBoundParameters `
             -ScriptBlock {
             $params = $args[0]
 
@@ -838,11 +819,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $ContentTypeSyndicationEnabled,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $ContentTypeSyndicationEnabled
     )
 
     Write-Verbose -Message "Testing managed metadata service application $Name"

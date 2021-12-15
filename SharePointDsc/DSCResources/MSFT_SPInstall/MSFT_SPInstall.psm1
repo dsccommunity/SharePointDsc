@@ -114,7 +114,7 @@ function Get-TargetResource
     $installedItems = $installedItemsX86 + $installedItemsX64
     $installedItems = $installedItems.DisplayName | Select-Object -Unique
     $spInstall = $installedItems | Where-Object -FilterScript {
-        $_ -match "^Microsoft SharePoint Server (2013|2016|2019)$"
+        $_ -match "^Microsoft SharePoint Server (2013|2016|2019|Subscription Edition)$"
     }
 
     if ($spInstall)
@@ -211,7 +211,8 @@ function Set-TargetResource
         throw $message
     }
 
-    $majorVersion = (Get-SPDscAssemblyVersion -PathToAssembly $InstallerPath)
+    $majorVersion = Get-SPDscAssemblyVersion -PathToAssembly $InstallerPath
+    $buildVersion = Get-SPDscBuildVersion -PathToAssembly $InstallerPath
     if ($majorVersion -eq 15)
     {
         $svrsetupDll = Join-Path -Path $BinaryDir -ChildPath "updates\svrsetup.dll"
@@ -373,8 +374,16 @@ function Set-TargetResource
 
     $setupExe = Join-Path -Path $BinaryDir -ChildPath "setup.exe"
 
+    $args = "/config `"$configPath`""
+    if ($majorVersion -eq 16 -and $buildVersion -ge 13000)
+    {
+        $args += ' /IAcceptTheLicenseTerms'
+    }
+
+    Write-Verbose -Message "Calling the SharePoint installer"
+    Write-Verbose -Message "Args for SharePoint installer are: $args"
     $setup = Start-Process -FilePath $setupExe `
-        -ArgumentList "/config `"$configPath`"" `
+        -ArgumentList $args `
         -Wait `
         -PassThru
 
@@ -425,6 +434,15 @@ function Set-TargetResource
                     -Source $MyInvocation.MyCommand.Source
                 throw $message
             }
+        }
+        30203
+        {
+            $message = "SharePoint install failed, license terms are not accepted."
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
         Default
         {

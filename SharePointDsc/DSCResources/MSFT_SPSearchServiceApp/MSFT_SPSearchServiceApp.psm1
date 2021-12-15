@@ -61,14 +61,37 @@ function Get-TargetResource
         $DefaultContentAccessAccount,
 
         [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        [System.UInt16]
+        $ErrorDeleteCountAllowed,
+
+        [Parameter()]
+        [System.UInt16]
+        $ErrorDeleteIntervalAllowed,
+
+        [Parameter()]
+        [System.UInt16]
+        $ErrorCountAllowed,
+
+        [Parameter()]
+        [System.UInt16]
+        $ErrorIntervalAllowed,
+
+        [Parameter()]
+        [System.UInt16]
+        $DeleteUnvisitedMethod,
+
+        [Parameter()]
+        [System.UInt16]
+        $RecrawlErrorCount,
+
+        [Parameter()]
+        [System.UInt16]
+        $RecrawlErrorInterval
     )
 
     Write-Verbose -Message "Getting Search service application '$Name'"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $PSScriptRoot) `
+    $result = Invoke-SPDscCommand -Arguments @($PSBoundParameters, $PSScriptRoot) `
         -ScriptBlock {
         $params = $args[0]
         $scriptRoot = $args[1]
@@ -230,6 +253,13 @@ function Get-TargetResource
                 CloudIndex                  = $cloudIndex
                 AlertsEnabled               = $serviceApp.AlertsEnabled
                 FixFarmAccountPermissions   = $farmAccountPermissionsNeedCorrecting
+                ErrorDeleteCountAllowed     = $serviceApp.GetProperty("ErrorDeleteCountAllowed")
+                ErrorDeleteIntervalAllowed  = $serviceApp.GetProperty("ErrorDeleteIntervalAllowed")
+                ErrorCountAllowed           = $serviceApp.GetProperty("ErrorCountAllowed")
+                ErrorIntervalAllowed        = $serviceApp.GetProperty("ErrorIntervalAllowed")
+                DeleteUnvisitedMethod       = $serviceApp.GetProperty("DeleteUnvisitedMethod")
+                RecrawlErrorCount           = $serviceApp.GetProperty("RecrawlErrorCount")
+                RecrawlErrorInterval        = $serviceApp.GetProperty("RecrawlErrorInterval")
             }
             return $returnVal
         }
@@ -296,8 +326,32 @@ function Set-TargetResource
         $DefaultContentAccessAccount,
 
         [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        [System.UInt16]
+        $ErrorDeleteCountAllowed,
+
+        [Parameter()]
+        [System.UInt16]
+        $ErrorDeleteIntervalAllowed,
+
+        [Parameter()]
+        [System.UInt16]
+        $ErrorCountAllowed,
+
+        [Parameter()]
+        [System.UInt16]
+        $ErrorIntervalAllowed,
+
+        [Parameter()]
+        [System.UInt16]
+        $DeleteUnvisitedMethod,
+
+        [Parameter()]
+        [System.UInt16]
+        $RecrawlErrorCount,
+
+        [Parameter()]
+        [System.UInt16]
+        $RecrawlErrorInterval
     )
 
     Write-Verbose -Message "Setting Search service application '$Name'"
@@ -320,8 +374,7 @@ function Set-TargetResource
     {
         # Create the service app as it doesn't exist
         Write-Verbose -Message "Creating Search Service Application $Name"
-        Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+        Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
             -ScriptBlock {
             $params = $args[0]
             $eventSource = $args[1]
@@ -416,27 +469,8 @@ function Set-TargetResource
                     Set-SPEnterpriseSearchServiceApplication @setParams
                 }
 
-                if ($params.ContainsKey("SearchCenterUrl") -eq $true)
-                {
-                    Write-Verbose -Message "Setting SearchCenterUrl to $($params.SearchCenterUrl)"
-                    $serviceApp = Get-SPServiceApplication | Where-Object -FilterScript {
-                        $_.Name -eq $params.Name -and `
-                            $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
-                    }
-                    $serviceApp.SearchCenterUrl = $params.SearchCenterUrl
-                    $serviceApp.Update()
-                }
-
-                if ($params.ContainsKey("AlertsEnabled") -eq $true)
-                {
-                    Write-Verbose -Message "Setting AlertsEnabled to $($params.AlertsEnabled)"
-                    $serviceApp = Get-SPServiceApplication | Where-Object -FilterScript {
-                        $_.Name -eq $params.Name -and `
-                            $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
-                    }
-                    $serviceApp.AlertsEnabled = $params.AlertsEnabled
-                    $serviceApp.Update()
-                }
+                Write-Verbose -Message ("NOTE: Don't forget to configure a Search topology " + `
+                        "using the SPSearchTopology resource!")
             }
         }
     }
@@ -445,8 +479,7 @@ function Set-TargetResource
     {
         # Update the service app that already exists
         Write-Verbose -Message "Updating Search Service Application $Name"
-        Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments @($PSBoundParameters, $result) `
+        Invoke-SPDscCommand -Arguments @($PSBoundParameters, $result) `
             -ScriptBlock {
             $params = $args[0]
             $result = $args[1]
@@ -510,121 +543,188 @@ function Set-TargetResource
             {
                 Set-SPEnterpriseSearchServiceApplication @setParams
             }
-
-            if ($params.ContainsKey("SearchCenterUrl") -eq $true -and `
-                    $result.SearchCenterUrl -ne $params.SearchCenterUrl)
-            {
-                Write-Verbose -Message "Updating SearchCenterUrl to $($params.SearchCenterUrl)"
-                $serviceApp = Get-SPServiceApplication | Where-Object -FilterScript {
-                    $_.Name -eq $params.Name -and `
-                        $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
-                }
-                $serviceApp.SearchCenterUrl = $params.SearchCenterUrl
-                $serviceApp.Update()
-            }
-
-            if ($params.ContainsKey("AlertsEnabled") -eq $true -and `
-                    $result.AlertsEnabled -ne $params.AlertsEnabled)
-            {
-                Write-Verbose -Message "Updating AlertsEnabled to $($params.AlertsEnabled)"
-                $serviceApp = Get-SPServiceApplication | Where-Object -FilterScript {
-                    $_.Name -eq $params.Name -and `
-                        $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
-                }
-                $serviceApp.AlertsEnabled = $params.AlertsEnabled
-                $serviceApp.Update()
-            }
         }
     }
 
     # Only check and correct when Ensure=Present, FixFarmAccountPermissions=True and the permissions are incorrect
-    if ($Ensure -eq "Present" -and `
-            $FixFarmAccountPermissions -eq $true -and `
-            $result.FixFarmAccountPermissions -eq $true)
+    if ($Ensure -eq "Present")
     {
-        Write-Verbose -Message "Fixing database permissions for Search Service Application $Name"
-        Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments @($PSBoundParameters, $PSScriptRoot) `
+        if ($FixFarmAccountPermissions -eq $true -and `
+                $result.FixFarmAccountPermissions -eq $true)
+        {
+            Write-Verbose -Message "Fixing database permissions for Search Service Application $Name"
+            Invoke-SPDscCommand -Arguments @($PSBoundParameters, $PSScriptRoot) `
+                -ScriptBlock {
+                $params = $args[0]
+                $scriptRoot = $args[1]
+
+                $modulePath = "..\..\Modules\SharePointDsc.Search\SPSearchServiceApp.psm1"
+                Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve) -Verbose:$false
+
+                $serviceApp = Get-SPServiceApplication | Where-Object -FilterScript {
+                    $_.Name -eq $params.Name -and `
+                        $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
+                }
+
+                $farmAccount = (Get-SPFarm).DefaultServiceAccount.Name
+                $dbServer = $serviceApp.SearchAdminDatabase.NormalizedDataSource
+
+                Write-Verbose -Message "Checking and correcting Admin Database"
+                $adminDB = $serviceApp.SearchAdminDatabase.Name
+                if ((Confirm-UserIsDBOwner -SQLServer $dbServer `
+                            -Database $adminDB `
+                            -User $farmAccount `
+                            -DatabaseCredentials $params.DatabaseCredentials) -eq $false)
+                {
+                    Set-UserAsDBOwner -SQLServer $dbServer `
+                        -Database $adminDB `
+                        -User $farmAccount `
+                        -DatabaseCredentials $params.DatabaseCredentials
+                }
+
+                Write-Verbose -Message "Checking and correcting Analytics reporting Database"
+                foreach ($database in $serviceApp.AnalyticsReportingDatabases)
+                {
+                    $analyticsDB = $database.Name
+                    if ((Confirm-UserIsDBOwner -SQLServer $dbServer `
+                                -Database $analyticsDB `
+                                -User $farmAccount `
+                                -DatabaseCredentials $params.DatabaseCredentials) -eq $false)
+                    {
+                        Set-UserAsDBOwner -SQLServer $dbServer `
+                            -Database $analyticsDB `
+                            -User $farmAccount `
+                            -DatabaseCredentials $params.DatabaseCredentials
+                    }
+                }
+
+                Write-Verbose -Message "Checking and correcting Crawl Database(s)"
+                foreach ($database in (Get-SPEnterpriseSearchCrawlDatabase -SearchApplication $serviceApp))
+                {
+                    $crawlDB = $database.Database.Name
+                    Write-Verbose -Message "  * Processing $crawlDB"
+
+                    $dbServer = $database.Database.NormalizedDataSource
+                    if ((Confirm-UserIsDBOwner -SQLServer $dbServer `
+                                -Database $crawlDB `
+                                -User $farmAccount `
+                                -DatabaseCredentials $params.DatabaseCredentials) -eq $false)
+                    {
+                        Set-UserAsDBOwner -SQLServer $dbServer `
+                            -Database $crawlDB `
+                            -User $farmAccount `
+                            -DatabaseCredentials $params.DatabaseCredentials
+                    }
+                }
+
+                Write-Verbose -Message "Checking and correcting Links Database(s)"
+                foreach ($database in (Get-SPEnterpriseSearchLinksDatabase -SearchApplication $serviceApp))
+                {
+                    $linksDB = $database.Database.Name
+                    Write-Verbose -Message "  * Processing $linksDB"
+
+                    $dbServer = $database.Database.NormalizedDataSource
+                    if ((Confirm-UserIsDBOwner -SQLServer $dbServer `
+                                -Database $linksDB `
+                                -User $farmAccount `
+                                -DatabaseCredentials $params.DatabaseCredentials) -eq $false)
+                    {
+                        Set-UserAsDBOwner -SQLServer $dbServer `
+                            -Database $linksDB `
+                            -User $farmAccount `
+                            -DatabaseCredentials $params.DatabaseCredentials
+                    }
+                }
+            }
+        }
+
+        Write-Verbose -Message "Updating settings of Search Service Application $Name"
+        Invoke-SPDscCommand -Arguments @($PSBoundParameters, $result) `
             -ScriptBlock {
             $params = $args[0]
-            $scriptRoot = $args[1]
-
-            $modulePath = "..\..\Modules\SharePointDsc.Search\SPSearchServiceApp.psm1"
-            Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve) -Verbose:$false
+            $result = $args[1]
 
             $serviceApp = Get-SPServiceApplication | Where-Object -FilterScript {
                 $_.Name -eq $params.Name -and `
                     $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
             }
 
-            $farmAccount = (Get-SPFarm).DefaultServiceAccount.Name
-            $dbServer = $serviceApp.SearchAdminDatabase.NormalizedDataSource
-
-            Write-Verbose -Message "Checking and correcting Admin Database"
-            $adminDB = $serviceApp.SearchAdminDatabase.Name
-            if ((Confirm-UserIsDBOwner -SQLServer $dbServer `
-                        -Database $adminDB `
-                        -User $farmAccount `
-                        -DatabaseCredentials $params.DatabaseCredentials) -eq $false)
+            $runUpdate = $false
+            if ($params.ContainsKey("SearchCenterUrl") -eq $true -and `
+                    $result.SearchCenterUrl -ne $params.SearchCenterUrl)
             {
-                Set-UserAsDBOwner -SQLServer $dbServer `
-                    -Database $adminDB `
-                    -User $farmAccount `
-                    -DatabaseCredentials $params.DatabaseCredentials
+                Write-Verbose -Message "Updating SearchCenterUrl to $($params.SearchCenterUrl)"
+                $serviceApp.SearchCenterUrl = $params.SearchCenterUrl
+                $runUpdate = $true
             }
 
-            Write-Verbose -Message "Checking and correcting Analytics reporting Database"
-            foreach ($database in $serviceApp.AnalyticsReportingDatabases)
+            if ($params.ContainsKey("AlertsEnabled") -eq $true -and `
+                    $result.AlertsEnabled -ne $params.AlertsEnabled)
             {
-                $analyticsDB = $database.Name
-                if ((Confirm-UserIsDBOwner -SQLServer $dbServer `
-                            -Database $analyticsDB `
-                            -User $farmAccount `
-                            -DatabaseCredentials $params.DatabaseCredentials) -eq $false)
-                {
-                    Set-UserAsDBOwner -SQLServer $dbServer `
-                        -Database $analyticsDB `
-                        -User $farmAccount `
-                        -DatabaseCredentials $params.DatabaseCredentials
-                }
+                Write-Verbose -Message "Updating AlertsEnabled to $($params.AlertsEnabled)"
+                $serviceApp.AlertsEnabled = $params.AlertsEnabled
+                $runUpdate = $true
             }
 
-            Write-Verbose -Message "Checking and correcting Crawl Database(s)"
-            foreach ($database in (Get-SPEnterpriseSearchCrawlDatabase -SearchApplication $serviceApp))
+            if ($params.ContainsKey("ErrorDeleteCountAllowed") -eq $true -and `
+                    $result.ErrorDeleteCountAllowed -ne $params.ErrorDeleteCountAllowed)
             {
-                $crawlDB = $database.Database.Name
-                Write-Verbose -Message "  * Processing $crawlDB"
-
-                $dbServer = $database.Database.NormalizedDataSource
-                if ((Confirm-UserIsDBOwner -SQLServer $dbServer `
-                            -Database $crawlDB `
-                            -User $farmAccount `
-                            -DatabaseCredentials $params.DatabaseCredentials) -eq $false)
-                {
-                    Set-UserAsDBOwner -SQLServer $dbServer `
-                        -Database $crawlDB `
-                        -User $farmAccount `
-                        -DatabaseCredentials $params.DatabaseCredentials
-                }
+                Write-Verbose -Message "Updating ErrorDeleteCountAllowed to $($params.ErrorDeleteCountAllowed)"
+                $serviceApp.SetProperty("ErrorDeleteCountAllowed", $params.ErrorDeleteCountAllowed)
+                $runUpdate = $true
             }
 
-            Write-Verbose -Message "Checking and correcting Links Database(s)"
-            foreach ($database in (Get-SPEnterpriseSearchLinksDatabase -SearchApplication $serviceApp))
+            if ($params.ContainsKey("ErrorDeleteIntervalAllowed") -eq $true -and `
+                    $result.ErrorDeleteIntervalAllowed -ne $params.ErrorDeleteIntervalAllowed)
             {
-                $linksDB = $database.Database.Name
-                Write-Verbose -Message "  * Processing $linksDB"
+                Write-Verbose -Message "Updating ErrorDeleteIntervalAllowed to $($params.ErrorDeleteIntervalAllowed)"
+                $serviceApp.SetProperty("ErrorDeleteIntervalAllowed", $params.ErrorDeleteIntervalAllowed)
+                $runUpdate = $true
+            }
 
-                $dbServer = $database.Database.NormalizedDataSource
-                if ((Confirm-UserIsDBOwner -SQLServer $dbServer `
-                            -Database $linksDB `
-                            -User $farmAccount `
-                            -DatabaseCredentials $params.DatabaseCredentials) -eq $false)
-                {
-                    Set-UserAsDBOwner -SQLServer $dbServer `
-                        -Database $linksDB `
-                        -User $farmAccount `
-                        -DatabaseCredentials $params.DatabaseCredentials
-                }
+            if ($params.ContainsKey("ErrorCountAllowed") -eq $true -and `
+                    $result.ErrorCountAllowed -ne $params.ErrorCountAllowed)
+            {
+                Write-Verbose -Message "Updating ErrorCountAllowed to $($params.ErrorCountAllowed)"
+                $serviceApp.SetProperty("ErrorCountAllowed", $params.ErrorCountAllowed)
+                $runUpdate = $true
+            }
+
+            if ($params.ContainsKey("ErrorIntervalAllowed") -eq $true -and `
+                    $result.ErrorIntervalAllowed -ne $params.ErrorIntervalAllowed)
+            {
+                Write-Verbose -Message "Updating ErrorIntervalAllowed to $($params.ErrorIntervalAllowed)"
+                $serviceApp.SetProperty("ErrorIntervalAllowed", $params.ErrorIntervalAllowed)
+                $runUpdate = $true
+            }
+
+            if ($params.ContainsKey("DeleteUnvisitedMethod") -eq $true -and `
+                    $result.DeleteUnvisitedMethod -ne $params.DeleteUnvisitedMethod)
+            {
+                Write-Verbose -Message "Updating DeleteUnvisitedMethod to $($params.DeleteUnvisitedMethod)"
+                $serviceApp.SetProperty("DeleteUnvisitedMethod", $params.DeleteUnvisitedMethod)
+                $runUpdate = $true
+            }
+
+            if ($params.ContainsKey("RecrawlErrorCount") -eq $true -and `
+                    $result.RecrawlErrorCount -ne $params.RecrawlErrorCount)
+            {
+                Write-Verbose -Message "Updating RecrawlErrorCount to $($params.RecrawlErrorCount)"
+                $serviceApp.SetProperty("RecrawlErrorCount", $params.RecrawlErrorCount)
+                $runUpdate = $true
+            }
+
+            if ($params.ContainsKey("RecrawlErrorInterval") -eq $true -and `
+                    $result.RecrawlErrorInterval -ne $params.RecrawlErrorInterval)
+            {
+                Write-Verbose -Message "Updating RecrawlErrorInterval to $($params.RecrawlErrorInterval)"
+                $serviceApp.SetProperty("RecrawlErrorInterval", $params.RecrawlErrorInterval)
+                $runUpdate = $true
+            }
+
+            if ($runUpdate -eq $true)
+            {
+                $serviceApp.Update()
             }
         }
     }
@@ -633,8 +733,7 @@ function Set-TargetResource
     {
         # The service app should not exit
         Write-Verbose -Message "Removing Search Service Application $Name"
-        Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+        Invoke-SPDscCommand -Arguments $PSBoundParameters `
             -ScriptBlock {
             $params = $args[0]
 
@@ -717,8 +816,32 @@ function Test-TargetResource
         $DefaultContentAccessAccount,
 
         [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        [System.UInt16]
+        $ErrorDeleteCountAllowed,
+
+        [Parameter()]
+        [System.UInt16]
+        $ErrorDeleteIntervalAllowed,
+
+        [Parameter()]
+        [System.UInt16]
+        $ErrorCountAllowed,
+
+        [Parameter()]
+        [System.UInt16]
+        $ErrorIntervalAllowed,
+
+        [Parameter()]
+        [System.UInt16]
+        $DeleteUnvisitedMethod,
+
+        [Parameter()]
+        [System.UInt16]
+        $RecrawlErrorCount,
+
+        [Parameter()]
+        [System.UInt16]
+        $RecrawlErrorInterval
     )
 
     Write-Verbose -Message "Testing Search service application '$Name'"
@@ -779,7 +902,15 @@ function Test-TargetResource
             "ApplicationPool",
             "SearchCenterUrl",
             "ProxyName",
-            "AlertsEnabled")
+            "AlertsEnabled",
+            "ErrorDeleteCountAllowed",
+            "ErrorDeleteIntervalAllowed",
+            "ErrorCountAllowed",
+            "ErrorIntervalAllowed",
+            "DeleteUnvisitedMethod",
+            "RecrawlErrorCount",
+            "RecrawlErrorInterval"
+        )
     }
     else
     {
@@ -823,11 +954,6 @@ function Export-TargetResource
                 if ($results.Get_Item("CloudIndex") -eq $false)
                 {
                     $results.Remove("CloudIndex")
-                }
-
-                if ($results.Contains("InstallAccount"))
-                {
-                    $results.Remove("InstallAccount")
                 }
 
                 if ($null -eq $results.SearchCenterUrl)

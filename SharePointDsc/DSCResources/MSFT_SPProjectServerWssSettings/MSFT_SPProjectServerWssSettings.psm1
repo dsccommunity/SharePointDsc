@@ -11,11 +11,7 @@ function Get-TargetResource
         [Parameter(Mandatory = $true)]
         [ValidateSet("AutoCreate", "UserChoice", "DontCreate")]
         [System.String]
-        $CreateProjectSiteMode,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $CreateProjectSiteMode
     )
 
     Write-Verbose -Message "Getting WSS settings for $Url"
@@ -31,8 +27,7 @@ function Get-TargetResource
         throw $message
     }
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $PSScriptRoot) `
+    $result = Invoke-SPDscCommand -Arguments @($PSBoundParameters, $PSScriptRoot) `
         -ScriptBlock {
         $params = $args[0]
         $scriptRoot = $args[1]
@@ -96,17 +91,12 @@ function Set-TargetResource
         [Parameter(Mandatory = $true)]
         [ValidateSet("AutoCreate", "UserChoice", "DontCreate")]
         [System.String]
-        $CreateProjectSiteMode,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $CreateProjectSiteMode
     )
 
     Write-Verbose -Message "Setting WSS settings for $Url"
 
-    Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $PSScriptRoot) `
+    Invoke-SPDscCommand -Arguments @($PSBoundParameters, $PSScriptRoot) `
         -ScriptBlock {
         $params = $args[0]
         $scriptRoot = $args[1]
@@ -157,11 +147,7 @@ function Test-TargetResource
         [Parameter(Mandatory = $true)]
         [ValidateSet("AutoCreate", "UserChoice", "DontCreate")]
         [System.String]
-        $CreateProjectSiteMode,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $CreateProjectSiteMode
     )
 
     Write-Verbose -Message "Testing WSS settings for $Url"

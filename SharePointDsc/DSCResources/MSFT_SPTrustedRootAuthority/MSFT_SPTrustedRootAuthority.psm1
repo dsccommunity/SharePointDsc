@@ -19,11 +19,7 @@ function Get-TargetResource
         [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
-        $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Ensure = "Present"
     )
 
     Write-Verbose "Getting Trusted Root Authority with name '$Name'"
@@ -49,8 +45,7 @@ function Get-TargetResource
         }
     }
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
@@ -103,11 +98,7 @@ function Set-TargetResource
         [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
-        $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Ensure = "Present"
     )
 
     Write-Verbose -Message "Setting SPTrustedRootAuthority '$Name'"
@@ -142,8 +133,7 @@ function Set-TargetResource
     if ($Ensure -eq "Present" -and $CurrentValues.Ensure -eq "Present")
     {
         Write-Verbose -Message "Updating SPTrustedRootAuthority '$Name'"
-        $null = Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+        $null = Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
             -ScriptBlock {
             $params = $args[0]
             $eventSource = $args[1]
@@ -223,8 +213,7 @@ function Set-TargetResource
     if ($Ensure -eq "Present" -and $CurrentValues.Ensure -eq "Absent")
     {
         Write-Verbose -Message "Adding SPTrustedRootAuthority '$Name'"
-        $null = Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+        $null = Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
             -ScriptBlock {
             $params = $args[0]
             $eventSource = $args[1]
@@ -303,8 +292,7 @@ function Set-TargetResource
     if ($Ensure -eq "Absent")
     {
         Write-Verbose -Message "Removing SPTrustedRootAuthority '$Name'"
-        $null = Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+        $null = Invoke-SPDscCommand -Arguments $PSBoundParameters `
             -ScriptBlock {
             $params = $args[0]
             Remove-SPTrustedRootAuthority -Identity $params.Name `
@@ -334,11 +322,7 @@ function Test-TargetResource
         [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
-        $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Ensure = "Present"
     )
 
     Write-Verbose -Message "Testing SPTrustedRootAuthority '$Name'"

@@ -31,17 +31,12 @@ function Get-TargetResource
 
         [Parameter()]
         [System.UInt16]
-        $NumberOfThreads,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $NumberOfThreads
     )
 
     Write-Verbose -Message "Getting antivirus configuration settings"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
@@ -114,17 +109,12 @@ function Set-TargetResource
 
         [Parameter()]
         [System.UInt16]
-        $NumberOfThreads,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $NumberOfThreads
     )
 
     Write-Verbose -Message "Setting antivirus configuration settings"
 
-    Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+    Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
         $eventSource = $args[1]
@@ -210,11 +200,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.UInt16]
-        $NumberOfThreads,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $NumberOfThreads
     )
 
     Write-Verbose -Message "Testing antivirus configuration settings"

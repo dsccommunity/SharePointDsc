@@ -615,13 +615,24 @@ function Invoke-SPDscCommand
 
     $VerbosePreference = 'Continue'
 
-    $baseScript = @"
-        if (`$null -eq (Get-PSSnapin -Name Microsoft.SharePoint.PowerShell -ErrorAction SilentlyContinue))
-        {
-            Add-PSSnapin Microsoft.SharePoint.PowerShell
-        }
+    $installedVersion = Get-SPDscInstalledProductVersion
+    if ($installedVersion.ProductMajorPart -eq 15 -or $installedVersion.ProductBuildPart -le 12999)
+    {
+        $baseScript = @"
+            if (`$null -eq (Get-PSSnapin -Name Microsoft.SharePoint.PowerShell -ErrorAction SilentlyContinue))
+            {
+                Add-PSSnapin Microsoft.SharePoint.PowerShell
+            }
 
 "@
+    }
+    else
+    {
+        $baseScript = @"
+            Import-Module SharePointServer -Verbose:`$false -WarningAction SilentlyContinue
+
+"@
+    }
 
     $invokeArgs = @{
         ScriptBlock = [ScriptBlock]::Create($baseScript + $ScriptBlock.ToString())
@@ -885,34 +896,13 @@ function Test-SPDscObjectHasProperty
     return $false
 }
 
-function Test-SPDscRunAsCredential
-{
-    [CmdletBinding()]
-    [OutputType([System.Boolean])]
-    param
-    (
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $Credential
-    )
-
-    # If no specific credential is passed and it's not the machine account, it must be
-    # PsDscRunAsCredential
-    if (($null -eq $Credential) -and ($Env:USERNAME.Contains("$") -eq $false))
-    {
-        return $true
-    }
-    # return false for all other scenarios
-    return $false
-}
-
 function Test-SPDscRunningAsFarmAccount
 {
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     param (
         [Parameter()]
-        [pscredential]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 

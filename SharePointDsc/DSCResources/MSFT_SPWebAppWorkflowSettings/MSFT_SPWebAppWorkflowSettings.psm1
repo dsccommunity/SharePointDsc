@@ -18,18 +18,13 @@ function Get-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $EmailToNoPermissionWorkflowParticipantsEnable,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $EmailToNoPermissionWorkflowParticipantsEnable
     )
 
     Write-Verbose -Message "Getting web application '$WebAppUrl' workflow settings"
 
     $paramArgs = @($PSBoundParameters, $PSScriptRoot)
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $paramArgs `
+    $result = Invoke-SPDscCommand -Arguments $paramArgs `
         -ScriptBlock {
         $params = $args[0]
         $ScriptRoot = $args[1]
@@ -75,18 +70,13 @@ function Set-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $EmailToNoPermissionWorkflowParticipantsEnable,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $EmailToNoPermissionWorkflowParticipantsEnable
     )
 
     Write-Verbose -Message "Setting web application '$WebAppUrl' workflow settings"
 
     $paramArgs = @($PSBoundParameters, $MyInvocation.MyCommand.Source, $PSScriptRoot)
-    $null = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $paramArgs `
+    $null = Invoke-SPDscCommand -Arguments $paramArgs `
         -ScriptBlock {
         $params = $args[0]
         $eventSource = $args[1]
@@ -129,11 +119,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $EmailToNoPermissionWorkflowParticipantsEnable,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $EmailToNoPermissionWorkflowParticipantsEnable
     )
 
     Write-Verbose -Message "Testing web application '$WebAppUrl' workflow settings"
@@ -174,10 +160,6 @@ function Export-TargetResource
                 $PartialContent += "        {`r`n"
                 $results = Get-TargetResource @params
 
-                if ($results.Contains("InstallAccount"))
-                {
-                    $results.Remove("InstallAccount")
-                }
                 $results = Repair-Credentials -results $results
                 $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
                 $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"

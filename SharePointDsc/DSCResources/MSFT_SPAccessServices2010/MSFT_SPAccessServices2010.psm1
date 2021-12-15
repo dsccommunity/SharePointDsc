@@ -15,17 +15,26 @@ function Get-TargetResource
         [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
-        $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Ensure = "Present"
     )
 
     Write-Verbose -Message "Getting Access 2010 Service app '$Name'"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $productVersion = Get-SPDscInstalledProductVersion
+    if ($productVersion.FileMajorPart -eq 16 `
+            -and $productVersion.FileBuildPart -gt 13000)
+    {
+        $message = ("Since SharePoint Server Subscription Edition the Access Services 2010 does no longer " + `
+            "exists. See https://docs.microsoft.com/en-us/sharepoint/what-s-new/what-s-deprecated-or-removed-from-sharepoint-server-2019#access-services-2013 " + `
+            "for more info.")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
+    }
+
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
         $serviceApps = Get-SPServiceApplication | Where-Object -FilterScript {
@@ -78,21 +87,31 @@ function Set-TargetResource
         [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
-        $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Ensure = "Present"
     )
 
     Write-Verbose -Message "Setting Access 2010 Services app '$Name'"
+
+    $productVersion = Get-SPDscInstalledProductVersion
+    if ($productVersion.FileMajorPart -eq 16 `
+            -and $productVersion.FileBuildPart -gt 13000)
+    {
+        $message = ("Since SharePoint Server Subscription Edition the Access Services 2010 does no longer " + `
+            "exists. See https://docs.microsoft.com/en-us/sharepoint/what-s-new/what-s-deprecated-or-removed-from-sharepoint-server-2019#access-services-2013 " + `
+            "for more info.")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
+    }
+
     $result = Get-TargetResource @PSBoundParameters
 
     if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present")
     {
         Write-Verbose "Creating Access 2010 Service Application '$Name'"
-        Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+        Invoke-SPDscCommand -Arguments $PSBoundParameters `
             -ScriptBlock {
             $params = $args[0]
             $accessApp = New-SPAccessServiceApplication -Name $params.Name `
@@ -102,8 +121,7 @@ function Set-TargetResource
     if ($result.Ensure -eq "Present" -and $Ensure -eq "Present")
     {
         Write-Verbose "Updating Access 2010 service application '$Name'"
-        Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+        Invoke-SPDscCommand -Arguments $PSBoundParameters `
             -ScriptBlock {
             $params = $args[0]
             $apps = Get-SPServiceApplication | Where-Object -FilterScript {
@@ -134,8 +152,7 @@ function Set-TargetResource
     if ($Ensure -eq "Absent")
     {
         Write-Verbose "Removing Access 2010 service application '$Name'"
-        Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+        Invoke-SPDscCommand -Arguments $PSBoundParameters `
             -ScriptBlock {
             $params = $args[0]
 
@@ -177,11 +194,7 @@ function Test-TargetResource
         [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
-        $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Ensure = "Present"
     )
     Write-Verbose -Message "Testing Access 2010 service app '$Name'"
 

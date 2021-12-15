@@ -21,11 +21,7 @@ function Get-TargetResource
 
         [Parameter()]
         [System.String]
-        $DatabaseUpgradeTime,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $DatabaseUpgradeTime
     )
 
     Write-Verbose -Message "Getting status of Configuration Wizard"
@@ -88,11 +84,7 @@ function Set-TargetResource
 
         [Parameter()]
         [System.String]
-        $DatabaseUpgradeTime,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $DatabaseUpgradeTime
     )
 
     Write-Verbose -Message "Setting status of Configuration Wizard"
@@ -112,8 +104,7 @@ function Set-TargetResource
 
     # Getting the servers patch status from SharePoint
     # https://docs.microsoft.com/en-us/dotnet/api/microsoft.sharepoint.administration.spserverproductinfo.statustype
-    $statusType = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $statusType = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         return Get-SPDscServerPatchStatus
     }
@@ -249,8 +240,7 @@ function Set-TargetResource
 
     # Start wizard
     Write-Verbose -Message "Starting Configuration Wizard"
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $psconfigExe `
+    $result = Invoke-SPDscCommand -Arguments $psconfigExe `
         -ScriptBlock {
         $psconfigExe = $args[0]
 
@@ -344,11 +334,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.String]
-        $DatabaseUpgradeTime,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $DatabaseUpgradeTime
     )
 
     Write-Verbose -Message "Testing status of Configuration Wizard"

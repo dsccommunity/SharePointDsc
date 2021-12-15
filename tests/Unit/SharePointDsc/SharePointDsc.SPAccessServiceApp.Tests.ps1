@@ -50,247 +50,255 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-                # Initialize tests
-                $getTypeFullName = "Microsoft.Office.Access.Services.MossHost.AccessServicesWebServiceApplication"
-
-                # Mocks for all contexts
-                Mock -CommandName New-SPAccessServicesApplication -MockWith { }
-                Mock -CommandName Set-SPAccessServicesApplication -MockWith { }
-                Mock -CommandName Remove-SPServiceApplication -MockWith { }
-
-                try
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15 -or
+                    ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16 -and
+                    $Global:SPDscHelper.CurrentStubBuildNumber.Build -lt 13000))
                 {
-                    [Microsoft.SharePoint.SPServiceContext]
-                }
-                catch
-                {
-                    $CsharpCode2 = @"
+                    # Initialize tests
+                    $getTypeFullName = "Microsoft.Office.Access.Services.MossHost.AccessServicesWebServiceApplication"
+
+                    # Mocks for all contexts
+                    Mock -CommandName New-SPAccessServicesApplication -MockWith { }
+                    Mock -CommandName Set-SPAccessServicesApplication -MockWith { }
+                    Mock -CommandName Remove-SPServiceApplication -MockWith { }
+
+                    try
+                    {
+                        [Microsoft.SharePoint.SPServiceContext]
+                    }
+                    catch
+                    {
+                        $CsharpCode2 = @"
     namespace Microsoft.SharePoint {
     public enum SPSiteSubscriptionIdentifier { Default };
 
     public class SPServiceContext {
         public static string GetContext(System.Object[] serviceApplicationProxyGroup, SPSiteSubscriptionIdentifier siteSubscriptionId) {
-            return "";
+            return "context";
         }
     }
     }
 "@
-                    Add-Type -TypeDefinition $CsharpCode2
+                        Add-Type -TypeDefinition $CsharpCode2
+                    }
                 }
             }
 
             # Test contexts
-            Context -Name "When no service applications exist in the current farm" -Fixture {
-                BeforeAll {
-                    $testParams = @{
-                        Name            = "Test Access Services App"
-                        DatabaseServer  = "SQL.contoso.local"
-                        ApplicationPool = "Test App Pool"
-                    }
-
-                    Mock -CommandName Get-SPServiceApplication -MockWith {
-                        return $null
-                    }
-                }
-
-                It "Should return absent from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
-                }
-
-                It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should -Be $false
-                }
-
-                It "Should create a new service application in the set method" {
-                    Set-TargetResource @testParams
-                    Assert-MockCalled New-SPAccessServicesApplication
-                }
-            }
-
-            Context -Name "When service applications exist in the current farm but the specific Access Services app does not" -Fixture {
-                BeforeAll {
-                    $testParams = @{
-                        Name            = "Test Access Services App"
-                        DatabaseServer  = "SQL.contoso.local"
-                        ApplicationPool = "Test App Pool"
-                    }
-
-                    Mock -CommandName Get-SPServiceApplication -MockWith {
-                        $spServiceApp = [PSCustomObject]@{
-                            DisplayName = $testParams.Name
+            if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15 -or
+                ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16 -and
+                $Global:SPDscHelper.CurrentStubBuildNumber.Build -lt 13000))
+            {
+                Context -Name "When no service applications exist in the current farm" -Fixture {
+                    BeforeAll {
+                        $testParams = @{
+                            Name            = "Test Access Services App"
+                            DatabaseServer  = "SQL.contoso.local"
+                            ApplicationPool = "Test App Pool"
                         }
-                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
-                            -Name GetType `
-                            -Value {
-                            return @{
-                                FullName = "Microsoft.Office.UnKnownWebServiceApplication"
+
+                        Mock -CommandName Get-SPServiceApplication -MockWith {
+                            return $null
+                        }
+                    }
+
+                    It "Should return absent from the Get method" {
+                        (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
+                    }
+
+                    It "Should return false when the Test method is called" {
+                        Test-TargetResource @testParams | Should -Be $false
+                    }
+
+                    It "Should create a new service application in the set method" {
+                        Set-TargetResource @testParams
+                        Assert-MockCalled New-SPAccessServicesApplication
+                    }
+                }
+
+                Context -Name "When service applications exist in the current farm but the specific Access Services app does not" -Fixture {
+                    BeforeAll {
+                        $testParams = @{
+                            Name            = "Test Access Services App"
+                            DatabaseServer  = "SQL.contoso.local"
+                            ApplicationPool = "Test App Pool"
+                        }
+
+                        Mock -CommandName Get-SPServiceApplication -MockWith {
+                            $spServiceApp = [PSCustomObject]@{
+                                DisplayName = $testParams.Name
                             }
-                        } -PassThru -Force
-                        return $spServiceApp
-                    }
-                }
-
-                It "Should return null from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
-                }
-            }
-
-            Context -Name "When a service application exists and is configured correctly" -Fixture {
-                BeforeAll {
-                    $testParams = @{
-                        Name            = "Test Access Services App"
-                        DatabaseServer  = "SQL.contoso.local"
-                        ApplicationPool = "Test App Pool"
-                    }
-
-                    Mock -CommandName Get-SPServiceApplication -MockWith {
-                        $spServiceApp = [PSCustomObject]@{
-                            TypeName        = "Access Services Web Service Application"
-                            DisplayName     = $testParams.Name
-                            Name            = $testParams.Name
-                            DatabaseServer  = $testParams.DatabaseServer
-                            ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                            $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                                -Name GetType `
+                                -Value {
+                                return @{
+                                    FullName = "Microsoft.Office.UnKnownWebServiceApplication"
+                                }
+                            } -PassThru -Force
+                            return $spServiceApp
                         }
-                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
-                            -Name GetType `
-                            -Value {
-                            return @{
-                                FullName = $getTypeFullName
+                    }
+
+                    It "Should return null from the Get method" {
+                        (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
+                    }
+                }
+
+                Context -Name "When a service application exists and is configured correctly" -Fixture {
+                    BeforeAll {
+                        $testParams = @{
+                            Name            = "Test Access Services App"
+                            DatabaseServer  = "SQL.contoso.local"
+                            ApplicationPool = "Test App Pool"
+                        }
+
+                        Mock -CommandName Get-SPServiceApplication -MockWith {
+                            $spServiceApp = [PSCustomObject]@{
+                                TypeName        = "Access Services Web Service Application"
+                                DisplayName     = $testParams.Name
+                                Name            = $testParams.Name
+                                DatabaseServer  = $testParams.DatabaseServer
+                                ApplicationPool = @{ Name = $testParams.ApplicationPool }
                             }
-                        } -PassThru -Force
-                        return $spServiceApp
-                    }
-
-                    Mock -CommandName Get-SPAccessServicesDatabaseServer -MockWith {
-                        return @{
-                            ServerName = $testParams.DatabaseServer
+                            $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                                -Name GetType `
+                                -Value {
+                                return @{
+                                    FullName = $getTypeFullName
+                                }
+                            } -PassThru -Force
+                            return $spServiceApp
                         }
-                    }
-                }
 
-                It "Should return Present from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
-                }
-
-                It "Should return true when the Test method is called" {
-                    Test-TargetResource @testParams | Should -Be $true
-                }
-            }
-
-            Context -Name "When the service application exists but it shouldn't" -Fixture {
-                BeforeAll {
-                    $testParams = @{
-                        Name            = "Test App"
-                        ApplicationPool = "-"
-                        DatabaseServer  = "-"
-                        Ensure          = "Absent"
-                    }
-
-                    Mock -CommandName Get-SPServiceApplication -MockWith {
-                        $spServiceApp = [PSCustomObject]@{
-                            TypeName        = "Access Services Web Service Application"
-                            DisplayName     = $testParams.Name
-                            Name            = $testParams.Name
-                            DatabaseServer  = $testParams.DatabaseServer
-                            ApplicationPool = @{ Name = $testParams.ApplicationPool }
-                        }
-                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
-                            -Name GetType `
-                            -Value {
+                        Mock -CommandName Get-SPAccessServicesDatabaseServer -MockWith {
                             return @{
-                                FullName = $getTypeFullName
+                                ServerName = $testParams.DatabaseServer
                             }
-                        } -PassThru -Force
-                        return $spServiceApp
-                    }
-
-                    Mock -CommandName Get-SPAccessServicesDatabaseServer -MockWith {
-                        return @{
-                            ServerName = $testParams.DatabaseServer
-                        }
-                    }
-                }
-
-                It "Should return present from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
-                }
-
-                It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should -Be $false
-                }
-
-                It "Should call the remove service application cmdlet in the set method" {
-                    Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope
-                    Set-TargetResource @testParams
-                    Assert-MockCalled Remove-SPServiceApplication
-                }
-            }
-
-            Context -Name "When the service application doesn't exist and it shouldn't" -Fixture {
-                BeforeAll {
-                    $testParams = @{
-                        Name            = "Test App"
-                        ApplicationPool = "-"
-                        DatabaseServer  = "-"
-                        Ensure          = "Absent"
-                    }
-
-                    Mock -CommandName Get-SPServiceApplication -MockWith {
-                        return $null
-                    }
-                }
-
-                It "Should return absent from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
-                }
-
-                It "Should return true when the Test method is called" {
-                    Test-TargetResource @testParams | Should -Be $true
-                }
-            }
-
-            Context -Name "Running ReverseDsc Export" -Fixture {
-                BeforeAll {
-                    Import-Module (Join-Path -Path (Split-Path -Path (Get-Module SharePointDsc -ListAvailable).Path -Parent) -ChildPath "Modules\SharePointDSC.Reverse\SharePointDSC.Reverse.psm1")
-
-                    Mock -CommandName Write-Host -MockWith { }
-
-                    Mock -CommandName Get-TargetResource -MockWith {
-                        return @{
-                            Name            = "Access Services Service Application"
-                            DatabaseServer  = "SQL01"
-                            ApplicationPool = "Service App Pool"
-                            Ensure          = "Present"
                         }
                     }
 
-                    Mock -CommandName Get-SPServiceApplication -MockWith {
-                        $spServiceApp = [PSCustomObject]@{
-                            TypeName        = "Access Services Web Service Application"
-                            DisplayName     = "Access Services Service Application"
-                            Name            = "Access Services Service Application"
-                            DatabaseServer  = "SQL01"
-                            ApplicationPool = "Service App Pool"
+                    It "Should return Present from the get method" {
+                        (Get-TargetResource @testParams).Ensure | Should -Be "Present"
+                    }
+
+                    It "Should return true when the Test method is called" {
+                        Test-TargetResource @testParams | Should -Be $true
+                    }
+                }
+
+                Context -Name "When the service application exists but it shouldn't" -Fixture {
+                    BeforeAll {
+                        $testParams = @{
+                            Name            = "Test App"
+                            ApplicationPool = "-"
+                            DatabaseServer  = "-"
+                            Ensure          = "Absent"
                         }
-                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
-                            -Name GetType `
-                            -Value {
+
+                        Mock -CommandName Get-SPServiceApplication -MockWith {
+                            $spServiceApp = [PSCustomObject]@{
+                                TypeName        = "Access Services Web Service Application"
+                                DisplayName     = $testParams.Name
+                                Name            = $testParams.Name
+                                DatabaseServer  = $testParams.DatabaseServer
+                                ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                            }
+                            $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                                -Name GetType `
+                                -Value {
+                                return @{
+                                    FullName = $getTypeFullName
+                                }
+                            } -PassThru -Force
+                            return $spServiceApp
+                        }
+
+                        Mock -CommandName Get-SPAccessServicesDatabaseServer -MockWith {
                             return @{
-                                FullName = $getTypeFullName
+                                ServerName = $testParams.DatabaseServer
                             }
-                        } -PassThru -Force
-                        return $spServiceApp
+                        }
                     }
 
-                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
-                    {
-                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
-                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    It "Should return present from the Get method" {
+                        (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                     }
 
-                    $result = @'
+                    It "Should return false when the Test method is called" {
+                        Test-TargetResource @testParams | Should -Be $false
+                    }
+
+                    It "Should call the remove service application cmdlet in the set method" {
+                        Set-TargetResource @testParams
+                        Assert-MockCalled Remove-SPServiceApplication
+                    }
+                }
+
+                Context -Name "When the service application doesn't exist and it shouldn't" -Fixture {
+                    BeforeAll {
+                        $testParams = @{
+                            Name            = "Test App"
+                            ApplicationPool = "-"
+                            DatabaseServer  = "-"
+                            Ensure          = "Absent"
+                        }
+
+                        Mock -CommandName Get-SPServiceApplication -MockWith {
+                            return $null
+                        }
+                    }
+
+                    It "Should return absent from the Get method" {
+                        (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
+                    }
+
+                    It "Should return true when the Test method is called" {
+                        Test-TargetResource @testParams | Should -Be $true
+                    }
+                }
+
+                Context -Name "Running ReverseDsc Export" -Fixture {
+                    BeforeAll {
+                        Import-Module (Join-Path -Path (Split-Path -Path (Get-Module SharePointDsc -ListAvailable).Path -Parent) -ChildPath "Modules\SharePointDSC.Reverse\SharePointDSC.Reverse.psm1")
+
+                        Mock -CommandName Write-Host -MockWith { }
+
+                        Mock -CommandName Get-TargetResource -MockWith {
+                            return @{
+                                Name            = "Access Services Service Application"
+                                DatabaseServer  = "SQL01"
+                                ApplicationPool = "Service App Pool"
+                                Ensure          = "Present"
+                            }
+                        }
+
+                        Mock -CommandName Get-SPServiceApplication -MockWith {
+                            $spServiceApp = [PSCustomObject]@{
+                                TypeName        = "Access Services Web Service Application"
+                                DisplayName     = "Access Services Service Application"
+                                Name            = "Access Services Service Application"
+                                DatabaseServer  = "SQL01"
+                                ApplicationPool = "Service App Pool"
+                            }
+                            $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                                -Name GetType `
+                                -Value {
+                                return @{
+                                    FullName = $getTypeFullName
+                                }
+                            } -PassThru -Force
+                            return $spServiceApp
+                        }
+
+                        if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                        {
+                            $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                            $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                        }
+
+                        $result = @'
         SPAccessServiceApp AccessServicesServiceApplication
         {
             ApplicationPool      = "Service App Pool";
@@ -301,10 +309,37 @@ try
         }
 
 '@
-                }
+                    }
 
-                It "Should return valid DSC block from the Export method" {
-                    Export-TargetResource | Should -Be $result
+                    It "Should return valid DSC block from the Export method" {
+                        Export-TargetResource | Should -Be $result
+                    }
+                }
+            }
+
+            if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16 -and
+                $Global:SPDscHelper.CurrentStubBuildNumber.Build -gt 13000)
+            {
+                Context -Name "All methods throw exceptions as Access Services no longer exists in SharePoint Server Subscription Edition" -Fixture {
+                    BeforeAll {
+                        $testParams = @{
+                            Name            = "Test Access Services App"
+                            DatabaseServer  = "SQL.contoso.local"
+                            ApplicationPool = "Test App Pool"
+                        }
+                    }
+
+                    It "Should throw on the get method" {
+                        { Get-TargetResource @testParams } | Should -Throw "Since SharePoint Server Subscription Edition the Access Services does no longer exists."
+                    }
+
+                    It "Should throw on the test method" {
+                        { Test-TargetResource @testParams } | Should -Throw "Since SharePoint Server Subscription Edition the Access Services does no longer exists."
+                    }
+
+                    It "Should throw on the set method" {
+                        { Set-TargetResource @testParams } | Should -Throw "Since SharePoint Server Subscription Edition the Access Services does no longer exists."
+                    }
                 }
             }
         }

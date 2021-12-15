@@ -30,5 +30,4 @@ class MSFT_SPWebAppAuthentication : OMI_BaseResource
     [Write, Description("Specifies the zone settings for the Internet zone."), EmbeddedInstance("MSFT_SPWebAppZoneSettings")] string InternetSettings;
     [Write, Description("Specifies the zone settings for the Extranet zone."), EmbeddedInstance("MSFT_SPWebAppZoneSettings")] string ExtranetSettings;
     [Write, Description("Specifies the zone settings for the Custom zone."), EmbeddedInstance("MSFT_SPWebAppZoneSettings")] string CustomSettings;
-    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] string InstallAccount;
 };

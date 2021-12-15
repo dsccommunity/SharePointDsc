@@ -68,17 +68,12 @@ function Get-TargetResource
 
         [Parameter()]
         [System.UInt16]
-        $MaxSizeOfUserFormState,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $MaxSizeOfUserFormState
     )
 
     Write-Verbose -Message "Getting InfoPath Forms Service Configuration"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
@@ -197,11 +192,7 @@ function Set-TargetResource
 
         [Parameter()]
         [System.UInt16]
-        $MaxSizeOfUserFormState,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $MaxSizeOfUserFormState
     )
 
     Write-Verbose -Message "Setting InfoPath Forms Service Configuration"
@@ -217,8 +208,7 @@ function Set-TargetResource
         throw $message
     }
 
-    Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
         $config = Get-SPInfoPathFormsService
@@ -367,11 +357,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.UInt16]
-        $MaxSizeOfUserFormState,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $MaxSizeOfUserFormState
     )
 
     Write-Verbose -Message "Testing the InfoPath Form Services Configuration"

@@ -18,17 +18,12 @@ function Get-TargetResource
 
         [Parameter()]
         [System.String[]]
-        $EnsureAllowed,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $EnsureAllowed
     )
 
     Write-Verbose -Message "Getting web application '$WebAppUrl' blocked file types"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $PSScriptRoot) `
+    $result = Invoke-SPDscCommand -Arguments @($PSBoundParameters, $PSScriptRoot) `
         -ScriptBlock {
         $params = $args[0]
         $ScriptRoot = $args[1]
@@ -74,17 +69,12 @@ function Set-TargetResource
 
         [Parameter()]
         [System.String[]]
-        $EnsureAllowed,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $EnsureAllowed
     )
 
     Write-Verbose -Message "Setting web application '$WebAppUrl' blocked file types"
 
-    $null = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $PSScriptRoot) `
+    $null = Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $PSScriptRoot) `
         -ScriptBlock {
         $params = $args[0]
         $eventSource = $args[1]
@@ -129,11 +119,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.String[]]
-        $EnsureAllowed,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $EnsureAllowed
     )
 
     Write-Verbose -Message "Testing for web application '$WebAppUrl' blocked file types"

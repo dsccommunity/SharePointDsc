@@ -23,17 +23,12 @@ function Get-TargetResource
         [Parameter()]
         [ValidateRange(2, 168)]
         [System.UInt32]
-        $UnusedSiteNotificationsBeforeDeletion,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $UnusedSiteNotificationsBeforeDeletion
     )
 
     Write-Verbose -Message "Getting web application '$WebAppUrl' site use and deletion settings"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
@@ -101,17 +96,12 @@ function Set-TargetResource
         [Parameter()]
         [ValidateRange(2, 168)]
         [System.UInt32]
-        $UnusedSiteNotificationsBeforeDeletion,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $UnusedSiteNotificationsBeforeDeletion
     )
 
     Write-Verbose -Message "Setting web application '$WebAppUrl' Site Use and Deletion settings"
 
-    Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+    Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
         $eventSource = $args[1]
@@ -255,11 +245,7 @@ function Test-TargetResource
         [Parameter()]
         [ValidateRange(2, 168)]
         [System.UInt32]
-        $UnusedSiteNotificationsBeforeDeletion,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $UnusedSiteNotificationsBeforeDeletion
     )
 
     Write-Verbose -Message "Testing web application '$WebAppUrl' site use and deletion settings"
@@ -298,10 +284,6 @@ function Export-TargetResource
                 $PartialContent += "        {`r`n"
                 $results = Get-TargetResource @params
 
-                if ($results.Contains("InstallAccount"))
-                {
-                    $results.Remove("InstallAccount")
-                }
                 $results = Repair-Credentials -results $results
                 $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
                 $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"

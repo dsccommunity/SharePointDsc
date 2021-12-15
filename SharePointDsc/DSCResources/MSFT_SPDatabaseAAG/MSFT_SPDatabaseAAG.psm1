@@ -19,11 +19,7 @@ function Get-TargetResource
         [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
-        $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Ensure = "Present"
     )
 
     Write-Verbose -Message "Getting AAG configuration for $DatabaseName"
@@ -45,8 +41,7 @@ function Get-TargetResource
     if ($Ensure -eq "Present")
     {
         Write-Verbose -Message "Database(s) must be included in AAG $AGName"
-        $result = Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments ($PSBoundParameters) `
+        $result = Invoke-SPDscCommand -Arguments ($PSBoundParameters) `
             -ScriptBlock {
             $params = $args[0]
 
@@ -91,8 +86,7 @@ function Get-TargetResource
     else
     {
         Write-Verbose -Message "Database(s) must not be included in an AAG $AGName"
-        $result = Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+        $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
             -ScriptBlock {
             $params = $args[0]
 
@@ -150,11 +144,7 @@ function Set-TargetResource
         [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
-        $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Ensure = "Present"
     )
 
     Write-Verbose -Message "Setting AAG configuration for $DatabaseName"
@@ -176,11 +166,23 @@ function Set-TargetResource
     if ($Ensure -eq "Present")
     {
         Write-Verbose -Message "Checking AAG settings for $DatabaseName"
-        Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+        Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
             -ScriptBlock {
             $params = $args[0]
             $eventSource = $args[1]
+
+            # Check for SPSE, where cmdlets are renamed
+            if ((Get-SPDscInstalledProductVersion).FileMajorPart -eq 16 -and `
+                (Get-SPDscInstalledProductVersion).FileBuildPart -gt 13000)
+            {
+                $addCmd = 'Add-SPDatabaseToAvailabilityGroup'
+                $removeCmd = 'Remove-SPDatabaseFromAvailabilityGroup'
+            }
+            else
+            {
+                $addCmd = 'Add-DatabaseToAvailabilityGroup'
+                $removeCmd = 'Remove-DatabaseFromAvailabilityGroup'
+            }
 
             $databases = Get-SPDatabase | Where-Object -FilterScript {
                 $_.Name -like $params.DatabaseName
@@ -196,7 +198,7 @@ function Set-TargetResource
                         if ($ag.Name -ne $params.AGName)
                         {
                             # Remove it from the current AAG first
-                            Remove-DatabaseFromAvailabilityGroup -AGName $params.AGName `
+                            &$removeCmd -AGName $params.AGName `
                                 -DatabaseName $database.Name `
                                 -Force
 
@@ -209,7 +211,7 @@ function Set-TargetResource
                             {
                                 $addParams.Add("FileShare", $params.FileShare)
                             }
-                            Add-DatabaseToAvailabilityGroup @addParams
+                            &$addCmd @addParams
                         }
                     }
                     else
@@ -223,7 +225,7 @@ function Set-TargetResource
                         {
                             $cmdParams.Add("FileShare", $params.FileShare)
                         }
-                        Add-DatabaseToAvailabilityGroup @cmdParams
+                        &$addCmd @cmdParams
                     }
                 }
             }
@@ -241,11 +243,21 @@ function Set-TargetResource
     else
     {
         Write-Verbose -Message "Removing $DatabaseName from $AGName"
-        Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+        Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
             -ScriptBlock {
             $params = $args[0]
             $eventSource = $args[1]
+
+            # Check for SPSE, where cmdlets are renamed
+            if ((Get-SPDscInstalledProductVersion).FileMajorPart -eq 16 -and `
+                (Get-SPDscInstalledProductVersion).FileBuildPart -gt 13000)
+            {
+                $removeCmd = 'Remove-SPDatabaseFromAvailabilityGroup'
+            }
+            else
+            {
+                $removeCmd = 'Remove-DatabaseFromAvailabilityGroup'
+            }
 
             $databases = Get-SPDatabase | Where-Object -FilterScript {
                 $_.Name -like $params.DatabaseName
@@ -255,7 +267,7 @@ function Set-TargetResource
             {
                 foreach ($database in $databases)
                 {
-                    Remove-DatabaseFromAvailabilityGroup -AGName $params.AGName `
+                    &$removeCmd -AGName $params.AGName `
                         -DatabaseName $database.Name `
                         -Force
                 }
@@ -294,11 +306,7 @@ function Test-TargetResource
         [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
-        $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Ensure = "Present"
     )
 
     Write-Verbose -Message "Testing AAG configuration for $DatabaseName"

@@ -20,5 +20,4 @@ class MSFT_SPWebAppClientCallableSettings : OMI_BaseResource
     [write, Description("Sets the threshold in milliseconds for logging csom request usage data ")] UInt32 RequestUsageExecutionTimeThreshold;
     [write, Description("Sets a Boolean value that specifies whether to log usage data or not")] Boolean EnableRequestUsage;
     [write, Description("Sets a Boolean value that specifies whether to log usage data when request has an exception or not")] Boolean LogActionsIfHasRequestException;
-    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] string InstallAccount;
 };

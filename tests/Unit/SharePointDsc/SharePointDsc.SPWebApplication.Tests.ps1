@@ -53,6 +53,18 @@ try
                 Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
+                try
+                {
+                    [Microsoft.SharePoint.Administration.SPUrlZone]
+                }
+                catch
+                {
+                    Add-Type -TypeDefinition @"
+        namespace Microsoft.SharePoint.Administration {
+            public enum SPUrlZone { Default, Intranet, Internet, Custom, Extranet };
+        }
+"@
+                }
 
                 # Mocks for all contexts
                 Mock -CommandName New-SPAuthenticationProvider -MockWith { }
@@ -84,6 +96,61 @@ try
             }
 
             # Test contexts
+            Context -Name "AllowLegacyEncryption used with other OS than Windows Server 2022" -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        Name                   = "SharePoint Sites"
+                        ApplicationPool        = "SharePoint Web Apps"
+                        ApplicationPoolAccount = "DEMO\ServiceAccount"
+                        WebAppUrl              = "http://sites.sharepoint.com"
+                        AllowLegacyEncryption  = $true
+                        Ensure                 = "Present"
+                    }
+
+                    Mock -CommandName Get-SPDscOSVersion -MockWith {
+                        return @{
+                            Major = 10
+                            Minor = 0
+                            Build = 17763
+                        }
+                    }
+                }
+
+                It "return AllowLegacyEncryption=Null from the get method" {
+                    (Get-TargetResource @testParams).AllowLegacyEncryption | Should -BeNullOrEmpty
+                }
+
+                It "throw an exception in the set method" {
+                    { Set-TargetResource @testParams } | Should -Throw "You cannot specify the AllowLegacyEncryption parameter when using Windows Server 2019 or earlier."
+                }
+            }
+
+            if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16 -and
+                $Global:SPDscHelper.CurrentStubBuildNumber.Build -gt 10000 -and
+                $Global:SPDscHelper.CurrentStubBuildNumber.Build -lt 13000)
+            {
+                Context -Name "UseServerNameIndication used with SharePoint 2019" -Fixture {
+                    BeforeAll {
+                        $testParams = @{
+                            Name                    = "SharePoint Sites"
+                            ApplicationPool         = "SharePoint Web Apps"
+                            ApplicationPoolAccount  = "DEMO\ServiceAccount"
+                            WebAppUrl               = "http://sites.sharepoint.com"
+                            UseServerNameIndication = $true
+                            Ensure                  = "Present"
+                        }
+                    }
+
+                    It "return UseServerNameIndication=Null from the get method" {
+                        (Get-TargetResource @testParams).UseServerNameIndication | Should -BeNullOrEmpty
+                    }
+
+                    It "retrieving Managed Account fails in the set method" {
+                        { Set-TargetResource @testParams } | Should -Throw "The parameters AllowLegacyEncryption, CertificateThumbprint or UseServerNameIndication are only supported with SharePoint Server Subscription Edition."
+                    }
+                }
+            }
+
             Context -Name "The specified Managed Account does not exist" -Fixture {
                 BeforeAll {
                     $testParams = @{
@@ -230,9 +297,21 @@ try
                                     }
                                 )
                                 IisSettings      = @(
-                                    @{ Path = "C:\inetpub\wwwroot\something" }
+                                    @{
+                                        Path           = "C:\inetpub\wwwroot\something"
+                                        SecureBindings = @(
+                                            @{
+                                                Certificate             = @{
+                                                    Thumbprint = '7CF9E91F141FCA1049F56AB96BE2A1D7D3F9198D'
+                                                }
+                                                UseServerNameIndication = $false
+                                                DisableLegacyTls        = $true
+                                            }
+                                        )
+                                    }
                                 )
                                 Url              = $testParams.WebAppUrl
+                                SiteDataServers  = @()
                             }) }
                 }
 
@@ -275,9 +354,21 @@ try
                                     }
                                 )
                                 IisSettings      = @(
-                                    @{ Path = "C:\inetpub\wwwroot\something" }
+                                    @{
+                                        Path           = "C:\inetpub\wwwroot\something"
+                                        SecureBindings = @(
+                                            @{
+                                                Certificate             = @{
+                                                    Thumbprint = '7CF9E91F141FCA1049F56AB96BE2A1D7D3F9198D'
+                                                }
+                                                UseServerNameIndication = $false
+                                                DisableLegacyTls        = $true
+                                            }
+                                        )
+                                    }
                                 )
                                 Url              = $testParams.WebAppUrl
+                                SiteDataServers  = @()
                             }) }
                 }
 
@@ -320,9 +411,21 @@ try
                                     }
                                 )
                                 IisSettings      = @(
-                                    @{ Path = "C:\inetpub\wwwroot\something" }
+                                    @{
+                                        Path           = "C:\inetpub\wwwroot\something"
+                                        SecureBindings = @(
+                                            @{
+                                                Certificate             = @{
+                                                    Thumbprint = '7CF9E91F141FCA1049F56AB96BE2A1D7D3F9198D'
+                                                }
+                                                UseServerNameIndication = $false
+                                                DisableLegacyTls        = $true
+                                            }
+                                        )
+                                    }
                                 )
                                 Url              = $testParams.WebAppUrl
+                                SiteDataServers  = @()
                             }) }
                 }
 
@@ -366,9 +469,21 @@ try
                                     }
                                 )
                                 IisSettings      = @(
-                                    @{ Path = "C:\inetpub\wwwroot\something" }
+                                    @{
+                                        Path           = "C:\inetpub\wwwroot\something"
+                                        SecureBindings = @(
+                                            @{
+                                                Certificate             = @{
+                                                    Thumbprint = '7CF9E91F141FCA1049F56AB96BE2A1D7D3F9198D'
+                                                }
+                                                UseServerNameIndication = $false
+                                                DisableLegacyTls        = $true
+                                            }
+                                        )
+                                    }
                                 )
                                 Url              = $testParams.WebAppUrl
+                                SiteDataServers  = @()
                             }) }
                 }
 
@@ -442,9 +557,21 @@ try
                                     }
                                 )
                                 IisSettings             = @(
-                                    @{ Path = "C:\inetpub\wwwroot\something" }
+                                    @{
+                                        Path           = "C:\inetpub\wwwroot\something"
+                                        SecureBindings = @(
+                                            @{
+                                                Certificate             = @{
+                                                    Thumbprint = '7CF9E91F141FCA1049F56AB96BE2A1D7D3F9198D'
+                                                }
+                                                UseServerNameIndication = $false
+                                                DisableLegacyTls        = $true
+                                            }
+                                        )
+                                    }
                                 )
                                 Url                     = $testParams.WebAppUrl
+                                SiteDataServers         = @()
                             }
                         ) }
                 }
@@ -492,9 +619,21 @@ try
                                     }
                                 )
                                 IisSettings             = @(
-                                    @{ Path = "C:\inetpub\wwwroot\something" }
+                                    @{
+                                        Path           = "C:\inetpub\wwwroot\something"
+                                        SecureBindings = @(
+                                            @{
+                                                Certificate             = @{
+                                                    Thumbprint = '7CF9E91F141FCA1049F56AB96BE2A1D7D3F9198D'
+                                                }
+                                                UseServerNameIndication = $false
+                                                DisableLegacyTls        = $true
+                                            }
+                                        )
+                                    }
                                 )
                                 Url                     = $testParams.WebAppUrl
+                                SiteDataServers         = @()
                             }
                         ) }
                 }
@@ -695,9 +834,21 @@ try
                                     }
                                 )
                                 IisSettings             = @(
-                                    @{ Path = "C:\inetpub\wwwroot\something" }
+                                    @{
+                                        Path           = "C:\inetpub\wwwroot\something"
+                                        SecureBindings = @(
+                                            @{
+                                                Certificate             = @{
+                                                    Thumbprint = '7CF9E91F141FCA1049F56AB96BE2A1D7D3F9198D'
+                                                }
+                                                UseServerNameIndication = $false
+                                                DisableLegacyTls        = $true
+                                            }
+                                        )
+                                    }
                                 )
                                 Url                     = $testParams.WebAppUrl
+                                SiteDataServers         = @()
                             }
                         ) }
                 }
@@ -727,17 +878,19 @@ try
                     }
 
                     Mock -CommandName Get-SPDscContentService -MockWith {
-                        ApplicationPools = @(
-                            @{
-                                Name = $testParams.ApplicationPool
-                            },
-                            @{
-                                Name = "Default App Pool"
-                            },
-                            @{
-                                Name = "SharePoint Token Service App Pool"
-                            }
-                        )
+                        return @{
+                            ApplicationPools = @(
+                                @{
+                                    Name = $testParams.ApplicationPool
+                                },
+                                @{
+                                    Name = "Default App Pool"
+                                },
+                                @{
+                                    Name = "SharePoint Token Service App Pool"
+                                }
+                            )
+                        }
                     }
                     Mock -CommandName Get-SPAuthenticationProvider -MockWith {
                         return @{
@@ -750,6 +903,9 @@ try
                     Mock -CommandName Get-SPWebapplication -MockWith {
                         return $null
                     }
+
+                    Mock -CommandName New-SPWebapplication -MockWith {
+                    }
                 }
 
                 It "Should return absent from the get method" {
@@ -761,7 +917,8 @@ try
                 }
 
                 It "Should return false from the set method" {
-                    Test-TargetResource @testParams | Should -Be $false
+                    Set-TargetResource @testParams
+                    Assert-MockCalled -CommandName New-SPWebApplication -Times 1
                 }
             }
 
@@ -772,7 +929,18 @@ try
                         ApplicationPool        = "SharePoint Web Apps"
                         ApplicationPoolAccount = "DEMO\ServiceAccount"
                         DatabaseName           = "SP_Content_00"
+                        DatabaseServer         = "SQL01"
                         WebAppUrl              = "http://sites.sharepoint.com"
+                        SiteDataServers        = @(
+                            (New-CimInstance -ClassName MSFT_SPWebAppSiteDataServers -Property @{
+                                Zone = "Default"
+                                Uri  = "http://spwfe"
+                            } -ClientOnly),
+                            (New-CimInstance -ClassName MSFT_SPWebAppSiteDataServers -Property @{
+                                Zone = "Internet"
+                                Uri  = "http://spwfe"
+                            } -ClientOnly)
+                        )
                         Ensure                 = "Present"
                     }
 
@@ -824,6 +992,18 @@ try
                     }
 
                     Mock -CommandName Get-SPWebApplication -MockWith {
+                        $sds = New-Object "System.Collections.Generic.Dictionary[[object],[System.Collections.Generic.List[System.Uri]]]"
+
+                        $uriList = New-Object System.Collections.Generic.List[System.Uri](1)
+                        $target = New-Object System.Uri("http://spbackend")
+                        $target2 = New-Object System.Uri("http://spbackend2")
+                        $uriList.Add($target)
+                        $uriList.Add($target2)
+                        $defaultZone = [Microsoft.SharePoint.Administration.SPUrlZone]"Default"
+                        $sds.Add($defaultZone, $uriList)
+                        $intranetZone = [Microsoft.SharePoint.Administration.SPUrlZone]"Intranet"
+                        $sds.Add($intranetZone, $uriList)
+
                         $returnval = @(@{
                                 DisplayName             = $testParams.Name
                                 ApplicationPool         = @{
@@ -838,9 +1018,21 @@ try
                                     }
                                 )
                                 IisSettings             = @(
-                                    @{ Path = "C:\inetpub\wwwroot\something" }
+                                    @{
+                                        Path           = "C:\inetpub\wwwroot\something"
+                                        SecureBindings = @(
+                                            @{
+                                                Certificate             = @{
+                                                    Thumbprint = '7CF9E91F141FCA1049F56AB96BE2A1D7D3F9198D'
+                                                }
+                                                UseServerNameIndication = $false
+                                                DisableLegacyTls        = $true
+                                            }
+                                        )
+                                    }
                                 )
                                 Url                     = $testParams.WebAppUrl
+                                SiteDataServers         = $sds
                             }
                         )
                         $returnval = $returnval | Add-Member -MemberType ScriptMethod `
@@ -895,6 +1087,776 @@ try
                 }
             }
 
+            Context -Name "Mounting of new database fails" -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        Name                   = "SharePoint Sites"
+                        ApplicationPool        = "SharePoint Web Apps"
+                        ApplicationPoolAccount = "DEMO\ServiceAccount"
+                        DatabaseName           = "SP_Content_00"
+                        DatabaseServer         = "SQL01"
+                        WebAppUrl              = "http://sites.sharepoint.com"
+                        SiteDataServers        = @(
+                            (New-CimInstance -ClassName MSFT_SPWebAppSiteDataServers -Property @{
+                                Zone = "Default"
+                                Uri  = "http://spwfe"
+                            } -ClientOnly),
+                            (New-CimInstance -ClassName MSFT_SPWebAppSiteDataServers -Property @{
+                                Zone = "Internet"
+                                Uri  = "http://spwfe"
+                            } -ClientOnly)
+                        )
+                        Ensure                 = "Present"
+                    }
+
+                    try
+                    {
+                        [Microsoft.SharePoint.Administration.SPWebService] | Out-Null
+                    }
+                    catch
+                    {
+                        Add-Type -TypeDefinition @"
+                        namespace Microsoft.SharePoint.Administration
+                        {
+                            public class SPWebService {
+                                public SPWebService() { }
+                            }
+                        }
+"@
+                    }
+
+                    try
+                    {
+                        [Microsoft.SharePoint.Administration.SPApplicationPool] | Out-Null
+                    }
+                    catch
+                    {
+                        Add-Type -TypeDefinition @"
+                        namespace Microsoft.SharePoint.Administration
+                        {
+                            public class SPApplicationPool {
+                                public SPApplicationPool(System.String account, System.Object service) { }
+
+                                public string CurrentIdentityType { get; set; }
+                                public string Username { get; set; }
+                                public void Update(bool force) { }
+                                public void Provision() { }
+                            }
+                        }
+"@
+                    }
+
+                    Mock -CommandName Get-SPAuthenticationProvider -MockWith {
+                        return @{
+
+                            DisplayName               = "TestProvider"
+                            LoginProviderName         = "TestProvider"
+                            ClaimProviderName         = "TestClaimProvider"
+                            AuthenticationRedirectUrl = "/_trust/default.aspx?trust=TestProvider"
+                        }
+                    }
+
+                    Mock -CommandName Get-SPWebApplication -MockWith {
+                        $sds = New-Object "System.Collections.Generic.Dictionary[[object],[System.Collections.Generic.List[System.Uri]]]"
+
+                        $uriList = New-Object System.Collections.Generic.List[System.Uri](1)
+                        $target = New-Object System.Uri("http://spbackend")
+                        $target2 = New-Object System.Uri("http://spbackend2")
+                        $uriList.Add($target)
+                        $uriList.Add($target2)
+                        $defaultZone = [Microsoft.SharePoint.Administration.SPUrlZone]"Default"
+                        $sds.Add($defaultZone, $uriList)
+                        $intranetZone = [Microsoft.SharePoint.Administration.SPUrlZone]"Intranet"
+                        $sds.Add($intranetZone, $uriList)
+
+                        $returnval = @(@{
+                                DisplayName             = $testParams.Name
+                                ApplicationPool         = @{
+                                    Name     = "SharePoint Old AppPool"
+                                    Username = $testParams.ApplicationPoolAccount
+                                }
+                                UseClaimsAuthentication = $true
+                                ContentDatabases        = @(
+                                    @{
+                                        Name   = "SP_Content_01"
+                                        Server = "sql.domain.local"
+                                    }
+                                )
+                                IisSettings             = @(
+                                    @{
+                                        Path           = "C:\inetpub\wwwroot\something"
+                                        SecureBindings = @(
+                                            @{
+                                                Certificate             = @{
+                                                    Thumbprint = '7CF9E91F141FCA1049F56AB96BE2A1D7D3F9198D'
+                                                }
+                                                UseServerNameIndication = $false
+                                                DisableLegacyTls        = $true
+                                            }
+                                        )
+                                    }
+                                )
+                                Url                     = $testParams.WebAppUrl
+                                SiteDataServers         = $sds
+                            }
+                        )
+                        $returnval = $returnval | Add-Member -MemberType ScriptMethod `
+                            -Name Update `
+                            -Value {
+                            $global:SPDscRanWebAppUpdate = $true
+                        } -PassThru -Force | Add-Member -MemberType ScriptMethod `
+                            -Name ProvisionGlobally `
+                            -Value {
+                        } -PassThru -Force
+
+                        return $returnVal
+                    }
+
+                    Mock -CommandName Get-SPDscContentService -MockWith {
+                        $returnVal = @{
+                            ApplicationPools = @(
+                                @{
+                                    Name = "SharePoint Old AppPool"
+                                }
+                            )
+                        }
+                        $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name Update -Value {
+                            $Global:SPDscAntivirusUpdated = $true
+                        } -PassThru
+                        return $returnVal
+                    }
+
+                    Mock -CommandName Get-SPManagedAccount -MockWith {
+                        return ""
+                    }
+
+                    Mock -CommandName Mount-SPContentDatabase -MockWith {
+                        throw
+                    }
+                }
+
+                It "Should throw exception from the set method" {
+                    { Set-TargetResource @testParams } | Should -Throw "Error occurred while mounting content database. Content database is not mounted. Error details:"
+                }
+            }
+
+            Context -Name "Specified Managed Account does not exist" -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        Name                   = "SharePoint Sites"
+                        ApplicationPool        = "SharePoint Web Apps"
+                        ApplicationPoolAccount = "DEMO\ServiceAccount"
+                        DatabaseName           = "SP_Content_00"
+                        DatabaseServer         = "SQL01"
+                        WebAppUrl              = "http://sites.sharepoint.com"
+                        SiteDataServers        = @(
+                            (New-CimInstance -ClassName MSFT_SPWebAppSiteDataServers -Property @{
+                                Zone = "Default"
+                                Uri  = "http://spwfe"
+                            } -ClientOnly),
+                            (New-CimInstance -ClassName MSFT_SPWebAppSiteDataServers -Property @{
+                                Zone = "Internet"
+                                Uri  = "http://spwfe"
+                            } -ClientOnly)
+                        )
+                        Ensure                 = "Present"
+                    }
+
+                    try
+                    {
+                        [Microsoft.SharePoint.Administration.SPWebService] | Out-Null
+                    }
+                    catch
+                    {
+                        Add-Type -TypeDefinition @"
+                        namespace Microsoft.SharePoint.Administration
+                        {
+                            public class SPWebService {
+                                public SPWebService() { }
+                            }
+                        }
+"@
+                    }
+
+                    try
+                    {
+                        [Microsoft.SharePoint.Administration.SPApplicationPool] | Out-Null
+                    }
+                    catch
+                    {
+                        Add-Type -TypeDefinition @"
+                        namespace Microsoft.SharePoint.Administration
+                        {
+                            public class SPApplicationPool {
+                                public SPApplicationPool(System.String account, System.Object service) { }
+
+                                public string CurrentIdentityType { get; set; }
+                                public string Username { get; set; }
+                                public void Update(bool force) { }
+                                public void Provision() { }
+                            }
+                        }
+"@
+                    }
+
+                    Mock -CommandName Get-SPAuthenticationProvider -MockWith {
+                        return @{
+
+                            DisplayName               = "TestProvider"
+                            LoginProviderName         = "TestProvider"
+                            ClaimProviderName         = "TestClaimProvider"
+                            AuthenticationRedirectUrl = "/_trust/default.aspx?trust=TestProvider"
+                        }
+                    }
+
+                    Mock -CommandName Get-SPWebApplication -MockWith {
+                        $sds = New-Object "System.Collections.Generic.Dictionary[[object],[System.Collections.Generic.List[System.Uri]]]"
+
+                        $uriList = New-Object System.Collections.Generic.List[System.Uri](1)
+                        $target = New-Object System.Uri("http://spbackend")
+                        $target2 = New-Object System.Uri("http://spbackend2")
+                        $uriList.Add($target)
+                        $uriList.Add($target2)
+                        $defaultZone = [Microsoft.SharePoint.Administration.SPUrlZone]"Default"
+                        $sds.Add($defaultZone, $uriList)
+                        $intranetZone = [Microsoft.SharePoint.Administration.SPUrlZone]"Intranet"
+                        $sds.Add($intranetZone, $uriList)
+
+                        $returnval = @(@{
+                                DisplayName             = $testParams.Name
+                                ApplicationPool         = @{
+                                    Name     = "SharePoint Old AppPool"
+                                    Username = $testParams.ApplicationPoolAccount
+                                }
+                                UseClaimsAuthentication = $true
+                                ContentDatabases        = @(
+                                    @{
+                                        Name   = "SP_Content_01"
+                                        Server = "sql.domain.local"
+                                    }
+                                )
+                                IisSettings             = @(
+                                    @{
+                                        Path           = "C:\inetpub\wwwroot\something"
+                                        SecureBindings = @(
+                                            @{
+                                                Certificate             = @{
+                                                    Thumbprint = '7CF9E91F141FCA1049F56AB96BE2A1D7D3F9198D'
+                                                }
+                                                UseServerNameIndication = $false
+                                                DisableLegacyTls        = $true
+                                            }
+                                        )
+                                    }
+                                )
+                                Url                     = $testParams.WebAppUrl
+                                SiteDataServers         = $sds
+                            }
+                        )
+                        $returnval = $returnval | Add-Member -MemberType ScriptMethod `
+                            -Name Update `
+                            -Value {
+                            $global:SPDscRanWebAppUpdate = $true
+                        } -PassThru -Force | Add-Member -MemberType ScriptMethod `
+                            -Name ProvisionGlobally `
+                            -Value {
+                        } -PassThru -Force
+
+                        return $returnVal
+                    }
+
+                    Mock -CommandName Get-SPDscContentService -MockWith {
+                        $returnVal = @{
+                            ApplicationPools = @(
+                                @{
+                                    Name = "SharePoint Old AppPool"
+                                }
+                            )
+                        }
+                        $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name Update -Value {
+                            $Global:SPDscAntivirusUpdated = $true
+                        } -PassThru
+                        return $returnVal
+                    }
+
+                    Mock -CommandName Get-SPManagedAccount -MockWith {
+                        return $null
+                    }
+
+                    Mock -CommandName Mount-SPContentDatabase -MockWith { }
+                }
+
+                It "Should throw exception from the set method" {
+                    { Set-TargetResource @testParams } | Should -Throw "Specified ApplicationPoolAccount '$($testParams.ApplicationPoolAccount)' is not a managed account"
+                }
+            }
+
+            if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16 -and
+                $Global:SPDscHelper.CurrentStubBuildNumber.Build -gt 13000)
+            {
+                Context -Name "The web application does not exist and uses the Certificate parameters (SPSE)" -Fixture {
+                    BeforeAll {
+                        $testParams = @{
+                            Name                    = "SharePoint Sites"
+                            ApplicationPool         = "SharePoint Web Apps"
+                            ApplicationPoolAccount  = "DEMO\ServiceAccount"
+                            WebAppUrl               = "https://sites.sharepoint.com"
+                            DatabaseServer          = "sql.domain.local"
+                            DatabaseName            = "SP_Content_01"
+                            Port                    = 80
+                            HostHeader              = "sites.sharepoint.com"
+                            AllowLegacyEncryption   = $true
+                            CertificateThumbprint   = '7CF9E91F141FCA1049F56AB96BE2A1D7D3F9198D'
+                            UseServerNameIndication = $false
+                            Path                    = "C:\inetpub\wwwroot\something"
+                            Ensure                  = "Present"
+                        }
+
+                        Mock -CommandName Get-SPDscOSVersion -MockWith {
+                            return @{
+                                Major = 10
+                                Minor = 0
+                                Build = 20348
+                            }
+                        }
+
+                        Mock -CommandName Get-SPDscContentService -MockWith {
+                            return @{
+                                ApplicationPools = @(
+                                    @{
+                                        Name = $testParams.ApplicationPool
+                                    },
+                                    @{
+                                        Name = "Default App Pool"
+                                    },
+                                    @{
+                                        Name = "SharePoint Token Service App Pool"
+                                    }
+                                )
+                            }
+                        }
+                        Mock -CommandName Get-SPAuthenticationProvider -MockWith {
+                            return @{
+                                DisplayName     = "Windows Authentication"
+                                DisableKerberos = $true
+                                AllowAnonymous  = $false
+                            }
+                        }
+
+                        Mock -CommandName Get-SPCertificate -MockWith {
+                            return @{
+                                Thumbprint = $testParams.CertificateThumbprint
+                            }
+                        }
+
+                        Mock -CommandName Get-SPWebApplication -MockWith {
+                            return $null
+                        }
+
+                        Mock -CommandName New-SPWebApplication -MockWith {
+                        }
+                    }
+
+                    It "Should return absent from the get method" {
+                        (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
+                    }
+
+                    It "Should return false from the test method" {
+                        Test-TargetResource @testParams | Should -Be $false
+                    }
+
+                    It "Should return false from the set method" {
+                        Set-TargetResource @testParams
+                        Assert-MockCalled -CommandName New-SPWebApplication -Times 1
+                    }
+                }
+
+                Context -Name "Specified CertificateThumbprint is not found while creating new web app (SPSE)" -Fixture {
+                    BeforeAll {
+                        $testParams = @{
+                            Name                    = "SharePoint Sites"
+                            ApplicationPool         = "SharePoint Web Apps"
+                            ApplicationPoolAccount  = "DEMO\ServiceAccount"
+                            WebAppUrl               = "https://sites.sharepoint.com"
+                            DatabaseServer          = "sql.domain.local"
+                            DatabaseName            = "SP_Content_01"
+                            Port                    = 80
+                            HostHeader              = "sites.sharepoint.com"
+                            AllowLegacyEncryption   = $true
+                            CertificateThumbprint   = '7CF9E91F141FCA1049F56AB96BE2A1D7D3F9198D'
+                            UseServerNameIndication = $false
+                            Path                    = "C:\inetpub\wwwroot\something"
+                            Ensure                  = "Present"
+                        }
+
+                        Mock -CommandName Get-SPDscOSVersion -MockWith {
+                            return @{
+                                Major = 10
+                                Minor = 0
+                                Build = 20348
+                            }
+                        }
+
+                        Mock -CommandName Get-SPDscContentService -MockWith {
+                            return @{
+                                ApplicationPools = @(
+                                    @{
+                                        Name = $testParams.ApplicationPool
+                                    },
+                                    @{
+                                        Name = "Default App Pool"
+                                    },
+                                    @{
+                                        Name = "SharePoint Token Service App Pool"
+                                    }
+                                )
+                            }
+                        }
+                        Mock -CommandName Get-SPAuthenticationProvider -MockWith {
+                            return @{
+                                DisplayName     = "Windows Authentication"
+                                DisableKerberos = $true
+                                AllowAnonymous  = $false
+                            }
+                        }
+
+                        Mock -CommandName Get-SPCertificate -MockWith {
+                            return $null
+                        }
+
+                        Mock -CommandName Get-SPWebApplication -MockWith {
+                            return $null
+                        }
+
+                        Mock -CommandName New-SPWebApplication -MockWith {
+                        }
+                    }
+
+                    It "Should call the new SPWebApplication cmdlet from the set method" {
+                        { Set-TargetResource @testParams } | Should -Throw "No certificate found with the specified thumbprint: $($testParams.CertificateThumbprint). Make sure the certificate is added to Certificate Management first!"
+                    }
+                }
+
+                Context -Name "Specified CertificateThumbprint is not found while updating web app (SPSE)" -Fixture {
+                    BeforeAll {
+                        $testParams = @{
+                            Name                    = "SharePoint Sites"
+                            ApplicationPool         = "SharePoint Web Apps"
+                            ApplicationPoolAccount  = "DEMO\ServiceAccount"
+                            CertificateThumbprint   = '7CF9E91F141FCA1049F56AB96BE2A1D7D3F9198E'
+                            DatabaseName            = "SP_Content_00"
+                            Port                    = 80
+                            AllowLegacyEncryption   = $true
+                            UseServerNameIndication = $true
+                            WebAppUrl               = "https://sites.sharepoint.com"
+                            Ensure                  = "Present"
+                        }
+
+                        try
+                        {
+                            [Microsoft.SharePoint.Administration.SPWebService] | Out-Null
+                        }
+                        catch
+                        {
+                            Add-Type -TypeDefinition @"
+                            namespace Microsoft.SharePoint.Administration
+                            {
+                                public class SPWebService {
+                                    public SPWebService() { }
+                                }
+                            }
+"@
+                        }
+
+                        try
+                        {
+                            [Microsoft.SharePoint.Administration.SPApplicationPool] | Out-Null
+                        }
+                        catch
+                        {
+                            Add-Type -TypeDefinition @"
+                            namespace Microsoft.SharePoint.Administration
+                            {
+                                public class SPApplicationPool {
+                                    public SPApplicationPool(System.String account, System.Object service) { }
+
+                                    public string CurrentIdentityType { get; set; }
+                                    public string Username { get; set; }
+                                    public void Update(bool force) { }
+                                    public void Provision() { }
+                                }
+                        }
+"@
+                        }
+
+                        Mock -CommandName Get-SPDscOSVersion -MockWith {
+                            return @{
+                                Major = 10
+                                Minor = 0
+                                Build = 20348
+                            }
+                        }
+
+                        Mock -CommandName Get-SPAuthenticationProvider -MockWith {
+                            return @{
+
+                                DisplayName               = "TestProvider"
+                                LoginProviderName         = "TestProvider"
+                                ClaimProviderName         = "TestClaimProvider"
+                                AuthenticationRedirectUrl = "/_trust/default.aspx?trust=TestProvider"
+                            }
+                        }
+
+                        Mock -CommandName Get-SPWebApplication -MockWith {
+                            $sds = New-Object "System.Collections.Generic.Dictionary[[object],[System.Collections.Generic.List[System.Uri]]]"
+
+                            $uriList = New-Object System.Collections.Generic.List[System.Uri](1)
+                            $target = New-Object System.Uri("http://spbackend")
+                            $target2 = New-Object System.Uri("http://spbackend2")
+                            $uriList.Add($target)
+                            $uriList.Add($target2)
+                            $defaultZone = [Microsoft.SharePoint.Administration.SPUrlZone]"Default"
+                            $sds.Add($defaultZone, $uriList)
+                            $intranetZone = [Microsoft.SharePoint.Administration.SPUrlZone]"Intranet"
+                            $sds.Add($intranetZone, $uriList)
+
+                            $returnval = @(@{
+                                    DisplayName             = $testParams.Name
+                                    ApplicationPool         = @{
+                                        Name     = $testParams.ApplicationPool
+                                        Username = $testParams.ApplicationPoolAccount
+                                    }
+                                    UseClaimsAuthentication = $true
+                                    ContentDatabases        = @(
+                                        @{
+                                            Name   = "SP_Content_00"
+                                            Server = "sql.domain.local"
+                                        }
+                                    )
+                                    IisSettings             = @(
+                                        @{
+                                            Path           = "C:\inetpub\wwwroot\something"
+                                            SecureBindings = @(
+                                                @{
+                                                    Certificate             = @{
+                                                        Thumbprint = '7CF9E91F141FCA1049F56AB96BE2A1D7D3F9198D'
+                                                    }
+                                                    UseServerNameIndication = $false
+                                                    DisableLegacyTls        = $true
+                                                }
+                                            )
+                                        }
+                                    )
+                                    Url                     = $testParams.WebAppUrl
+                                    SiteDataServers         = $sds
+                                }
+                            )
+                            $returnval = $returnval | Add-Member -MemberType ScriptMethod `
+                                -Name Update `
+                                -Value {
+                                $global:SPDscRanWebAppUpdate = $true
+                            } -PassThru -Force | Add-Member -MemberType ScriptMethod `
+                                -Name ProvisionGlobally `
+                                -Value {
+                            } -PassThru -Force
+
+                            return $returnVal
+                        }
+
+                        Mock -CommandName Get-SPDscContentService -MockWith {
+                            $returnVal = @{
+                                ApplicationPools = @(
+                                    @{
+                                        Name = "SharePoint Old AppPool"
+                                    }
+                                )
+                            }
+                            return $returnVal
+                        }
+
+                        Mock -CommandName Get-SPManagedAccount -MockWith {
+                            return ""
+                        }
+
+                        Mock -CommandName Get-SPCertificate -MockWith {
+                            return $null
+                        }
+
+                        Mock -CommandName Set-SPWebApplication -MockWith { }
+                    }
+
+                    It "Should call the new SPWebApplication cmdlet from the set method" {
+                        { Set-TargetResource @testParams } | Should -Throw "No certificate found with the specified thumbprint: $($testParams.CertificateThumbprint). Make sure the certificate is added to Certificate Management first!"
+                    }
+                }
+
+                Context -Name "The web application does exist and should, but has incorrect settings (SPSE)" -Fixture {
+                    BeforeAll {
+                        $testParams = @{
+                            Name                    = "SharePoint Sites"
+                            ApplicationPool         = "SharePoint Web Apps"
+                            ApplicationPoolAccount  = "DEMO\ServiceAccount"
+                            CertificateThumbprint   = '7CF9E91F141FCA1049F56AB96BE2A1D7D3F9198E'
+                            DatabaseName            = "SP_Content_00"
+                            Port                    = 80
+                            AllowLegacyEncryption   = $true
+                            UseServerNameIndication = $true
+                            WebAppUrl               = "https://sites.sharepoint.com"
+                            Ensure                  = "Present"
+                        }
+
+                        try
+                        {
+                            [Microsoft.SharePoint.Administration.SPWebService] | Out-Null
+                        }
+                        catch
+                        {
+                            Add-Type -TypeDefinition @"
+                            namespace Microsoft.SharePoint.Administration
+                            {
+                                public class SPWebService {
+                                    public SPWebService() { }
+                                }
+                            }
+"@
+                        }
+
+                        try
+                        {
+                            [Microsoft.SharePoint.Administration.SPApplicationPool] | Out-Null
+                        }
+                        catch
+                        {
+                            Add-Type -TypeDefinition @"
+                            namespace Microsoft.SharePoint.Administration
+                            {
+                                public class SPApplicationPool {
+                                    public SPApplicationPool(System.String account, System.Object service) { }
+
+                                    public string CurrentIdentityType { get; set; }
+                                    public string Username { get; set; }
+                                    public void Update(bool force) { }
+                                    public void Provision() { }
+                                }
+                        }
+"@
+                        }
+
+                        Mock -CommandName Get-SPDscOSVersion -MockWith {
+                            return @{
+                                Major = 10
+                                Minor = 0
+                                Build = 20348
+                            }
+                        }
+
+                        Mock -CommandName Get-SPAuthenticationProvider -MockWith {
+                            return @{
+
+                                DisplayName               = "TestProvider"
+                                LoginProviderName         = "TestProvider"
+                                ClaimProviderName         = "TestClaimProvider"
+                                AuthenticationRedirectUrl = "/_trust/default.aspx?trust=TestProvider"
+                            }
+                        }
+
+                        Mock -CommandName Get-SPWebApplication -MockWith {
+                            $sds = New-Object "System.Collections.Generic.Dictionary[[object],[System.Collections.Generic.List[System.Uri]]]"
+
+                            $uriList = New-Object System.Collections.Generic.List[System.Uri](1)
+                            $target = New-Object System.Uri("http://spbackend")
+                            $target2 = New-Object System.Uri("http://spbackend2")
+                            $uriList.Add($target)
+                            $uriList.Add($target2)
+                            $defaultZone = [Microsoft.SharePoint.Administration.SPUrlZone]"Default"
+                            $sds.Add($defaultZone, $uriList)
+                            $intranetZone = [Microsoft.SharePoint.Administration.SPUrlZone]"Intranet"
+                            $sds.Add($intranetZone, $uriList)
+
+                            $returnval = @(@{
+                                    DisplayName             = $testParams.Name
+                                    ApplicationPool         = @{
+                                        Name     = $testParams.ApplicationPool
+                                        Username = $testParams.ApplicationPoolAccount
+                                    }
+                                    UseClaimsAuthentication = $true
+                                    ContentDatabases        = @(
+                                        @{
+                                            Name   = "SP_Content_00"
+                                            Server = "sql.domain.local"
+                                        }
+                                    )
+                                    IisSettings             = @(
+                                        @{
+                                            Path           = "C:\inetpub\wwwroot\something"
+                                            SecureBindings = @(
+                                                @{
+                                                    Certificate             = @{
+                                                        Thumbprint = '7CF9E91F141FCA1049F56AB96BE2A1D7D3F9198D'
+                                                    }
+                                                    UseServerNameIndication = $false
+                                                    DisableLegacyTls        = $true
+                                                }
+                                            )
+                                        }
+                                    )
+                                    Url                     = $testParams.WebAppUrl
+                                    SiteDataServers         = $sds
+                                }
+                            )
+                            $returnval = $returnval | Add-Member -MemberType ScriptMethod `
+                                -Name Update `
+                                -Value {
+                                $global:SPDscRanWebAppUpdate = $true
+                            } -PassThru -Force | Add-Member -MemberType ScriptMethod `
+                                -Name ProvisionGlobally `
+                                -Value {
+                            } -PassThru -Force
+
+                            return $returnVal
+                        }
+
+                        Mock -CommandName Get-SPDscContentService -MockWith {
+                            $returnVal = @{
+                                ApplicationPools = @(
+                                    @{
+                                        Name = "SharePoint Old AppPool"
+                                    }
+                                )
+                            }
+                            return $returnVal
+                        }
+
+                        Mock -CommandName Get-SPManagedAccount -MockWith {
+                            return ""
+                        }
+
+                        Mock -CommandName Get-SPCertificate -MockWith {
+                            return ""
+                        }
+
+                        Mock -CommandName Set-SPWebApplication -MockWith { }
+                    }
+
+                    It "Should return present from the get method" {
+                        $result = Get-TargetResource @testParams
+                        $result.Ensure | Should -Be "Present"
+                        $result.CertificateThumbprint | Should -Be "7CF9E91F141FCA1049F56AB96BE2A1D7D3F9198D"
+                        $result.UseServerNameIndication | Should -Be $false
+                        $result.AllowLegacyEncryption | Should -Be $false
+                    }
+
+                    It "Should return true from the test method" {
+                        Test-TargetResource @testParams | Should -Be $false
+                    }
+
+                    It "Should call the new SPWebApplication cmdlet from the set method" {
+                        Set-TargetResource @testParams
+                        Assert-MockCalled Set-SPWebApplication
+                    }
+                }
+            }
+
             Context -Name "Running ReverseDsc Export" -Fixture {
                 BeforeAll {
                     Import-Module (Join-Path -Path (Split-Path -Path (Get-Module SharePointDsc -ListAvailable).Path -Parent) -ChildPath "Modules\SharePointDSC.Reverse\SharePointDSC.Reverse.psm1")
@@ -902,19 +1864,42 @@ try
                     Mock -CommandName Write-Host -MockWith { }
 
                     Mock -CommandName Get-TargetResource -MockWith {
+                        $currentSDS = @()
+                        $currentSDS += New-Object -TypeName PSObject -Property @{
+                            Zone = "Default"
+                            Uri  = "http://spbackend"
+                        }
+                        $currentSDS += New-Object -TypeName PSObject -Property @{
+                            Zone = "Intranet"
+                            Uri  = "http://spfrontend"
+                        }
+
                         return @{
-                            Name                   = "SharePoint Sites"
-                            ApplicationPool        = "SharePoint Sites"
-                            ApplicationPoolAccount = "CONTOSO\svcSPWebApp"
-                            AllowAnonymous         = $false
-                            DatabaseName           = "SP_Content_01"
-                            DatabaseServer         = "SQL.contoso.local\SQLINSTANCE"
-                            WebAppUrl              = "http://example.contoso.local"
-                            HostHeader             = "http://example.contoso.local"
-                            Path                   = "C:\InetPub\wwwroot"
-                            Port                   = 80
-                            UseClassic             = $false
-                            Ensure                 = "Present"
+                            Name                    = "SharePoint Sites"
+                            ApplicationPool         = "SharePoint Sites"
+                            ApplicationPoolAccount  = "CONTOSO\svcSPWebApp"
+                            AllowAnonymous          = $false
+                            AllowLegacyEncryption   = $true
+                            CertificateThumbprint   = '7CF9E91F141FCA1049F56AB96BE2A1D7D3F9198D'
+                            DatabaseName            = "SP_Content_01"
+                            DatabaseServer          = "SQL.contoso.local\SQLINSTANCE"
+                            WebAppUrl               = "http://example.contoso.local"
+                            HostHeader              = "http://example.contoso.local"
+                            Path                    = "C:\InetPub\wwwroot"
+                            Port                    = 80
+                            UseClassic              = $false
+                            UseServerNameIndication = $false
+                            SiteDataServers         = @(
+                                @{
+                                    Zone = "Default"
+                                    Uri  = "http://spbackend"
+                                }
+                                @{
+                                    Zone = "Intranet"
+                                    Uri  = "http://spbackend2"
+                                }
+                            )
+                            Ensure                  = "Present"
                         }
                     }
 
@@ -947,19 +1932,31 @@ try
                     $result = @'
         SPWebApplication SharePointSites
         {
-            AllowAnonymous         = $False;
-            ApplicationPool        = "SharePoint Sites";
-            ApplicationPoolAccount = "CONTOSO\svcSPWebApp";
-            DatabaseName           = "SP_Content_01";
-            DatabaseServer         = $ConfigurationData.NonNodeData.DatabaseServer;
-            Ensure                 = "Present";
-            HostHeader             = "http://example.contoso.local";
-            Name                   = "SharePoint Sites";
-            Path                   = "C:\InetPub\wwwroot";
-            Port                   = 80;
-            PsDscRunAsCredential   = $Credsspfarm;
-            UseClassic             = $False;
-            WebAppUrl              = "http://example.contoso.local";
+            AllowAnonymous          = $False;
+            AllowLegacyEncryption   = $true;
+            ApplicationPool         = "SharePoint Sites";
+            ApplicationPoolAccount  = "CONTOSO\svcSPWebApp";
+            CertificateThumbprint   = "7CF9E91F141FCA1049F56AB96BE2A1D7D3F9198D";
+            DatabaseName            = "SP_Content_01";
+            DatabaseServer          = $ConfigurationData.NonNodeData.DatabaseServer;
+            Ensure                  = "Present";
+            HostHeader              = "http://example.contoso.local";
+            Name                    = "SharePoint Sites";
+            Path                    = "C:\InetPub\wwwroot";
+            Port                    = 80;
+            PsDscRunAsCredential    = $Credsspfarm;
+            SiteDataServers         = @(
+                MSFT_SPWebAppSiteDataServers {
+                    Zone = 'Default'
+                    Uri = 'http://spbackend'
+                },
+                MSFT_SPWebAppSiteDataServers {
+                    Zone = 'Intranet'
+                    Uri = 'http://spbackend2'
+                });
+            UseClassic              = $False;
+            UseServerNameIndication = $false;
+            WebAppUrl               = "http://example.contoso.local";
         }
 
 '@

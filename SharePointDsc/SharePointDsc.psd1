@@ -120,7 +120,6 @@
         'Test-SPDscIsADUser',
         'Test-SPDscObjectHasProperty',
         'Test-SPDscParameterState',
-        'Test-SPDscRunAsCredential',
         'Test-SPDscRunningAsFarmAccount',
         'Test-SPDscUserIsLocalAdmin'
     )
@@ -149,6 +148,8 @@
         'SPBCSServiceApp',
         'SPBlobCacheSettings',
         'SPCacheAccounts',
+        'SPCertificate',
+        'SPCertificateSettings',
         'SPConfigWizard',
         'SPContentDatabase',
         'SPDatabaseAAG',

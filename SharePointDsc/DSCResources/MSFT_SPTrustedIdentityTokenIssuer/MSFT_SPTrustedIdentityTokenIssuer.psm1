@@ -51,17 +51,12 @@ function Get-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $UseWReplyParameter = $false,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $UseWReplyParameter = $false
     )
 
     Write-Verbose -Message "Getting SPTrustedIdentityTokenIssuer '$Name' settings"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
@@ -171,11 +166,7 @@ function Set-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $UseWReplyParameter = $false,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $UseWReplyParameter = $false
     )
 
     Write-Verbose -Message "Setting SPTrustedIdentityTokenIssuer '$Name' settings"
@@ -210,8 +201,7 @@ function Set-TargetResource
             }
 
             Write-Verbose -Message "Creating SPTrustedIdentityTokenIssuer '$Name'"
-            $null = Invoke-SPDscCommand -Credential $InstallAccount `
-                -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+            $null = Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
                 -ScriptBlock {
                 $params = $args[0]
                 $eventSource = $args[1]
@@ -356,8 +346,7 @@ function Set-TargetResource
     else
     {
         Write-Verbose "Removing SPTrustedIdentityTokenIssuer '$Name'"
-        $null = Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+        $null = Invoke-SPDscCommand -Arguments $PSBoundParameters `
             -ScriptBlock {
             $params = $args[0]
             $Name = $params.Name
@@ -458,11 +447,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $UseWReplyParameter = $false,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $UseWReplyParameter = $false
     )
 
     Write-Verbose -Message "Testing SPTrustedIdentityTokenIssuer '$Name' settings"
@@ -568,10 +553,6 @@ function Export-TargetResource
                 $results.Remove("SigningCertificateFilePath")
             }
 
-            if ($results.Contains("InstallAccount"))
-            {
-                $results.Remove("InstallAccount")
-            }
             $results = Repair-Credentials -results $results
             $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
             $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"

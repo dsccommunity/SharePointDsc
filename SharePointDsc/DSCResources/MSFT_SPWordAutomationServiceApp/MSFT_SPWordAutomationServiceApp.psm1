@@ -97,11 +97,7 @@ function Get-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $AddToDefault = $false,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $AddToDefault = $false
     )
 
     Write-Verbose -Message "Getting Word Automation service app '$Name'"
@@ -145,8 +141,7 @@ function Get-TargetResource
         throw $message
     }
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
@@ -320,11 +315,7 @@ function Set-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $AddToDefault = $false,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $AddToDefault = $false
     )
 
     Write-Verbose -Message "Setting Word Automation service app '$Name'"
@@ -373,8 +364,7 @@ function Set-TargetResource
     if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present")
     {
         Write-Verbose -Message "Creating Word Automation Service Application $Name"
-        Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+        Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
             -ScriptBlock {
             $params = $args[0]
             $eventSource = $args[1]
@@ -432,8 +422,7 @@ function Set-TargetResource
     if ($result.Ensure -eq "Present" -and $Ensure -eq "Present")
     {
         Write-Verbose -Message "Updating Word Automation Service Application $Name"
-        Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+        Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
             -ScriptBlock {
             $params = $args[0]
             $eventSource = $args[1]
@@ -590,7 +579,7 @@ function Set-TargetResource
     if ($Ensure -eq "Absent")
     {
         Write-Verbose -Message "Removing Word Automation Service Application $Name"
-        Invoke-SPDscCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDscCommand -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
 
             $serviceApp = Get-SPServiceApplication | Where-Object -FilterScript {
@@ -714,11 +703,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $AddToDefault = $false,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $AddToDefault = $false
     )
 
     Write-Verbose -Message "Testing Word Automation service app '$Name'"
@@ -822,10 +807,6 @@ function Export-TargetResource
                 $PartialContent += "        {`r`n"
                 $results = Get-TargetResource @params
 
-                if ($results.Contains("InstallAccount"))
-                {
-                    $results.Remove("InstallAccount")
-                }
                 $results = Repair-Credentials -results $results
 
                 Add-ConfigurationDataEntry -Node "NonNodeData" -Key "DatabaseServer" -Value $results.DatabaseServer -Description "Name of the Database Server associated with the destination SharePoint Farm;"

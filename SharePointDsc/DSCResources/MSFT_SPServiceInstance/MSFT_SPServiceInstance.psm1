@@ -9,10 +9,6 @@ function Get-TargetResource
         $Name,
 
         [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
-
-        [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present"
@@ -23,8 +19,7 @@ function Get-TargetResource
     $newName = (Get-SPDscServiceTypeName -DisplayName $Name)
 
     $invokeArgs = @{
-        Credential = $InstallAccount
-        Arguments  = @($PSBoundParameters, $newName)
+        Arguments = @($PSBoundParameters, $newName)
     }
     $result = Invoke-SPDscCommand @invokeArgs -ScriptBlock {
         $params = $args[0]
@@ -81,10 +76,6 @@ function Set-TargetResource
         $Name,
 
         [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
-
-        [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present"
@@ -94,8 +85,7 @@ function Set-TargetResource
 
     $newName = (Get-SPDscServiceTypeName -DisplayName $Name)
     $invokeArgs = @{
-        Credential = $InstallAccount
-        Arguments  = @($PSBoundParameters, $MyInvocation.MyCommand.Source, $newName)
+        Arguments = @($PSBoundParameters, $MyInvocation.MyCommand.Source, $newName)
     }
 
     if ($Ensure -eq "Present")
@@ -226,10 +216,6 @@ function Test-TargetResource
         [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
 
         [Parameter()]
         [ValidateSet("Present", "Absent")]

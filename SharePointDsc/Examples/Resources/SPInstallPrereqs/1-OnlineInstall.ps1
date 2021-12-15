@@ -53,7 +53,7 @@ Configuration Example
 
     node localhost
     {
-        SPInstallPrereqs InstallPrerequisites
+        SPInstallPrereqs 'InstallPrerequisitesOnline'
         {
             IsSingleInstance = "Yes"
             InstallerPath    = "C:\SPInstall\Prerequisiteinstaller.exe"

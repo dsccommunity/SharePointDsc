@@ -56,11 +56,7 @@ function Get-TargetResource
         [Parameter()]
         [ValidateSet("Modern", "Classic", "Latest")]
         [System.String]
-        $UserExperienceVersion,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $UserExperienceVersion
     )
 
     Write-Verbose -Message "Getting self service site creation settings for Web Application '$WebAppUrl'"
@@ -112,8 +108,7 @@ function Get-TargetResource
         }
     }
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
@@ -245,11 +240,7 @@ function Set-TargetResource
         [Parameter()]
         [ValidateSet("Modern", "Classic", "Latest")]
         [System.String]
-        $UserExperienceVersion,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $UserExperienceVersion
     )
 
     Write-Verbose -Message "Setting self service site creation settings for Web Application '$WebAppUrl'"
@@ -306,8 +297,7 @@ function Set-TargetResource
         }
     }
 
-    Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+    Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
         $eventSource = $args[1]
@@ -545,11 +535,7 @@ function Test-TargetResource
         [Parameter()]
         [ValidateSet("Modern", "Classic", "Latest")]
         [System.String]
-        $UserExperienceVersion,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $UserExperienceVersion
     )
 
     Write-Verbose -Message "Testing self service site creation settings for Web Application '$WebAppUrl'"

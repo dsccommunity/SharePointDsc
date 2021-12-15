@@ -26,17 +26,12 @@ function Get-TargetResource
         [Parameter()]
         [ValidateRange(0, 99)]
         [System.UInt32]
-        $NumberOfRetries,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $NumberOfRetries
     )
 
     Write-Verbose -Message "Getting farm wide automatic password change settings"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $farm = Get-SPFarm
         if ($null -eq $farm )
@@ -88,17 +83,12 @@ function Set-TargetResource
         [Parameter()]
         [ValidateRange(0, 99)]
         [System.UInt32]
-        $NumberOfRetries,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $NumberOfRetries
     )
 
     Write-Verbose -Message "Setting farm wide automatic password change settings"
 
-    Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
         $farm = Get-SPFarm -ErrorAction Continue
@@ -153,11 +143,7 @@ function Test-TargetResource
         [Parameter()]
         [ValidateRange(0, 99)]
         [System.UInt32]
-        $NumberOfRetries,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $NumberOfRetries
     )
 
     Write-Verbose -Message "Testing farm wide automatic password change settings"

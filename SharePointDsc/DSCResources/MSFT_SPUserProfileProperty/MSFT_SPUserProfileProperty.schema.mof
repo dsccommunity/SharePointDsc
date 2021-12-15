@@ -31,5 +31,4 @@ class MSFT_SPUserProfileProperty : OMI_BaseResource
     [Write, Description("The name of the term store to look up managed terms from")] string TermStore;
     [Write, Description("The name of the term store group that terms are in for this field")] string TermGroup;
     [Write, Description("The name of the term set to allow values to be selected from")] string TermSet;
-    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] string InstallAccount;
 };

@@ -10,19 +10,39 @@ function Get-TargetResource
 
         [Parameter(Mandatory = $true)]
         [System.String]
+        $WebAppUrl,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $ApplicationPool,
 
         [Parameter(Mandatory = $true)]
         [System.String]
         $ApplicationPoolAccount,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter()]
         [System.String]
-        $WebAppUrl,
+        $Port,
+
+        [Parameter()]
+        [System.String]
+        $HostHeader,
+
+        [Parameter()]
+        [System.String]
+        $CertificateThumbprint,
 
         [Parameter()]
         [System.Boolean]
-        $AllowAnonymous,
+        $UseServerNameIndication,
+
+        [Parameter()]
+        [System.Boolean]
+        $AllowLegacyEncryption,
+
+        [Parameter()]
+        [System.String]
+        $Path,
 
         [Parameter()]
         [System.String]
@@ -41,35 +61,62 @@ function Get-TargetResource
         $DatabaseCredentials,
 
         [Parameter()]
-        [System.String]
-        $HostHeader,
-
-        [Parameter()]
-        [System.String]
-        $Path,
-
-        [Parameter()]
-        [System.String]
-        $Port,
+        [System.Boolean]
+        $AllowAnonymous,
 
         [Parameter()]
         [System.Boolean]
         $UseClassic = $false,
 
         [Parameter()]
-        [ValidateSet("Present", "Absent")]
-        [System.String]
-        $Ensure = "Present",
+        [Microsoft.Management.Infrastructure.CimInstance[]]
+        $SiteDataServers,
 
         [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        [ValidateSet("Present", "Absent")]
+        [System.String]
+        $Ensure = "Present"
     )
 
     Write-Verbose -Message "Getting web application '$Name' config"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $osVersion = Get-SPDscOSVersion
+    if ($PSBoundParameters.ContainsKey("AllowLegacyEncryption") -and `
+        ($osVersion.Major -ne 10 -or $osVersion.Build -ne 20348))
+    {
+        Write-Verbose ("You cannot specify the AllowLegacyEncryption parameter when using " + `
+                "Windows Server 2019 or earlier.")
+
+        return @{
+            Name                   = $Name
+            WebAppUrl              = $WebAppUrl
+            ApplicationPool        = $ApplicationPool
+            ApplicationPoolAccount = $ApplicationPoolAccount
+        }
+    }
+
+    if ($PSBoundParameters.ContainsKey("CertificateThumbprint") -or `
+            $PSBoundParameters.ContainsKey("UseServerNameIndication") -or `
+            $PSBoundParameters.ContainsKey("AllowLegacyEncryption"))
+    {
+        $productVersion = Get-SPDscInstalledProductVersion
+        if ($productVersion.FileMajorPart -ne 16 -or `
+                $productVersion.FileBuildPart -lt 13000)
+        {
+            Write-Verbose ("The parameters AllowLegacyEncryption, CertificateThumbprint or " + `
+                    "UseServerNameIndication are only supported with SharePoint Server " + `
+                    "Subscription Edition.")
+
+            return @{
+                Name                   = $Name
+                WebAppUrl              = $WebAppUrl
+                ApplicationPool        = $ApplicationPool
+                ApplicationPoolAccount = $ApplicationPoolAccount
+            }
+        }
+    }
+
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
@@ -93,7 +140,9 @@ function Get-TargetResource
             $classicAuth = $true
         }
 
-        $IISPath = $wa.IisSettings[0].Path
+        $iisSettings = $wa.IisSettings[0]
+
+        $IISPath = $iisSettings.Path
         if (-not [System.String]::IsNullOrEmpty($IISPath))
         {
             $IISPath = $IISPath.ToString()
@@ -108,19 +157,32 @@ function Get-TargetResource
             $contentDb = $wa.ContentDatabases[0]
         }
 
+        $currSiteDataServers = @()
+        foreach ($entry in $wa.SiteDataServers.GetEnumerator())
+        {
+            $sdsEntry = @{
+                $entry.Key.ToString() = $entry.Value.AbsoluteUri.TrimEnd("/")
+            }
+            $currSiteDataServers += $sdsEntry
+        }
+
         return @{
-            Name                   = $wa.DisplayName
-            ApplicationPool        = $wa.ApplicationPool.Name
-            ApplicationPoolAccount = $wa.ApplicationPool.Username
-            WebAppUrl              = $wa.Url
-            AllowAnonymous         = $authProvider.AllowAnonymous
-            DatabaseName           = $contentDb.Name
-            DatabaseServer         = $contentDb.Server
-            HostHeader             = (New-Object -TypeName System.Uri $wa.Url).Host
-            Path                   = $IISPath
-            Port                   = (New-Object -TypeName System.Uri $wa.Url).Port
-            UseClassic             = $classicAuth
-            Ensure                 = "Present"
+            Name                    = $wa.DisplayName
+            WebAppUrl               = $wa.Url
+            ApplicationPool         = $wa.ApplicationPool.Name
+            ApplicationPoolAccount  = $wa.ApplicationPool.Username
+            Port                    = (New-Object -TypeName System.Uri $wa.Url).Port
+            HostHeader              = (New-Object -TypeName System.Uri $wa.Url).Host
+            CertificateThumbprint   = $iisSettings.SecureBindings[0].Certificate.Thumbprint
+            UseServerNameIndication = $iisSettings.SecureBindings[0].UseServerNameIndication
+            AllowLegacyEncryption   = -not $iisSettings.SecureBindings[0].DisableLegacyTls
+            Path                    = $IISPath
+            DatabaseName            = $contentDb.Name
+            DatabaseServer          = $contentDb.Server
+            AllowAnonymous          = $authProvider.AllowAnonymous
+            UseClassic              = $classicAuth
+            SiteDataServers         = $currSiteDataServers
+            Ensure                  = "Present"
         }
     }
     return $result
@@ -138,19 +200,39 @@ function Set-TargetResource
 
         [Parameter(Mandatory = $true)]
         [System.String]
+        $WebAppUrl,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $ApplicationPool,
 
         [Parameter(Mandatory = $true)]
         [System.String]
         $ApplicationPoolAccount,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter()]
         [System.String]
-        $WebAppUrl,
+        $Port,
+
+        [Parameter()]
+        [System.String]
+        $HostHeader,
+
+        [Parameter()]
+        [System.String]
+        $CertificateThumbprint,
 
         [Parameter()]
         [System.Boolean]
-        $AllowAnonymous,
+        $UseServerNameIndication,
+
+        [Parameter()]
+        [System.Boolean]
+        $AllowLegacyEncryption,
+
+        [Parameter()]
+        [System.String]
+        $Path,
 
         [Parameter()]
         [System.String]
@@ -169,39 +251,67 @@ function Set-TargetResource
         $DatabaseCredentials,
 
         [Parameter()]
-        [System.String]
-        $HostHeader,
-
-        [Parameter()]
-        [System.String]
-        $Path,
-
-        [Parameter()]
-        [System.String]
-        $Port,
+        [System.Boolean]
+        $AllowAnonymous,
 
         [Parameter()]
         [System.Boolean]
         $UseClassic = $false,
 
         [Parameter()]
-        [ValidateSet("Present", "Absent")]
-        [System.String]
-        $Ensure = "Present",
+        [Microsoft.Management.Infrastructure.CimInstance[]]
+        $SiteDataServers,
 
         [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        [ValidateSet("Present", "Absent")]
+        [System.String]
+        $Ensure = "Present"
     )
 
     Write-Verbose -Message "Setting web application '$Name' config"
 
     $PSBoundParameters.UseClassic = $UseClassic
 
+    if ($PSBoundParameters.ContainsKey("Port") -eq $false)
+    {
+        $PSBoundParameters.Port = (New-Object -TypeName System.Uri $WebAppUrl).Port
+    }
+
+    $osVersion = Get-SPDscOSVersion
+    if ($PSBoundParameters.ContainsKey("AllowLegacyEncryption") -and `
+        ($osVersion.Major -ne 10 -or $osVersion.Build -ne 20348))
+    {
+        $message = ("You cannot specify the AllowLegacyEncryption parameter when using " + `
+                "Windows Server 2019 or earlier.")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
+    }
+
+    if ($PSBoundParameters.ContainsKey("CertificateThumbprint") -or `
+            $PSBoundParameters.ContainsKey("UseServerNameIndication") -or `
+            $PSBoundParameters.ContainsKey("AllowLegacyEncryption"))
+    {
+        $productVersion = Get-SPDscInstalledProductVersion
+        if ($productVersion.FileMajorPart -ne 16 -or `
+                $productVersion.FileBuildPart -lt 13000)
+        {
+            $message = ("The parameters AllowLegacyEncryption, CertificateThumbprint or " + `
+                    "UseServerNameIndication are only supported with SharePoint Server " + `
+                    "Subscription Edition.")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
+        }
+    }
+
     if ($Ensure -eq "Present")
     {
-        Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+        Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
             -ScriptBlock {
             $params = $args[0]
             $eventSource = $args[1]
@@ -267,6 +377,30 @@ function Set-TargetResource
                 {
                     $newWebAppParams.Add("AllowAnonymousAccess", $params.AllowAnonymous)
                 }
+                if ($params.ContainsKey("CertificateThumbprint") -eq $true)
+                {
+                    $cert = Get-SPCertificate -Thumbprint $params.CertificateThumbprint -Store "EndEntity"
+                    if ($null -eq $cert)
+                    {
+                        $message = ("No certificate found with the specified thumbprint: " + `
+                                "$($params.CertificateThumbprint). Make sure the certificate " + `
+                                "is added to Certificate Management first!")
+                        Add-SPDscEvent -Message $message `
+                            -EntryType 'Error' `
+                            -EventID 100 `
+                            -Source $eventSource
+                        throw $message
+                    }
+                    $newWebAppParams.Add("Certificate", $cert)
+                }
+                if ($params.ContainsKey("UseServerNameIndication") -eq $true)
+                {
+                    $newWebAppParams.Add("UseServerNameIndication", $params.UseServerNameIndication)
+                }
+                if ($params.ContainsKey("AllowLegacyEncryption") -eq $true)
+                {
+                    $newWebAppParams.Add("AllowLegacyEncryption", $params.AllowLegacyEncryption)
+                }
                 if ($params.ContainsKey("DatabaseName") -eq $true)
                 {
                     $newWebAppParams.Add("DatabaseName", $params.DatabaseName)
@@ -307,6 +441,8 @@ function Set-TargetResource
             else
             {
                 Write-Verbose -Message "Update existing web application"
+                $updateWebApplication = $false
+
                 if ($params.ContainsKey("DatabaseName") -eq $true)
                 {
                     Write-Verbose -Message "Checking content database '$($params.DatabaseName)'"
@@ -393,17 +529,124 @@ function Set-TargetResource
 
                     Write-Verbose -Message "Applying new application pool"
                     $wa.ApplicationPool = $newAppPool
+                    $updateWebApplication = $true
+                }
+
+                if ($params.ContainsKey("SiteDataServers") -eq $true)
+                {
+                    $currentSiteDataServers = $wa.SiteDataServers
+                    $currentZones = [array]$currentSiteDataServers.Keys
+                    foreach ($currentSDServerZone in $currentZones)
+                    {
+                        $targetSDServers = $params.SiteDataServers | Where-Object -FilterScript {
+                            $_.Zone -eq $currentSDServerZone
+                        }
+
+                        if ($null -eq $targetSDServers)
+                        {
+                            $null = $currentSiteDataServers.Remove($currentSDServerZone)
+                        }
+                    }
+
+                    foreach ($targetSDServer in $params.SiteDataServers)
+                    {
+                        $zone = [Microsoft.SharePoint.Administration.SPUrlZone]$targetSDServer.Zone #Specify zone name
+                        if ($currentSiteDataServers.ContainsKey($zone))
+                        {
+                            # Zone exists, check value
+                            if ($null -ne (Compare-Object -ReferenceObject $currentSiteDataServers[$zone].AbsoluteUri.TrimEnd("/") -DifferenceObject $targetSDServer.Uri))
+                            {
+                                $null = $currentSiteDataServers.Remove($zone)
+
+                                $uriList = New-Object System.Collections.Generic.List[System.Uri](1)
+                                foreach ($uri in $targetSDServer.Uri)
+                                {
+                                    $target = New-Object System.Uri($uri)
+                                    $uriList.Add($target)
+                                }
+                                $currentSiteDataServers.Add($zone, $uriList)
+                            }
+                        }
+                        else
+                        {
+                            # Zone does not exist, add value
+                            $uriList = New-Object System.Collections.Generic.List[System.Uri](1)
+                            foreach ($uri in $targetSDServer.Uri)
+                            {
+                                $target = New-Object System.Uri($uri)
+                                $uriList.Add($target)
+                            }
+                            $currentSiteDataServers.Add($zone, $uriList)
+                        }
+                    }
+
+                    $updateWebApplication = $true
+                }
+
+                if ($updateWebApplication -eq $true)
+                {
                     $wa.Update()
                     $wa.ProvisionGlobally()
                 }
+
+                $updateWebAppParams = @{
+                    Identity = $params.WebAppUrl
+                    Zone     = 'Default'
+                }
+
+                if ($params.ContainsKey("CertificateThumbprint") -eq $true)
+                {
+                    $cert = Get-SPCertificate -Thumbprint $params.CertificateThumbprint -Store "EndEntity"
+                    if ($null -eq $cert)
+                    {
+                        $message = ("No certificate found with the specified thumbprint: " + `
+                                "$($params.CertificateThumbprint). Make sure the certificate " + `
+                                "is added to Certificate Management first!")
+                        Add-SPDscEvent -Message $message `
+                            -EntryType 'Error' `
+                            -EventID 100 `
+                            -Source $eventSource
+                        throw $message
+                    }
+                    $updateWebAppParams.Add("Certificate", $cert)
+                }
+                if ($params.ContainsKey("UseServerNameIndication") -eq $true)
+                {
+                    $updateWebAppParams.Add("UseServerNameIndication", $params.UseServerNameIndication)
+                }
+                if ($params.ContainsKey("AllowLegacyEncryption") -eq $true)
+                {
+                    $updateWebAppParams.Add("AllowLegacyEncryption", $params.AllowLegacyEncryption)
+                }
+                if ((New-Object -TypeName System.Uri $params.WebAppUrl).Scheme -eq "https")
+                {
+                    $updateWebAppParams.Add("SecureSocketsLayer", $true)
+                }
+
+                $productVersion = Get-SPDscInstalledProductVersion
+                if ($productVersion.FileMajorPart -eq 16 -and `
+                        $productVersion.FileBuildPart -ge 13000)
+                {
+                    if ($params.ContainsKey("HostHeader") -eq $true)
+                    {
+                        $updateWebAppParams.Add("HostHeader", $params.HostHeader)
+                    }
+
+                    if ($params.ContainsKey("Port") -eq $true)
+                    {
+                        $updateWebAppParams.Add("Port", $params.Port)
+                    }
+                }
+
+                Write-Verbose -Message "Updating web application with these parameters: $(Convert-SPDscHashtableToString -Hashtable $updateWebAppParams)"
+                Set-SPWebApplication @updateWebAppParams | Out-Null
             }
         }
     }
 
     if ($Ensure -eq "Absent")
     {
-        Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+        Invoke-SPDscCommand -Arguments $PSBoundParameters `
             -ScriptBlock {
             $params = $args[0]
 
@@ -429,19 +672,39 @@ function Test-TargetResource
 
         [Parameter(Mandatory = $true)]
         [System.String]
+        $WebAppUrl,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $ApplicationPool,
 
         [Parameter(Mandatory = $true)]
         [System.String]
         $ApplicationPoolAccount,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter()]
         [System.String]
-        $WebAppUrl,
+        $Port,
+
+        [Parameter()]
+        [System.String]
+        $HostHeader,
+
+        [Parameter()]
+        [System.String]
+        $CertificateThumbprint,
 
         [Parameter()]
         [System.Boolean]
-        $AllowAnonymous,
+        $UseServerNameIndication,
+
+        [Parameter()]
+        [System.Boolean]
+        $AllowLegacyEncryption,
+
+        [Parameter()]
+        [System.String]
+        $Path,
 
         [Parameter()]
         [System.String]
@@ -460,29 +723,21 @@ function Test-TargetResource
         $DatabaseCredentials,
 
         [Parameter()]
-        [System.String]
-        $HostHeader,
-
-        [Parameter()]
-        [System.String]
-        $Path,
-
-        [Parameter()]
-        [System.String]
-        $Port,
+        [System.Boolean]
+        $AllowAnonymous,
 
         [Parameter()]
         [System.Boolean]
         $UseClassic = $false,
 
         [Parameter()]
-        [ValidateSet("Present", "Absent")]
-        [System.String]
-        $Ensure = "Present",
+        [Microsoft.Management.Infrastructure.CimInstance[]]
+        $SiteDataServers,
 
         [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        [ValidateSet("Present", "Absent")]
+        [System.String]
+        $Ensure = "Present"
     )
 
     Write-Verbose -Message "Testing for web application '$Name' config"
@@ -494,10 +749,52 @@ function Test-TargetResource
     Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
+    if ($PSBoundParameters.ContainsKey("SiteDataServers"))
+    {
+        $inDesiredState = $true
+
+        $currentSiteDataServers = $CurrentValues.SiteDataServers
+        foreach ($currentSDServerZone in $currentSiteDataServers.Keys)
+        {
+            $targetSDServers = $PSBoundParameters.SiteDataServers | Where-Object { $_.Zone -eq $currentSDServerZone }
+            if ($null -eq $targetSDServers)
+            {
+                $inDesiredState = $false
+            }
+        }
+
+        foreach ($targetSDServer in $PSBoundParameters.SiteDataServers)
+        {
+            $currentZone = $currentSiteDataServers | Where-Object { $_.GetEnumerator().Name -eq $targetSDServer.Zone }
+            if ($null -ne $currentZone)
+            {
+                if ($null -ne (Compare-Object -ReferenceObject $currentZone.($targetSDServer.Zone) -DifferenceObject $targetSDServer.Uri))
+                {
+                    $inDesiredState = $false
+                }
+            }
+            else
+            {
+                $inDesiredState = $false
+            }
+        }
+
+        Write-Verbose -Message "Test-TargetResource returned $inDesiredState"
+
+        return $inDesiredState
+    }
+
     $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
         -Source $($MyInvocation.MyCommand.Source) `
         -DesiredValues $PSBoundParameters `
-        -ValuesToCheck @("ApplicationPool", "DatabaseName", "Ensure")
+        -ValuesToCheck @(
+        "AllowLegacyEncryption",
+        "ApplicationPool",
+        "CertificateThumbprint",
+        "DatabaseName",
+        "Ensure",
+        "UseServerNameIndication"
+    )
 
     Write-Verbose -Message "Test-TargetResource returned $result"
 
@@ -542,6 +839,11 @@ function Export-TargetResource
                 $results.Remove("AllowAnonymous")
             }
 
+            if ($results.SiteDataServers.Count -ne 0)
+            {
+                $results.SiteDataServers = Convert-SPDscArrayToCIMInstanceString -Params $results.SiteDataServers -CIMInstanceName "MSFT_SPWebAppSiteDataServers"
+            }
+
             Add-ConfigurationDataEntry -Node "NonNodeData" -Key "DatabaseServer" -Value $results.DatabaseServer -Description "Name of the Database Server associated with the destination SharePoint Farm;"
             $results.DatabaseServer = "`$ConfigurationData.NonNodeData.DatabaseServer"
             $results["Path"] = $results["Path"].ToString()
@@ -551,7 +853,9 @@ function Export-TargetResource
                 $currentDSCBlock = Convert-DSCStringParamToVariable -DSCBlock $currentDSCBlock -ParameterName "ApplicationPoolAccount"
             }
             $currentDSCBlock = Convert-DSCStringParamToVariable -DSCBlock $currentDSCBlock -ParameterName "DatabaseServer"
+            $currentDSCBlock = Convert-DSCStringParamToVariable -DSCBlock $currentDSCBlock -ParameterName "SiteDataServers" -IsCIMArray $true
             $currentDSCBlock = Convert-DSCStringParamToVariable -DSCBlock $currentDSCBlock -ParameterName "PsDscRunAsCredential"
+
             $partialContent += $currentDSCBlock
             $partialContent += "        }`r`n"
 

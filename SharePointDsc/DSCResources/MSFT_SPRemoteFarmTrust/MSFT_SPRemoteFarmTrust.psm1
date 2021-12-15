@@ -18,17 +18,12 @@ function Get-TargetResource
 
         [Parameter()]
         [ValidateSet("Present", "Absent")]
-        [System.String] $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        [System.String] $Ensure = "Present"
     )
 
     Write-Verbose -Message "Getting remote farm trust '$Name'"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
@@ -85,11 +80,7 @@ function Set-TargetResource()
 
         [Parameter()]
         [ValidateSet("Present", "Absent")]
-        [System.String] $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        [System.String] $Ensure = "Present"
     )
 
     Write-Verbose -Message "Setting remote farm trust '$Name'"
@@ -98,8 +89,7 @@ function Set-TargetResource()
     {
         Write-Verbose -Message "Adding remote farm trust '$Name'"
 
-        Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+        Invoke-SPDscCommand -Arguments $PSBoundParameters `
             -ScriptBlock {
             $params = $args[0]
             $remoteWebApp = $params.RemoteWebAppUrl.TrimEnd('/')
@@ -149,8 +139,7 @@ function Set-TargetResource()
     {
         Write-Verbose -Message "Removing remote farm trust '$Name'"
 
-        Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+        Invoke-SPDscCommand -Arguments $PSBoundParameters `
             -ScriptBlock {
             $params = $args[0]
 
@@ -197,11 +186,7 @@ function Test-TargetResource()
 
         [Parameter()]
         [ValidateSet("Present", "Absent")]
-        [System.String] $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        [System.String] $Ensure = "Present"
     )
 
     Write-Verbose -Message "Testing remote farm trust '$Name'"

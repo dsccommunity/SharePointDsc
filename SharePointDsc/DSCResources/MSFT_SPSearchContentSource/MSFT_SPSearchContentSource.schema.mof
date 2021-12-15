@@ -28,5 +28,4 @@ class MSFT_SPSearchContentSource : OMI_BaseResource
     [Write, Description("Line of Business System and System Instance names")] String LOBSystemSet[];
     [Write, Description("Present if the source should exist, absent if it should not"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
     [Write, Description("Specify true if DSC is allowed to delete and recreate a content source to apply the correct settings, otherwise false will just report errors if a change can not be applied.")] Boolean Force;
-    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };

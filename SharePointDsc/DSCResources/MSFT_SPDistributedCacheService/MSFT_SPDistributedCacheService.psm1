@@ -27,17 +27,12 @@ function Get-TargetResource
 
         [Parameter()]
         [System.String[]]
-        $ServerProvisionOrder,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $ServerProvisionOrder
     )
 
     Write-Verbose -Message "Getting the cache host information"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
         $nullReturnValue = @{
@@ -47,24 +42,38 @@ function Get-TargetResource
 
         try
         {
-            Use-CacheCluster -ErrorAction SilentlyContinue
-            $cacheHost = Get-CacheHost -ErrorAction SilentlyContinue
+            $productVersion = Get-SPDscInstalledProductVersion
+            if ($productVersion.FileMajorPart -eq 16 `
+                    -and $productVersion.FileBuildPart -gt 13000)
+            {
+                Write-Verbose -Message "'Use-CacheCluster' cmdlet not required for SPSE"
+                Write-Verbose -Message "Using newer 'Get-SPCacheHostConfig' cmdlet for SPSE"
+                $cacheHostConfig = Get-SPCacheHostConfig -HostName $env:COMPUTERNAME -ErrorAction SilentlyContinue
+                $cacheHost = Get-SPCacheHost -HostName $cacheHostConfig.HostName -CachePort $cacheHostConfig.CachePort
+                $firewallRule = Get-NetFirewallRule -DisplayName "SharePoint Caching Service (TCP-In)" `
+                    -ErrorAction SilentlyContinue
+            }
+            else
+            {
+                Use-CacheCluster -ErrorAction SilentlyContinue
+                $cacheHost = Get-CacheHost -ErrorAction SilentlyContinue
+                $computerName = ([System.Net.Dns]::GetHostByName($env:computerName)).HostName
+                $cachePort = ($cacheHost | Where-Object -FilterScript {
+                        $_.HostName -eq $computerName
+                    }).PortNo
+                $cacheHostConfig = Get-AFCacheHostConfiguration -ComputerName $computerName `
+                    -CachePort $cachePort `
+                    -ErrorAction SilentlyContinue
+                $firewallRule = Get-NetFirewallRule -DisplayName "SharePoint Distributed Cache" `
+                    -ErrorAction SilentlyContinue
+            }
 
             if ($null -eq $cacheHost)
             {
                 return $nullReturnValue
             }
-            $computerName = ([System.Net.Dns]::GetHostByName($env:computerName)).HostName
-            $cachePort = ($cacheHost | Where-Object -FilterScript {
-                    $_.HostName -eq $computerName
-                }).PortNo
-            $cacheHostConfig = Get-AFCacheHostConfiguration -ComputerName $computerName `
-                -CachePort $cachePort `
-                -ErrorAction SilentlyContinue
 
-            $windowsService = Get-CimInstance -Class Win32_Service -Filter "Name='AppFabricCachingService'"
-            $firewallRule = Get-NetFirewallRule -DisplayName "SharePoint Distributed Cache" `
-                -ErrorAction SilentlyContinue
+            $windowsService = Get-CimInstance -Class Win32_Service -Filter "Name='AppFabricCachingService' OR Name='SPCache'"
 
             return @{
                 Name                 = $params.Name
@@ -112,13 +121,8 @@ function Set-TargetResource
 
         [Parameter()]
         [System.String[]]
-        $ServerProvisionOrder,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $ServerProvisionOrder
     )
-
     Write-Verbose -Message "Setting the cache host information"
 
     $CurrentState = Get-TargetResource @PSBoundParameters
@@ -129,7 +133,7 @@ function Set-TargetResource
         if ($createFirewallRules -eq $true)
         {
             Write-Verbose -Message "Create a firewall rule for AppFabric"
-            Invoke-SPDscCommand -Credential $InstallAccount -ScriptBlock {
+            Invoke-SPDscCommand -ScriptBlock {
                 $icmpRuleName = "File and Printer Sharing (Echo Request - ICMPv4-In)"
                 $icmpFirewallRule = Get-NetFirewallRule -DisplayName $icmpRuleName `
                     -ErrorAction SilentlyContinue
@@ -145,20 +149,29 @@ function Set-TargetResource
                 }
                 Enable-NetFirewallRule -DisplayName $icmpRuleName
 
-                $spRuleName = "SharePoint Distributed Cache"
-                $firewallRule = Get-NetFirewallRule -DisplayName $spRuleName `
-                    -ErrorAction SilentlyContinue
-                if ($null -eq $firewallRule)
+                $productVersion = Get-SPDscInstalledProductVersion
+                if ($productVersion.FileMajorPart -eq 16 `
+                        -and $productVersion.FileBuildPart -gt 13000)
                 {
-                    New-NetFirewallRule -Name "SPDistCache" `
-                        -DisplayName $spRuleName `
-                        -Protocol TCP `
-                        -LocalPort 22233-22236 `
-                        -Group "SharePoint"
+                    Write-Verbose -Message 'Skipping Firewall Rule creation on SharePoint Server Subscription Edition because Add-SPDistributedCacheServiceInstance will add the Rule "SharePoint Caching Service (TCP-In)"'
                 }
-                Enable-NetFirewallRule -DisplayName $spRuleName
+                else
+                {
+                    $spRuleName = "SharePoint Distributed Cache"
+                    $firewallRule = Get-NetFirewallRule -DisplayName $spRuleName `
+                        -ErrorAction SilentlyContinue
+                    if ($null -eq $firewallRule)
+                    {
+                        New-NetFirewallRule -Name "SPDistCache" `
+                            -DisplayName $spRuleName `
+                            -Protocol TCP `
+                            -LocalPort 22233-22236 `
+                            -Group "SharePoint"
+                    }
+                    Enable-NetFirewallRule -DisplayName $spRuleName
+                    Write-Verbose -Message "Firewall rule added"
+                }
             }
-            Write-Verbose -Message "Firewall rule added"
         }
 
         Write-Verbose -Message ("Current state is '$($CurrentState.Ensure)' " + `
@@ -167,8 +180,7 @@ function Set-TargetResource
         if ($CurrentState.Ensure -ne $Ensure)
         {
             Write-Verbose -Message "Enabling distributed cache service"
-            Invoke-SPDscCommand -Credential $InstallAccount `
-                -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+            Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
                 -ScriptBlock {
                 $params = $args[0]
                 $eventSource = $args[1]
@@ -316,7 +328,7 @@ function Set-TargetResource
 
                 $farm = Get-SPFarm
                 $cacheService = $farm.Services | Where-Object -FilterScript {
-                    $_.Name -eq "AppFabricCachingService"
+                    $_.Name -eq "AppFabricCachingService" -or $_.Name -eq "SPCache"
                 }
 
                 if ($cacheService.ProcessIdentity.ManagedAccount.Username -ne $params.ServiceAccount)
@@ -342,13 +354,12 @@ function Set-TargetResource
         {
             if ($CurrentState.ServiceAccount -ne $ServiceAccount.UserName)
             {
-                Invoke-SPDscCommand -Credential $InstallAccount `
-                    -Arguments $PSBoundParameters `
+                Invoke-SPDscCommand -Arguments $PSBoundParameters `
                     -ScriptBlock {
                     $params = $args[0]
                     $farm = Get-SPFarm
                     $cacheService = $farm.Services | Where-Object -FilterScript {
-                        $_.Name -eq "AppFabricCachingService"
+                        $_.Name -eq "AppFabricCachingService" -or $_.Name -eq "SPCache"
                     }
 
                     if ($cacheService.ProcessIdentity.ManagedAccount.Username -ne $params.ServiceAccount)
@@ -374,8 +385,7 @@ function Set-TargetResource
             if ($CurrentState.CacheSizeInMB -ne $CacheSizeInMB)
             {
                 Write-Verbose -Message "Updating distributed cache service cache size"
-                Invoke-SPDscCommand -Credential $InstallAccount `
-                    -Arguments $PSBoundParameters `
+                Invoke-SPDscCommand -Arguments $PSBoundParameters `
                     -ScriptBlock {
                     $params = $args[0]
 
@@ -437,7 +447,7 @@ function Set-TargetResource
     else
     {
         Write-Verbose -Message "Removing distributed cache to the server"
-        Invoke-SPDscCommand -Credential $InstallAccount -ScriptBlock {
+        Invoke-SPDscCommand -ScriptBlock {
             Remove-SPDistributedCacheServiceInstance
 
             $serviceInstance = Get-SPServiceInstance -Server $env:computername `
@@ -461,7 +471,7 @@ function Set-TargetResource
         }
         if ($CreateFirewallRules -eq $true)
         {
-            Invoke-SPDscCommand -Credential $InstallAccount -ScriptBlock {
+            Invoke-SPDscCommand -ScriptBlock {
                 $firewallRule = Get-NetFirewallRule -DisplayName "SharePoint Distribute Cache" `
                     -ErrorAction SilentlyContinue
                 if ($null -ne $firewallRule)
@@ -504,11 +514,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.String[]]
-        $ServerProvisionOrder,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $ServerProvisionOrder
     )
 
     Write-Verbose -Message "Testing the cache host information"

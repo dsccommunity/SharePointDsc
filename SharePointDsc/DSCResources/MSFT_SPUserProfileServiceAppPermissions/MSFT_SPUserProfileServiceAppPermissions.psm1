@@ -18,18 +18,14 @@ function Get-TargetResource
 
         [Parameter()]
         [System.String[]]
-        $UseTagsAndNotes,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $UseTagsAndNotes
     )
 
     Write-Verbose -Message "Getting permissions for user profile service proxy '$ProxyName"
 
     Confirm-SPDscUpaPermissionsConfig -Parameters $PSBoundParameters
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
         $proxy = Get-SPServiceApplicationProxy | Where-Object { $_.DisplayName -eq $params.ProxyName }
@@ -127,11 +123,7 @@ function Set-TargetResource
 
         [Parameter()]
         [System.String[]]
-        $UseTagsAndNotes,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $UseTagsAndNotes
     )
 
     Write-Verbose -Message "Setting permissions for user profile service proxy '$ProxyName"
@@ -148,7 +140,7 @@ function Set-TargetResource
                 "'NT AUTHORITY\Authenticated Users'. This will be removed as " + `
                 "identies on service app proxy permissions should be claims based.")
 
-        Invoke-SPDscCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDscCommand -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
 
             $proxy = Get-SPServiceApplicationProxy | Where-Object { $_.DisplayName -eq $params.ProxyName }
@@ -164,8 +156,7 @@ function Set-TargetResource
         $CurrentValues = Get-TargetResource @PSBoundParameters
     }
 
-    Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $CurrentValues) `
+    Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $CurrentValues) `
         -ScriptBlock {
         $params = $args[0]
         $eventSource = $args[1]
@@ -325,11 +316,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.String[]]
-        $UseTagsAndNotes,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $UseTagsAndNotes
     )
 
     Write-Verbose -Message "Testing permissions for user profile service proxy '$ProxyName"

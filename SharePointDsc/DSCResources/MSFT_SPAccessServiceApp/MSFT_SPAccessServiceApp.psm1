@@ -19,17 +19,26 @@ function Get-TargetResource
         [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
-        $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Ensure = "Present"
     )
 
     Write-Verbose -Message "Getting Access Services service app '$Name'"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $productVersion = Get-SPDscInstalledProductVersion
+    if ($productVersion.FileMajorPart -eq 16 `
+            -and $productVersion.FileBuildPart -gt 13000)
+    {
+        $message = ("Since SharePoint Server Subscription Edition the Access Services does no longer " + `
+                "exists. See https://docs.microsoft.com/en-us/sharepoint/what-s-new/what-s-deprecated-or-removed-from-sharepoint-server-2019#access-services-2013 " + `
+                "for more info.")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
+    }
+
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
@@ -90,22 +99,31 @@ function Set-TargetResource
         [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
-        $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Ensure = "Present"
     )
 
     Write-Verbose -Message "Setting Access Services service app '$Name'"
+
+    $productVersion = Get-SPDscInstalledProductVersion
+    if ($productVersion.FileMajorPart -eq 16 `
+            -and $productVersion.FileBuildPart -gt 13000)
+    {
+        $message = ("Since SharePoint Server Subscription Edition the Access Services does no longer " + `
+                "exists. See https://docs.microsoft.com/en-us/sharepoint/what-s-new/what-s-deprecated-or-removed-from-sharepoint-server-2019#access-services-2013" + `
+                "for more info.")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
+    }
 
     $result = Get-TargetResource @PSBoundParameters
 
     if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present")
     {
         Write-Verbose -Message "Creating Access Services Application $Name"
-        Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+        Invoke-SPDscCommand -Arguments $PSBoundParameters `
             -ScriptBlock {
 
             $params = $args[0]
@@ -121,8 +139,7 @@ function Set-TargetResource
     if ($Ensure -eq "Absent")
     {
         Write-Verbose -Message "Removing Access Service Application $Name"
-        Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+        Invoke-SPDscCommand -Arguments $PSBoundParameters `
             -ScriptBlock {
 
             $params = $args[0]
@@ -167,11 +184,7 @@ function Test-TargetResource
         [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
-        $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $Ensure = "Present"
     )
 
     Write-Verbose -Message "Testing for Access Service Application '$Name'"

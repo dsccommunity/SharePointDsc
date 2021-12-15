@@ -4,5 +4,4 @@ class MSFT_SPManagedMetaDataServiceAppDefault : OMI_BaseResource
     [Key, Description("Specifies the Service Application Proxy Group for which to configure the defaults. Use 'default' or the name of the proxy group.")] String ServiceAppProxyGroup;
     [Required, Description("The name of the managed metadata service application proxy used as default column terms set")] String DefaultSiteCollectionProxyName;
     [Required, Description("The name of the managed metadata service application proxy used as default keyword terms set")] String DefaultKeywordProxyName;
-    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };

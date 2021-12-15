@@ -47,17 +47,12 @@ function Get-TargetResource
 
         [Parameter()]
         [System.String]
-        $RequestAccessEmail,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $RequestAccessEmail
     )
 
     Write-Verbose -Message "Getting SPWeb '$Url'"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
@@ -137,30 +132,18 @@ function Set-TargetResource
 
         [Parameter()]
         [System.String]
-        $RequestAccessEmail,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $RequestAccessEmail
     )
 
     Write-Verbose -Message "Setting SPWeb '$Url'"
 
     $PSBoundParameters.Ensure = $Ensure
 
-    Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+    Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
-        if ($null -eq $params.InstallAccount)
-        {
-            $currentUserName = "$env:USERDOMAIN\$env:USERNAME"
-        }
-        else
-        {
-            $currentUserName = $params.InstallAccount.UserName
-        }
+        $currentUserName = "$env:USERDOMAIN\$env:USERNAME"
 
         Write-Verbose "Grant user '$currentUserName' Access To Process Identity for '$($params.Url)'..."
         $site = New-Object -Type Microsoft.SharePoint.SPSite -ArgumentList $params.Url
@@ -170,7 +153,7 @@ function Set-TargetResource
 
         if ($null -eq $web)
         {
-            @("InstallAccount", "Ensure", "RequestAccessEmail") |
+            @("Ensure", "RequestAccessEmail") |
                 ForEach-Object -Process {
                     if ($params.ContainsKey($_) -eq $true)
                     {
@@ -294,11 +277,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.String]
-        $RequestAccessEmail,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $RequestAccessEmail
     )
 
     Write-Verbose -Message "Testing SPWeb '$Url'"
