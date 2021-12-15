@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SharePointDsc
   - Added support for SharePoint Server Subscription Edition in Util module and unit tests stubs
   - Added SPSE unit tests to the Azure pipeline definitions
+- SPCertificate
+  - New resource for SharePoint Server Subscription Edition
 - SPCertificateSettings
   - New resource for SharePoint Server Subscription Edition
 - SPDatabaseAAG
@@ -28,6 +30,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added possibility to configure Search Index Deletion Policies settings
 - SPWebApplication
   - Added possibility to manage the SiteDataServers property
+  - Added support for configuring AllowLegacyEncryption, CertificateThumbprint and UseServerNameIndication
+- SPWebApplicationExtension
+  - Added support for configuring AllowLegacyEncryption, CertificateThumbprint and UseServerNameIndication
 
 ### Changed
 
@@ -41,6 +46,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Service app no longer exists in SharePoint Server Subscription Edition. Added logic to check for SPSE.
 - SPPerformancePointServiceApp
   - Service app no longer exists in SharePoint Server Subscription Edition. Added logic to check for SPSE.
+- SPWebApplicationExtension
+  - Updated so it infers the UseSSL value from the URL, just like the SPWebApplication resouce
 
 ### Fixed
 
@@ -52,6 +59,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SharePointDsc
   - [BREAKING CHANGE] Removed PowerShell v4.0 support by removing the InstallAccount parameter
     from all resources.
+- SPWebApplicationExtension
+  - [BREAKING CHANGE] Removed UseSSL parameter
 
 ## [4.9.0] - 2021-11-06
 

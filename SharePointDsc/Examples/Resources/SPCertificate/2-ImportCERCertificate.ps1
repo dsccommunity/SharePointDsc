@@ -35,7 +35,8 @@ Updated author, copyright notice, and URLs.
 <#
 
 .DESCRIPTION
- This example shows how to create a new web application extension in the local farm
+ This example shows how to import a CER certificate into the Root store of
+ the local computer.
 
 #>
 
@@ -45,23 +46,21 @@ Configuration Example
     (
         [Parameter(Mandatory = $true)]
         [PSCredential]
-        $SetupAccount
+        $SetupAccount,
+
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $CertificatePassword
     )
 
     Import-DscResource -ModuleName SharePointDsc
 
     node localhost
     {
-        SPWebApplicationExtension IntranetZone
+        SPCertificate RootCACertificate
         {
-            WebAppUrl            = "http://example.contoso.local"
-            Name                 = "Contoso Intranet Zone"
-            AllowAnonymous       = $false
-            Url                  = "http://intranet.contoso.local"
-            Zone                 = "Intranet"
-            HostHeader           = "intranet.contoso.local"
-            Path                 = "c:\inetpub\wwwroot\wss\VirtualDirectories\intranet"
-            Port                 = 80
+            CertificateFilePath  = 'C:\Certificates\RootCA.cer'
+            Store                = 'Root'
             Ensure               = "Present"
             PsDscRunAsCredential = $SetupAccount
         }

@@ -35,7 +35,8 @@ Updated author, copyright notice, and URLs.
 <#
 
 .DESCRIPTION
- This example shows how to create a new web application extension in the local farm
+ This example shows how to remove a PFX certificate from Certificate
+ Management.
 
 #>
 
@@ -45,24 +46,22 @@ Configuration Example
     (
         [Parameter(Mandatory = $true)]
         [PSCredential]
-        $SetupAccount
+        $SetupAccount,
+
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $CertificatePassword
     )
 
     Import-DscResource -ModuleName SharePointDsc
 
     node localhost
     {
-        SPWebApplicationExtension IntranetZone
+        SPCertificate IntranetCertificate
         {
-            WebAppUrl            = "http://example.contoso.local"
-            Name                 = "Contoso Intranet Zone"
-            AllowAnonymous       = $false
-            Url                  = "http://intranet.contoso.local"
-            Zone                 = "Intranet"
-            HostHeader           = "intranet.contoso.local"
-            Path                 = "c:\inetpub\wwwroot\wss\VirtualDirectories\intranet"
-            Port                 = 80
-            Ensure               = "Present"
+            CertificateFilePath  = 'C:\Certificates\Intranet.pfx'
+            CertificatePassword  = $CertificatePassword
+            Ensure               = "Absent"
             PsDscRunAsCredential = $SetupAccount
         }
     }

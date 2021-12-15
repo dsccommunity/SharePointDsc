@@ -148,6 +148,7 @@
         'SPBCSServiceApp',
         'SPBlobCacheSettings',
         'SPCacheAccounts',
+        'SPCertificate',
         'SPCertificateSettings',
         'SPConfigWizard',
         'SPContentDatabase',

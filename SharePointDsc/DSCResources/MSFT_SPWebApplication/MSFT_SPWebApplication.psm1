@@ -30,6 +30,18 @@ function Get-TargetResource
 
         [Parameter()]
         [System.String]
+        $CertificateThumbprint,
+
+        [Parameter()]
+        [System.Boolean]
+        $UseServerNameIndication,
+
+        [Parameter()]
+        [System.Boolean]
+        $AllowLegacyEncryption,
+
+        [Parameter()]
+        [System.String]
         $Path,
 
         [Parameter()]
@@ -68,6 +80,42 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting web application '$Name' config"
 
+    $osVersion = Get-SPDscOSVersion
+    if ($PSBoundParameters.ContainsKey("AllowLegacyEncryption") -and `
+        ($osVersion.Major -ne 10 -or $osVersion.Build -ne 20348))
+    {
+        Write-Verbose ("You cannot specify the AllowLegacyEncryption parameter when using " + `
+                "Windows Server 2019 or earlier.")
+
+        return @{
+            Name                   = $Name
+            WebAppUrl              = $WebAppUrl
+            ApplicationPool        = $ApplicationPool
+            ApplicationPoolAccount = $ApplicationPoolAccount
+        }
+    }
+
+    if ($PSBoundParameters.ContainsKey("CertificateThumbprint") -or `
+            $PSBoundParameters.ContainsKey("UseServerNameIndication") -or `
+            $PSBoundParameters.ContainsKey("AllowLegacyEncryption"))
+    {
+        $productVersion = Get-SPDscInstalledProductVersion
+        if ($productVersion.FileMajorPart -ne 16 -or `
+                $productVersion.FileBuildPart -lt 13000)
+        {
+            Write-Verbose ("The parameters AllowLegacyEncryption, CertificateThumbprint or " + `
+                    "UseServerNameIndication are only supported with SharePoint Server " + `
+                    "Subscription Edition.")
+
+            return @{
+                Name                   = $Name
+                WebAppUrl              = $WebAppUrl
+                ApplicationPool        = $ApplicationPool
+                ApplicationPoolAccount = $ApplicationPoolAccount
+            }
+        }
+    }
+
     $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
@@ -92,7 +140,9 @@ function Get-TargetResource
             $classicAuth = $true
         }
 
-        $IISPath = $wa.IisSettings[0].Path
+        $iisSettings = $wa.IisSettings[0]
+
+        $IISPath = $iisSettings.Path
         if (-not [System.String]::IsNullOrEmpty($IISPath))
         {
             $IISPath = $IISPath.ToString()
@@ -107,8 +157,6 @@ function Get-TargetResource
             $contentDb = $wa.ContentDatabases[0]
         }
 
-        $wa = Get-SPWebApplication https://root.portal.politie.local
-
         $currSiteDataServers = @()
         foreach ($entry in $wa.SiteDataServers.GetEnumerator())
         {
@@ -119,19 +167,22 @@ function Get-TargetResource
         }
 
         return @{
-            Name                   = $wa.DisplayName
-            WebAppUrl              = $wa.Url
-            ApplicationPool        = $wa.ApplicationPool.Name
-            ApplicationPoolAccount = $wa.ApplicationPool.Username
-            Port                   = (New-Object -TypeName System.Uri $wa.Url).Port
-            HostHeader             = (New-Object -TypeName System.Uri $wa.Url).Host
-            Path                   = $IISPath
-            DatabaseName           = $contentDb.Name
-            DatabaseServer         = $contentDb.Server
-            AllowAnonymous         = $authProvider.AllowAnonymous
-            UseClassic             = $classicAuth
-            SiteDataServers        = $currSiteDataServers
-            Ensure                 = "Present"
+            Name                    = $wa.DisplayName
+            WebAppUrl               = $wa.Url
+            ApplicationPool         = $wa.ApplicationPool.Name
+            ApplicationPoolAccount  = $wa.ApplicationPool.Username
+            Port                    = (New-Object -TypeName System.Uri $wa.Url).Port
+            HostHeader              = (New-Object -TypeName System.Uri $wa.Url).Host
+            CertificateThumbprint   = $iisSettings.SecureBindings[0].Certificate.Thumbprint
+            UseServerNameIndication = $iisSettings.SecureBindings[0].UseServerNameIndication
+            AllowLegacyEncryption   = -not $iisSettings.SecureBindings[0].DisableLegacyTls
+            Path                    = $IISPath
+            DatabaseName            = $contentDb.Name
+            DatabaseServer          = $contentDb.Server
+            AllowAnonymous          = $authProvider.AllowAnonymous
+            UseClassic              = $classicAuth
+            SiteDataServers         = $currSiteDataServers
+            Ensure                  = "Present"
         }
     }
     return $result
@@ -166,6 +217,18 @@ function Set-TargetResource
         [Parameter()]
         [System.String]
         $HostHeader,
+
+        [Parameter()]
+        [System.String]
+        $CertificateThumbprint,
+
+        [Parameter()]
+        [System.Boolean]
+        $UseServerNameIndication,
+
+        [Parameter()]
+        [System.Boolean]
+        $AllowLegacyEncryption,
 
         [Parameter()]
         [System.String]
@@ -208,6 +271,43 @@ function Set-TargetResource
     Write-Verbose -Message "Setting web application '$Name' config"
 
     $PSBoundParameters.UseClassic = $UseClassic
+
+    if ($PSBoundParameters.ContainsKey("Port") -eq $false)
+    {
+        $PSBoundParameters.Port = (New-Object -TypeName System.Uri $WebAppUrl).Port
+    }
+
+    $osVersion = Get-SPDscOSVersion
+    if ($PSBoundParameters.ContainsKey("AllowLegacyEncryption") -and `
+        ($osVersion.Major -ne 10 -or $osVersion.Build -ne 20348))
+    {
+        $message = ("You cannot specify the AllowLegacyEncryption parameter when using " + `
+                "Windows Server 2019 or earlier.")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
+    }
+
+    if ($PSBoundParameters.ContainsKey("CertificateThumbprint") -or `
+            $PSBoundParameters.ContainsKey("UseServerNameIndication") -or `
+            $PSBoundParameters.ContainsKey("AllowLegacyEncryption"))
+    {
+        $productVersion = Get-SPDscInstalledProductVersion
+        if ($productVersion.FileMajorPart -ne 16 -or `
+                $productVersion.FileBuildPart -lt 13000)
+        {
+            $message = ("The parameters AllowLegacyEncryption, CertificateThumbprint or " + `
+                    "UseServerNameIndication are only supported with SharePoint Server " + `
+                    "Subscription Edition.")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
+        }
+    }
 
     if ($Ensure -eq "Present")
     {
@@ -276,6 +376,30 @@ function Set-TargetResource
                 if ($params.ContainsKey("AllowAnonymous") -eq $true)
                 {
                     $newWebAppParams.Add("AllowAnonymousAccess", $params.AllowAnonymous)
+                }
+                if ($params.ContainsKey("CertificateThumbprint") -eq $true)
+                {
+                    $cert = Get-SPCertificate -Thumbprint $params.CertificateThumbprint -Store "EndEntity"
+                    if ($null -eq $cert)
+                    {
+                        $message = ("No certificate found with the specified thumbprint: " + `
+                                "$($params.CertificateThumbprint). Make sure the certificate " + `
+                                "is added to Certificate Management first!")
+                        Add-SPDscEvent -Message $message `
+                            -EntryType 'Error' `
+                            -EventID 100 `
+                            -Source $eventSource
+                        throw $message
+                    }
+                    $newWebAppParams.Add("Certificate", $cert)
+                }
+                if ($params.ContainsKey("UseServerNameIndication") -eq $true)
+                {
+                    $newWebAppParams.Add("UseServerNameIndication", $params.UseServerNameIndication)
+                }
+                if ($params.ContainsKey("AllowLegacyEncryption") -eq $true)
+                {
+                    $newWebAppParams.Add("AllowLegacyEncryption", $params.AllowLegacyEncryption)
                 }
                 if ($params.ContainsKey("DatabaseName") -eq $true)
                 {
@@ -464,6 +588,58 @@ function Set-TargetResource
                     $wa.Update()
                     $wa.ProvisionGlobally()
                 }
+
+                $updateWebAppParams = @{
+                    Identity = $params.WebAppUrl
+                    Zone     = 'Default'
+                }
+
+                if ($params.ContainsKey("CertificateThumbprint") -eq $true)
+                {
+                    $cert = Get-SPCertificate -Thumbprint $params.CertificateThumbprint -Store "EndEntity"
+                    if ($null -eq $cert)
+                    {
+                        $message = ("No certificate found with the specified thumbprint: " + `
+                                "$($params.CertificateThumbprint). Make sure the certificate " + `
+                                "is added to Certificate Management first!")
+                        Add-SPDscEvent -Message $message `
+                            -EntryType 'Error' `
+                            -EventID 100 `
+                            -Source $eventSource
+                        throw $message
+                    }
+                    $updateWebAppParams.Add("Certificate", $cert)
+                }
+                if ($params.ContainsKey("UseServerNameIndication") -eq $true)
+                {
+                    $updateWebAppParams.Add("UseServerNameIndication", $params.UseServerNameIndication)
+                }
+                if ($params.ContainsKey("AllowLegacyEncryption") -eq $true)
+                {
+                    $updateWebAppParams.Add("AllowLegacyEncryption", $params.AllowLegacyEncryption)
+                }
+                if ((New-Object -TypeName System.Uri $params.WebAppUrl).Scheme -eq "https")
+                {
+                    $updateWebAppParams.Add("SecureSocketsLayer", $true)
+                }
+
+                $productVersion = Get-SPDscInstalledProductVersion
+                if ($productVersion.FileMajorPart -eq 16 -and `
+                        $productVersion.FileBuildPart -ge 13000)
+                {
+                    if ($params.ContainsKey("HostHeader") -eq $true)
+                    {
+                        $updateWebAppParams.Add("HostHeader", $params.HostHeader)
+                    }
+
+                    if ($params.ContainsKey("Port") -eq $true)
+                    {
+                        $updateWebAppParams.Add("Port", $params.Port)
+                    }
+                }
+
+                Write-Verbose -Message "Updating web application with these parameters: $(Convert-SPDscHashtableToString -Hashtable $updateWebAppParams)"
+                Set-SPWebApplication @updateWebAppParams | Out-Null
             }
         }
     }
@@ -513,6 +689,18 @@ function Test-TargetResource
         [Parameter()]
         [System.String]
         $HostHeader,
+
+        [Parameter()]
+        [System.String]
+        $CertificateThumbprint,
+
+        [Parameter()]
+        [System.Boolean]
+        $UseServerNameIndication,
+
+        [Parameter()]
+        [System.Boolean]
+        $AllowLegacyEncryption,
 
         [Parameter()]
         [System.String]
@@ -599,7 +787,14 @@ function Test-TargetResource
     $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
         -Source $($MyInvocation.MyCommand.Source) `
         -DesiredValues $PSBoundParameters `
-        -ValuesToCheck @("ApplicationPool", "DatabaseName", "Ensure")
+        -ValuesToCheck @(
+        "AllowLegacyEncryption",
+        "ApplicationPool",
+        "CertificateThumbprint",
+        "DatabaseName",
+        "Ensure",
+        "UseServerNameIndication"
+    )
 
     Write-Verbose -Message "Test-TargetResource returned $result"
 
