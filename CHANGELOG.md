@@ -36,6 +36,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- General
+  - Updated pipeline definition
 - ReverseDsc
   - Changed form Size to dynamic Width
   - Change column width to calc /3 of Form.
