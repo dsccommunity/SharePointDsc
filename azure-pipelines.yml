@@ -15,6 +15,7 @@ variables:
   buildArtifactName: output
   testResultFolderName: testResults
   testArtifactName: testResults
+  defaultBranch: master
 
 stages:
   - stage: Build
