@@ -5,6 +5,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- SPTrustedIdentityTokenIssuer
+  - Added parameters to support OIDC authentication in SharePoint Server Subscription Edition
+
 ## [5.0.0] - 2021-12-17
 
 ### Added
