@@ -13,32 +13,32 @@ function Get-TargetResource
         $Description,
 
         # SAML-specific
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [String]
         $Realm,
 
         # SAML-specific
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [String]
         $SignInUrl,
 
         # OIDC-specific
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [String]
         $RegisteredIssuerName,
 
         # OIDC-specific
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [String]
         $AuthorizationEndPointUri,
 
         # OIDC-specific
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [String]
         $DefaultClientIdentifier,
 
         # OIDC-specific
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [String]
         $SignOutUrl,
 
@@ -169,32 +169,32 @@ function Set-TargetResource
         $Description,
 
         # SAML-specific
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [String]
         $Realm,
 
         # SAML-specific
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [String]
         $SignInUrl,
 
         # OIDC-specific
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [String]
         $RegisteredIssuerName,
 
         # OIDC-specific
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [String]
         $AuthorizationEndPointUri,
 
         # OIDC-specific
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [String]
         $DefaultClientIdentifier,
 
         # OIDC-specific
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [String]
         $SignOutUrl,
 
@@ -241,7 +241,7 @@ function Set-TargetResource
     {
         if ($CurrentValues.Ensure -eq "Absent")
         {
-            if ($true -eq $PSBoundParameters.ContainsKey("SigningCertificateThumbprint") -and 
+            if ($true -eq $PSBoundParameters.ContainsKey("SigningCertificateThumbprint") -and
                 $true -eq $PSBoundParameters.ContainsKey("SigningCertificateFilePath"))
             {
                 $message = ("Cannot use both parameters SigningCertificateThumbprint and SigningCertificateFilePath at the same time.")
@@ -252,7 +252,7 @@ function Set-TargetResource
                 throw $message
             }
 
-            if ($false -eq $PSBoundParameters.ContainsKey("SigningCertificateThumbprint") -and 
+            if ($false -eq $PSBoundParameters.ContainsKey("SigningCertificateThumbprint") -and
                 $false -eq $PSBoundParameters.ContainsKey("SigningCertificateFilePath"))
             {
                 $message = ("At least one of the following parameters must be specified: " + `
@@ -265,7 +265,7 @@ function Set-TargetResource
             }
 
             # Ensure that at least one parameter is specified between Realm (SAML trust) or RegisteredIssuerName (OIDC trust)
-            if ($false -eq $PSBoundParameters.ContainsKey("Realm") -and 
+            if ($false -eq $PSBoundParameters.ContainsKey("Realm") -and
                 $false -eq $PSBoundParameters.ContainsKey("RegisteredIssuerName"))
             {
                 $message = ("At least one of the following parameters must be specified: " + `
@@ -278,7 +278,7 @@ function Set-TargetResource
             }
 
             # Ensure that parameters Realm (SAML trust) or RegisteredIssuerName (OIDC trust) are not both set
-            if ($true -eq $PSBoundParameters.ContainsKey("Realm") -and 
+            if ($true -eq $PSBoundParameters.ContainsKey("Realm") -and
                 $true -eq $PSBoundParameters.ContainsKey("RegisteredIssuerName"))
             {
                 $message = ("Parameters Realm (for SAML trust) and RegisteredIssuerName (for OIDC trust) cannot be both set.")
@@ -290,7 +290,7 @@ function Set-TargetResource
             }
 
             # SAML trust: If parameter Realm is set, then parameter SignInUrl is required
-            if ($true -eq $PSBoundParameters.ContainsKey("Realm") -and 
+            if ($true -eq $PSBoundParameters.ContainsKey("Realm") -and
                 $false -eq $PSBoundParameters.ContainsKey("SignInUrl"))
             {
                 $message = ("Parameter Realm was set but SignInUrl is not set. Parameter SignInUrl required when Realm is set.")
@@ -301,16 +301,16 @@ function Set-TargetResource
                 throw $message
             }
 
-            # OIDC trust: If parameter RegisteredIssuerName is set, 
+            # OIDC trust: If parameter RegisteredIssuerName is set,
             # then parameters AuthorizationEndPointUri, DefaultClientIdentifier and SignOutUrl are required
             if ($true -eq $PSBoundParameters.ContainsKey("RegisteredIssuerName") -and (
-                $false -eq $PSBoundParameters.ContainsKey("AuthorizationEndPointUri") -or 
-                $false -eq $PSBoundParameters.ContainsKey("DefaultClientIdentifier") -or 
-                $false -eq $PSBoundParameters.ContainsKey("SignOutUrl") ))
+                    $false -eq $PSBoundParameters.ContainsKey("AuthorizationEndPointUri") -or
+                    $false -eq $PSBoundParameters.ContainsKey("DefaultClientIdentifier") -or
+                    $false -eq $PSBoundParameters.ContainsKey("SignOutUrl") ))
             {
                 $message = ("Parameter RegisteredIssuerName was set but AuthorizationEndPointUri, DefaultClientIdentifier and SignOutUrl are not set." + `
-                    "Parameters AuthorizationEndPointUri, DefaultClientIdentifier and SignOutUrl are required when RegisteredIssuerName is set")
-                    Add-SPDscEvent -Message $message `
+                        "Parameters AuthorizationEndPointUri, DefaultClientIdentifier and SignOutUrl are required when RegisteredIssuerName is set")
+                Add-SPDscEvent -Message $message `
                     -EntryType 'Error' `
                     -EventID 100 `
                     -Source $MyInvocation.MyCommand.Source
@@ -432,12 +432,14 @@ function Set-TargetResource
                     $runParams.Add("AuthorizationEndPointUri", $params.AuthorizationEndPointUri)
                     $runParams.Add("DefaultClientIdentifier", $params.DefaultClientIdentifier)
                     $runParams.Add("SignOutUrl", $params.SignOutUrl)
-                } else {
+                }
+                else
+                {
                     $runParams.Add("Realm", $params.Realm)
                     $runParams.Add("SignInUrl", $params.SignInUrl)
                     $runParams.Add("UseWReply", $params.UseWReplyParameter)
-                }                
-                
+                }
+
                 $runParams.Add("IdentifierClaim", $params.IdentifierClaim)
                 $runParams.Add("ClaimsMappings", $claimsMappingsArray)
                 $trust = New-SPTrustedIdentityTokenIssuer @runParams
@@ -542,32 +544,32 @@ function Test-TargetResource
         $Description,
 
         # SAML-specific
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [String]
         $Realm,
 
         # SAML-specific
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [String]
         $SignInUrl,
 
         # OIDC-specific
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [String]
         $RegisteredIssuerName,
 
         # OIDC-specific
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [String]
         $AuthorizationEndPointUri,
 
         # OIDC-specific
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [String]
         $DefaultClientIdentifier,
 
         # OIDC-specific
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [String]
         $SignOutUrl,
 
@@ -608,7 +610,7 @@ function Test-TargetResource
 
     Write-Verbose -Message "Testing SPTrustedIdentityTokenIssuer '$Name' settings"
 
-    if ($true -eq $PSBoundParameters.ContainsKey("SigningCertificateThumbprint") -and 
+    if ($true -eq $PSBoundParameters.ContainsKey("SigningCertificateThumbprint") -and
         $true -eq $PSBoundParameters.ContainsKey("SigningCertificateFilePath"))
     {
         $message = ("Cannot use both parameters SigningCertificateThumbprint and SigningCertificateFilePath at the same time.")
@@ -619,7 +621,7 @@ function Test-TargetResource
         throw $message
     }
 
-    if ($false -eq $PSBoundParameters.ContainsKey("SigningCertificateThumbprint") -and 
+    if ($false -eq $PSBoundParameters.ContainsKey("SigningCertificateThumbprint") -and
         $false -eq $PSBoundParameters.ContainsKey("SigningCertificateFilePath"))
     {
         $message = ("At least one of the following parameters must be specified: " + `
@@ -632,7 +634,7 @@ function Test-TargetResource
     }
 
     # Ensure that at least one parameter is specified between Realm (SAML trust) or RegisteredIssuerName (OIDC trust)
-    if ($false -eq $PSBoundParameters.ContainsKey("Realm") -and 
+    if ($false -eq $PSBoundParameters.ContainsKey("Realm") -and
         $false -eq $PSBoundParameters.ContainsKey("RegisteredIssuerName"))
     {
         $message = ("At least one of the following parameters must be specified: " + `
@@ -645,7 +647,7 @@ function Test-TargetResource
     }
 
     # Ensure that parameters Realm (SAML trust) or RegisteredIssuerName (OIDC trust) are not both set
-    if ($true -eq $PSBoundParameters.ContainsKey("Realm") -and 
+    if ($true -eq $PSBoundParameters.ContainsKey("Realm") -and
         $true -eq $PSBoundParameters.ContainsKey("RegisteredIssuerName"))
     {
         $message = ("Parameters Realm (for SAML trust) and RegisteredIssuerName (for OIDC trust) cannot be both set.")
@@ -657,7 +659,7 @@ function Test-TargetResource
     }
 
     # SAML trust: If parameter Realm is set, then parameter SignInUrl is required
-    if ($true -eq $PSBoundParameters.ContainsKey("Realm") -and 
+    if ($true -eq $PSBoundParameters.ContainsKey("Realm") -and
         $false -eq $PSBoundParameters.ContainsKey("SignInUrl"))
     {
         $message = ("Parameter Realm was set but SignInUrl is not set. Parameter SignInUrl required when Realm is set.")
@@ -668,16 +670,16 @@ function Test-TargetResource
         throw $message
     }
 
-    # OIDC trust: If parameter RegisteredIssuerName is set, 
+    # OIDC trust: If parameter RegisteredIssuerName is set,
     # then parameters AuthorizationEndPointUri, DefaultClientIdentifier and SignOutUrl are required
     if ($true -eq $PSBoundParameters.ContainsKey("RegisteredIssuerName") -and (
-        $false -eq $PSBoundParameters.ContainsKey("AuthorizationEndPointUri") -or 
-        $false -eq $PSBoundParameters.ContainsKey("DefaultClientIdentifier") -or 
-        $false -eq $PSBoundParameters.ContainsKey("SignOutUrl") ))
+            $false -eq $PSBoundParameters.ContainsKey("AuthorizationEndPointUri") -or
+            $false -eq $PSBoundParameters.ContainsKey("DefaultClientIdentifier") -or
+            $false -eq $PSBoundParameters.ContainsKey("SignOutUrl") ))
     {
         $message = ("Parameter RegisteredIssuerName was set but AuthorizationEndPointUri, DefaultClientIdentifier and SignOutUrl are not set." + `
-            "Parameters AuthorizationEndPointUri, DefaultClientIdentifier and SignOutUrl are required when RegisteredIssuerName is set")
-            Add-SPDscEvent -Message $message `
+                "Parameters AuthorizationEndPointUri, DefaultClientIdentifier and SignOutUrl are required when RegisteredIssuerName is set")
+        Add-SPDscEvent -Message $message `
             -EntryType 'Error' `
             -EventID 100 `
             -Source $MyInvocation.MyCommand.Source
