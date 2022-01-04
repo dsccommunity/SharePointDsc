@@ -15,7 +15,7 @@ class MSFT_SPTrustedIdentityTokenIssuer : OMI_BaseResource
     [Required, Description("Description of the SPTrustedIdentityTokenIssuer")] String Description;
     [Write, Description("Default Realm that is passed to identity provider")] String Realm;
     [Write, Description("URL of the identity provider where user is redirected to for authentication")] String SignInUrl;
-    [Write, Description("Required for OIDC trust: specify the identity of the issuer")] String RegisteredIssuerName;
+    [Write, Description("Specify the identity of the issuer")] String RegisteredIssuerName;
     [Write, Description("Required for OIDC trust: specify the sign-in URL of the issuer")] String AuthorizationEndPointUri;
     [Write, Description("Required for OIDC trust: specify the client identifier of the issuer")] String DefaultClientIdentifier;
     [Write, Description("Required for OIDC trust: specify the sign-out URL of the issuer")] String SignOutUrl;
