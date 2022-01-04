@@ -27,7 +27,7 @@ certiificate store because SharePoint does not accept it.
 The SigningCertificateFilePath must be the file path to the public key of
 the signing certificate.
 
-For an OIDC trust, the specific mandatory parameters are 
+For an OIDC trust, the specific mandatory parameters are RegisteredIssuerName, 
 AuthorizationEndPointUri, DefaultClientIdentifier and SignOutUrl.
 
 The ClaimsMappings property is an array of MSFT_SPClaimTypeMapping to use

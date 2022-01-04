@@ -300,13 +300,14 @@ function Set-TargetResource
             }
 
             # OIDC trust: If parameter DefaultClientIdentifier is set, 
-            # then parameters AuthorizationEndPointUri and SignOutUrl are required
+            # then parameters AuthorizationEndPointUri, RegisteredIssuerName and SignOutUrl are required
             if ($true -eq $PSBoundParameters.ContainsKey("DefaultClientIdentifier") -and (
                 $false -eq $PSBoundParameters.ContainsKey("AuthorizationEndPointUri") -or 
+                $false -eq $PSBoundParameters.ContainsKey("RegisteredIssuerName") -or 
                 $false -eq $PSBoundParameters.ContainsKey("SignOutUrl") ))
             {
-                $message = ("Parameter DefaultClientIdentifier was set but AuthorizationEndPointUri or SignOutUrl are not set." + `
-                    "Parameters AuthorizationEndPointUri, DefaultClientIdentifier and SignOutUrl are required when DefaultClientIdentifier is set")
+                $message = ("Parameter DefaultClientIdentifier was set but AuthorizationEndPointUri, RegisteredIssuerName or SignOutUrl are not set." + `
+                    "Parameters AuthorizationEndPointUri, RegisteredIssuerName, DefaultClientIdentifier and SignOutUrl are required when DefaultClientIdentifier is set")
                     Add-SPDscEvent -Message $message `
                     -EntryType 'Error' `
                     -EventID 100 `
@@ -665,13 +666,14 @@ function Test-TargetResource
     }
 
     # OIDC trust: If parameter DefaultClientIdentifier is set, 
-    # then parameters AuthorizationEndPointUri and SignOutUrl are required
+    # then parameters AuthorizationEndPointUri, RegisteredIssuerName and SignOutUrl are required
     if ($true -eq $PSBoundParameters.ContainsKey("DefaultClientIdentifier") -and (
         $false -eq $PSBoundParameters.ContainsKey("AuthorizationEndPointUri") -or 
+        $false -eq $PSBoundParameters.ContainsKey("RegisteredIssuerName") -or 
         $false -eq $PSBoundParameters.ContainsKey("SignOutUrl") ))
     {
-        $message = ("Parameter DefaultClientIdentifier was set but AuthorizationEndPointUri or SignOutUrl are not set." + `
-            "Parameters AuthorizationEndPointUri, DefaultClientIdentifier and SignOutUrl are required when DefaultClientIdentifier is set")
+        $message = ("Parameter DefaultClientIdentifier was set but AuthorizationEndPointUri, RegisteredIssuerName or SignOutUrl are not set." + `
+            "Parameters AuthorizationEndPointUri, RegisteredIssuerName, DefaultClientIdentifier and SignOutUrl are required when DefaultClientIdentifier is set")
             Add-SPDscEvent -Message $message `
             -EntryType 'Error' `
             -EventID 100 `
