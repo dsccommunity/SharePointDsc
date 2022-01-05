@@ -362,7 +362,7 @@ try
                         Name                         = "Contoso"
                         Description                  = "Contoso"
                         Realm                        = "https://sharepoint.contoso.com"
-                        $DefaultClientIdentifier     = "fae5bd07-be63-4a64-a28c-7931a4ebf62b"
+                        DefaultClientIdentifier      = "fae5bd07-be63-4a64-a28c-7931a4ebf62b"
                         SignInUrl                    = "https://adfs.contoso.com/adfs/ls/"
                         IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
                         ClaimsMappings               = @(
@@ -383,7 +383,7 @@ try
                     }
                 }
 
-                It "should fail validation of certificate in the set method" {
+                It "should fail validation of parameters" {
                     { Set-TargetResource @testParams } | Should -Throw "Parameters Realm (for SAML trust) and DefaultClientIdentifier (for OIDC trust) cannot be both set."
                 }
             }
@@ -412,7 +412,7 @@ try
                     }
                 }
 
-                It "should fail validation of certificate in the set method" {
+                It "should fail validation of parameters" {
                     { Set-TargetResource @testParams } | Should -Throw "At least one of the following parameters must be specified: " + `
                         "Realm (for SAML trust), DefaultClientIdentifier (for OIDC trust)."
                 }
@@ -443,7 +443,7 @@ try
                     }
                 }
 
-                It "should fail validation of certificate in the set method" {
+                It "should fail validation of parameters" {
                     { Set-TargetResource @testParams } | Should -Throw "Parameter Realm was set but SignInUrl is not set. Parameter SignInUrl required when Realm is set."
                 }
             }
@@ -453,8 +453,8 @@ try
                     $testParams = @{
                         Name                         = "Contoso"
                         Description                  = "Contoso"
-                        $DefaultClientIdentifier     = "fae5bd07-be63-4a64-a28c-7931a4ebf62b"
-                        $SignOutUrl                  = "https://adfs.contoso.com/adfs/oauth2/logout"
+                        DefaultClientIdentifier      = "fae5bd07-be63-4a64-a28c-7931a4ebf62b"
+                        SignOutUrl                   = "https://adfs.contoso.com/adfs/oauth2/logout"
                         IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
                         ClaimsMappings               = @(
                             (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
@@ -473,7 +473,7 @@ try
                     }
                 }
 
-                It "should fail validation of certificate in the set method" {
+                It "should fail validation of parameters" {
                     { Set-TargetResource @testParams } | Should -Throw "Parameter DefaultClientIdentifier was set but AuthorizationEndPointUri, RegisteredIssuerName or SignOutUrl are not set." + `
                         "Parameters AuthorizationEndPointUri, RegisteredIssuerName, DefaultClientIdentifier and SignOutUrl are required when DefaultClientIdentifier is set"
                 }
@@ -526,9 +526,9 @@ try
                     $testParams = @{
                         Name                         = "Contoso"
                         Description                  = "Contoso"
-                        $DefaultClientIdentifier     = "fae5bd07-be63-4a64-a28c-7931a4ebf62b"
-                        $AuthorizationEndPointUri    = "https://adfs.contoso.com/adfs/oauth2/authorize"
-                        $SignOutUrl                  = "https://adfs.contoso.com/adfs/oauth2/logout"
+                        DefaultClientIdentifier      = "fae5bd07-be63-4a64-a28c-7931a4ebf62b"
+                        AuthorizationEndPointUri     = "https://adfs.contoso.com/adfs/oauth2/authorize"
+                        SignOutUrl                   = "https://adfs.contoso.com/adfs/oauth2/logout"
                         IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
                         ClaimsMappings               = @(
                             (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
@@ -612,9 +612,9 @@ try
                     $testParams = @{
                         Name                         = "Contoso"
                         Description                  = "Contoso"
-                        $DefaultClientIdentifier     = "fae5bd07-be63-4a64-a28c-7931a4ebf62b"
-                        $AuthorizationEndPointUri    = "https://adfs.contoso.com/adfs/oauth2/authorize"
-                        $SignOutUrl                  = "https://adfs.contoso.com/adfs/oauth2/logout"
+                        DefaultClientIdentifier      = "fae5bd07-be63-4a64-a28c-7931a4ebf62b"
+                        AuthorizationEndPointUri     = "https://adfs.contoso.com/adfs/oauth2/authorize"
+                        SignOutUrl                   = "https://adfs.contoso.com/adfs/oauth2/logout"
                         IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
                         ClaimsMappings               = @(
                             (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
@@ -767,9 +767,9 @@ try
                     $testParams = @{
                         Name                         = "Contoso"
                         Description                  = "Contoso"
-                        $DefaultClientIdentifier     = "fae5bd07-be63-4a64-a28c-7931a4ebf62b"
-                        $AuthorizationEndPointUri    = "https://adfs.contoso.com/adfs/oauth2/authorize"
-                        $SignOutUrl                  = "https://adfs.contoso.com/adfs/oauth2/logout"
+                        DefaultClientIdentifier      = "fae5bd07-be63-4a64-a28c-7931a4ebf62b"
+                        AuthorizationEndPointUri     = "https://adfs.contoso.com/adfs/oauth2/authorize"
+                        SignOutUrl                   = "https://adfs.contoso.com/adfs/oauth2/logout"
                         IdentifierClaim              = "IdentityClaimTypeNotSpecifiedInClaimsMappings"
                         ClaimsMappings               = @(
                             (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
