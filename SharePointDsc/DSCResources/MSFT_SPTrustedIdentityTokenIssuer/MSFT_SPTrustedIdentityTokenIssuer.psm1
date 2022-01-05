@@ -697,7 +697,7 @@ function Test-TargetResource
 
     $productVersion = Get-SPDscInstalledProductVersion
     if ($true -eq $PSBoundParameters.ContainsKey("DefaultClientIdentifier") -and
-        $productVersion.FileMajorPart -eq 16 -and $productVersion.FileBuildPart -gt 13000)
+        ($productVersion.FileMajorPart -ne 16 -or $productVersion.FileBuildPart -le 13000))
     {
         $message = ("OIDC parameters can only be used with SharePoint Server Subscription Edition.")
         Add-SPDscEvent -Message $message `
