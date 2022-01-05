@@ -527,6 +527,7 @@ try
                         Name                         = "Contoso"
                         Description                  = "Contoso"
                         DefaultClientIdentifier      = "fae5bd07-be63-4a64-a28c-7931a4ebf62b"
+                        RegisteredIssuerName         = "https://adfs.contoso.com/adfs"
                         AuthorizationEndPointUri     = "https://adfs.contoso.com/adfs/oauth2/authorize"
                         SignOutUrl                   = "https://adfs.contoso.com/adfs/oauth2/logout"
                         IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
@@ -613,6 +614,7 @@ try
                         Name                         = "Contoso"
                         Description                  = "Contoso"
                         DefaultClientIdentifier      = "fae5bd07-be63-4a64-a28c-7931a4ebf62b"
+                        RegisteredIssuerName         = "https://adfs.contoso.com/adfs"
                         AuthorizationEndPointUri     = "https://adfs.contoso.com/adfs/oauth2/authorize"
                         SignOutUrl                   = "https://adfs.contoso.com/adfs/oauth2/logout"
                         IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
@@ -651,13 +653,13 @@ try
                 }
             }
 
-            Context -Name "The SPTrustedLoginProvider already exists but should be removed" -Fixture {
+            Context -Name "The SAML SPTrustedLoginProvider already exists but should be removed" -Fixture {
                 BeforeAll {
                     $testParams = @{
                         Name                         = "Contoso"
                         Description                  = "Contoso"
-                        # Realm                        = "https://sharepoint.contoso.com"
-                        # SignInUrl                    = "https://adfs.contoso.com/adfs/ls/"
+                        Realm                        = "https://sharepoint.contoso.com"
+                        SignInUrl                    = "https://adfs.contoso.com/adfs/ls/"
                         IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
                         ClaimsMappings               = @(
                             (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
@@ -768,6 +770,7 @@ try
                         Name                         = "Contoso"
                         Description                  = "Contoso"
                         DefaultClientIdentifier      = "fae5bd07-be63-4a64-a28c-7931a4ebf62b"
+                        RegisteredIssuerName         = "https://adfs.contoso.com/adfs"
                         AuthorizationEndPointUri     = "https://adfs.contoso.com/adfs/oauth2/authorize"
                         SignOutUrl                   = "https://adfs.contoso.com/adfs/oauth2/logout"
                         IdentifierClaim              = "IdentityClaimTypeNotSpecifiedInClaimsMappings"
