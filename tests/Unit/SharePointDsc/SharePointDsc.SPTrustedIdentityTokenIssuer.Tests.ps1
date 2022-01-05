@@ -133,7 +133,7 @@ try
             }
 
             # Test contexts
-            Context -Name "The SPTrustedLoginProvider does not exist but should, using a signing certificate in the certificate store" -Fixture {
+            Context -Name "The SAML SPTrustedLoginProvider does not exist but should, using a signing certificate in the certificate store" -Fixture {
                 BeforeAll {
                     $testParams = @{
                         Name                         = "Contoso"
@@ -143,14 +143,14 @@ try
                         IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
                         ClaimsMappings               = @(
                             (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
-                                    Name              = "Email"
-                                    IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
-                                } -ClientOnly)
+                                Name              = "Email"
+                                IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                            } -ClientOnly)
                             (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
-                                    Name              = "Role"
-                                    IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
-                                    LocalClaimType    = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
-                                } -ClientOnly)
+                                Name              = "Role"
+                                IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
+                                LocalClaimType    = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                            } -ClientOnly)
                         )
                         SigningCertificateThumbprint = "123ABCFACE123ABCFACE123ABCFACE123ABCFACE"
                         ClaimProviderName            = "LDAPCP"
@@ -174,7 +174,7 @@ try
                 }
             }
 
-            Context -Name "The SPTrustedLoginProvider does not exist but should, using a signing certificate in the file path" -Fixture {
+            Context -Name "The SAML SPTrustedLoginProvider does not exist but should, using a signing certificate in the file path" -Fixture {
                 BeforeAll {
                     $testParams = @{
                         Name                       = "Contoso"
@@ -184,14 +184,14 @@ try
                         IdentifierClaim            = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
                         ClaimsMappings             = @(
                             (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
-                                    Name              = "Email"
-                                    IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
-                                } -ClientOnly)
+                                Name              = "Email"
+                                IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                            } -ClientOnly)
                             (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
-                                    Name              = "Role"
-                                    IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
-                                    LocalClaimType    = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
-                                } -ClientOnly)
+                                Name              = "Role"
+                                IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
+                                LocalClaimType    = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                            } -ClientOnly)
                         )
                         SigningCertificateFilePath = "F:\Data\DSC\FakeSigning.cer"
                         ClaimProviderName          = "LDAPCP"
@@ -233,14 +233,14 @@ try
                         IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
                         ClaimsMappings               = @(
                             (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
-                                    Name              = "Email"
-                                    IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
-                                } -ClientOnly)
+                                Name              = "Email"
+                                IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                            } -ClientOnly)
                             (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
-                                    Name              = "Role"
-                                    IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
-                                    LocalClaimType    = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
-                                } -ClientOnly)
+                                Name              = "Role"
+                                IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
+                                LocalClaimType    = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                            } -ClientOnly)
                         )
                         SigningCertificateThumbprint = "123ABCFACE123ABCFACE123ABCFACE123ABCFACE"
                         SigningCertificateFilePath   = "F:\Data\DSC\FakeSigning.cer"
@@ -265,14 +265,14 @@ try
                         IdentifierClaim    = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
                         ClaimsMappings     = @(
                             (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
-                                    Name              = "Email"
-                                    IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
-                                } -ClientOnly)
+                                Name              = "Email"
+                                IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                            } -ClientOnly)
                             (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
-                                    Name              = "Role"
-                                    IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
-                                    LocalClaimType    = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
-                                } -ClientOnly)
+                                Name              = "Role"
+                                IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
+                                LocalClaimType    = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                            } -ClientOnly)
                         )
                         ClaimProviderName  = "LDAPCP"
                         ProviderSignOutUri = "https://adfs.contoso.com/adfs/ls/"
@@ -295,14 +295,14 @@ try
                         IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
                         ClaimsMappings               = @(
                             (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
-                                    Name              = "Email"
-                                    IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
-                                } -ClientOnly)
+                                Name              = "Email"
+                                IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                            } -ClientOnly)
                             (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
-                                    Name              = "Role"
-                                    IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
-                                    LocalClaimType    = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
-                                } -ClientOnly)
+                                Name              = "Role"
+                                IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
+                                LocalClaimType    = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                            } -ClientOnly)
                         )
                         SigningCertificateThumbprint = "XX123ABCFACEXX"
                         ClaimProviderName            = "LDAPCP"
@@ -326,14 +326,14 @@ try
                         IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
                         ClaimsMappings               = @(
                             (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
-                                    Name              = "Email"
-                                    IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
-                                } -ClientOnly)
+                                Name              = "Email"
+                                IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                            } -ClientOnly)
                             (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
-                                    Name              = "Role"
-                                    IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
-                                    LocalClaimType    = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
-                                } -ClientOnly)
+                                Name              = "Role"
+                                IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
+                                LocalClaimType    = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                            } -ClientOnly)
                         )
                         SigningCertificateThumbprint = "123ABCFACE123ABCFACE123ABCFACE123ABCFACE"
                         ClaimProviderName            = "LDAPCP"
@@ -356,7 +356,130 @@ try
                 }
             }
 
-            Context -Name "The SPTrustedLoginProvider does not exist but should, with a claims provider that exists on the farm" -Fixture {
+            Context -Name "A SAML SPTrustedLoginProvider is desired, but parameters for both OIDC and SAML trusts are set" -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        Name                         = "Contoso"
+                        Description                  = "Contoso"
+                        Realm                        = "https://sharepoint.contoso.com"
+                        $DefaultClientIdentifier     = "fae5bd07-be63-4a64-a28c-7931a4ebf62b"
+                        SignInUrl                    = "https://adfs.contoso.com/adfs/ls/"
+                        IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                        ClaimsMappings               = @(
+                            (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                                Name              = "Email"
+                                IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                            } -ClientOnly)
+                            (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                                Name              = "Role"
+                                IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
+                                LocalClaimType    = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                            } -ClientOnly)
+                        )
+                        SigningCertificateThumbprint = "123ABCFACE123ABCFACE123ABCFACE123ABCFACE"
+                        ClaimProviderName            = "LDAPCP"
+                        ProviderSignOutUri           = "https://adfs.contoso.com/adfs/ls/"
+                        Ensure                       = "Present"
+                    }
+                }
+
+                It "should fail validation of certificate in the set method" {
+                    { Set-TargetResource @testParams } | Should -Throw "Parameters Realm (for SAML trust) and DefaultClientIdentifier (for OIDC trust) cannot be both set."
+                }
+            }
+
+            Context -Name "A SPTrustedLoginProvider is desired, but neither property Realm nor DefaultClientIdentifier set" -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        Name                         = "Contoso"
+                        Description                  = "Contoso"
+                        IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                        ClaimsMappings               = @(
+                            (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                                Name              = "Email"
+                                IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                            } -ClientOnly)
+                            (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                                Name              = "Role"
+                                IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
+                                LocalClaimType    = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                            } -ClientOnly)
+                        )
+                        SigningCertificateThumbprint = "123ABCFACE123ABCFACE123ABCFACE123ABCFACE"
+                        ClaimProviderName            = "LDAPCP"
+                        ProviderSignOutUri           = "https://adfs.contoso.com/adfs/ls/"
+                        Ensure                       = "Present"
+                    }
+                }
+
+                It "should fail validation of certificate in the set method" {
+                    { Set-TargetResource @testParams } | Should -Throw "At least one of the following parameters must be specified: " + `
+                        "Realm (for SAML trust), DefaultClientIdentifier (for OIDC trust)."
+                }
+            }
+
+            Context -Name "A SAML SPTrustedLoginProvider is desired, but property SignInUrl is not set" -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        Name                         = "Contoso"
+                        Description                  = "Contoso"
+                        Realm                        = "https://sharepoint.contoso.com"
+                        IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                        ClaimsMappings               = @(
+                            (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                                Name              = "Email"
+                                IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                            } -ClientOnly)
+                            (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                                Name              = "Role"
+                                IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
+                                LocalClaimType    = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                            } -ClientOnly)
+                        )
+                        SigningCertificateThumbprint = "123ABCFACE123ABCFACE123ABCFACE123ABCFACE"
+                        ClaimProviderName            = "LDAPCP"
+                        ProviderSignOutUri           = "https://adfs.contoso.com/adfs/ls/"
+                        Ensure                       = "Present"
+                    }
+                }
+
+                It "should fail validation of certificate in the set method" {
+                    { Set-TargetResource @testParams } | Should -Throw "Parameter Realm was set but SignInUrl is not set. Parameter SignInUrl required when Realm is set."
+                }
+            }
+
+            Context -Name "A OIDC SPTrustedLoginProvider is desired, but not all required OIDC properties are set" -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        Name                         = "Contoso"
+                        Description                  = "Contoso"
+                        $DefaultClientIdentifier     = "fae5bd07-be63-4a64-a28c-7931a4ebf62b"
+                        $SignOutUrl                  = "https://adfs.contoso.com/adfs/oauth2/logout"
+                        IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                        ClaimsMappings               = @(
+                            (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                                Name              = "Email"
+                                IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                            } -ClientOnly)
+                            (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                                Name              = "Role"
+                                IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
+                                LocalClaimType    = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                            } -ClientOnly)
+                        )
+                        SigningCertificateThumbprint = "123ABCFACE123ABCFACE123ABCFACE123ABCFACE"
+                        ClaimProviderName            = "LDAPCP"
+                        Ensure                       = "Present"
+                    }
+                }
+
+                It "should fail validation of certificate in the set method" {
+                    { Set-TargetResource @testParams } | Should -Throw "Parameter DefaultClientIdentifier was set but AuthorizationEndPointUri, RegisteredIssuerName or SignOutUrl are not set." + `
+                        "Parameters AuthorizationEndPointUri, RegisteredIssuerName, DefaultClientIdentifier and SignOutUrl are required when DefaultClientIdentifier is set"
+                }
+            }
+
+            Context -Name "The SAML SPTrustedLoginProvider does not exist but should, with a claims provider that exists on the farm" -Fixture {
                 BeforeAll {
                     $testParams = @{
                         Name                         = "Contoso"
@@ -366,14 +489,14 @@ try
                         IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
                         ClaimsMappings               = @(
                             (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
-                                    Name              = "Email"
-                                    IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
-                                } -ClientOnly)
+                                Name              = "Email"
+                                IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                            } -ClientOnly)
                             (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
-                                    Name              = "Role"
-                                    IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
-                                    LocalClaimType    = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
-                                } -ClientOnly)
+                                Name              = "Role"
+                                IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
+                                LocalClaimType    = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                            } -ClientOnly)
                         )
                         SigningCertificateThumbprint = "123ABCFACE123ABCFACE123ABCFACE123ABCFACE"
                         ClaimProviderName            = "LDAPCP"
@@ -398,7 +521,49 @@ try
                 }
             }
 
-            Context -Name "The SPTrustedLoginProvider already exists and should not be changed" -Fixture {
+            Context -Name "The OIDC SPTrustedLoginProvider does not exist but should, with a claims provider that exists on the farm" -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        Name                         = "Contoso"
+                        Description                  = "Contoso"
+                        $DefaultClientIdentifier     = "fae5bd07-be63-4a64-a28c-7931a4ebf62b"
+                        $AuthorizationEndPointUri    = "https://adfs.contoso.com/adfs/oauth2/authorize"
+                        $SignOutUrl                  = "https://adfs.contoso.com/adfs/oauth2/logout"
+                        IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                        ClaimsMappings               = @(
+                            (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                                Name              = "Email"
+                                IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                            } -ClientOnly)
+                            (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                                Name              = "Role"
+                                IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
+                                LocalClaimType    = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                            } -ClientOnly)
+                        )
+                        SigningCertificateThumbprint = "123ABCFACE123ABCFACE123ABCFACE123ABCFACE"
+                        ClaimProviderName            = "LDAPCP"
+                        Ensure                       = "Present"
+                    }
+
+                    Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith {
+                        $sptrust = [pscustomobject]@{
+                            Name              = $testParams.Name
+                            ClaimProviderName = $testParams.ClaimProviderName
+                        }
+                        $sptrust | Add-Member -Name Update -MemberType ScriptMethod -Value { }
+                        return $sptrust
+                    }
+                }
+
+                It "Should create the SPTrustedLoginProvider with claims provider set" {
+                    Set-TargetResource @testParams
+                    $getResults = Get-TargetResource @testParams
+                    $getResults.ClaimProviderName | Should -Be $testParams.ClaimProviderName
+                }
+            }
+
+            Context -Name "The SAML SPTrustedLoginProvider already exists and should not be changed" -Fixture {
                 BeforeAll {
                     $testParams = @{
                         Name                         = "Contoso"
@@ -408,18 +573,62 @@ try
                         IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
                         ClaimsMappings               = @(
                             (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
-                                    Name              = "Email"
-                                    IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
-                                } -ClientOnly)
+                                Name              = "Email"
+                                IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                            } -ClientOnly)
                             (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
-                                    Name              = "Role"
-                                    IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
-                                    LocalClaimType    = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
-                                } -ClientOnly)
+                                Name              = "Role"
+                                IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
+                                LocalClaimType    = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                            } -ClientOnly)
                         )
                         SigningCertificateThumbprint = "123ABCFACE123ABCFACE123ABCFACE123ABCFACE"
                         ClaimProviderName            = "LDAPCP"
                         ProviderSignOutUri           = "https://adfs.contoso.com/adfs/ls/"
+                        Ensure                       = "Present"
+                    }
+
+                    Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith {
+                        $sptrust = [pscustomobject]@{
+                            Name              = $testParams.Name
+                            ClaimProviderName = $testParams.ClaimProviderName
+                        }
+                        return $sptrust
+                    }
+                }
+
+                It "Should return present from the get method" {
+                    $getResults = Get-TargetResource @testParams
+                    $getResults.Ensure | Should -Be "Present"
+                }
+
+                It "Should return true from the test method" {
+                    Test-TargetResource @testParams | Should -Be $true
+                }
+            }
+
+            Context -Name "The OIDC SPTrustedLoginProvider already exists and should not be changed" -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        Name                         = "Contoso"
+                        Description                  = "Contoso"
+                        $DefaultClientIdentifier     = "fae5bd07-be63-4a64-a28c-7931a4ebf62b"
+                        $AuthorizationEndPointUri    = "https://adfs.contoso.com/adfs/oauth2/authorize"
+                        $SignOutUrl                  = "https://adfs.contoso.com/adfs/oauth2/logout"
+                        IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                        ClaimsMappings               = @(
+                            (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                                Name              = "Email"
+                                IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                            } -ClientOnly)
+                            (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                                Name              = "Role"
+                                IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
+                                LocalClaimType    = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                            } -ClientOnly)
+                        )
+                        SigningCertificateThumbprint = "123ABCFACE123ABCFACE123ABCFACE123ABCFACE"
+                        ClaimProviderName            = "LDAPCP"
                         Ensure                       = "Present"
                     }
 
@@ -447,19 +656,19 @@ try
                     $testParams = @{
                         Name                         = "Contoso"
                         Description                  = "Contoso"
-                        Realm                        = "https://sharepoint.contoso.com"
-                        SignInUrl                    = "https://adfs.contoso.com/adfs/ls/"
+                        # Realm                        = "https://sharepoint.contoso.com"
+                        # SignInUrl                    = "https://adfs.contoso.com/adfs/ls/"
                         IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
                         ClaimsMappings               = @(
                             (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
-                                    Name              = "Email"
-                                    IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
-                                } -ClientOnly)
+                                Name              = "Email"
+                                IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                            } -ClientOnly)
                             (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
-                                    Name              = "Role"
-                                    IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
-                                    LocalClaimType    = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
-                                } -ClientOnly)
+                                Name              = "Role"
+                                IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
+                                LocalClaimType    = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                            } -ClientOnly)
                         )
                         SigningCertificateThumbprint = "123ABCFACE123ABCFACE123ABCFACE123ABCFACE"
                         ClaimProviderName            = "LDAPCP"
@@ -516,7 +725,7 @@ try
                 }
             }
 
-            Context -Name "The SPTrustedLoginProvider is desired, but the IdentifierClaim parameter does not match a claim type in ClaimsMappings" -Fixture {
+            Context -Name "The SAML SPTrustedLoginProvider is desired, but the IdentifierClaim parameter does not match a claim type in ClaimsMappings" -Fixture {
                 BeforeAll {
                     $testParams = @{
                         Name                         = "Contoso"
@@ -526,18 +735,55 @@ try
                         IdentifierClaim              = "IdentityClaimTypeNotSpecifiedInClaimsMappings"
                         ClaimsMappings               = @(
                             (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
-                                    Name              = "Email"
-                                    IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
-                                } -ClientOnly)
+                                Name              = "Email"
+                                IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                            } -ClientOnly)
                             (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
-                                    Name              = "Role"
-                                    IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
-                                    LocalClaimType    = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
-                                } -ClientOnly)
+                                Name              = "Role"
+                                IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
+                                LocalClaimType    = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                            } -ClientOnly)
                         )
                         SigningCertificateThumbprint = "123ABCFACE123ABCFACE123ABCFACE123ABCFACE"
                         ClaimProviderName            = "LDAPCP"
                         ProviderSignOutUri           = "https://adfs.contoso.com/adfs/ls/"
+                        Ensure                       = "Present"
+                    }
+
+                    Mock -CommandName New-SPClaimTypeMapping -MockWith {
+                        return [pscustomobject]@{
+                            InputClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                        }
+                    }
+                }
+
+                It "should fail validation of IdentifierClaim in the set method" {
+                    { Set-TargetResource @testParams } | Should -Throw "IdentifierClaim does not match any claim type specified in ClaimsMappings."
+                }
+            }
+
+            Context -Name "The OIDC SPTrustedLoginProvider is desired, but the IdentifierClaim parameter does not match a claim type in ClaimsMappings" -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        Name                         = "Contoso"
+                        Description                  = "Contoso"
+                        $DefaultClientIdentifier     = "fae5bd07-be63-4a64-a28c-7931a4ebf62b"
+                        $AuthorizationEndPointUri    = "https://adfs.contoso.com/adfs/oauth2/authorize"
+                        $SignOutUrl                  = "https://adfs.contoso.com/adfs/oauth2/logout"
+                        IdentifierClaim              = "IdentityClaimTypeNotSpecifiedInClaimsMappings"
+                        ClaimsMappings               = @(
+                            (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                                Name              = "Email"
+                                IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                            } -ClientOnly)
+                            (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                                Name              = "Role"
+                                IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
+                                LocalClaimType    = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                            } -ClientOnly)
+                        )
+                        SigningCertificateThumbprint = "123ABCFACE123ABCFACE123ABCFACE123ABCFACE"
+                        ClaimProviderName            = "LDAPCP"
                         Ensure                       = "Present"
                     }
 
