@@ -1239,10 +1239,7 @@ function Set-TargetResource
             Write-Verbose -Message ("Pausing for 5 minutes to allow the timer service to " +
                 "fully provision the server")
             Start-Sleep -Seconds 300
-            Write-Verbose -Message ("Join farm complete. Restarting computer to allow " +
-                "configuration to continue")
-
-            $global:DSCMachineStatus = 1
+            Write-Verbose -Message ("Join farm complete")
         }
     }
 }

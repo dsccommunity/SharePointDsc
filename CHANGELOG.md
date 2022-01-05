@@ -5,6 +5,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- SPFarm
+  - Suppress a useless reboot that was triggered once a server joined the farm
+
 ## [5.0.0] - 2021-12-17
 
 ### Added
