@@ -91,7 +91,7 @@ function Get-TargetResource
             $realm = $spTrust.DefaultProviderRealm
             $signInUrl = $spTrust.ProviderUri.OriginalString
             $registeredIssuerName = $spTrust.RegisteredIssuerName
-            if ($false -eq [String]::IsNullOrWhiteSpace($params.AuthorizationEndPointUri))
+            if ($false -eq [String]::IsNullOrWhiteSpace($spTrust.AuthorizationEndPointUri))
             {
                 $authorizationEndPointUri = $spTrust.AuthorizationEndPointUri.ToString()
             }
@@ -101,7 +101,7 @@ function Get-TargetResource
             $SigningCertificateThumbprint = $spTrust.SigningCertificate.Thumbprint
             $currentState = "Present"
             $claimProviderName = $sptrust.ClaimProviderName
-            if ($false -eq [String]::IsNullOrWhiteSpace($params.ProviderSignOutUri))
+            if ($false -eq [String]::IsNullOrWhiteSpace($spTrust.ProviderSignOutUri))
             {
                 $providerSignOutUri = $sptrust.ProviderSignOutUri.OriginalString
             }
