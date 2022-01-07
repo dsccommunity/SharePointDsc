@@ -473,7 +473,7 @@ try
                 }
 
                 It "should fail validation of parameters" {
-                    { Set-TargetResource @testParams } | Should -Throw "Parameter DefaultClientIdentifier was set but AuthorizationEndPointUri, RegisteredIssuerName or SignOutUrl are not set. Parameters AuthorizationEndPointUri, RegisteredIssuerName, DefaultClientIdentifier and SignOutUrl are required when DefaultClientIdentifier is set"
+                    { Set-TargetResource @testParams } | Should -Throw "Parameter DefaultClientIdentifier was set but AuthorizationEndPointUri, RegisteredIssuerName or SignOutUrl are not set.Parameters AuthorizationEndPointUri, RegisteredIssuerName, DefaultClientIdentifier and SignOutUrl are required when DefaultClientIdentifier is set"
                 }
             }
 
