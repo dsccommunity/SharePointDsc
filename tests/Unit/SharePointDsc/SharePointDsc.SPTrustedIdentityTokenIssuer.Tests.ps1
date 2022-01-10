@@ -477,6 +477,72 @@ try
                 }
             }
 
+            Context -Name "A OIDC SPTrustedLoginProvider is desired, but not all required OIDC properties are set" -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        Name                         = "Contoso"
+                        Description                  = "Contoso"
+                        DefaultClientIdentifier      = "fae5bd07-be63-4a64-a28c-7931a4ebf62b"
+                        SignOutUrl                   = "https://adfs.contoso.com/adfs/oauth2/logout"
+                        IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                        ClaimsMappings               = @(
+                            (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                                Name              = "Email"
+                                IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                            } -ClientOnly)
+                            (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                                Name              = "Role"
+                                IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
+                                LocalClaimType    = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                            } -ClientOnly)
+                        )
+                        SigningCertificateThumbprint = "123ABCFACE123ABCFACE123ABCFACE123ABCFACE"
+                        ClaimProviderName            = "LDAPCP"
+                        Ensure                       = "Present"
+                    }
+                }
+
+                It "should fail validation of parameters" {
+                    { Set-TargetResource @testParams } | Should -Throw "Parameter DefaultClientIdentifier was set but AuthorizationEndPointUri, RegisteredIssuerName or SignOutUrl are not set.Parameters AuthorizationEndPointUri, RegisteredIssuerName, DefaultClientIdentifier and SignOutUrl are required when DefaultClientIdentifier is set"
+                }
+            }
+
+            if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -ne 16 -or
+                $Global:SPDscHelper.CurrentStubBuildNumber.Build -le 13000)
+            {
+                Context -Name "A OIDC SPTrustedLoginProvider is desired, but current version is not SharePoint Subscription" -Fixture {
+                    BeforeAll {
+                        $testParams = @{
+                            Name                         = "Contoso"
+                            Description                  = "Contoso"
+                            DefaultClientIdentifier      = "fae5bd07-be63-4a64-a28c-7931a4ebf62b"
+                            RegisteredIssuerName         = "https://adfs.contoso.com/adfs"
+                            AuthorizationEndPointUri     = "https://adfs.contoso.com/adfs/oauth2/authorize"
+                            SignOutUrl                   = "https://adfs.contoso.com/adfs/oauth2/logout"
+                            IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                            ClaimsMappings               = @(
+                            (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                                    Name              = "Email"
+                                    IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                                } -ClientOnly)
+                            (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                                    Name              = "Role"
+                                    IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
+                                    LocalClaimType    = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                                } -ClientOnly)
+                            )
+                            SigningCertificateThumbprint = "123ABCFACE123ABCFACE123ABCFACE123ABCFACE"
+                            ClaimProviderName            = "LDAPCP"
+                            Ensure                       = "Present"
+                        }
+                    }
+
+                    It "should fail validation of current version of SharePoint" {
+                        { Set-TargetResource @testParams } | Should -Throw "OIDC parameters can only be used with SharePoint Server Subscription Edition."
+                    }
+                }
+            }
+
             Context -Name "The SAML SPTrustedLoginProvider does not exist but should, with a claims provider that exists on the farm" -Fixture {
                 BeforeAll {
                     $testParams = @{
@@ -730,6 +796,85 @@ try
                 It "Should remove the SPTrustedIdentityTokenIssuer" {
                     Set-TargetResource @testParams
                     Assert-MockCalled Remove-SPTrustedIdentityTokenIssuer
+                }
+            }
+
+            if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16 -and
+                $Global:SPDscHelper.CurrentStubBuildNumber.Build -gt 13000)
+            {
+                Context -Name "The OIDC SPTrustedLoginProvider already exists but should be removed" -Fixture {
+                    BeforeAll {
+                        $testParams = @{
+                            Name                         = "Contoso"
+                            Description                  = "Contoso"
+                            DefaultClientIdentifier      = "fae5bd07-be63-4a64-a28c-7931a4ebf62b"
+                            RegisteredIssuerName         = "https://adfs.contoso.com/adfs"
+                            AuthorizationEndPointUri     = "https://adfs.contoso.com/adfs/oauth2/authorize"
+                            SignOutUrl                   = "https://adfs.contoso.com/adfs/oauth2/logout"
+                            IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                            ClaimsMappings               = @(
+                            (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                                    Name              = "Email"
+                                    IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                                } -ClientOnly)
+                            (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                                    Name              = "Role"
+                                    IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
+                                    LocalClaimType    = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                                } -ClientOnly)
+                            )
+                            SigningCertificateThumbprint = "123ABCFACE123ABCFACE123ABCFACE123ABCFACE"
+                            ClaimProviderName            = "LDAPCP"
+                            Ensure                       = "Absent"
+                        }
+
+                        Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith {
+                            $sptrust = [pscustomobject]@{
+                                Name = $testParams.Name
+                            }
+                            $sptrust | Add-Member -Name Update -MemberType ScriptMethod -Value { }
+                            return $sptrust
+                        }
+
+                        Mock -CommandName Get-SPWebApplication -MockWith {
+                            $spWebApp = [pscustomobject]@{
+                                Url = "http://webAppUrl"
+                            }
+                            $spWebApp | Add-Member -Name Update -MemberType ScriptMethod -Value { }
+                            $spWebApp | Add-Member -Name GetIisSettingsWithFallback -MemberType ScriptMethod -Value { }
+                            return $spWebApp
+                        }
+
+                        Mock -CommandName Get-SPAuthenticationProvider -MockWith {
+                            $spAP = [pscustomobject]@{
+                                LoginProviderName = ""
+                            }
+                            $spAP | Add-Member -Name Update -MemberType ScriptMethod -Value { }
+                            $spAP | Add-Member -MemberType ScriptMethod `
+                                -Name GetType `
+                                -Value {
+                                return @{
+                                    FullName = "Microsoft.SharePoint.Administration.SPTrustedAuthenticationProvider"
+                                }
+                            } -PassThru -Force
+                            return $spAP
+                        }
+
+                        Mock -CommandName Remove-SPTrustedIdentityTokenIssuer -MockWith { }
+                    }
+
+                    It "Should return absent from the get method" {
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
+                    }
+
+                    It "Should return true from the test method" {
+                        Test-TargetResource @testParams | Should -Be $false
+                    }
+
+                    It "Should remove the SPTrustedIdentityTokenIssuer" {
+                        Set-TargetResource @testParams
+                        Assert-MockCalled Remove-SPTrustedIdentityTokenIssuer
+                    }
                 }
             }
 
