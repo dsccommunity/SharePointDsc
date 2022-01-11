@@ -5,9 +5,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
 - SPFarm
   - Suppress a useless reboot that was triggered once a server joined the farm
   - Suppress a useless 5 minutes sleep triggered once a server joined the farm
+
+### Fixed
+
+- SPTrustedRootAuthority
+  - Fixed issue where certificates not in the Personal store could not be used
 
 ## [5.0.0] - 2021-12-17
 
