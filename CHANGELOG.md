@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - SPFarm
   - Suppress a useless reboot that was triggered once a server joined the farm
+  - Suppress a useless 5 minutes sleep triggered once a server joined the farm
 
 ## [5.0.0] - 2021-12-17
 
