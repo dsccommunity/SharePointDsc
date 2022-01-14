@@ -569,19 +569,30 @@ try
                     }
 
                     Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith {
+                        return $null
+                    }
+
+                    Mock -CommandName New-SPTrustedIdentityTokenIssuer -MockWith {
                         $sptrust = [pscustomobject]@{
-                            Name              = $testParams.Name
-                            ClaimProviderName = $testParams.ClaimProviderName
+                            ImportTrustCertificate = $null
+                            Name                   = ""
+                            Description            = ""
+                            Realm                  = ""
+                            SignInUrl              = ""
+                            UseWReply              = ""
+                            ProviderSignOutUri     = ""
+                            IdentifierClaim        = ""
+                            ClaimsMappings         = $null
+                            ClaimProviderName      = ""
                         }
                         $sptrust | Add-Member -Name Update -MemberType ScriptMethod -Value { }
                         return $sptrust
                     }
                 }
 
-                It "Should create the SPTrustedLoginProvider with claims provider set" {
+                It "Should call cmdlet New-SPTrustedIdentityTokenIssuer" {
                     Set-TargetResource @testParams
-                    $getResults = Get-TargetResource @testParams
-                    $getResults.ClaimProviderName | Should -Be $testParams.ClaimProviderName
+                    Assert-MockCalled New-SPTrustedIdentityTokenIssuer
                 }
             }
 
@@ -615,19 +626,30 @@ try
                         }
 
                         Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith {
+                            return $null
+                        }
+
+                        Mock -CommandName New-SPTrustedIdentityTokenIssuer -MockWith {
                             $sptrust = [pscustomobject]@{
-                                Name              = $testParams.Name
-                                ClaimProviderName = $testParams.ClaimProviderName
+                                ImportTrustCertificate   = $null
+                                Name                     = ""
+                                Description              = ""
+                                RegisteredIssuerName     = ""
+                                AuthorizationEndPointUri = ""
+                                DefaultClientIdentifier  = ""
+                                SignOutUrl               = ""
+                                IdentifierClaim          = ""
+                                ClaimsMappings           = $null
+                                ClaimProviderName        = ""
                             }
                             $sptrust | Add-Member -Name Update -MemberType ScriptMethod -Value { }
                             return $sptrust
                         }
                     }
 
-                    It "Should create the SPTrustedLoginProvider with claims provider set" {
+                    It "Should call cmdlet New-SPTrustedIdentityTokenIssuer" {
                         Set-TargetResource @testParams
-                        $getResults = Get-TargetResource @testParams
-                        $getResults.ClaimProviderName | Should -Be $testParams.ClaimProviderName
+                        Assert-MockCalled New-SPTrustedIdentityTokenIssuer
                     }
                 }
             }
