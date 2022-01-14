@@ -659,8 +659,9 @@ try
 
                     Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith {
                         $sptrust = [pscustomobject]@{
-                            Name              = $testParams.Name
-                            ClaimProviderName = $testParams.ClaimProviderName
+                            Name               = $testParams.Name
+                            ProviderSignOutUri = $testParams.ProviderSignOutUri
+                            ClaimProviderName  = $testParams.ClaimProviderName
                         }
                         return $sptrust
                     }
@@ -707,8 +708,9 @@ try
 
                         Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith {
                             $sptrust = [pscustomobject]@{
-                                Name              = $testParams.Name
-                                ClaimProviderName = $testParams.ClaimProviderName
+                                Name                     = $testParams.Name
+                                AuthorizationEndPointUri = $testParams.AuthorizationEndPointUri
+                                ClaimProviderName        = $testParams.ClaimProviderName
                             }
                             return $sptrust
                         }
