@@ -5,6 +5,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- SPTrustedIdentityTokenIssuer
+  - Added parameters to support OIDC authentication in SharePoint Server Subscription Edition
 - SPFarm
   - Suppress a useless reboot that was triggered once a server joined the farm
   - Suppress a useless 5 minutes sleep triggered once a server joined the farm

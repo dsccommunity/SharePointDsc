@@ -6,6 +6,12 @@
 This resource is used to create or remove SPTrustedIdentityTokenIssuer in a
 SharePoint farm.
 
+In SharePoint 2013 / 2016 / 2019, it can only be a SAML trust.
+In SharePoint Subscription, it can be a SAML trust or an OIDC trust.
+
+For a SAML trust, the specific mandatory parameters are Realm, SignInUrl, 
+and either SigningCertificateThumbPrint or SigningCertificateFilePath.
+
 Either parameter SigningCertificateThumbPrint or SigningCertificateFilePath
 must be set. If specifying both SigningCertificateThumbPrint and
 SigningCertificateFilePath, the certificate thumbprint will be verified
@@ -20,6 +26,9 @@ certiificate store because SharePoint does not accept it.
 
 The SigningCertificateFilePath must be the file path to the public key of
 the signing certificate.
+
+For an OIDC trust, the specific mandatory parameters are RegisteredIssuerName, 
+AuthorizationEndPointUri, DefaultClientIdentifier and SignOutUrl.
 
 The ClaimsMappings property is an array of MSFT_SPClaimTypeMapping to use
 with cmdlet New-SPClaimTypeMapping. Each MSFT_SPClaimTypeMapping requires
