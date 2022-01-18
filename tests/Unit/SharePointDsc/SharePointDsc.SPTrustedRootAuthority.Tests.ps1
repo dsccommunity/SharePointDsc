@@ -49,7 +49,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 Mock -CommandName Remove-SPTrustedRootAuthority -MockWith { }
                 Mock -CommandName Set-SPTrustedRootAuthority -MockWith { }
@@ -166,7 +166,7 @@ try
                         Ensure = "Present"
                     }
 
-                    Mock -CommandName Get-Item -MockWith {
+                    Mock -CommandName Get-ChildItem -MockWith {
                         return @{
                             Subject    = "CN=CertName"
                             Thumbprint = $testParams.CertificateThumbprint
@@ -208,7 +208,7 @@ try
                         Ensure              = "Present"
                     }
 
-                    Mock -CommandName Get-Item -MockWith {
+                    Mock -CommandName Get-ChildItem -MockWith {
                         return @{
                             Subject    = "CN=CertName"
                             Thumbprint = $testParams.CertificateThumbprint
@@ -250,7 +250,7 @@ try
                         Ensure                = "Present"
                     }
 
-                    Mock -CommandName Get-Item -MockWith {
+                    Mock -CommandName Get-ChildItem -MockWith {
                         return @{
                             Subject    = "CN=CertName"
                             Thumbprint = $testParams.CertificateThumbprint
@@ -396,7 +396,7 @@ try
                         }
                     }
 
-                    Mock -CommandName Get-Item -MockWith {
+                    Mock -CommandName Get-ChildItem -MockWith {
                         return  @{
                             Subject    = "CN=CertName"
                             Thumbprint = $testParams.CertificateThumbprint
@@ -440,7 +440,7 @@ try
                         return $true
                     }
 
-                    Mock -CommandName Get-Item -MockWith {
+                    Mock -CommandName Get-ChildItem -MockWith {
                         return  @{
                             Subject    = "CN=CertName"
                             Thumbprint = $testParams.CertificateThumbprint
@@ -540,7 +540,7 @@ try
                         }
                     }
 
-                    Mock -CommandName Get-Item -MockWith {
+                    Mock -CommandName Get-ChildItem -MockWith {
                         return  $null
                     }
                 }
@@ -570,7 +570,7 @@ try
                         return $null
                     }
 
-                    Mock -CommandName Get-Item -MockWith {
+                    Mock -CommandName Get-ChildItem -MockWith {
                         return $null
                     }
                 }
@@ -596,7 +596,7 @@ try
                         Ensure                = "Present"
                     }
 
-                    Mock -CommandName Get-Item -MockWith {
+                    Mock -CommandName Get-ChildItem -MockWith {
                         return @{
                             Subject    = "CN=CertIdentifier"
                             Thumbprint = $testParams.CertificateThumbprint
@@ -618,7 +618,7 @@ try
 
                 It "Should create a new trusted root authority in the set method" {
                     Set-TargetResource @testParams
-                    Assert-MockCalled Get-Item -Times 1
+                    Assert-MockCalled Get-ChildItem -Times 1
                     Assert-MockCalled New-SPTrustedRootAuthority -Times 1
                 }
             }
@@ -635,7 +635,7 @@ try
                         return $true
                     }
 
-                    Mock -CommandName Get-Item -MockWith {
+                    Mock -CommandName Get-ChildItem -MockWith {
                         return  @{
                             Subject    = "CN=CertName"
                             Thumbprint = $testParams.CertificateThumbprint
@@ -685,7 +685,7 @@ try
                         return $true
                     }
 
-                    Mock -CommandName Get-Item -MockWith {
+                    Mock -CommandName Get-ChildItem -MockWith {
                         return  @{
                             Subject    = "CN=CertName"
                             Thumbprint = $testParams.CertificateThumbprint
@@ -731,7 +731,7 @@ try
                         Ensure                = "Present"
                     }
 
-                    Mock -CommandName Get-Item -MockWith {
+                    Mock -CommandName Get-ChildItem -MockWith {
                         $retVal = [pscustomobject]@{
                             Subject       = "CN=CertIdentifier"
                             Thumbprint    = $testParams.CertificateThumbprint
@@ -780,7 +780,7 @@ try
 
                 It "Should create a new Trusted Root Authority in the set method" {
                     Set-TargetResource @testParams
-                    Assert-MockCalled Get-Item -Times 1
+                    Assert-MockCalled Get-ChildItem -Times 1
                     Assert-MockCalled Set-SPTrustedRootAuthority -Times 1
                     Assert-MockCalled New-Object -Times 1
                 }
@@ -794,7 +794,7 @@ try
                         Ensure                = "Absent"
                     }
 
-                    Mock -CommandName Get-Item -MockWith {
+                    Mock -CommandName Get-ChildItem -MockWith {
                         return @{
                             Subject    = "CN=CertIdentifier"
                             Thumbprint = $testParams.CertificateThumbprint
@@ -833,7 +833,7 @@ try
                         Ensure                = "Absent"
                     }
 
-                    Mock -CommandName Get-Item -MockWith {
+                    Mock -CommandName Get-ChildItem -MockWith {
                         return  @{
                             Subject    = "CN=CertIdentifier"
                             Thumbprint = $testParams.CertificateThumbprint
