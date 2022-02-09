@@ -13,5 +13,6 @@ class MSFT_SPWebAppPeoplePickerSettings : OMI_BaseResource
     [Write, Description("Sets the custom query that is sent to Active Directory")] String ActiveDirectoryCustomQuery;
     [Write, Description("Sets the time-out in seconds when a query is issued to Active Directory")] Uint16 ActiveDirectorySearchTimeout;
     [Write, Description("Specifies whether to search only the current site collection")] Boolean OnlySearchWithinSiteCollection;
+    [Write, Description("Specifies whether to check the user against the existing site collection users")] Boolean PeopleEditorOnlyResolveWithinSiteCollection;
     [Write, Description("List of all domains/forests that must be searched"), EmbeddedInstance("MSFT_SPWebAppPPSearchDomain")] String SearchActiveDirectoryDomains[];
 };

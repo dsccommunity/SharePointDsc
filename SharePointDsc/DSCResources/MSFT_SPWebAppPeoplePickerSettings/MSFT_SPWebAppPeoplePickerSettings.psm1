@@ -25,6 +25,10 @@ function Get-TargetResource
         $OnlySearchWithinSiteCollection,
 
         [Parameter()]
+        [System.Boolean]
+        $PeopleEditorOnlyResolveWithinSiteCollection,
+
+        [Parameter()]
         [Microsoft.Management.Infrastructure.CimInstance[]]
         $SearchActiveDirectoryDomains
     )
@@ -61,12 +65,13 @@ function Get-TargetResource
         }
 
         return @{
-            WebAppUrl                      = $params.WebAppUrl
-            ActiveDirectoryCustomFilter    = $wa.PeoplePickerSettings.ActiveDirectoryCustomFilter
-            ActiveDirectoryCustomQuery     = $wa.PeoplePickerSettings.ActiveDirectoryCustomQuery
-            ActiveDirectorySearchTimeout   = $wa.PeoplePickerSettings.ActiveDirectorySearchTimeout.TotalSeconds
-            OnlySearchWithinSiteCollection = $wa.PeoplePickerSettings.OnlySearchWithinSiteCollection
-            SearchActiveDirectoryDomains   = $searchADDomains
+            WebAppUrl                                   = $params.WebAppUrl
+            ActiveDirectoryCustomFilter                 = $wa.PeoplePickerSettings.ActiveDirectoryCustomFilter
+            ActiveDirectoryCustomQuery                  = $wa.PeoplePickerSettings.ActiveDirectoryCustomQuery
+            ActiveDirectorySearchTimeout                = $wa.PeoplePickerSettings.ActiveDirectorySearchTimeout.TotalSeconds
+            OnlySearchWithinSiteCollection              = $wa.PeoplePickerSettings.OnlySearchWithinSiteCollection
+            PeopleEditorOnlyResolveWithinSiteCollection = $wa.PeoplePickerSettings.PeopleEditorOnlyResolveWithinSiteCollection
+            SearchActiveDirectoryDomains                = $searchADDomains
         }
     }
     return $result
@@ -97,6 +102,10 @@ function Set-TargetResource
         [Parameter()]
         [System.Boolean]
         $OnlySearchWithinSiteCollection,
+
+        [Parameter()]
+        [System.Boolean]
+        $PeopleEditorOnlyResolveWithinSiteCollection,
 
         [Parameter()]
         [Microsoft.Management.Infrastructure.CimInstance[]]
@@ -152,6 +161,14 @@ function Set-TargetResource
             if ($params.OnlySearchWithinSiteCollection -ne $wa.PeoplePickerSettings.OnlySearchWithinSiteCollection)
             {
                 $wa.PeoplePickerSettings.OnlySearchWithinSiteCollection = $params.OnlySearchWithinSiteCollection
+            }
+        }
+
+        if ($params.ContainsKey("PeopleEditorOnlyResolveWithinSiteCollection"))
+        {
+            if ($params.PeopleEditorOnlyResolveWithinSiteCollection -ne $wa.PeoplePickerSettings.PeopleEditorOnlyResolveWithinSiteCollection)
+            {
+                $wa.PeoplePickerSettings.PeopleEditorOnlyResolveWithinSiteCollection = $params.PeopleEditorOnlyResolveWithinSiteCollection
             }
         }
 
@@ -251,6 +268,10 @@ function Test-TargetResource
         $OnlySearchWithinSiteCollection,
 
         [Parameter()]
+        [System.Boolean]
+        $PeopleEditorOnlyResolveWithinSiteCollection,
+
+        [Parameter()]
         [Microsoft.Management.Infrastructure.CimInstance[]]
         $SearchActiveDirectoryDomains
     )
@@ -306,7 +327,8 @@ function Test-TargetResource
         -ValuesToCheck @("ActiveDirectoryCustomFilter", `
             "ActiveDirectoryCustomQuery", `
             "ActiveDirectorySearchTimeout", `
-            "OnlySearchWithinSiteCollection")
+            "OnlySearchWithinSiteCollection",
+        "PeopleEditorOnlyResolveWithinSiteCollection")
 
     Write-Verbose -Message "Test-TargetResource returned $result"
 

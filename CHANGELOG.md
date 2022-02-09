@@ -9,8 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - SharePointDsc
   - Added generic unit tests files to quickly run all or a specific unit test
+  - Updated pipeline scripts to a recent version
 - SPTrustedIdentityTokenIssuer
   - Added parameters to support OIDC authentication in SharePoint Server Subscription Edition
+- SPWebAppPeoplePickerSettings
+  - Added the PeopleEditorOnlyResolveWithinSiteCollection parameter to the resource
 
 ### Changed
 
