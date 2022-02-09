@@ -49,7 +49,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
                 $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
@@ -57,7 +57,8 @@ try
                     -ArgumentList @("username", $mockPassword)
 
                 try
-                { [Microsoft.SharePoint.Administration.SPPeoplePickerSearchActiveDirectoryDomain]
+                {
+                    [Microsoft.SharePoint.Administration.SPPeoplePickerSearchActiveDirectoryDomain]
                 }
                 catch
                 {
@@ -135,42 +136,43 @@ try
                         WebAppUrl                    = "http://sharepoint.contoso.com"
                         SearchActiveDirectoryDomains = @(
                             (New-CimInstance -ClassName MSFT_SPWebAppPPSearchDomain -Property @{
-                                    FQDN          = "contoso.intra"
-                                    IsForest      = $false
-                                    AccessAccount = (New-CimInstance -ClassName MSFT_Credential `
-                                            -Property @{
-                                            Username = [string]$mockAccount.UserName;
-                                            Password = [string]$mockAccount.Password;
-                                        } `
-                                            -Namespace root/microsoft/windows/desiredstateconfiguration `
-                                            -ClientOnly)
-                                } -ClientOnly)
+                                FQDN          = "contoso.intra"
+                                IsForest      = $false
+                                AccessAccount = (New-CimInstance -ClassName MSFT_Credential `
+                                        -Property @{
+                                        Username = [string]$mockAccount.UserName;
+                                        Password = [string]$mockAccount.Password;
+                                    } `
+                                        -Namespace root/microsoft/windows/desiredstateconfiguration `
+                                        -ClientOnly)
+                            } -ClientOnly)
                         )
                     }
 
                     Mock -CommandName Get-SPWebApplication -MockWith {
                         $searchADdom = New-Object -TypeName "System.Collections.Generic.List[System.Object]"
                         $searchDom1 = New-Object -TypeName "Object" | `
-                            Add-Member -MemberType NoteProperty `
-                            -Name DomainName `
-                            -Value ( "contosonew.intra" ) -PassThru | `
-                            Add-Member -MemberType NoteProperty `
-                            -Name IsForest `
-                            -Value ( $false ) -PassThru | `
-                            Add-Member -MemberType NoteProperty `
-                            -Name LoginName `
-                            -Value ( $mockAccount.UserName ) -PassThru
+                                Add-Member -MemberType NoteProperty `
+                                -Name DomainName `
+                                -Value ( "contosonew.intra" ) -PassThru | `
+                                    Add-Member -MemberType NoteProperty `
+                                    -Name IsForest `
+                                    -Value ( $false ) -PassThru | `
+                                        Add-Member -MemberType NoteProperty `
+                                        -Name LoginName `
+                                        -Value ( $mockAccount.UserName ) -PassThru
                         $searchADdom.Add($searchDom1)
 
                         $returnval = @{
                             PeoplePickerSettings = @{
-                                ActiveDirectoryCustomFilter    = "()"
-                                ActiveDirectoryCustomQuery     = "()"
-                                ActiveDirectorySearchTimeout   = @{
+                                ActiveDirectoryCustomFilter                 = "()"
+                                ActiveDirectoryCustomQuery                  = "()"
+                                ActiveDirectorySearchTimeout                = @{
                                     TotalSeconds = 10
                                 }
-                                OnlySearchWithinSiteCollection = $true
-                                SearchActiveDirectoryDomains   = $searchADdom
+                                OnlySearchWithinSiteCollection              = $true
+                                PeopleEditorOnlyResolveWithinSiteCollection = $true
+                                SearchActiveDirectoryDomains                = $searchADdom
                             }
                         }
                         $returnval = $returnval | Add-Member -MemberType ScriptMethod -Name Update -Value {
@@ -199,36 +201,38 @@ try
             Context -Name "Settings do not match actual values" -Fixture {
                 BeforeAll {
                     $testParams = @{
-                        WebAppUrl                      = "http://sharepoint.contoso.com"
-                        ActiveDirectoryCustomFilter    = $null
-                        ActiveDirectoryCustomQuery     = $null
-                        ActiveDirectorySearchTimeout   = 30
-                        OnlySearchWithinSiteCollection = $false
+                        WebAppUrl                                   = "http://sharepoint.contoso.com"
+                        ActiveDirectoryCustomFilter                 = $null
+                        ActiveDirectoryCustomQuery                  = $null
+                        ActiveDirectorySearchTimeout                = 30
+                        OnlySearchWithinSiteCollection              = $false
+                        PeopleEditorOnlyResolveWithinSiteCollection = $false
                     }
 
                     Mock -CommandName Get-SPWebApplication -MockWith {
                         $searchADdom = New-Object -TypeName "System.Collections.Generic.List[System.Object]"
                         $searchDom1 = New-Object -TypeName "Object" | `
-                            Add-Member -MemberType NoteProperty `
-                            -Name DomainName `
-                            -Value ( "contoso.intra" ) -PassThru | `
-                            Add-Member -MemberType NoteProperty `
-                            -Name IsForest `
-                            -Value ( $false ) -PassThru | `
-                            Add-Member -MemberType NoteProperty `
-                            -Name LoginName `
-                            -Value ( $mockAccount.UserName ) -PassThru
+                                Add-Member -MemberType NoteProperty `
+                                -Name DomainName `
+                                -Value ( "contoso.intra" ) -PassThru | `
+                                    Add-Member -MemberType NoteProperty `
+                                    -Name IsForest `
+                                    -Value ( $false ) -PassThru | `
+                                        Add-Member -MemberType NoteProperty `
+                                        -Name LoginName `
+                                        -Value ( $mockAccount.UserName ) -PassThru
                         $searchADdom.Add($searchDom1)
 
                         $returnval = @{
                             PeoplePickerSettings = @{
-                                ActiveDirectoryCustomFilter    = "()"
-                                ActiveDirectoryCustomQuery     = "()"
-                                ActiveDirectorySearchTimeout   = @{
+                                ActiveDirectoryCustomFilter                 = "()"
+                                ActiveDirectoryCustomQuery                  = "()"
+                                ActiveDirectorySearchTimeout                = @{
                                     TotalSeconds = 10
                                 }
-                                OnlySearchWithinSiteCollection = $true
-                                SearchActiveDirectoryDomains   = $searchADdom
+                                OnlySearchWithinSiteCollection              = $true
+                                PeopleEditorOnlyResolveWithinSiteCollection = $true
+                                SearchActiveDirectoryDomains                = $searchADdom
                             }
                         }
                         $returnval = $returnval | Add-Member -MemberType ScriptMethod -Name Update -Value {
@@ -260,42 +264,43 @@ try
                         WebAppUrl                    = "http://sharepoint.contoso.com"
                         SearchActiveDirectoryDomains = @(
                             (New-CimInstance -ClassName MSFT_SPWebAppPPSearchDomain -Property @{
-                                    FQDN          = "contoso.intra"
-                                    IsForest      = $false
-                                    AccessAccount = (New-CimInstance -ClassName MSFT_Credential `
-                                            -Property @{
-                                            Username = [string]$mockAccount.UserName;
-                                            Password = [string]$mockAccount.Password;
-                                        } `
-                                            -Namespace root/microsoft/windows/desiredstateconfiguration `
-                                            -ClientOnly)
-                                } -ClientOnly)
+                                FQDN          = "contoso.intra"
+                                IsForest      = $false
+                                AccessAccount = (New-CimInstance -ClassName MSFT_Credential `
+                                        -Property @{
+                                        Username = [string]$mockAccount.UserName;
+                                        Password = [string]$mockAccount.Password;
+                                    } `
+                                        -Namespace root/microsoft/windows/desiredstateconfiguration `
+                                        -ClientOnly)
+                            } -ClientOnly)
                         )
                     }
 
                     Mock -CommandName Get-SPWebApplication -MockWith {
                         $searchADdom = New-Object -TypeName "System.Collections.Generic.List[System.Object]"
                         $searchDom1 = New-Object -TypeName "Object" | `
-                            Add-Member -MemberType NoteProperty `
-                            -Name DomainName `
-                            -Value ( "contoso.intra" ) -PassThru | `
-                            Add-Member -MemberType NoteProperty `
-                            -Name IsForest `
-                            -Value ( $false ) -PassThru | `
-                            Add-Member -MemberType NoteProperty `
-                            -Name LoginName `
-                            -Value ( $mockAccount.UserName ) -PassThru
+                                Add-Member -MemberType NoteProperty `
+                                -Name DomainName `
+                                -Value ( "contoso.intra" ) -PassThru | `
+                                    Add-Member -MemberType NoteProperty `
+                                    -Name IsForest `
+                                    -Value ( $false ) -PassThru | `
+                                        Add-Member -MemberType NoteProperty `
+                                        -Name LoginName `
+                                        -Value ( $mockAccount.UserName ) -PassThru
                         $searchADdom.Add($searchDom1)
 
                         $returnval = @{
                             PeoplePickerSettings = @{
-                                ActiveDirectoryCustomFilter    = "()"
-                                ActiveDirectoryCustomQuery     = "()"
-                                ActiveDirectorySearchTimeout   = @{
+                                ActiveDirectoryCustomFilter                 = "()"
+                                ActiveDirectoryCustomQuery                  = "()"
+                                ActiveDirectorySearchTimeout                = @{
                                     TotalSeconds = 10
                                 }
-                                OnlySearchWithinSiteCollection = $true
-                                SearchActiveDirectoryDomains   = $searchADdom
+                                OnlySearchWithinSiteCollection              = $true
+                                PeopleEditorOnlyResolveWithinSiteCollection = $true
+                                SearchActiveDirectoryDomains                = $searchADdom
                             }
                         }
                         $returnval = $returnval | Add-Member -MemberType ScriptMethod -Name Update -Value {
@@ -329,13 +334,14 @@ try
                     Mock -CommandName Get-SPWebApplication -MockWith {
                         $returnval = @{
                             PeoplePickerSettings = @{
-                                ActiveDirectoryCustomFilter    = $null
-                                ActiveDirectoryCustomQuery     = $null
-                                ActiveDirectorySearchTimeout   = @{
+                                ActiveDirectoryCustomFilter                 = $null
+                                ActiveDirectoryCustomQuery                  = $null
+                                ActiveDirectorySearchTimeout                = @{
                                     TotalSeconds = 30
                                 }
-                                OnlySearchWithinSiteCollection = $false
-                                SearchActiveDirectoryDomains   = @()
+                                OnlySearchWithinSiteCollection              = $false
+                                PeopleEditorOnlyResolveWithinSiteCollection = $true
+                                SearchActiveDirectoryDomains                = @()
                             }
                         }
                         $returnval = $returnval | Add-Member -MemberType ScriptMethod -Name Update -Value {

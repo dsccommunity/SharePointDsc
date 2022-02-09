@@ -52,13 +52,13 @@ BuildWorkflow:
     # code coverage files and needs to get merged into one file.
     #- Merge_CodeCoverage_Files
 
-
   merge:
     - Merge_CodeCoverage_Files
 
   publish:
     - Publish_Release_To_GitHub
     - Publish_Module_To_Gallery
+    - Publish_GitHub_Wiki_Content
 
 ####################################################
 #       PESTER  Configuration                      #

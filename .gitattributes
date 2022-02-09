@@ -6,4 +6,6 @@
 *.jpg binary
 *.xl* binary
 *.pfx binary
+*.png binary
 *.dll binary
+*.so  binary
