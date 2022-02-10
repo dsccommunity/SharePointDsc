@@ -10,7 +10,7 @@ a number of components that are common across all deployments.
 When describing a configuration for a SharePoint Server, there are a number of common
 components that are likely to exist in every configuration.
 Namely the components related to the installation of the product -
-[SPInstallPreReqs](SPInstallPreReqs) and [SPInstall](SPInstall).
+_[SPInstallPreReqs](SPInstallPreReqs)_ and _[SPInstall](SPInstall)_.
 
 It is also important to understand how the SharePointDsc resources impersonate and communicate
 with the SharePoint PowerShell cmdlet's.
@@ -18,8 +18,8 @@ For PowerShell 5 (which we recommend) you should use the PsDscRunAsCredential pr
  the account a resource should run as.
 However for PowerShell 4 this is not an option, and the InstallAccount option is to be used in
 that situation, which relies on creating a local PowerShell session that uses CredSSP authentication.
-This means you are likely to want to use the xCredSSP resources also (see [Remote sessions and
-the InstallAccount variable](Remote-sessions-and-the-InstallAccount-variable)) for more information
+This means you are likely to want to use the xCredSSP resources also (see _[Remote sessions and
+the InstallAccount variable](Remote-sessions-and-the-InstallAccount-variable)_) for more information
 on this).
 There are also a limited number of scenario's in SharePointDsc that will always use this CredSSP
 approach (such as provisioning the user profile sync service) so it is recommended that even if
@@ -31,8 +31,8 @@ The single server deployment is the most straightforward - you will have one con
 that will describe all of the components that you want to have on that server.
 This is not likely to be a production deployment, but more a development or testing server.
 The specifics of what you put in to this configuration are largely up to what you want this server
-to be running, but you will always include [SPFarm](SPFarm) to create the farm, and
-[SPDistributedCacheService](SPDistributedCacheService) to enable the distributed cache service
+to be running, but you will always include _[SPFarm](SPFarm)_ to create the farm, and
+_[SPDistributedCacheService](SPDistributedCacheService)_ to enable the distributed cache service
 in the farm.
 The rest can be as little or as detailed as you need it to be in order to achieve your desired
 configuration.

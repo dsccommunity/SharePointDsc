@@ -36,7 +36,7 @@ This removes the need to have InstallAccount on SharePointDsc resources. However
 The SharePointDsc resources will detect if they are running as the local system account or not and will only use a "remote" session as described above where it is needed.
 
 Also note that some resources in SharePointDsc still use the above described remote session technique to simulate other others regardless of whether or not PsDscRunAsCredential is used.
-An example of this is [SPUserProfileSyncService](SPUserProfileSyncService) which uses this approach to run as the farm account value.
+An example of this is _[SPUserProfileSyncService](SPUserProfileSyncService)_ which uses this approach to run as the farm account value.
 
 An example of how to use this property in PowerShell 5 is shown below:
 

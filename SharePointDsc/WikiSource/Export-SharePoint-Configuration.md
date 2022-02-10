@@ -15,7 +15,7 @@ That is why Nik Charlebois created [ReverseDsc](https://www.powershellgallery.co
 This module offers generic functionalities to generate DSC configurations and requires a technology
 specific orchestrator script to export the data.
 
-> For a [Full list](Understanding-Resources) of what can be extracted have a look at our Included Resources section.
+> For a _[Full list](Understanding-Resources)_ of what can be extracted have a look at our Included Resources section.
 
 Since SharePointDsc v4.5, this orchestrator script (and therefore ReverseDsc support) has been
 natively integrated into SharePointDsc.

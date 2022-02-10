@@ -4,7 +4,7 @@ SharePointDsc v#.#.#
 
 Here you will find all the information you need to make use of the SharePoint DSC resources, including details of the resources that are available, current capabilities and known issues, and information to help plan a DSC based implementation of SharePoint.
 
-Please leave comments, feature requests, and bug reports in the [issues section](../issues) for this module.
+Please leave comments, feature requests, and bug reports in the [issues section](https://github.com/dsccommunity/SharePointDsc/issues) for this module.
 
 ## Quick start
 
@@ -17,7 +17,7 @@ To confirm installation, run the below command and ensure you see the SharePoint
 
     Get-DscResource -Module SharePointDsc
 
-To view a more detailed explanation, view our [Getting Started](Getting-Started) page.
+To view a more detailed explanation, view our _[Getting Started](Getting-Started)_ page.
 
 
 ## Supported SharePoint versions
@@ -36,11 +36,11 @@ SharePointDsc currently supports:
 ## Known Issues
 There are some known issues (and their solutions/workarounds) with SharePointDsc or PowerShell:
 
-[Error Exceeded the configured MaxEnvelopeSize quota](Error-Exceeded-the-configured-MaxEnvelopeSize-quota)
+_[Error Exceeded the configured MaxEnvelopeSize quota](Error-Exceeded-the-configured-MaxEnvelopeSize-quota)_
 
-[Setting up Central Administration on HTTPS](Setting-up-Central-Administration-on-HTTPS)
+_[Setting up Central Administration on HTTPS](Setting-up-Central-Administration-on-HTTPS)_
 
-[Using CredSSP on a domain controller / single server farm](Using-CredSSP-on-a-Domain-Controller)
+_[Using CredSSP on a domain controller / single server farm](Using-CredSSP-on-a-Domain-Controller)_
 
 ## Multilingual support
 
@@ -55,4 +55,4 @@ Resources inside the SharePointDSC module are categorized into 4 main groups.
 - Distributed Resources
 - Utility Resources
 
-To understand how to use these resources in your Configuration to avoid Syntax and undesired results go to our [Understanding Resources](Understanding-Resources) section.
+To understand how to use these resources in your Configuration to avoid Syntax and undesired results go to our _[Understanding Resources](Understanding-Resources)_ section.

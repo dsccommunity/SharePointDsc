@@ -12,14 +12,14 @@ The Get-TargetResource function should not return $null as a result. It may, how
 ```PowerShell
 function Get-TargetResource
 {
-	$nullreturn = @{
-            ServiceAppName = $ServiceAppName
-            Name = $Name
-            RequestLimit = $null
-            WaitTime = $null
-            Ensure = "Absent"
-	}
-	return $nullreturn
+    $nullreturn = @{
+      ServiceAppName = $ServiceAppName
+      Name           = $Name
+      RequestLimit   = $null
+      WaitTime       = $null
+      Ensure         = "Absent"
+    }
+    return $nullreturn
 }
 ```
 

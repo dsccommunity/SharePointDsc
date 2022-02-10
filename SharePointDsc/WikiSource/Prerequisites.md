@@ -5,6 +5,6 @@ To use DSC on earlier versions of Windows, install the Windows Management Framew
 
 However it is strongly recommended that PowerShell 5.0 (or above) is used, as it adds support for the PsDscRunAsCredential parameter and has overall better performance and troubleshooting capabilities.
 
-The logic behind this is explained on the page "[Remote sessions and the InstallAccount variable](Remote-sessions-and-the-InstallAccount-variable)" page.
+The logic behind this is explained on the page _[Remote sessions and the InstallAccount variable](Remote-sessions-and-the-InstallAccount-variable)_ page.
 
 [PowerShell 5.1](https://www.microsoft.com/en-us/download/details.aspx?id=54616) includes significant improvements in Desired State Configuration and PowerShell Script Debugging.

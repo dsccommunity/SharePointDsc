@@ -19,9 +19,9 @@ These resources can manage site configuring for tasks such as bindings, or remov
 
 Available at [https://www.powershellgallery.com/packages/xCredSSP](https://www.powershellgallery.com/packages/xCredSSP)
 
-The xCredSSP module is a simple way to automate CredSSP configuration. See [Remote sessions and the InstallAccount variable](Remote-sessions-and-the-InstallAccount-variable) for more information on this.
+The xCredSSP module is a simple way to automate CredSSP configuration. See _[Remote sessions and the InstallAccount variable](Remote-sessions-and-the-InstallAccount-variable)_ for more information on this.
 
-## SchannelDsc
+## SChannelDsc
 
 Available at [https://www.powershellgallery.com/packages/SchannelDsc](https://www.powershellgallery.com/packages/SchannelDsc)
 
