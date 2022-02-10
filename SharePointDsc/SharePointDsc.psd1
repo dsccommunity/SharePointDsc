@@ -48,12 +48,7 @@
     # ProcessorArchitecture = ''
 
     # Modules that must be imported into the global environment prior to importing this module
-    # RequiredModules      = @(
-    #     @{
-    #         ModuleName      = "ReverseDSC"
-    #         RequiredVersion = "2.0.0.7"
-    #     }
-    # )
+    # RequiredModules      = @()
 
     # Assemblies that must be loaded prior to importing this module
     # RequiredAssemblies = @()

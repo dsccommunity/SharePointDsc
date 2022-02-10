@@ -1768,7 +1768,7 @@ try
                     Username = 'contoso\\user1'
                     PermissionLevel = 'Full Control'
                     ActAsSystemAccount = \$True
-                },
+                }
                 MSFT_SPWebPolicyPermissions {
                     Username = 'contoso\\Group 1'
                     PermissionLevel = 'Full Read'
