@@ -1582,8 +1582,8 @@ function Export-SPConfiguration
         $BinaryLocation
     )
 
-    $reverseDSCVersion = [Version]"2.0.0.7"
-    $reverseDSCModule = Get-Module ReverseDsc -ListAvailable | Where-Object -FilterScript { $_.Version -eq $reverseDSCVersion }
+    $reverseDSCVersion = [Version]"2.0.0.10"
+    $reverseDSCModule = Get-Module ReverseDsc -ListAvailable | Where-Object -FilterScript { $_.Version -ge $reverseDSCVersion }
     if ($null -eq $reverseDSCModule)
     {
         Write-Host "[ERROR} ReverseDsc v$($reverseDSCVersion.ToString()) could not be found. Make sure you have this module installed before running this cmdlet!" -ForegroundColor Red
