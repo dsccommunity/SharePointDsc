@@ -27,7 +27,10 @@
         'output/RequiredModules'.
 
     .PARAMETER PesterScript
-        Not yet written.
+        One or more paths that will override the Pester configuration in build
+        configuration file when running the build task Invoke_Pester_Tests.
+
+        If running Pester 5 test, use the alias PesterPath to be future-proof.
 
     .PARAMETER PesterTag
         Filter which tags to run when invoking Pester tests. This is used in the
@@ -85,6 +88,8 @@ param
     $RequiredModulesDirectory = $(Join-Path 'output' 'RequiredModules'),
 
     [Parameter()]
+    # This alias is to prepare for the rename of this parameter to PesterPath when Pester 4 support is removed
+    [Alias('PesterPath')]
     [System.Object[]]
     $PesterScript,
 
@@ -217,6 +222,38 @@ process
         if ($BuildInfo.TaskHeader)
         {
             Set-BuildHeader -Script ([scriptblock]::Create($BuildInfo.TaskHeader))
+        }
+
+        <#
+            Add BuildModuleOutput to PSModule Path environment variable.
+            Moved here (not in begin block) because build file can contains BuiltSubModuleDirectory value.
+        #>
+        if ($BuiltModuleSubdirectory)
+        {
+            if (-not (Split-Path -IsAbsolute -Path $BuiltModuleSubdirectory))
+            {
+                $BuildModuleOutput = Join-Path -Path $OutputDirectory -ChildPath $BuiltModuleSubdirectory
+            }
+            else
+            {
+                $BuildModuleOutput = $BuiltModuleSubdirectory
+            }
+        } # test if BuiltModuleSubDirectory set in build config file
+        elseif ($BuildInfo.ContainsKey('BuiltModuleSubDirectory'))
+        {
+            $BuildModuleOutput = Join-Path -Path $OutputDirectory -ChildPath $BuildInfo['BuiltModuleSubdirectory']
+        }
+        else
+        {
+            $BuildModuleOutput = $OutputDirectory
+        }
+
+        # Pre-pending $BuildModuleOutput folder to PSModulePath to resolve built module from this folder.
+        if ($powerShellModulePaths -notcontains $BuildModuleOutput)
+        {
+            Write-Host -Object "[build] Pre-pending '$BuildModuleOutput' folder to PSModulePath" -ForegroundColor Green
+
+            $env:PSModulePath = $BuildModuleOutput + [System.IO.Path]::PathSeparator + $env:PSModulePath
         }
 
         <#
@@ -401,30 +438,6 @@ Begin
             {
                 Write-Warning -Message "Some required Modules are missing, make sure you first run with the '-ResolveDependency' parameter. Running 'build.ps1 -ResolveDependency -Tasks noop' will pull required modules without running the build task."
             }
-        }
-
-        if ($BuiltModuleSubdirectory)
-        {
-            if (-not (Split-Path -IsAbsolute -Path $BuiltModuleSubdirectory))
-            {
-                $BuildModuleOutput = Join-Path -Path $OutputDirectory -ChildPath $BuiltModuleSubdirectory
-            }
-            else
-            {
-                $BuildModuleOutput = $BuiltModuleSubdirectory
-            }
-        }
-        else
-        {
-            $BuildModuleOutput = $OutputDirectory
-        }
-
-        # Pre-pending $BuildModuleOutput folder to PSModulePath to resolve built module from this folder.
-        if ($powerShellModulePaths -notcontains $BuildModuleOutput)
-        {
-            Write-Host -Object "[pre-build] Pre-pending '$BuildModuleOutput' folder to PSModulePath" -ForegroundColor Green
-
-            $env:PSModulePath = $BuildModuleOutput + [System.IO.Path]::PathSeparator + $env:PSModulePath
         }
 
         <#

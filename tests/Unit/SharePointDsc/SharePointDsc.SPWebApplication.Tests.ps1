@@ -50,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
                 try
@@ -1949,7 +1949,7 @@ try
                 MSFT_SPWebAppSiteDataServers {
                     Zone = 'Default'
                     Uri = 'http://spbackend'
-                },
+                }
                 MSFT_SPWebAppSiteDataServers {
                     Zone = 'Intranet'
                     Uri = 'http://spbackend2'

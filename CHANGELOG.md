@@ -9,11 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - SharePointDsc
   - Added generic unit tests files to quickly run all or a specific unit test
+  - Updated pipeline scripts to a recent version
 - SPTrustedIdentityTokenIssuer
   - Added parameters to support OIDC authentication in SharePoint Server Subscription Edition
+- SPWebAppPeoplePickerSettings
+  - Added the PeopleEditorOnlyResolveWithinSiteCollection parameter to the resource
 
 ### Changed
 
+- SharePointDsc
+  - Updated ReverseDsc version requirement to 2.0.0.10 to fix an issue
+    with Exporting an array of CIM instances
 - SPFarm
   - Suppress a useless reboot that was triggered once a server joined the farm
   - Suppress a useless 5 minutes sleep triggered once a server joined the farm

@@ -49,7 +49,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Mocks for all contexts
                 Mock -CommandName Set-SPLogLevel -MockWith { }
@@ -966,7 +966,7 @@ try
             Name                 = "Export";
             PsDscRunAsCredential = $Credsspfarm;
             SPLogLevelSetting    = @(
-                MSFT_SPLogLevelItem {TraceLevel="Default"; Name="Administration"; EventLevel="Default"; Area="Access Services"},
+                MSFT_SPLogLevelItem {TraceLevel="Default"; Name="Administration"; EventLevel="Default"; Area="Access Services"}
                 MSFT_SPLogLevelItem {TraceLevel="Default"; Name="General"; EventLevel="Default"; Area="SharePoint Server"}
             );
         }
