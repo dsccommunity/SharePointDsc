@@ -246,7 +246,7 @@ function Add-SPDscConfigDBLock
         $command.Connection = $connection
 
         # Added $Database just in case multiple farms are added at once.
-        $command.CommandText = "CREATE TABLE ##SPDscLock$Database (Locked BIT)"
+        $command.CommandText = "CREATE TABLE [##SPDscLock$Database] (Locked BIT)"
         $null = $command.ExecuteNonQuery()
     }
     finally
