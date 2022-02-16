@@ -23,7 +23,8 @@ servers provisioning a cache at the same time. Note, this approach only makes
 a server check the others for distributed cache, it does not provision the
 cache automatically on all servers. If a previous server in the sequence does
 not appear to be running distributed cache after 30 minutes, the local server
-that was waiting will begin anyway.
+that was waiting will begin anyway. The expected values for ServerProvisionOrder 
+are the hostnames `$env:COMPUTERNAME` of the servers.
 
 The default value for the Ensure parameter is Present. When not specifying this
 parameter, the distributed cache is provisioned.
