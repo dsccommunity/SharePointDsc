@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added parameters to support OIDC authentication in SharePoint Server Subscription Edition
 - SPWebAppPeoplePickerSettings
   - Added the PeopleEditorOnlyResolveWithinSiteCollection parameter to the resource
+- SPDistributedCacheService
+  - Added documentation to clarify the use of the ServerProvisionOrder parameter
 
 ### Changed
 
