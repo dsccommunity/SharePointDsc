@@ -28,6 +28,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - SPTrustedRootAuthority
   - Fixed issue where certificates not in the Personal store could not be used
+- Add-SPDscConfigDBLock
+  - Fixed issue where a Farm configuration Database could not contain a dash '-'
 
 ## [5.0.0] - 2021-12-17
 
