@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SharePointDsc
   - Added generic unit tests files to quickly run all or a specific unit test
   - Updated pipeline scripts to a recent version
+  - Added a extensive flexible configuration to deploy a SharePoint environment
 - SPTrustedIdentityTokenIssuer
   - Added parameters to support OIDC authentication in SharePoint Server Subscription Edition
 - SPWebAppPeoplePickerSettings
@@ -26,6 +27,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- SPSearchIndexPartition
+  - Fixed issue where the Get method returned multiple values when using multiple
+    index components
 - SPTrustedRootAuthority
   - Fixed issue where certificates not in the Personal store could not be used
 
