@@ -1734,4 +1734,5 @@ if ($validConfig -eq $false)
     WriteError -Message " "
     WriteError -Message "Validation failed! Configuration contains errors."
 }
+
 return $validConfig

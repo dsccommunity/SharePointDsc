@@ -621,14 +621,14 @@ try
                     $result = @'
         SPSearchTopology [0-9A-Fa-f]{8}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{12}
         {
-            Admin                   = "\$ConfigurationData.NonNodeData.SearchAdminServers";
-            AnalyticsProcessing     = "\$ConfigurationData.NonNodeData.SearchAnalyticsProcessingServers";
-            ContentProcessing       = "\$ConfigurationData.NonNodeData.SearchContentProcessingServers";
-            Crawler                 = "\$ConfigurationData.NonNodeData.SearchCrawlerServers";
+            Admin                   = \$ConfigurationData.NonNodeData.SearchAdminServers;
+            AnalyticsProcessing     = \$ConfigurationData.NonNodeData.SearchAnalyticsProcessingServers;
+            ContentProcessing       = \$ConfigurationData.NonNodeData.SearchContentProcessingServers;
+            Crawler                 = \$ConfigurationData.NonNodeData.SearchCrawlerServers;
             FirstPartitionDirectory = "I:\\SearchIndexes\\0";
-            IndexPartition          = "\$ConfigurationData.NonNodeData.SearchIndexPartitionServers";
+            IndexPartition          = \$ConfigurationData.NonNodeData.SearchIndexPartitionServers;
             PsDscRunAsCredential    = \$Credsspfarm;
-            QueryProcessing         = "\$ConfigurationData.NonNodeData.QueryProcessingServers";
+            QueryProcessing         = \$ConfigurationData.NonNodeData.QueryProcessingServers;
             ServiceAppName          = "Search Service Application";
         }
 

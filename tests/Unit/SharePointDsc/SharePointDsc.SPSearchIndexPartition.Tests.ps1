@@ -260,7 +260,7 @@ try
             Index                = 1;
             PsDscRunAsCredential = \$Credsspfarm;
             RootDirectory        = "I:\\SearchIndexes\\1";
-            Servers              = "\$ConfigurationData.NonNodeData.SearchIndexPartitionServers";
+            Servers              = \$ConfigurationData.NonNodeData.SearchIndexPartitionServers;
             ServiceAppName       = "Search Service Application";
         }
 

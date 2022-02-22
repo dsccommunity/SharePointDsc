@@ -23,7 +23,7 @@
     'DscResource.DocGenerator'  = 'latest'
 
     # Required for examples
-    xWebAdministration          = '3.1.0'
+    xWebAdministration          = 'latest'
 
     # Required for Export of Config
     ReverseDSC                  = "2.0.0.10"
