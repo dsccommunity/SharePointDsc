@@ -1,4 +1,4 @@
-﻿### NOTE: This script hasn't been fully tested yet. We are in the process of doing that.
+### NOTE: This script hasn't been fully tested yet. We are in the process of doing that.
 ###       But wanted to share it anyways, so it can be used as an example by others.
 
 ##### GENERIC VARIABLES #####

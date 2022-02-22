@@ -1,4 +1,4 @@
-﻿#region ##### FUNCTIONS #####
+#region ##### FUNCTIONS #####
 function WriteLog
 {
     param

@@ -1,4 +1,4 @@
-﻿Configuration Deploy_PrepServers
+Configuration Deploy_PrepServers
 {
     param
     (
