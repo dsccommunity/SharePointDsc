@@ -34,12 +34,6 @@ stages:
               }
               Write-Host -Object "##vso[build.updatebuildnumber]$($gitVersionObject.FullSemVer)"
             displayName: Calculate ModuleVersion (GitVersion)
-          # - task: GitVersion@5
-          #   name: gitVersion
-          #   displayName: 'Evaluate Next Version'
-          #   inputs:
-          #     runtime: 'core'
-          #     configFilePath: 'GitVersion.yml'
 
           - task: PowerShell@2
             name: package
@@ -49,7 +43,7 @@ stages:
               arguments: '-ResolveDependency -tasks pack'
               pwsh: true
             env:
-              ModuleVersion: $(gitVersion.NuGetVersionV2)
+              ModuleVersion: $(NuGetVersionV2)
 
           - task: PublishPipelineArtifact@1
             displayName: 'Publish Pipeline Artifact'
