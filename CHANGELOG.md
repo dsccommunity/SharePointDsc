@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SharePointDsc
   - Added generic unit tests files to quickly run all or a specific unit test
   - Updated pipeline scripts to a recent version
-  - Added a extensive flexible configuration to deploy a SharePoint environment
+  - Added an extensive flexible configuration to deploy a SharePoint environment
 - SPDistributedCacheService
   - Added documentation to clarify the use of the ServerProvisionOrder parameter
 - SPTrustedIdentityTokenIssuer
