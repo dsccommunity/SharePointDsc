@@ -10,12 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SharePointDsc
   - Added generic unit tests files to quickly run all or a specific unit test
   - Updated pipeline scripts to a recent version
+  - Added an extensive flexible configuration to deploy a SharePoint environment
+- SPDistributedCacheService
+  - Added documentation to clarify the use of the ServerProvisionOrder parameter
 - SPTrustedIdentityTokenIssuer
   - Added parameters to support OIDC authentication in SharePoint Server Subscription Edition
 - SPWebAppPeoplePickerSettings
   - Added the PeopleEditorOnlyResolveWithinSiteCollection parameter to the resource
-- SPDistributedCacheService
-  - Added documentation to clarify the use of the ServerProvisionOrder parameter
 
 ### Changed
 
@@ -28,6 +29,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- SPSearchIndexPartition
+  - Fixed issue where the Get method returned multiple values when using multiple
+    index components
+  - Fixed issue the Export would place quotes around a variable in the output
+- SPSearchTopology
+  - Fixed issue the Export would place quotes around a variable in the output
 - SPTrustedRootAuthority
   - Fixed issue where certificates not in the Personal store could not be used
 - Add-SPDscConfigDBLock

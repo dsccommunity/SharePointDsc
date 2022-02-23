@@ -94,10 +94,15 @@ This means that the farm server configuration will likely be much larger than an
 configuration, but it also provides more flexibility in the implementation as all logical components are
 in one spot on one server.
 
+As an example, checkout the FarmDeployment folder in the repository. This folder contains a DSC configuration and several accompanying scripts that combined can be used to prepare and configure a SharePoint farm, in various setups. The configuration also configure other settings related to SharePoint, like disabling SSLv3. See [Instructions](Instructions) for more information.
+
 ## Examples
 
-In the module is an examples directory which demonstrates both a single server deployment, as well as the
-three configurations needed for the above mentioned multi-server example (so one "farm" configuration,
-then an app server and a front end server).
+The module also contains an Examples directory in which several examples are available:
+
+- Examples for each of the SharePointDsc resources
+- A single server deployment, where all SharePoint components are deployed to one server
+- A small farm deployment, with an application and a front end server
+
 These examples demonstrate the concepts discussed here and can be used as as starting point for your own
 configurations.

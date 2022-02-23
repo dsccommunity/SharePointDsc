@@ -35,7 +35,7 @@ function Get-TargetResource
                 Where-Object -FilterScript {
                 ($_.GetType().Name -eq "IndexComponent") `
                     -and ($_.IndexPartitionOrdinal -eq $params.Index)
-            }
+            } | Select-Object -First 1
 
         $IndexComponents = $searchComponent.ServerName
         $rootDirectory = $searchComponent.RootDirectory
@@ -286,7 +286,7 @@ function Export-TargetResource
                 $ssa = Get-SPEnterpriseSearchServiceApplication -Identity $ssa
                 $currentTopology = $ssa.ActiveTopology
                 $indexComponents = Get-SPEnterpriseSearchComponent -SearchTopology $currentTopology | `
-                    Where-Object -FilterScript {
+                        Where-Object -FilterScript {
                         $_.GetType().Name -eq "IndexComponent"
                     }
 
@@ -318,6 +318,7 @@ function Export-TargetResource
 
                             $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
                             $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+                            $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "Servers"
                             $PartialContent += $currentBlock
                             $PartialContent += "        }`r`n"
                             $Content += $PartialContent
