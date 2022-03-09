@@ -49,7 +49,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
                 $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
@@ -136,17 +136,15 @@ try
                         WebAppUrl                    = "http://sharepoint.contoso.com"
                         SearchActiveDirectoryDomains = @(
                             (New-CimInstance -ClassName MSFT_SPWebAppPPSearchDomain -Property @{
-                                FQDN            = "contoso.intra"
-                                IsForest        = $false
-                                AccessAccount   = (New-CimInstance -ClassName MSFT_Credential `
+                                FQDN          = "contoso.intra"
+                                IsForest      = $false
+                                AccessAccount = (New-CimInstance -ClassName MSFT_Credential `
                                         -Property @{
                                         Username = [string]$mockAccount.UserName;
                                         Password = [string]$mockAccount.Password;
                                     } `
                                         -Namespace root/microsoft/windows/desiredstateconfiguration `
                                         -ClientOnly)
-                                CustomFilter    = "(company=Contoso)"
-                                ShortDomainName = "CONTOSO"
                             } -ClientOnly)
                         )
                     }
@@ -223,22 +221,29 @@ try
 
                     Mock -CommandName Get-SPWebApplication -MockWith {
                         $searchADdom = New-Object -TypeName "System.Collections.Generic.List[System.Object]"
-                        $searchDom1 = New-Object -TypeName "Object" | `
-                                Add-Member -MemberType NoteProperty `
-                                -Name DomainName `
-                                -Value ( "contoso.intra" ) -PassThru | `
-                                    Add-Member -MemberType NoteProperty `
-                                    -Name IsForest `
-                                    -Value ( $false ) -PassThru | `
-                                        Add-Member -MemberType NoteProperty `
-                                        -Name LoginName `
-                                        -Value ( 'wrongUsername' ) -PassThru | `
-                                            Add-Member -MemberType NoteProperty `
-                                            -Name CustomFilter `
-                                            -Value ( "(company=Fabrikam)" ) -PassThru | `
-                                                Add-Member -MemberType NoteProperty `
-                                                -Name ShortDomainName `
-                                                -Value ( "FABRIKAM" ) -PassThru
+                        # Create a SPPeoplePickerSearchActiveDirectoryDomain
+                        $searchDom1 = New-Object -TypeName "Object"
+                        $addMember = @{
+                            InputObject = $searchDom1
+                            MemberType  = 'NoteProperty'
+                        }
+                        Add-Member @addMember -Name DomainName -Value "contoso.intra"
+                        Add-Member @addMember -Name IsForest -Value $false
+                        Add-Member @addMember -Name LoginName -Value "wrongUsername"
+                        Add-Member @addMember -Name CustomFilter -Value "(company=Fabrikam)"
+                        Add-Member @addMember -Name ShortDomainName -Value "FABRIKAM"
+                        $addMemberSetPassword = @{
+                            InputObject = $searchDom1
+                            MemberType  = 'ScriptMethod'
+                            Name        = 'SetPassword'
+                            Value       = {
+                                param(
+                                    [securestring]
+                                    $Password
+                                )
+                            }
+                        }
+                        Add-Member @addMemberSetPassword
                         $searchADdom.Add($searchDom1)
 
                         $returnval = @{
