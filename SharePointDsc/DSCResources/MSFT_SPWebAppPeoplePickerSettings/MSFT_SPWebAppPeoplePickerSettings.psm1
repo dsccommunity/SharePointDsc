@@ -213,11 +213,11 @@ function Set-TargetResource
                             $adsearchobj.SetPassword($accessAccountPassword)
                         }
                     }
-                    if ($searchADDomain.ContainsKey('CustomFilter'))
+                    if ($null -ne ($searchADDomain.CimInstanceProperties | Where-Object -FilterScript { $_.Name -eq 'CustomFilter' }))
                     {
                         $adsearchobj.CustomFilter = $searchADDomain.CustomFilter
                     }
-                    if ($searchADDomain.ContainsKey('ShortDomainName'))
+                    if ($null -ne ($searchADDomain.CimInstanceProperties | Where-Object -FilterScript { $_.Name -eq 'ShortDomainName' }))
                     {
                         $adsearchobj.ShortDomainName = $searchADDomain.ShortDomainName
                     }
@@ -226,7 +226,7 @@ function Set-TargetResource
                 }
                 else
                 {
-                    if ($searchADDomain.ContainsKey('AccessAccount'))
+                    if ($null -ne ($searchADDomain.CimInstanceProperties | Where-Object -FilterScript { $_.Name -eq 'AccessAccount' }))
                     {
                         $configuredDomain.LoginName = $searchADDomain.AccessAccount.UserName
 
@@ -240,11 +240,11 @@ function Set-TargetResource
                             $configuredDomain.SetPassword($accessAccountPassword)
                         }
                     }
-                    if ($searchADDomain.ContainsKey('CustomFilter'))
+                    if ($null -ne ($searchADDomain.CimInstanceProperties | Where-Object -FilterScript { $_.Name -eq 'CustomFilter' }))
                     {
                         $configuredDomain.CustomFilter = $searchADDomain.CustomFilter
                     }
-                    if ($searchADDomain.ContainsKey('ShortDomainName'))
+                    if ($null -ne ($searchADDomain.CimInstanceProperties | Where-Object -FilterScript { $_.Name -eq 'ShortDomainName' }))
                     {
                         $configuredDomain.ShortDomainName = $searchADDomain.ShortDomainName
                     }
