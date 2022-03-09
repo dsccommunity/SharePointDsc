@@ -32,7 +32,7 @@ function Invoke-TestSetup
 
     $script:testEnvironment = Initialize-TestEnvironment `
         -DSCModuleName $script:DSCModuleName `
-        -DSCResourceName $script:DSCResourceFullName `
+        -DscResourceName $script:DSCResourceFullName `
         -ResourceType 'Mof' `
         -TestType 'Unit'
 }
@@ -130,21 +130,23 @@ try
                 }
             }
 
-            Context -Name "Search domain settings do not match actual values" -Fixture {
+            Context -Name "Search domain settings do not match actual values (Domain does not exist)" -Fixture {
                 BeforeAll {
                     $testParams = @{
                         WebAppUrl                    = "http://sharepoint.contoso.com"
                         SearchActiveDirectoryDomains = @(
                             (New-CimInstance -ClassName MSFT_SPWebAppPPSearchDomain -Property @{
-                                FQDN          = "contoso.intra"
-                                IsForest      = $false
-                                AccessAccount = (New-CimInstance -ClassName MSFT_Credential `
+                                FQDN            = "contoso.intra"
+                                IsForest        = $false
+                                AccessAccount   = (New-CimInstance -ClassName MSFT_Credential `
                                         -Property @{
                                         Username = [string]$mockAccount.UserName;
                                         Password = [string]$mockAccount.Password;
                                     } `
                                         -Namespace root/microsoft/windows/desiredstateconfiguration `
                                         -ClientOnly)
+                                CustomFilter    = "(company=Contoso)"
+                                ShortDomainName = "CONTOSO"
                             } -ClientOnly)
                         )
                     }
@@ -161,6 +163,82 @@ try
                                         Add-Member -MemberType NoteProperty `
                                         -Name LoginName `
                                         -Value ( $mockAccount.UserName ) -PassThru
+                        $searchADdom.Add($searchDom1)
+
+                        $returnval = @{
+                            PeoplePickerSettings = @{
+                                ActiveDirectoryCustomFilter                 = "()"
+                                ActiveDirectoryCustomQuery                  = "()"
+                                ActiveDirectorySearchTimeout                = @{
+                                    TotalSeconds = 10
+                                }
+                                OnlySearchWithinSiteCollection              = $true
+                                PeopleEditorOnlyResolveWithinSiteCollection = $true
+                                SearchActiveDirectoryDomains                = $searchADdom
+                            }
+                        }
+                        $returnval = $returnval | Add-Member -MemberType ScriptMethod -Name Update -Value {
+                            $Global:SPDscWebApplicationUpdateCalled = $true
+                        } -PassThru
+
+                        return $returnval
+                    }
+                }
+
+                It "Should return SearchTimeOut=10 from the get method" {
+                    (Get-TargetResource @testParams).ActiveDirectorySearchTimeout | Should -Be 10
+                }
+
+                It "Should return false from the test method" {
+                    Test-TargetResource @testParams | Should -Be $false
+                }
+
+                It "Should update the people picker settings" {
+                    $Global:SPDscWebApplicationUpdateCalled = $false
+                    Set-TargetResource @testParams
+                    $Global:SPDscWebApplicationUpdateCalled | Should -Be $true
+                }
+            }
+
+            Context -Name "Search domain settings do not match actual values (Domain exists)" -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl                    = "http://sharepoint.contoso.com"
+                        SearchActiveDirectoryDomains = @(
+                            (New-CimInstance -ClassName MSFT_SPWebAppPPSearchDomain -Property @{
+                                FQDN            = "contoso.intra"
+                                IsForest        = $false
+                                AccessAccount   = (New-CimInstance -ClassName MSFT_Credential `
+                                        -Property @{
+                                        Username = [string]$mockAccount.UserName;
+                                        Password = [string]$mockAccount.Password;
+                                    } `
+                                        -Namespace root/microsoft/windows/desiredstateconfiguration `
+                                        -ClientOnly)
+                                CustomFilter    = "(company=Contoso)"
+                                ShortDomainName = "CONTOSO"
+                            } -ClientOnly)
+                        )
+                    }
+
+                    Mock -CommandName Get-SPWebApplication -MockWith {
+                        $searchADdom = New-Object -TypeName "System.Collections.Generic.List[System.Object]"
+                        $searchDom1 = New-Object -TypeName "Object" | `
+                                Add-Member -MemberType NoteProperty `
+                                -Name DomainName `
+                                -Value ( "contoso.intra" ) -PassThru | `
+                                    Add-Member -MemberType NoteProperty `
+                                    -Name IsForest `
+                                    -Value ( $false ) -PassThru | `
+                                        Add-Member -MemberType NoteProperty `
+                                        -Name LoginName `
+                                        -Value ( 'wrongUsername' ) -PassThru | `
+                                            Add-Member -MemberType NoteProperty `
+                                            -Name CustomFilter `
+                                            -Value ( "(company=Fabrikam)" ) -PassThru | `
+                                                Add-Member -MemberType NoteProperty `
+                                                -Name ShortDomainName `
+                                                -Value ( "FABRIKAM" ) -PassThru
                         $searchADdom.Add($searchDom1)
 
                         $returnval = @{
@@ -264,15 +342,17 @@ try
                         WebAppUrl                    = "http://sharepoint.contoso.com"
                         SearchActiveDirectoryDomains = @(
                             (New-CimInstance -ClassName MSFT_SPWebAppPPSearchDomain -Property @{
-                                FQDN          = "contoso.intra"
-                                IsForest      = $false
-                                AccessAccount = (New-CimInstance -ClassName MSFT_Credential `
+                                FQDN            = "contoso.intra"
+                                IsForest        = $false
+                                AccessAccount   = (New-CimInstance -ClassName MSFT_Credential `
                                         -Property @{
                                         Username = [string]$mockAccount.UserName;
                                         Password = [string]$mockAccount.Password;
                                     } `
                                         -Namespace root/microsoft/windows/desiredstateconfiguration `
                                         -ClientOnly)
+                                CustomFilter    = "(company=Contoso)"
+                                ShortDomainName = "CONTOSO"
                             } -ClientOnly)
                         )
                     }
@@ -288,7 +368,13 @@ try
                                     -Value ( $false ) -PassThru | `
                                         Add-Member -MemberType NoteProperty `
                                         -Name LoginName `
-                                        -Value ( $mockAccount.UserName ) -PassThru
+                                        -Value ( $mockAccount.UserName ) -PassThru | `
+                                            Add-Member -MemberType NoteProperty `
+                                            -Name CustomFilter `
+                                            -Value ( "(company=Contoso)" ) -PassThru | `
+                                                Add-Member -MemberType NoteProperty `
+                                                -Name ShortDomainName `
+                                                -Value ( "CONTOSO" ) -PassThru
                         $searchADdom.Add($searchDom1)
 
                         $returnval = @{
