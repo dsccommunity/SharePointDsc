@@ -64,10 +64,13 @@ Configuration Example
             ActiveDirectorySearchTimeout   = 30
             OnlySearchWithinSiteCollection = $false
             SearchActiveDirectoryDomains   = @(
-                MSFT_SPWebAppPPSearchDomain {
-                    FQDN          = "contoso.com"
-                    IsForest      = $false
-                    AccessAccount = $AccessAccount
+                MSFT_SPWebAppPPSearchDomain
+                {
+                    FQDN            = "contoso.com"
+                    IsForest        = $false
+                    AccessAccount   = $AccessAccount
+                    CustomFilter    = '(company=Contoso)'
+                    ShortDomainName = 'CONTOSO'
                 }
             )
             PsDscRunAsCredential           = $SetupAccount
