@@ -7,21 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- SPFarmPropertyBag
-  - Added support for boolean and int32 data types
-- SPInstall
-  - Added additional ExitCode for incorrect license key
-- SPShellAdmin
-  - Added additional logging to improve troubleshooting
+  - SPWebAppPeoplePickerSettings
+    - Added the CustomFilter parameter to the resource
+    - Added the ShortDomainName parameter to the resource
 
 ### Fixed
 
-- SPSearchServiceApp
-  - Fixed issue where the database permissions were not corrected for new
-    search service applications.
 - SPWebApplication
-  - Fixed an issue where the Set method tried to use the Parameter SecureSocketsLayer with
-    Set-SPWebApplication on SharePoint Server older than Subscription Edition.
+  - Fixed an issue where the Set method tried to use the Parameter SecureSocketsLayer with Set-SPWebApplication on SharePoint Server older than Subscription Edition.
+- SPWebAppPeoplePickerSettings
+  - Fixed an issue where the Set method would not update a non mandatory parameter on an existing SPWebAppPPSearchDomain
 
 ## [5.1.0] - 2022-02-24
 
