@@ -618,10 +618,6 @@ function Set-TargetResource
                 {
                     $updateWebAppParams.Add("AllowLegacyEncryption", $params.AllowLegacyEncryption)
                 }
-                if ((New-Object -TypeName System.Uri $params.WebAppUrl).Scheme -eq "https")
-                {
-                    $updateWebAppParams.Add("SecureSocketsLayer", $true)
-                }
 
                 $productVersion = Get-SPDscInstalledProductVersion
                 if ($productVersion.FileMajorPart -eq 16 -and `
@@ -635,6 +631,11 @@ function Set-TargetResource
                     if ($params.ContainsKey("Port") -eq $true)
                     {
                         $updateWebAppParams.Add("Port", $params.Port)
+                    }
+
+                    if ((New-Object -TypeName System.Uri $params.WebAppUrl).Scheme -eq "https")
+                    {
+                        $updateWebAppParams.Add("SecureSocketsLayer", $true)
                     }
                 }
 
