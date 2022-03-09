@@ -223,15 +223,11 @@ try
                         $searchADdom = New-Object -TypeName "System.Collections.Generic.List[System.Object]"
                         # Create a SPPeoplePickerSearchActiveDirectoryDomain
                         $searchDom1 = New-Object -TypeName "Object"
-                        $addMember = @{
-                            InputObject = $searchDom1
-                            MemberType  = 'NoteProperty'
-                        }
-                        Add-Member @addMember -Name DomainName -Value "contoso.intra"
-                        Add-Member @addMember -Name IsForest -Value $false
-                        Add-Member @addMember -Name LoginName -Value "wrongUsername"
-                        Add-Member @addMember -Name CustomFilter -Value "(company=Fabrikam)"
-                        Add-Member @addMember -Name ShortDomainName -Value "FABRIKAM"
+                        Add-Member -InputObject $searchDom1 -MemberType 'NoteProperty' -Name DomainName -Value "contoso.intra"
+                        Add-Member -InputObject $searchDom1 -MemberType 'NoteProperty' -Name IsForest -Value $false
+                        Add-Member -InputObject $searchDom1 -MemberType 'NoteProperty' -Name LoginName -Value "wrongUsername"
+                        Add-Member -InputObject $searchDom1 -MemberType 'NoteProperty' -Name CustomFilter -Value "(company=Fabrikam)"
+                        Add-Member -InputObject $searchDom1 -MemberType 'NoteProperty' -Name ShortDomainName -Value "FABRIKAM"
                         $addMemberSetPassword = @{
                             InputObject = $searchDom1
                             MemberType  = 'ScriptMethod'
