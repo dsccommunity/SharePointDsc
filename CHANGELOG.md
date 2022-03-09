@@ -5,9 +5,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+  - SPWebAppPeoplePickerSettings
+    - Added the CustomFilter parameter to the resource
+    - Added the ShortDomainName parameter to the resource
+
 ### Fixed
+
 - SPWebApplication
   - Fixed an issue where the Set method tried to use the Parameter SecureSocketsLayer with Set-SPWebApplication on SharePoint Server older than Subscription Edition.
+- SPWebAppPeoplePickerSettings
+  - Fixed an issue where the Set method would not update a non mandatory parameter on an existing SPWebAppPPSearchDomain
 
 ## [5.1.0] - 2022-02-24
 
