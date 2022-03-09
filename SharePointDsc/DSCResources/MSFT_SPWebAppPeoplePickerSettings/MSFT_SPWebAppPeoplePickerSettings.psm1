@@ -61,6 +61,8 @@ function Get-TargetResource
             $searchADDomain.FQDN = $searchDomain.DomainName
             $searchADDomain.IsForest = $searchDomain.IsForest
             $searchADDomain.AccessAccount = $searchDomain.LoginName
+            $searchADDomain.CustomFilter = $searchDomain.CustomFilter
+            $searchADDomain.ShortDomainName = $searchDomain.ShortDomainName
             $searchADDomains += $searchADDomain
         }
 
@@ -211,8 +213,41 @@ function Set-TargetResource
                             $adsearchobj.SetPassword($accessAccountPassword)
                         }
                     }
+                    if ($searchADDomain.ContainsKey('CustomFilter'))
+                    {
+                        $adsearchobj.CustomFilter = $searchADDomain.CustomFilter
+                    }
+                    if ($searchADDomain.ContainsKey('ShortDomainName'))
+                    {
+                        $adsearchobj.ShortDomainName = $searchADDomain.ShortDomainName
+                    }
 
                     $wa.PeoplePickerSettings.SearchActiveDirectoryDomains.Add($adsearchobj)
+                }
+                else
+                {
+                    if ($searchADDomain.ContainsKey('AccessAccount'))
+                    {
+                        $configuredDomain.LoginName = $searchADDomain.AccessAccount.UserName
+
+                        if ([string]::IsNullOrEmpty($searchADDomain.AccessAccount.Password))
+                        {
+                            $configuredDomain.SetPassword($null)
+                        }
+                        else
+                        {
+                            $accessAccountPassword = ConvertTo-SecureString $searchADDomain.AccessAccount.Password -AsPlainText -Force
+                            $configuredDomain.SetPassword($accessAccountPassword)
+                        }
+                    }
+                    if ($searchADDomain.ContainsKey('CustomFilter'))
+                    {
+                        $configuredDomain.CustomFilter = $searchADDomain.CustomFilter
+                    }
+                    if ($searchADDomain.ContainsKey('ShortDomainName'))
+                    {
+                        $configuredDomain.ShortDomainName = $searchADDomain.ShortDomainName
+                    }
                 }
             }
 
@@ -318,6 +353,36 @@ function Test-TargetResource
 
             Write-Verbose -Message "Test-TargetResource returned false"
             return $false
+        }
+        else
+        {
+            if ($searchADDomain.ContainsKey('AccessAccount') -and $searchADDomain.AccessAccount.UserName -ne $specifiedDomain.LoginName)
+            {
+                $message = "Current LoginName Property of SearchActiveDirectoryDomain $searchADDomain does not match the desired state."
+                Write-Verbose -Message $message
+                Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
+                Write-Verbose -Message "Test-TargetResource returned false"
+                return $false
+            }
+            if ($searchADDomain.ContainsKey('CustomFilter') -and $searchADDomain.CustomFilter -ne $specifiedDomain.CustomFilter)
+            {
+                $message = "Current CustomFilter Property of SearchActiveDirectoryDomain $searchADDomain  does not match the desired state."
+                Write-Verbose -Message $message
+                Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
+                Write-Verbose -Message "Test-TargetResource returned false"
+                return $false
+            }
+            if ($searchADDomain.ContainsKey('ShortDomainName') -and $searchADDomain.ShortDomainName -ne $specifiedDomain.ShortDomainName)
+            {
+                $message = "Current ShortDomainName Property of SearchActiveDirectoryDomain $searchADDomain  does not match the desired state."
+                Write-Verbose -Message $message
+                Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
+                Write-Verbose -Message "Test-TargetResource returned false"
+                return $false
+            }
         }
     }
 
