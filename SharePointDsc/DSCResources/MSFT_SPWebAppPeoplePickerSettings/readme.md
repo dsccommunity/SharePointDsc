@@ -15,3 +15,8 @@ queried before you can configure the SearchActiveDirectoryDomains.
 The encryption key must be set on every front-end web server in the farm
 on which SharePoint is installed:
 https://technet.microsoft.com/en-us/library/gg602075(v=office.15).aspx#section3
+
+Due to a SharePoint API limitation a password missmatch can not be detected. 
+To update the password after the initial add to the SearchActiveDirectoryDomains 
+the `SPPeoplePickerSearchActiveDirectoryDomain` has to be removed from the SearchActiveDirectoryDomains or
+the the password needs to be updated with the `SetPassword(SecureString)` Method directly.
