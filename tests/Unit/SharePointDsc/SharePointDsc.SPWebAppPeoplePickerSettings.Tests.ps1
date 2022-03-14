@@ -216,6 +216,19 @@ try
                                 CustomFilter    = "(company=Contoso)"
                                 ShortDomainName = "CONTOSO"
                             } -ClientOnly)
+                            (New-CimInstance -ClassName MSFT_SPWebAppPPSearchDomain -Property @{
+                                FQDN            = "fabrikam.intra"
+                                IsForest        = $false
+                                AccessAccount   = (New-CimInstance -ClassName MSFT_Credential `
+                                        -Property @{
+                                        Username = [string]$mockAccount.UserName;
+                                        Password = [string]$null;
+                                    } `
+                                        -Namespace root/microsoft/windows/desiredstateconfiguration `
+                                        -ClientOnly)
+                                CustomFilter    = "(company=FABRIKAM)"
+                                ShortDomainName = "FABRIKAM"
+                            } -ClientOnly)
                         )
                     }
 
@@ -241,6 +254,27 @@ try
                         }
                         Add-Member @addMemberSetPassword
                         $searchADdom.Add($searchDom1)
+
+                        # Create a SPPeoplePickerSearchActiveDirectoryDomain
+                        $searchDom2 = New-Object -TypeName "Object"
+                        Add-Member -InputObject $searchDom2 -MemberType 'NoteProperty' -Name DomainName -Value "fabrikam.intra"
+                        Add-Member -InputObject $searchDom2 -MemberType 'NoteProperty' -Name IsForest -Value $false
+                        Add-Member -InputObject $searchDom2 -MemberType 'NoteProperty' -Name LoginName -Value "wrongUsername"
+                        Add-Member -InputObject $searchDom2 -MemberType 'NoteProperty' -Name CustomFilter -Value "(company=Fabrikam)"
+                        Add-Member -InputObject $searchDom2 -MemberType 'NoteProperty' -Name ShortDomainName -Value "FABRIKAM"
+                        $addMemberSetPassword = @{
+                            InputObject = $searchDom2
+                            MemberType  = 'ScriptMethod'
+                            Name        = 'SetPassword'
+                            Value       = {
+                                param(
+                                    [securestring]
+                                    $Password
+                                )
+                            }
+                        }
+                        Add-Member @addMemberSetPassword
+                        $searchADdom.Add($searchDom2)
 
                         $returnval = @{
                             PeoplePickerSettings = @{
