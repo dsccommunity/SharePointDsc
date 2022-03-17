@@ -202,8 +202,8 @@ function Get-TargetResource
                                 -Database $analyticsDB `
                                 -User $farmAccount `
                                 -DatabaseCredentials $params.DatabaseCredentials) -eq $false
+                        Write-Verbose -Message "Farm Account Permissions Need Correcting: $farmAccountPermissionsNeedCorrecting"
                     }
-                    Write-Verbose -Message "Farm Account Permissions Need Correcting: $farmAccountPermissionsNeedCorrecting"
                 }
 
                 Write-Verbose -Message "Checking Crawl Database(s)"
@@ -370,11 +370,13 @@ function Set-TargetResource
 
     $result = Get-TargetResource @PSBoundParameters
 
+    $newServiceApp = $false
+
     if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present")
     {
         # Create the service app as it doesn't exist
         Write-Verbose -Message "Creating Search Service Application $Name"
-        Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+        $newServiceApp = Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
             -ScriptBlock {
             $params = $args[0]
             $eventSource = $args[1]
@@ -469,8 +471,14 @@ function Set-TargetResource
                     Set-SPEnterpriseSearchServiceApplication @setParams
                 }
 
-                Write-Verbose -Message ("NOTE: Don't forget to configure a Search topology " + `
+                Write-Warning -Message ("NOTE: Don't forget to configure a Search topology " + `
                         "using the SPSearchTopology resource!")
+
+                return $true
+            }
+            else
+            {
+                return $false
             }
         }
     }
@@ -549,8 +557,9 @@ function Set-TargetResource
     # Only check and correct when Ensure=Present, FixFarmAccountPermissions=True and the permissions are incorrect
     if ($Ensure -eq "Present")
     {
-        if ($FixFarmAccountPermissions -eq $true -and `
-                $result.FixFarmAccountPermissions -eq $true)
+        if (($FixFarmAccountPermissions -eq $true -and `
+                    $result.FixFarmAccountPermissions -eq $true) -or `
+                $newServiceApp -eq $true)
         {
             Write-Verbose -Message "Fixing database permissions for Search Service Application $Name"
             Invoke-SPDscCommand -Arguments @($PSBoundParameters, $PSScriptRoot) `
@@ -876,7 +885,10 @@ function Test-TargetResource
             $message = ("Specified Default content access account is not in the desired state" + `
                     "Actual: $current Desired: $desired")
             Write-Verbose -Message $message
-            Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 1 `
+                -Source $MyInvocation.MyCommand.Source
             return $false
         }
     }
@@ -888,7 +900,10 @@ function Test-TargetResource
             $message = ("FixFarmAccountPermissions is set to True, but the Search databases " + `
                     "do not have the correct permissions")
             Write-Verbose -Message $message
-            Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 1 `
+                -Source $MyInvocation.MyCommand.Source
             return $false
         }
     }

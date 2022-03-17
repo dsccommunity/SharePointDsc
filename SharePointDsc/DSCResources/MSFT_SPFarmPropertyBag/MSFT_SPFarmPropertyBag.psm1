@@ -13,12 +13,38 @@ function Get-TargetResource
         $Value,
 
         [Parameter()]
+        [ValidateSet("Boolean", "String", "Int32")]
+        [System.String]
+        $ParameterType = 'String',
+
+        [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = 'Present'
     )
 
-    Write-Verbose -Message "Looking for SPFarm property '$Name'"
+    Write-Verbose -Message "Getting SPFarm property '$Key'"
+
+    if ($ParameterType -eq 'Boolean' -and $Value -notin @('True', 'False'))
+    {
+        $message = ("Value can only be True or False when ParameterType is Boolean. Current value: $Value")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
+    }
+
+    $int = 0
+    if ($ParameterType -eq 'Int32' -and [Int32]::TryParse($Value, [ref]$int) -eq $false)
+    {
+        $message = ("Value has to be a number when ParameterType is Int32. Current value: $Value")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
+    }
 
     $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
@@ -26,11 +52,11 @@ function Get-TargetResource
 
         try
         {
-            $spFarm = Get-SPFarm -ErrorAction SilentlyContinue
+            $spFarm = Get-SPFarm -ErrorAction SilentlyContinue -Verbose:$false
         }
         catch
         {
-            Write-Verbose -Message ("No local SharePoint farm was detected.")
+            Write-Verbose -Message ('No local SharePoint farm was detected.')
             return @{
                 Key    = $params.Key
                 Value  = $null
@@ -45,25 +71,53 @@ function Get-TargetResource
                 if ($spFarm.Properties.Contains($params.Key) -eq $true)
                 {
                     $localEnsure = "Present"
-                    $currentValue = $spFarm.Properties[$params.Key]
+                    $value = $spFarm.Properties[$params.Key]
+                    switch ($value.GetType().Name)
+                    {
+                        'Boolean'
+                        {
+                            $currentType = 'Boolean'
+                            if ($value)
+                            {
+                                $currentValue = 'true'
+                            }
+                            else
+                            {
+                                $currentValue = 'false'
+                            }
+                        }
+                        'String'
+                        {
+                            $currentType = 'String'
+                            $currentValue = $spFarm.Properties[$params.Key]
+                        }
+                        'Int32'
+                        {
+                            $currentType = 'Int32'
+                            $currentValue = $spFarm.Properties[$params.Key].ToString()
+                        }
+                    }
                 }
                 else
                 {
-                    $localEnsure = "Absent"
                     $currentValue = $null
+                    $currentType = ""
+                    $localEnsure = "Absent"
                 }
             }
         }
         else
         {
             $currentValue = $null
+            $currentType = ""
             $localEnsure = 'Absent'
         }
 
         return @{
-            Key    = $params.Key
-            Value  = $currentValue
-            Ensure = $localEnsure
+            Key           = $params.Key
+            Value         = $currentValue
+            ParameterType = $currentType
+            Ensure        = $localEnsure
         }
     }
     return $result
@@ -83,12 +137,38 @@ function Set-TargetResource()
         $Value,
 
         [Parameter()]
+        [ValidateSet("Boolean", "String", "Int32")]
+        [System.String]
+        $ParameterType = 'String',
+
+        [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = 'Present'
     )
 
-    Write-Verbose -Message "Setting SPFarm property '$Name'"
+    Write-Verbose -Message "Setting SPFarm property '$Key'"
+
+    if ($ParameterType -eq 'Boolean' -and $Value -notin @('True', 'False'))
+    {
+        $message = ("Value can only be True or False when ParameterType is Boolean. Current value: $Value")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
+    }
+
+    $int = 0
+    if ($ParameterType -eq 'Int32' -and [Int32]::TryParse($Value, [ref]$int) -eq $false)
+    {
+        $message = ("Value has to be a number when ParameterType is Int32. Current value: $Value")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
+    }
 
     Invoke-SPDscCommand -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
@@ -97,11 +177,11 @@ function Set-TargetResource()
 
         try
         {
-            $spFarm = Get-SPFarm -ErrorAction SilentlyContinue
+            $spFarm = Get-SPFarm -ErrorAction SilentlyContinue -Verbose:$false
         }
         catch
         {
-            $message = "No local SharePoint farm was detected."
+            $message = 'No local SharePoint farm was detected.'
             Add-SPDscEvent -Message $message `
                 -EntryType 'Error' `
                 -EventID 100 `
@@ -114,17 +194,31 @@ function Set-TargetResource()
             if ($params.Value)
             {
                 Write-Verbose -Message "Adding property '$params.Key'='$params.value' to SPFarm.properties"
-                $spFarm.Properties[$params.Key] = $params.Value
+                switch ($params.ParameterType)
+                {
+                    'Boolean'
+                    {
+                        $spFarm.Properties[$params.Key] = [System.Convert]::ToBoolean($params.Value)
+                    }
+                    'String'
+                    {
+                        $spFarm.Properties[$params.Key] = $params.Value
+                    }
+                    'Int32'
+                    {
+                        $spFarm.Properties[$params.Key] = [Int32]::Parse($params.Value)
+                    }
+                }
                 $spFarm.Update()
             }
             else
             {
-                Write-Warning -Message 'Ensure = Present, value parameter cannot be null'
+                Write-Warning -Message 'Ensure = Present, parameter Value cannot be null'
             }
         }
         else
         {
-            Write-Verbose -Message "Removing property '$params.Key' from SPFarm.properties"
+            Write-Verbose -Message "Removing property '$($params.Key)' from SPFarm.properties"
 
             $spFarm.Properties.Remove($params.Key)
             $spFarm.Update()
@@ -147,12 +241,17 @@ function Test-TargetResource()
         $Value,
 
         [Parameter()]
+        [ValidateSet("Boolean", "String", "Int32")]
+        [System.String]
+        $ParameterType = 'String',
+
+        [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = 'Present'
     )
 
-    Write-Verbose -Message "Testing SPFarm property '$Name'"
+    Write-Verbose -Message "Testing SPFarm property '$Key'"
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
@@ -162,7 +261,7 @@ function Test-TargetResource()
     $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
         -Source $($MyInvocation.MyCommand.Source) `
         -DesiredValues $PSBoundParameters `
-        -ValuesToCheck @('Ensure', 'Key', 'Value')
+        -ValuesToCheck @('Ensure', 'Key', 'Value', 'ParameterType')
 
     Write-Verbose -Message "Test-TargetResource returned $result"
 

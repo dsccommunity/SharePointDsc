@@ -5,9 +5,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- SPFarmPropertyBag
+  - Added support for boolean and int32 data types
+- SPInstall
+  - Added additional ExitCode for incorrect license key
+- SPShellAdmin
+  - Added additional logging to improve troubleshooting
+
 ### Fixed
+
+- SPSearchServiceApp
+  - Fixed issue where the database permissions were not corrected for new
+    search service applications.
 - SPWebApplication
-  - Fixed an issue where the Set method tried to use the Parameter SecureSocketsLayer with Set-SPWebApplication on SharePoint Server older than Subscription Edition.
+  - Fixed an issue where the Set method tried to use the Parameter SecureSocketsLayer with
+    Set-SPWebApplication on SharePoint Server older than Subscription Edition.
 
 ## [5.1.0] - 2022-02-24
 
@@ -182,7 +196,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     created, resulting in other errors.
 - SPSearchTopology
   - Fixed issue where an error was thrown if the specified RootDirectory didn't exist on the
-    current server but did exist on the target server. 
+    current server but did exist on the target server.
   - Fixed issue with using FQDNs instead of NetBIOS server names.
 - SPSite
   - Implemented workaround to prevent issue with creating site collections immediately after
