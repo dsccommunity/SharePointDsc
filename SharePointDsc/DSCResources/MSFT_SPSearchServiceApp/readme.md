@@ -18,8 +18,19 @@ For more information about the Deletion Policy settings, check the following
 article:
 https://docs.microsoft.com/en-us/previous-versions/office/sharepoint-server-2010/hh127009(v=office.14)?redirectedfrom=MSDN
 
-**NOTE:** Don't forget to configure a Search topology using the SPSearchTopology
-resource!
+**NOTE:** Use 'ProvisionDefaultTopology = $true' parameter to provision default search topology. When this parameter is defined
+and value is TRUE then topology is created as below:
+
+1. First we check are there any servers having Search or ApplicationWithSearch role. If there are then all search components are
+provisioned to all these servers
+
+2. If no Search or ApplicationWithSearch role servers exist then we check are there servers having Custom role. If yes then all 
+search server components are provisioned to one (1) server having Custom role
+
+3. If no servers exist having roles defined in 1 and 2 then we check is this SingleServer or SingleServerFarm deployment and if yes
+the all search server components are provisioned to that single server
+
+If you do not want to provision default topology then you need to define search topology using the SPSearchTopology resource!
 
 **NOTE2:** The resource is also able to add the Farm account as db_owner to all
 Search databases, to prevent the issue described here:

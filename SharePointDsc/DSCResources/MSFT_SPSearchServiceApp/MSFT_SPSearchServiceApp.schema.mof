@@ -21,4 +21,5 @@ class MSFT_SPSearchServiceApp : OMI_BaseResource
     [Write, Description("Specifies what items get deleted: 0 - All unvisited items, 1 - (Default) All unvisited items that have the same host as the start address, 2 - None of the unvisited items. You can specify the following three values:")] uint16 DeleteUnvisitedMethod;
     [Write, Description("Specifies the number of consecutive crawls in which errors were encountered while fetching changes from the SharePoint content database")] uint16 RecrawlErrorCount;
     [Write, Description("Specifies the number of hours since the first error were encountered while fetching changes from the SharePoint content database")] uint16 RecrawlErrorInterval;
+    [Write, Description("Should default search topology be provisioned")] boolean ProvisionDefaultTopology;
 };

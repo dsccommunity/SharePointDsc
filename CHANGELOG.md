@@ -5,6 +5,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- SPSearchServiceApp
+  - Added optional ProvisionDefaultTopology (boolean) parameter to control should 
+    the SPSearchServiceApp provision search topology as well. See more info how 
+    this works from the resource readme.md
+
 ## [5.1.0] - 2022-02-24
 
 ### Added
