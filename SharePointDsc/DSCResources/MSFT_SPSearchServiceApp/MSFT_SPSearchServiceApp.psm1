@@ -488,10 +488,11 @@ function Set-TargetResource
 
                         if ($possibleSearchServers.Count -eq 0)
                         {
-                            $message = ("Unable to provision default topology as no servers having " + `
-                                        "one of the supported roles found. Make sure you have at least " + `
-                                        "one server configured using one of the supported roles which are: " + `
-                                        "Search, ApplicationWithSearch, Custom, SingleServer or SingleServerFarm")
+                            $message = ("You have specified DefaultSearchTopology=`$true, but we are " + `
+                                    "unable to provision search topology as no servers having " + `
+                                    "one of the supported roles found. Make sure you have at least " + `
+                                    "one server configured using one of the supported roles which are: " + `
+                                    "Search, ApplicationWithSearch, Custom, SingleServer or SingleServerFarm")
 
                             Add-SPDscEvent -Message $message `
                                 -EntryType 'Error' `
