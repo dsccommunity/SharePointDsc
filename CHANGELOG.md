@@ -5,6 +5,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- SPSearchServiceApp
+  - Added optional ProvisionDefaultTopology (boolean) parameter to control should 
+    the SPSearchServiceApp provision search topology as well. See more info how 
+    this works from the resource readme.md
+
 ### Fixed
 - SPWebApplication
   - Fixed an issue where the Set method tried to use the Parameter SecureSocketsLayer with Set-SPWebApplication on SharePoint Server older than Subscription Edition.

@@ -86,7 +86,11 @@ function Get-TargetResource
 
         [Parameter()]
         [System.UInt16]
-        $RecrawlErrorInterval
+        $RecrawlErrorInterval,
+
+        [Parameter()]
+        [System.Boolean]
+        $ProvisionDefaultTopology
     )
 
     Write-Verbose -Message "Getting Search service application '$Name'"
@@ -351,7 +355,11 @@ function Set-TargetResource
 
         [Parameter()]
         [System.UInt16]
-        $RecrawlErrorInterval
+        $RecrawlErrorInterval,
+
+        [Parameter()]
+        [System.Boolean]
+        $ProvisionDefaultTopology
     )
 
     Write-Verbose -Message "Setting Search service application '$Name'"
@@ -469,8 +477,156 @@ function Set-TargetResource
                     Set-SPEnterpriseSearchServiceApplication @setParams
                 }
 
-                Write-Verbose -Message ("NOTE: Don't forget to configure a Search topology " + `
-                        "using the SPSearchTopology resource!")
+                # Provision default topology if ProvisionDefaultTopology = $true
+                if ($params.ContainsKey("ProvisionDefaultTopology") -eq $true)
+                {
+                    if ($params.ProvisionDefaultTopology -eq $true)
+                    {
+                        $isCustomOrSingleProvisioning = $false
+
+                        $possibleSearchServers = Get-SPServer | Where-Object { $_.Role -in ("Search", "ApplicationWithSearch", "Custom", "SingleServerFarm", "SingleServer") }
+
+                        if ($possibleSearchServers.Count -eq 0)
+                        {
+                            $message = ("You have specified DefaultSearchTopology=`$true, but we are " + `
+                                    "unable to provision search topology as no servers having " + `
+                                    "one of the supported roles found. Make sure you have at least " + `
+                                    "one server configured using one of the supported roles which are: " + `
+                                    "Search, ApplicationWithSearch, Custom, SingleServer or SingleServerFarm")
+
+                            Add-SPDscEvent -Message $message `
+                                -EntryType 'Error' `
+                                -EventID 100 `
+                                -Source $eventSource
+                            throw $message
+                        }
+                        else
+                        {
+                            $searchServers = $possibleSearchServers | Where-Object { $_.Role -in ("Search", "ApplicationWithSearch") }
+
+                            if ($searchServers.Count -eq 0)
+                            {
+                                Write-Verbose -Message "Provisioning default search topology"
+
+                                $searchServers = $possibleSearchServers | Where-Object { $_.Role -eq "Custom" }
+
+                                if ($searchServers.Count -eq 0)
+                                {
+                                    $searchServers = $possibleSearchServers | Where-Object { $_.Role -in ("SingleServerFarm", "SingleServer") }
+
+                                    if ($searchServers.Count -gt 0)
+                                    {
+                                        $isCustomOrSingleProvisioning = $true
+                                    }
+                                }
+                                else
+                                {
+                                    $isCustomOrSingleProvisioning = $true
+                                }
+                            }
+
+                            # if custom, application, singleserver or singleserverfarm then we provision only to 1 server
+                            if ($isCustomOrSingleProvisioning)
+                            {
+                                $searchServers = $searchServers[0]
+                            }
+
+                            # Ensure the search service instance is running on all servers
+                            foreach ($searchServer in $searchServers)
+                            {
+                                $serverName = $searchServer.Address
+
+                                Write-Verbose -Message "SEARCH SERVER: $($searchServers)"
+
+                                $searchService = Get-SPEnterpriseSearchServiceInstance -Identity $serverName `
+                                    -ErrorAction SilentlyContinue
+
+                                if ($null -eq $searchService)
+                                {
+                                    $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
+                                    $searchServer = "$serverName.$domain"
+                                    $searchService = Get-SPEnterpriseSearchServiceInstance -Identity $serverName -ErrorAction SilentlyContinue
+                                }
+
+                                if (($searchService.Status -eq "Offline") -or ($searchService.Status -eq "Disabled"))
+                                {
+                                    Write-Verbose -Message "Start Search Service Instance"
+                                    Start-SPEnterpriseSearchServiceInstance -Identity $serverName
+                                }
+
+                                # Wait for Search Service Instance to come online
+                                $loopCount = 0
+                                $online = Get-SPEnterpriseSearchServiceInstance -Identity $serverName -ErrorAction SilentlyContinue
+                                while ($online.Status -ne "Online" -and $loopCount -lt 15)
+                                {
+                                    $online = Get-SPEnterpriseSearchServiceInstance -Identity $serverName -ErrorAction SilentlyContinue
+                                    Write-Verbose -Message ("$([DateTime]::Now.ToShortTimeString()) - Waiting for " + `
+                                            "search service instance to start on $searchServer " + `
+                                            "(waited $loopCount of 15 minutes)")
+                                    $loopCount++
+                                    Start-Sleep -Seconds 60
+                                }
+                            }
+
+                            # Get current topology and prepare a new one
+                            $currentTopology = $app.ActiveTopology
+                            $newTopology = New-SPEnterpriseSearchTopology -SearchApplication $app `
+                                -Clone `
+                                -SearchTopology $currentTopology
+
+                            #$domain = "." + (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
+
+                            foreach ($searchServer in $searchServers)
+                            {
+                                $serverName = $searchServer.Address
+
+                                $serviceInstance = Get-SPEnterpriseSearchServiceInstance -Identity $serverName
+
+                                $NewComponentParams = @{
+                                    SearchTopology        = $newTopology
+                                    SearchServiceInstance = $serviceInstance
+                                }
+
+                                Write-Verbose -Message "Adding $serverName to run an AdminComponent"
+                                $null = New-SPEnterpriseSearchAdminComponent @NewComponentParams
+
+                                Write-Verbose -Message "Adding $serverName to run a CrawlComponent"
+                                $null = New-SPEnterpriseSearchCrawlComponent @NewComponentParams
+
+                                Write-Verbose -Message "Adding $serverName to run a ContentProcessingComponent"
+                                $null = New-SPEnterpriseSearchContentProcessingComponent @NewComponentParams
+
+                                Write-Verbose -Message "Adding $serverName to run an AnalyticsProcessingComponent"
+                                $null = New-SPEnterpriseSearchAnalyticsProcessingComponent @NewComponentParams
+
+                                Write-Verbose -Message "Adding $serverName to run a QueryComponent"
+                                $null = New-SPEnterpriseSearchQueryProcessingComponent @NewComponentParams
+
+                                $NewComponentParams += @{
+                                    IndexPartition = 0
+                                }
+
+                                Write-Verbose -Message "Adding $serverName to run an IndexComponent"
+                                $null = New-SPEnterpriseSearchIndexComponent @NewComponentParams
+                            }
+
+                            # Apply the new topology to the farm
+                            Write-Verbose -Message "Applying new Search topology"
+                            Set-SPEnterpriseSearchTopology -Identity $newTopology
+
+
+                            # Stop search service instance on all the other servers not part of search topology
+                            (Get-SPServer) | Where-Object { $_ -notin $searchServers -and $_.Role -ne "Invalid" } | ForEach-Object {
+                                Get-SPEnterpriseSearchServiceInstance -Identity $_.Address | Stop-SPEnterpriseSearchServiceInstance
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    Write-Verbose -Message ("NOTE: Don't forget to configure a Search topology " + `
+                            "using the SPSearchTopology resource!")
+                }
             }
         }
     }
@@ -841,7 +997,11 @@ function Test-TargetResource
 
         [Parameter()]
         [System.UInt16]
-        $RecrawlErrorInterval
+        $RecrawlErrorInterval,
+
+        [Parameter()]
+        [System.Boolean]
+        $ProvisionDefaultTopology
     )
 
     Write-Verbose -Message "Testing Search service application '$Name'"
