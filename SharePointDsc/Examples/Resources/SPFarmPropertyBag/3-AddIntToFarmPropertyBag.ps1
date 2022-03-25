@@ -35,7 +35,7 @@ Updated author, copyright notice, and URLs.
 <#
 
 .DESCRIPTION
- This example shows how remove property bag in the current farm.
+ This example shows how add property bag in the current farm.
 
 #>
 
@@ -52,11 +52,13 @@ Configuration Example
 
     node localhost
     {
-        SPFarmPropertyBag APPLICATION_APPCodeProperty
+        SPFarmPropertyBag 'SetIntValue'
         {
+            Key                  = 'AnswerToEverything'
+            Value                = '42'
+            ParameterType        = 'Int32'
+            Ensure               = 'Present'
             PsDscRunAsCredential = $SetupAccount
-            Key = "KeyToRemove"
-            Ensure = "Absent"
         }
     }
 }

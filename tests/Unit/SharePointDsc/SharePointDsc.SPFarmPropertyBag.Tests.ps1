@@ -111,6 +111,52 @@ try
                 }
             }
 
+            Context -Name 'ParameterType is Boolean, but Value is not True or False' {
+                BeforeAll {
+                    $testParams = @{
+                        Key           = 'Property'
+                        Value         = 'String'
+                        ParameterType = 'Boolean'
+                    }
+
+                }
+
+                It 'Should throw exception from the get method' {
+                    { Get-TargetResource @testParams } | Should -Throw 'Value can only be True or False when ParameterType is Boolean. Current value:'
+                }
+
+                It 'Should throw exception from the set method' {
+                    { Set-TargetResource @testParams } | Should -Throw 'Value can only be True or False when ParameterType is Boolean. Current value:'
+                }
+
+                It 'Should throw exception from the test method' {
+                    { Test-TargetResource @testParams } | Should -Throw 'Value can only be True or False when ParameterType is Boolean. Current value:'
+                }
+            }
+
+            Context -Name 'ParameterType is Int32, but Value is not an integer' {
+                BeforeAll {
+                    $testParams = @{
+                        Key           = 'Property'
+                        Value         = 'String'
+                        ParameterType = 'Int32'
+                    }
+
+                }
+
+                It 'Should throw exception from the get method' {
+                    { Get-TargetResource @testParams } | Should -Throw 'Value has to be a number when ParameterType is Int32. Current value:'
+                }
+
+                It 'Should throw exception from the set method' {
+                    { Set-TargetResource @testParams } | Should -Throw 'Value has to be a number when ParameterType is Int32. Current value:'
+                }
+
+                It 'Should throw exception from the test method' {
+                    { Test-TargetResource @testParams } | Should -Throw 'Value has to be a number when ParameterType is Int32. Current value:'
+                }
+            }
+
             Context -Name 'The farm property does not exist, but should be' -Fixture {
                 BeforeAll {
                     $testParams = @{
@@ -200,7 +246,97 @@ try
                 }
             }
 
-            Context -Name 'The farm property does not exist, and should be' -Fixture {
+            Context -Name 'The farm property exists, but with wrong type (Boolean)' -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        Key           = 'FARM_TYPE'
+                        Value         = '5'
+                        ParameterType = "Int32"
+                        Ensure        = 'Present'
+                    }
+
+                    Mock -CommandName Get-SPFarm -MockWith {
+                        $spFarm = [pscustomobject]@{
+                            Properties = @{
+                                FARM_TYPE = $true
+                            }
+                        }
+                        $spFarm = $spFarm | Add-Member ScriptMethod Update {
+                            $Global:SPDscFarmPropertyUpdated = $true
+                        } -PassThru
+                        $spFarm = $spFarm | Add-Member ScriptMethod Remove {
+                            $Global:SPDscFarmPropertyRemoved = $true
+                        } -PassThru
+                        return $spFarm
+                    }
+                }
+
+                It 'Should return the same values as passed as parameters' {
+                    $result = Get-TargetResource @testParams
+                    $result.Ensure | Should -Be 'present'
+                    $result.Key | Should -Be $testParams.Key
+                    $result.Value | Should -Be 'True'
+                    $result.ParameterType | Should -Be 'Boolean'
+                }
+
+                It 'Should return false from the test method' {
+                    Test-TargetResource @testParams | Should -Be $false
+                }
+
+                $Global:SPDscFarmPropertyUpdated = $false
+                It 'Calls Get-SPFarm and updates farm property bag from the set method' {
+                    Set-TargetResource @testParams
+
+                    $Global:SPDscFarmPropertyUpdated | Should -Be $true
+                }
+            }
+
+            Context -Name 'The farm property exists, but with wrong type (Boolean)' -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        Key           = 'FARM_TYPE'
+                        Value         = 'False'
+                        ParameterType = "Boolean"
+                        Ensure        = 'Present'
+                    }
+
+                    Mock -CommandName Get-SPFarm -MockWith {
+                        $spFarm = [pscustomobject]@{
+                            Properties = @{
+                                FARM_TYPE = 5
+                            }
+                        }
+                        $spFarm = $spFarm | Add-Member ScriptMethod Update {
+                            $Global:SPDscFarmPropertyUpdated = $true
+                        } -PassThru
+                        $spFarm = $spFarm | Add-Member ScriptMethod Remove {
+                            $Global:SPDscFarmPropertyRemoved = $true
+                        } -PassThru
+                        return $spFarm
+                    }
+                }
+
+                It 'Should return the same values as passed as parameters' {
+                    $result = Get-TargetResource @testParams
+                    $result.Ensure | Should -Be 'present'
+                    $result.Key | Should -Be $testParams.Key
+                    $result.Value | Should -Be '5'
+                    $result.ParameterType | Should -Be 'Int32'
+                }
+
+                It 'Should return false from the test method' {
+                    Test-TargetResource @testParams | Should -Be $false
+                }
+
+                $Global:SPDscFarmPropertyUpdated = $false
+                It 'Calls Get-SPFarm and updates farm property bag from the set method' {
+                    Set-TargetResource @testParams
+
+                    $Global:SPDscFarmPropertyUpdated | Should -Be $true
+                }
+            }
+
+            Context -Name 'The farm property does not exist, and should not be' -Fixture {
                 BeforeAll {
                     $testParams = @{
                         Key    = 'FARM_TYPED'
@@ -250,7 +386,7 @@ try
                     Mock -CommandName Get-SPFarm -MockWith {
                         $spFarm = [pscustomobject]@{
                             Properties = @{
-                                FARM_TYPE = 'SearchFarm'
+                                FARM_TYPE = 5
                             }
                         }
                         $spFarm = $spFarm | Add-Member ScriptMethod Update {
@@ -271,7 +407,8 @@ try
 
                 It 'Should return the same values as passed as parameters' {
                     $result.Key | Should -Be $testParams.Key
-                    $result.value | Should -Be $testParams.Value
+                    $result.Value | Should -Be '5'
+                    $result.ParameterType | Should -Be 'Int32'
                 }
 
                 It 'Should return false from the test method' {
@@ -298,9 +435,10 @@ try
 
                     Mock -CommandName Get-TargetResource -MockWith {
                         return @{
-                            Key    = "Key"
-                            Value  = "Value"
-                            Ensure = "Present"
+                            Key           = "Key"
+                            Value         = "Value"
+                            ParameterType = "String"
+                            Ensure        = "Present"
                         }
                     }
 
@@ -324,6 +462,7 @@ try
         {
             Ensure               = "Present";
             Key                  = "Key";
+            ParameterType        = "String";
             PsDscRunAsCredential = \$Credsspfarm;
             Value                = "Value";
         }

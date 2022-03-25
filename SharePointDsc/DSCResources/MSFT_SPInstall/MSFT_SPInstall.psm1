@@ -435,6 +435,15 @@ function Set-TargetResource
                 throw $message
             }
         }
+        30030
+        {
+            $message = "SharePoint install failed: Incorrect license key!"
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
+        }
         30203
         {
             $message = "SharePoint install failed, license terms are not accepted."

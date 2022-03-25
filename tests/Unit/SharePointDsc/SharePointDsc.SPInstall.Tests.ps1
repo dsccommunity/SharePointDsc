@@ -384,6 +384,83 @@ try
                 }
             }
 
+            Context -Name "SharePoint installation fails: Issue with Prerequisites" -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance = "Yes"
+                        BinaryDir        = "C:\SPInstall"
+                        ProductKey       = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+                        Ensure           = "Present"
+                    }
+
+                    Mock -CommandName Start-Process -MockWith {
+                        return @{
+                            ExitCode = 30066
+                        }
+                    }
+
+                    Mock -CommandName Get-Item -MockWith {
+                        return $null
+                    }
+
+                    Mock -CommandName Get-Item -MockWith {
+                        return @{
+                            Path = "RegKey"
+                        }
+                    } -ParameterFilter { $Path -eq "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager" }
+
+                    Mock -CommandName Get-ItemProperty -MockWith {
+                        return 0
+                    }
+                }
+
+                It "Should throw an exception on an unknown exit code" {
+                    { Set-TargetResource @testParams } | Should -Throw 'SharePoint installation has failed due to an issue with prerequisites not being installed correctly. Please review the setup logs.'
+                }
+            }
+
+            Context -Name "SharePoint installation fails: Incorrect license key" -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance = "Yes"
+                        BinaryDir        = "C:\SPInstall"
+                        ProductKey       = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+                        Ensure           = "Present"
+                    }
+
+                    Mock -CommandName Start-Process -MockWith {
+                        return @{
+                            ExitCode = 30030
+                        }
+                    }
+                }
+
+                It "Should throw an exception on an unknown exit code" {
+                    { Set-TargetResource @testParams } | Should -Throw 'SharePoint install failed: Incorrect license key!'
+                }
+            }
+
+            Context -Name "SharePoint installation fails: License terms are not accepted" -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance = "Yes"
+                        BinaryDir        = "C:\SPInstall"
+                        ProductKey       = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+                        Ensure           = "Present"
+                    }
+
+                    Mock -CommandName Start-Process -MockWith {
+                        return @{
+                            ExitCode = 30203
+                        }
+                    }
+                }
+
+                It "Should throw an exception on an unknown exit code" {
+                    { Set-TargetResource @testParams } | Should -Throw 'SharePoint install failed, license terms are not accepted.'
+                }
+            }
+
             Context -Name "SharePoint binaries are installed and should not be" -Fixture {
                 BeforeAll {
                     $testParams = @{

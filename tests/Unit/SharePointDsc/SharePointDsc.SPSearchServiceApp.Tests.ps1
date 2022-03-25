@@ -50,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
                 Import-Module -Name (Join-Path -Path (Get-Module SharePointDsc -ListAvailable).ModuleBase `
@@ -267,32 +267,67 @@ try
                     Mock Import-Module -MockWith { } -ParameterFilter { $_.Name -eq $ModuleName }
 
                     Mock -CommandName Get-SPServiceApplication -MockWith {
-                        $spServiceApp = [PSCustomObject]@{
-                            DisplayName = $testParams.Name
-                            Name        = $testParams.Name
-                        }
-                        $spServiceApp | Add-Member -MemberType ScriptMethod `
-                            -Name GetType `
-                            -Value {
-                            return @{
-                                FullName = "Microsoft.Office.UnKnownWebServiceApplication"
+                        if ($global:SPDscGetServiceApplicationCount -eq 0)
+                        {
+                            $spServiceApp = [PSCustomObject]@{
+                                DisplayName = $testParams.Name
+                                Name        = $testParams.Name
                             }
-                        } -PassThru -Force
+                            $spServiceApp | Add-Member -MemberType ScriptMethod `
+                                -Name GetType `
+                                -Value {
+                                return @{
+                                    FullName = "Microsoft.Office.UnKnownWebServiceApplication"
+                                }
+                            } -PassThru -Force
+                        }
+                        else
+                        {
+                            $spServiceApp = [PSCustomObject]@{
+                                TypeName                    = "Search Service Application"
+                                DisplayName                 = $testParams.Name
+                                Name                        = $testParams.Name
+                                ApplicationPool             = @{ Name = $testParams.ApplicationPool }
+                                Database                    = @{
+                                    Name                 = "SP_Search"
+                                    NormalizedDataSource = 'SQL01'
+                                }
+                                SearchAdminDatabase         = @{
+                                    Name                 = "SP_Search" + '_Admin'
+                                    NormalizedDataSource = 'SQL01'
+                                }
+                                AnalyticsReportingDatabases = @{
+                                    Name                 = "SP_Search" + '_AnalyticsReportingStore'
+                                    NormalizedDataSource = 'SQL01'
+                                }
+                            }
+                            $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                                return @{ FullName = $getTypeFullName }
+                            } -PassThru -Force
+                            $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetProperty -Value {
+                                return 0
+                            } -PassThru -Force
+                        }
+                        $global:SPDscGetServiceApplicationCount++
                         return $spServiceApp
                     }
                 }
 
+                $global:SPDscGetServiceApplicationCount = 0
                 It "Should return absent from the Get method" {
                     (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
+                $global:SPDscGetServiceApplicationCount = 0
                 It "Should return false when the Test method is called" {
                     Test-TargetResource @testParams | Should -Be $false
                 }
 
+                $global:SPDscGetServiceApplicationCount = 0
                 It "Should create a new service application in the set method" {
                     Set-TargetResource @testParams
                     Assert-MockCalled New-SPEnterpriseSearchServiceApplication
+                    $global:SPDscGetServiceApplicationCount | Should -Be 3
                 }
             }
 
@@ -1163,7 +1198,39 @@ try
                     Mock Import-Module -MockWith { } -ParameterFilter { $_.Name -eq $ModuleName }
 
                     Mock -CommandName Get-SPServiceApplication -MockWith {
-                        return $null
+                        if ($global:SPDscGetServiceApplicationCount -eq 0)
+                        {
+                            $spServiceApp = $null
+                        }
+                        else
+                        {
+                            $spServiceApp = [PSCustomObject]@{
+                                TypeName                    = "Search Service Application"
+                                DisplayName                 = $testParams.Name
+                                Name                        = $testParams.Name
+                                ApplicationPool             = @{ Name = $testParams.ApplicationPool }
+                                Database                    = @{
+                                    Name                 = "SP_Search"
+                                    NormalizedDataSource = 'SQL01'
+                                }
+                                SearchAdminDatabase         = @{
+                                    Name                 = "SP_Search" + '_Admin'
+                                    NormalizedDataSource = 'SQL01'
+                                }
+                                AnalyticsReportingDatabases = @{
+                                    Name                 = "SP_Search" + '_AnalyticsReportingStore'
+                                    NormalizedDataSource = 'SQL01'
+                                }
+                            }
+                            $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                                return @{ FullName = $getTypeFullName }
+                            } -PassThru -Force
+                            $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetProperty -Value {
+                                return 0
+                            } -PassThru -Force
+                        }
+                        $global:SPDscGetServiceApplicationCount++
+                        return $spServiceApp
                     }
 
                     Mock -CommandName Get-SPDscInstalledProductVersion -MockWith {
@@ -1178,6 +1245,7 @@ try
                     Set-TargetResource @testParams
                 }
 
+                $global:SPDscGetServiceApplicationCount = 0
                 It "Should throw an error in the set method if the version of SharePoint isn't high enough" {
                     Mock -CommandName Get-SPDscInstalledProductVersion -MockWith {
                         return @{

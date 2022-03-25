@@ -107,7 +107,7 @@ function Get-TargetResource
 
         try
         {
-            $null = Get-SPFarm
+            $null = Get-SPFarm -Verbose:$false
         }
         catch
         {
@@ -116,10 +116,10 @@ function Get-TargetResource
             return $nullreturn
         }
 
-        $shellAdmins = Get-SPShellAdmin
+        $shellAdmins = Get-SPShellAdmin -Verbose:$false
 
         $cdbPermissions = @()
-        $databases = Get-SPDatabase
+        $databases = Get-SPDatabase -Verbose:$false
         if ($params.ContainsKey("ExcludeDatabases"))
         {
             $databases = $databases | Where-Object -FilterScript {
@@ -129,7 +129,7 @@ function Get-TargetResource
 
         foreach ($database in $databases)
         {
-            $dbShellAdmins = Get-SPShellAdmin -Database $database.Id
+            $dbShellAdmins = Get-SPShellAdmin -Database $database.Id -Verbose:$false
 
             $cdbPermission = @{
                 Name    = $database.Name
@@ -278,7 +278,7 @@ function Set-TargetResource
 
         try
         {
-            $null = Get-SPFarm
+            $null = Get-SPFarm -Verbose:$false
         }
         catch
         {
@@ -291,7 +291,7 @@ function Set-TargetResource
             throw $message
         }
 
-        $shellAdmins = Get-SPShellAdmin
+        $shellAdmins = Get-SPShellAdmin -Verbose:$false
 
         if ($params.Members)
         {
@@ -318,7 +318,8 @@ function Set-TargetResource
                             $user = $difference.InputObject
                             try
                             {
-                                Add-SPShellAdmin -UserName $user
+                                Write-Verbose -Message "Adding $member"
+                                Add-SPShellAdmin -UserName $user -Verbose:$false
                             }
                             catch
                             {
@@ -337,7 +338,8 @@ function Set-TargetResource
                             $user = $difference.InputObject
                             try
                             {
-                                Remove-SPShellAdmin -UserName $user -Confirm:$false
+                                Write-Verbose -Message "Removing $member"
+                                Remove-SPShellAdmin -UserName $user -Confirm:$false -Verbose:$false
                             }
                             catch
                             {
@@ -360,7 +362,8 @@ function Set-TargetResource
                 {
                     try
                     {
-                        Add-SPShellAdmin -UserName $member
+                        Write-Verbose -Message "Adding $member"
+                        Add-SPShellAdmin -UserName $member -Verbose:$false
                     }
                     catch
                     {
@@ -388,7 +391,8 @@ function Set-TargetResource
                     {
                         try
                         {
-                            Add-SPShellAdmin -UserName $member
+                            Write-Verbose -Message "Adding $member"
+                            Add-SPShellAdmin -UserName $member -Verbose:$false
                         }
                         catch
                         {
@@ -410,7 +414,8 @@ function Set-TargetResource
                 {
                     try
                     {
-                        Add-SPShellAdmin -UserName $member
+                        Write-Verbose -Message "Adding $member"
+                        Add-SPShellAdmin -UserName $member -Verbose:$false
                     }
                     catch
                     {
@@ -437,7 +442,8 @@ function Set-TargetResource
                     {
                         try
                         {
-                            Remove-SPShellAdmin -UserName $member -Confirm:$false
+                            Write-Verbose -Message "Removing $member"
+                            Remove-SPShellAdmin -UserName $member -Confirm:$false -Verbose:$false
                         }
                         catch
                         {
@@ -466,12 +472,12 @@ function Set-TargetResource
                 # Check if configured database exists, throw error if not
                 Write-Verbose -Message "Processing Database: $($database.Name)"
 
-                $currentCDB = Get-SPDatabase | Where-Object -FilterScript {
+                $currentCDB = Get-SPDatabase  -Verbose:$false | Where-Object -FilterScript {
                     $_.Name -eq $database.Name
                 }
                 if ($null -ne $currentCDB)
                 {
-                    $dbShellAdmins = Get-SPShellAdmin -database $currentCDB.Id
+                    $dbShellAdmins = Get-SPShellAdmin -Database $currentCDB.Id -Verbose:$false
 
                     if ($database.Members)
                     {
@@ -487,7 +493,10 @@ function Set-TargetResource
                                     $user = $difference.InputObject
                                     try
                                     {
-                                        Add-SPShellAdmin -database $currentCDB.Id -UserName $user
+                                        Write-Verbose -Message "Adding $user"
+                                        Add-SPShellAdmin -Database $currentCDB.Id `
+                                            -UserName $user `
+                                            -Verbose:$false
                                     }
                                     catch
                                     {
@@ -506,9 +515,11 @@ function Set-TargetResource
                                     $user = $difference.InputObject
                                     try
                                     {
+                                        Write-Verbose -Message "Removing $user"
                                         Remove-SPShellAdmin -Database $currentCDB.Id `
                                             -UserName $user `
-                                            -Confirm:$false
+                                            -Confirm:$false `
+                                            -Verbose:$false
                                     }
                                     catch
                                     {
@@ -530,7 +541,10 @@ function Set-TargetResource
                             {
                                 try
                                 {
-                                    Add-SPShellAdmin -database $currentCDB.Id -UserName $member
+                                    Write-Verbose -Message "Adding $member"
+                                    Add-SPShellAdmin -Database $currentCDB.Id `
+                                        -UserName $member `
+                                        -Verbose:$false
                                 }
                                 catch
                                 {
@@ -558,7 +572,10 @@ function Set-TargetResource
                                 {
                                     try
                                     {
-                                        Add-SPShellAdmin -database $currentCDB.Id -UserName $member
+                                        Write-Verbose -Message "Adding $member"
+                                        Add-SPShellAdmin -Database $currentCDB.Id `
+                                            -UserName $member `
+                                            -Verbose:$false
                                     }
                                     catch
                                     {
@@ -580,7 +597,10 @@ function Set-TargetResource
                             {
                                 try
                                 {
-                                    Add-SPShellAdmin -database $currentCDB.Id -UserName $member
+                                    Write-Verbose -Message "Adding $member"
+                                    Add-SPShellAdmin -Database $currentCDB.Id `
+                                        -UserName $member `
+                                        -Verbose:$false
                                 }
                                 catch
                                 {
@@ -608,9 +628,11 @@ function Set-TargetResource
                                 {
                                     try
                                     {
+                                        Write-Verbose -Message "Removing $member"
                                         Remove-SPShellAdmin -Database $currentCDB.Id `
                                             -UserName $member `
-                                            -Confirm:$false
+                                            -Confirm:$false `
+                                            -Verbose:$false
                                     }
                                     catch
                                     {
@@ -644,7 +666,7 @@ function Set-TargetResource
         {
             Write-Verbose -Message "Processing AllDatabases parameter"
 
-            $databases = Get-SPDatabase
+            $databases = Get-SPDatabase -Verbose:$false
             if ($params.ContainsKey("ExcludeDatabases"))
             {
                 $databases = $databases | Where-Object -FilterScript {
@@ -653,10 +675,10 @@ function Set-TargetResource
             }
             foreach ($database in $databases)
             {
-                $dbShellAdmins = Get-SPShellAdmin -database $database.Id
+                Write-Verbose -Message "Processing Database: $($database.Name)"
+                $dbShellAdmins = Get-SPShellAdmin -Database $database.Id -Verbose:$false
                 if ($params.Members)
                 {
-                    Write-Verbose -Message "Processing Database: $($database.Name)"
                     if ($dbShellAdmins)
                     {
                         $differences = Compare-Object -ReferenceObject $dbShellAdmins.UserName `
@@ -679,7 +701,10 @@ function Set-TargetResource
                                     $user = $difference.InputObject
                                     try
                                     {
-                                        Add-SPShellAdmin -database $database.Id -UserName $user
+                                        Write-Verbose -Message "Adding $user"
+                                        Add-SPShellAdmin -Database $database.Id `
+                                            -UserName $user `
+                                            -Verbose:$false
                                     }
                                     catch
                                     {
@@ -698,9 +723,11 @@ function Set-TargetResource
                                     $user = $difference.InputObject
                                     try
                                     {
+                                        Write-Verbose -Message "Removing $user"
                                         Remove-SPShellAdmin -Database $database.Id `
                                             -UserName $user `
-                                            -Confirm:$false
+                                            -Confirm:$false `
+                                            -Verbose:$false
                                     }
                                     catch
                                     {
@@ -723,7 +750,10 @@ function Set-TargetResource
                         {
                             try
                             {
-                                Add-SPShellAdmin -database $database.Id -UserName $member
+                                Write-Verbose -Message "Adding $member"
+                                Add-SPShellAdmin -Database $database.Id `
+                                    -UserName $member `
+                                    -Verbose:$false
                             }
                             catch
                             {
@@ -750,7 +780,10 @@ function Set-TargetResource
                             {
                                 try
                                 {
-                                    Add-SPShellAdmin -database $database.Id -UserName $member
+                                    Write-Verbose -Message "Adding $member"
+                                    Add-SPShellAdmin -Database $database.Id `
+                                        -UserName $member `
+                                        -Verbose:$false
                                 }
                                 catch
                                 {
@@ -772,7 +805,10 @@ function Set-TargetResource
                         {
                             try
                             {
-                                Add-SPShellAdmin -database $database.Id -UserName $member
+                                Write-Verbose -Message "Adding $member"
+                                Add-SPShellAdmin -Database $database.Id `
+                                    -UserName $member `
+                                    -Verbose:$false
                             }
                             catch
                             {
@@ -800,9 +836,11 @@ function Set-TargetResource
                             {
                                 try
                                 {
+                                    Write-Verbose -Message "Removing $member"
                                     Remove-SPShellAdmin -Database $database.Id `
                                         -UserName $member `
-                                        -Confirm:$false
+                                        -Confirm:$false `
+                                        -Verbose:$false
                                 }
                                 catch
                                 {

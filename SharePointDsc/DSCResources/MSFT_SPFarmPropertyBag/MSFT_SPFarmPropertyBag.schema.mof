@@ -3,5 +3,6 @@ class MSFT_SPFarmPropertyBag : OMI_BaseResource
 {
     [Key, Description("The key of the SPFarm property bag")] string Key;
     [Write, Description("Value of the SPfarm property bag")] String Value;
+    [Write, Description("Type of the data in the Value parameter"), ValueMap{"Boolean","String","Int32"}, Values{"Boolean","String","Int32"}] string ParameterType;
     [Write, Description("Set to present to ensure the SPfarm property exists, or absent to ensure it is removed"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
 };

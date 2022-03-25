@@ -52,12 +52,13 @@ Configuration Example
 
     node localhost
     {
-        SPFarmPropertyBag APPLICATION_APPCodeProperty
+        SPFarmPropertyBag 'SetStringValue'
         {
+            Key                  = 'FARM_TYPE'
+            Value                = 'SearchFarm'
+            ParameterType        = 'String'
+            Ensure               = 'Present'
             PsDscRunAsCredential = $SetupAccount
-            Key = "FARM_TYPE"
-            Value = "SearchFarm"
-            Ensure = "Present"
         }
     }
 }

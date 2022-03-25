@@ -5,8 +5,8 @@
 
 This resource is responsible for provisioning the distributed cache to the
 service it runs on. This is required in your farm on at least one server (as
-the behavior of SPCreateFarm and SPJoinFarm is to not enroll every server as a
-cache server). The service will be provisioned or de-provisioned based on the
+the behavior of SPFarm is to not enroll every server as a cache server).
+The service will be provisioned or de-provisioned based on the
 Ensure property, and when provisioned the CacheSizeInMB property and
 ServiceAccount property will be used to configure it. The property
 createFirewallRules is used to determine if exceptions should be added to the
