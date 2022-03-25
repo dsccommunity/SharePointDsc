@@ -557,9 +557,9 @@ function Set-TargetResource
     # Only check and correct when Ensure=Present, FixFarmAccountPermissions=True and the permissions are incorrect
     if ($Ensure -eq "Present")
     {
-        if (($FixFarmAccountPermissions -eq $true -and `
-                    $result.FixFarmAccountPermissions -eq $true) -or `
-                $newServiceApp -eq $true)
+        if ($FixFarmAccountPermissions -eq $true -and `
+            ($result.FixFarmAccountPermissions -eq $true -or `
+                    $newServiceApp -eq $true))
         {
             Write-Verbose -Message "Fixing database permissions for Search Service Application $Name"
             Invoke-SPDscCommand -Arguments @($PSBoundParameters, $PSScriptRoot) `
