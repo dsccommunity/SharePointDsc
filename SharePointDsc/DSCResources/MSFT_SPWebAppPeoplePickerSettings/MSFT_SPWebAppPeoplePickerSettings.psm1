@@ -365,35 +365,37 @@ function Test-TargetResource
                 Write-Verbose -Message "Test-TargetResource returned false"
                 return $false
             }
-            if ($searchADDomain.ContainsKey('CustomFilter') -and $searchADDomain.CustomFilter -ne $specifiedDomain.CustomFilter)
-            {
-                $message = "Current CustomFilter Property of SearchActiveDirectoryDomain $searchADDomain  does not match the desired state."
-                Write-Verbose -Message $message
-                Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
-
-                Write-Verbose -Message "Test-TargetResource returned false"
-                return $false
-            }
-            if ($searchADDomain.ContainsKey('ShortDomainName') -and $searchADDomain.ShortDomainName -ne $specifiedDomain.ShortDomainName)
-            {
-                $message = "Current ShortDomainName Property of SearchActiveDirectoryDomain $searchADDomain  does not match the desired state."
-                Write-Verbose -Message $message
-                Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
-
-                Write-Verbose -Message "Test-TargetResource returned false"
-                return $false
-            }
+            #if ($searchADDomain.ContainsKey('CustomFilter') -and $searchADDomain.CustomFilter -ne $specifiedDomain.CustomFilter)
+            #{
+            #    $message = "Current CustomFilter Property of SearchActiveDirectoryDomain $searchADDomain  does not match the desired state."
+            #    Write-Verbose -Message $message
+            #    Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+            #
+            #    Write-Verbose -Message "Test-TargetResource returned false"
+            #    return $false
+            #}
+            #if ($searchADDomain.ContainsKey('ShortDomainName') -and $searchADDomain.ShortDomainName -ne $specifiedDomain.ShortDomainName)
+            #{
+            #    $message = "Current ShortDomainName Property of SearchActiveDirectoryDomain $searchADDomain  does not match the desired state."
+            #    Write-Verbose -Message $message
+            #    Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+            #
+            #    Write-Verbose -Message "Test-TargetResource returned false"
+            #    return $false
+            #}
         }
     }
 
     $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
         -Source $($MyInvocation.MyCommand.Source) `
         -DesiredValues $PSBoundParameters `
-        -ValuesToCheck @("ActiveDirectoryCustomFilter", `
-            "ActiveDirectoryCustomQuery", `
-            "ActiveDirectorySearchTimeout", `
-            "OnlySearchWithinSiteCollection",
-        "PeopleEditorOnlyResolveWithinSiteCollection")
+        -ValuesToCheck @("ActiveDirectoryCustomFilter",
+        "ActiveDirectoryCustomQuery",
+        "ActiveDirectorySearchTimeout",
+        "OnlySearchWithinSiteCollection",
+        "PeopleEditorOnlyResolveWithinSiteCollection",
+        "CustomFilter",
+        "ShortDomainName")
 
     Write-Verbose -Message "Test-TargetResource returned $result"
 
