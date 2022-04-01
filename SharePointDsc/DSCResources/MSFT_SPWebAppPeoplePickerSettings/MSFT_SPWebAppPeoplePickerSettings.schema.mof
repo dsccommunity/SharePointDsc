@@ -4,6 +4,8 @@ Class MSFT_SPWebAppPPSearchDomain
     [Required, Description("FQDN of the domain or forest")] String FQDN;
     [Required, Description("Is the FQDN a forest?")] Boolean IsForest;
     [Write, Description("Specifies the credentials to use to connect to the specified domain or forest"), EmbeddedInstance("MSFT_Credential")] String AccessAccount;
+    [Write, Description("Sets a customized query filter to send to Active Directory")] String CustomFilter;
+    [Write, Description("NetBIOS name of the domain or forest")] String ShortDomainName;
 };
 [ClassVersion("1.0.0.0"), FriendlyName("SPWebAppPeoplePickerSettings")]
 class MSFT_SPWebAppPeoplePickerSettings : OMI_BaseResource
