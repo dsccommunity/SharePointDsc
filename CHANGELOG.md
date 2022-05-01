@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added additional ExitCode for incorrect license key
 - SPSearchCrawlDatabase
   - New resource
+- SPSearchIndexPartition
+  - Added additional logging to improve troubleshooting
 - SPShellAdmin
   - Added additional logging to improve troubleshooting
   - SPWebAppPeoplePickerSettings
@@ -23,6 +25,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - SharePointDsc
   - Fixed incorrect table formatting in the resource table of the Wiki
+- SPSearchIndexPartition
+  - Fixed issue where only one index component was returned after a regression issue in v5.1
+- SPSearchServiceApp
+  - Fixed issue where the database permissions were not corrected for new
+    search service applications.
 - SPWebApplication
   - Fixed an issue where the Set method tried to use the Parameter SecureSocketsLayer with Set-SPWebApplication on SharePoint Server older than Subscription Edition.
 - SPWebAppPeoplePickerSettings

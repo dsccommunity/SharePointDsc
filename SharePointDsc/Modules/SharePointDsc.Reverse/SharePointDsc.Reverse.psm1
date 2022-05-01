@@ -1336,6 +1336,11 @@ function DisplayGUI()
                 ExtractionMode = 1
             },
             @{
+                Name           = "SPSearchCrawlDatabase"
+                Text           = "Crawl Database"
+                ExtractionMode = 2
+            },
+            @{
                 Name           = "SPSearchCrawlRule"
                 Text           = "Crawl Rule"
                 ExtractionMode = 2
