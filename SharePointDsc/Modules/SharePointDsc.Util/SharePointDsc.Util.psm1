@@ -251,7 +251,14 @@ function Convert-SPDscHashtableToString
         }
         else
         {
-            $str = "$($pair.Key)=$($pair.Value)"
+            if ($null -eq $pair.Value)
+            {
+                $str = "$($pair.Key)=`$null"
+            }
+            else
+            {
+                $str = "$($pair.Key)=$($pair.Value)"
+            }
         }
         $values += $str
     }
@@ -1642,11 +1649,11 @@ function Export-SPConfiguration
             {
                 if ($DynamicCompilation)
                 {
-                    Get-SPReverseDSC -ComponentsToExtract $ComponentsToExtract -Credentials $Credentials -OutputPath $OutputPath -StandAlone -DynamicCompilation -ProductKey $ProductKey -BinaryLocation $BinaryLocation
+                    Get-SPReverseDSC -ComponentsToExtract $ComponentsToExtract -Credentials $Credentials -OutputPath $OutputPath -Standalone -DynamicCompilation -ProductKey $ProductKey -BinaryLocation $BinaryLocation
                 }
                 else
                 {
-                    Get-SPReverseDSC -ComponentsToExtract $ComponentsToExtract -Credentials $Credentials -OutputPath $OutputPath -StandAlone -ProductKey $ProductKey -BinaryLocation $BinaryLocation
+                    Get-SPReverseDSC -ComponentsToExtract $ComponentsToExtract -Credentials $Credentials -OutputPath $OutputPath -Standalone -ProductKey $ProductKey -BinaryLocation $BinaryLocation
                 }
             }
             else
