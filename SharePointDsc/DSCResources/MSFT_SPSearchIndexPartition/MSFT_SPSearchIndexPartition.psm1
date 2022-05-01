@@ -28,21 +28,21 @@ function Get-TargetResource
         $params = $args[0]
         $ConfirmPreference = 'None'
 
-        $ssa = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName
+        $ssa = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName -Verbose:$false
         $currentTopology = $ssa.ActiveTopology
 
-        $searchComponent = Get-SPEnterpriseSearchComponent -SearchTopology $currentTopology | `
+        $searchComponent = Get-SPEnterpriseSearchComponent -SearchTopology $currentTopology -Verbose:$false | `
                 Where-Object -FilterScript {
                 ($_.GetType().Name -eq "IndexComponent") `
                     -and ($_.IndexPartitionOrdinal -eq $params.Index)
-            } | Select-Object -First 1
+            }
 
         $IndexComponents = $searchComponent.ServerName
-        $rootDirectory = $searchComponent.RootDirectory
+        $rootDirectory = ($searchComponent | Select-Object -First 1).RootDirectory
 
         if ($rootDirectory -eq "")
         {
-            $ssi = Get-SPEnterpriseSearchServiceInstance
+            $ssi = Get-SPEnterpriseSearchServiceInstance -Verbose:$false
             $component = $ssi.Components | Select-Object -First 1
             $rootDirectory = $component.IndexLocation
         }
@@ -94,19 +94,21 @@ function Set-TargetResource
         # Ensure the search service instance is running on all servers
         foreach ($searchServer in $AllSearchServers)
         {
-            $searchService = Get-SPEnterpriseSearchServiceInstance -Identity $searchServer
+            $searchService = Get-SPEnterpriseSearchServiceInstance -Identity $searchServer `
+                -Verbose:$false
+
             if ($searchService.Status -eq "Offline")
             {
                 Write-Verbose -Message "Start Search Service Instance"
-                Start-SPEnterpriseSearchServiceInstance -Identity $searchService
+                Start-SPEnterpriseSearchServiceInstance -Identity $searchService -Verbose:$false
             }
 
             #Wait for Search Service Instance to come online
             $loopCount = 0
-            $online = Get-SPEnterpriseSearchServiceInstance -Identity $searchServer
+            $online = Get-SPEnterpriseSearchServiceInstance -Identity $searchServer -Verbose:$false
             do
             {
-                $online = Get-SPEnterpriseSearchServiceInstance -Identity $searchServer
+                $online = Get-SPEnterpriseSearchServiceInstance -Identity $searchServer -Verbose:$false
                 Write-Verbose -Message "Waiting for service: $($online.TypeName)"
                 $loopCount++
                 Start-Sleep -Seconds 30
@@ -134,22 +136,24 @@ function Set-TargetResource
         $AllSearchServiceInstances = @{ }
         foreach ($server in $AllSearchServers)
         {
-            $si = Get-SPEnterpriseSearchServiceInstance -Identity $server
+            $si = Get-SPEnterpriseSearchServiceInstance -Identity $server -Verbose:$false
             $AllSearchServiceInstances.Add($server, $si)
         }
 
-        # Get current topology and prepare a new one
-        $ssa = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName
+        Write-Verbose -Message 'Get current topology and prepare a new one'
+        $ssa = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName `
+            -Verbose:$false
         $currentTopology = $ssa.ActiveTopology
         $newTopology = New-SPEnterpriseSearchTopology -SearchApplication $ssa `
             -Clone `
-            -SearchTopology $currentTopology
+            -SearchTopology $currentTopology `
+            -Verbose:$false
 
         $componentTypes = @{
             Servers = "IndexComponent"
         }
 
-        # Build up the topology changes for each object type
+        Write-Verbose -Message 'Build up the topology changes for each object type'
         @("Servers") | ForEach-Object -Process {
             $CurrentSearchProperty = $_
             Write-Verbose -Message "Setting components for '$CurrentSearchProperty' property"
@@ -180,6 +184,7 @@ function Set-TargetResource
             }
             foreach ($componentToAdd in $ComponentsToAdd)
             {
+                Write-Verbose -Message "Adding $($AllSearchServiceInstances.$componentToAdd) to the topology"
                 $NewComponentParams = @{
                     SearchTopology        = $newTopology
                     SearchServiceInstance = $AllSearchServiceInstances.$componentToAdd
@@ -196,29 +201,31 @@ function Set-TargetResource
                                 $NewComponentParams.Add("RootDirectory", $params.RootDirectory)
                             }
                         }
-                        New-SPEnterpriseSearchIndexComponent @NewComponentParams
+                        New-SPEnterpriseSearchIndexComponent @NewComponentParams -Verbose:$false
                     }
                 }
             }
             foreach ($componentToRemove in $ComponentsToRemove)
             {
-                $component = Get-SPEnterpriseSearchComponent -SearchTopology $newTopology | `
-                        Where-Object -FilterScript {
-                        ($_.GetType().Name -eq $componentTypes.$CurrentSearchProperty) `
-                            -and ($_.ServerName -eq $componentToRemove) `
-                            -and ($_.IndexPartitionOrdinal -eq $params.Index)
-                    }
+                Write-Verbose -Message "Removing $($componentToRemove) from the topology"
+                $component = Get-SPEnterpriseSearchComponent -SearchTopology $newTopology `
+                    -Verbose:$false | Where-Object -FilterScript {
+                    ($_.GetType().Name -eq $componentTypes.$CurrentSearchProperty) `
+                        -and ($_.ServerName -eq $componentToRemove) `
+                        -and ($_.IndexPartitionOrdinal -eq $params.Index)
+                }
 
                 if ($null -ne $component)
                 {
                     $component | Remove-SPEnterpriseSearchComponent -SearchTopology $newTopology `
+                        -Verbose:$false `
                         -Confirm:$false
                 }
             }
         }
 
-        # Apply the new topology
-        Set-SPEnterpriseSearchTopology -Identity $newTopology
+        Write-Verbose -Message 'Apply the new topology'
+        Set-SPEnterpriseSearchTopology -Identity $newTopology -Verbose:$false
     }
 }
 
