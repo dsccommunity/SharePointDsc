@@ -1,0 +1,10 @@
+[ClassVersion("1.0.0.0"), FriendlyName("SPSearchCrawlDatabase")]
+class MSFT_SPSearchCrawlDatabase : OMI_BaseResource
+{
+    [Key, Description("The name of the crawl database")] string DatabaseName;
+    [Key, Description("The name of the search service application")] string ServiceAppName;
+    [Write, Description("The server that should host the crawl databases")] string DatabaseServer;
+    [Write, Description("Should SQL Server authentication be used to connect to the database?")] Boolean UseSQLAuthentication;
+    [Write, Description("If using SQL authentication, the SQL credentials to use to connect to the instance"), EmbeddedInstance("MSFT_Credential")] String DatabaseCredentials;
+    [Write, Description("Present if the service app should exist, absent if it should not"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
+};

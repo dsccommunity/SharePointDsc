@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added support for boolean and int32 data types
 - SPInstall
   - Added additional ExitCode for incorrect license key
+- SPSearchCrawlDatabase
+  - New resource
 - SPShellAdmin
   - Added additional logging to improve troubleshooting
 

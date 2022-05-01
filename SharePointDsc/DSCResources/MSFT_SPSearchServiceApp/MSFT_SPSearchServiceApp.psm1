@@ -1006,6 +1006,7 @@ function Export-TargetResource
                     DependsOn    = "[SPSearchServiceApp]$($searchSAInstance.Name.Replace(' ', ''))"
                 }
                 $partialContent += Read-TargetResource -ResourceName 'SPSearchContentSource' -ExportParams $properties
+                $partialContent += Read-TargetResource -ResourceName 'SPSearchCrawlDatabase' -ExportParams $properties
             }
             $i++
             $content += $partialContent
