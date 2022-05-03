@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- SharePointDsc
+  - Fixed incorrect table formatting in the resource table of the Wiki
 - SPWebApplication
   - Fixed an issue where the Set method tried to use the Parameter SecureSocketsLayer with Set-SPWebApplication on SharePoint Server older than Subscription Edition.
 - SPWebAppPeoplePickerSettings
