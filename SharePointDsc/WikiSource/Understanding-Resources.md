@@ -125,7 +125,7 @@ The SharePointDsc module includes the following DSC resources
 |_[SPUsageDefinition](SPUsageDefinition)_ | Distributed | - |
 |_[SPUserProfileProperty](SPUserProfileProperty)_ | Distributed | - |
 |_[SPUserProfileSection](SPUserProfileSection)_ | Distributed | - |
-|_[SPUserProfileServiceApp](SPUserProfileServiceApp)_ | Distributed | - | Yes |
+|_[SPUserProfileServiceApp](SPUserProfileServiceApp)_ | Distributed | Yes |
 |_[SPUserProfileServiceAppPermissions](SPUserProfileServiceAppPermissions)_ | Distributed | - |
 |_[SPUserProfileSyncConnection](SPUserProfileSyncConnection)_ | Distributed | - |
 |_[SPUserProfileSyncService](SPUserProfileSyncService)_ | Specific | Yes |
