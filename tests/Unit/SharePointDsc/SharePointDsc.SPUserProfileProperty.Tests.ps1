@@ -62,10 +62,10 @@ try
                     PrivacySetting      = "Public"
                     PropertyMappings    = @(
                         (New-CimInstance -ClassName MSFT_SPUserProfilePropertyMapping -ClientOnly -Property @{
-                                ConnectionName = "contoso"
-                                PropertyName   = "department"
-                                Direction      = "Import"
-                            })
+                            ConnectionName = "contoso"
+                            PropertyName   = "department"
+                            Direction      = "Import"
+                        })
                     )
                     Length              = 30
                     DisplayOrder        = 5496
@@ -93,10 +93,10 @@ try
                     Ensure              = "Present"
                     PropertyMappings    = @(
                         (New-CimInstance -ClassName MSFT_SPUserProfilePropertyMapping -ClientOnly -Property @{
-                                ConnectionName = "contoso"
-                                PropertyName   = "department"
-                                Direction      = "Import"
-                            })
+                            ConnectionName = "contoso"
+                            PropertyName   = "department"
+                            Direction      = "Import"
+                        })
                     )
                     Length              = 25
                     DisplayOrder        = 5401
@@ -480,15 +480,15 @@ try
                         PrivacySetting     = "Public"
                         PropertyMappings   = @(
                             (New-CimInstance -ClassName MSFT_SPUserProfilePropertyMapping -ClientOnly -Property @{
-                                    ConnectionName = "contoso"
-                                    PropertyName   = "department"
-                                    Direction      = "Import"
-                                }),
+                                ConnectionName = "contoso"
+                                PropertyName   = "department"
+                                Direction      = "Import"
+                            }),
                             (New-CimInstance -ClassName MSFT_SPUserProfilePropertyMapping -ClientOnly -Property @{
-                                    ConnectionName = "contoso"
-                                    PropertyName   = "givenname"
-                                    Direction      = "Import"
-                                })
+                                ConnectionName = "contoso"
+                                PropertyName   = "givenname"
+                                Direction      = "Import"
+                            })
                         )
                     }
                 }
@@ -1036,35 +1036,35 @@ try
                             } | Add-Member -MemberType ScriptMethod -Name Invoke -Value {
                                 return @(
                                     (([PSCustomObject]"Microsoft.Office.Server.UserProfiles.ADImport.UserProfileADImportPropertyMapping") `
-                                        | Add-Member -MemberType ScriptMethod -Name GetType -Value {
-                                            return @{
-                                                FullName = ""
-                                            } | Add-Member -MemberType ScriptMethod -Name GetMembers -Value {
-                                                return @(
+                                    | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                                        return @{
+                                            FullName = ""
+                                        } | Add-Member -MemberType ScriptMethod -Name GetMembers -Value {
+                                            return @(
                                                     (@{
-                                                            MemberType = "Property"
-                                                            Name       = "ProfileProperty"
-                                                        } | Add-Member -MemberType ScriptMethod -Name GetValue -Value {
-                                                            return "WorkEmailUpdate"
-                                                        } -PassThru -Force),
+                                                    MemberType = "Property"
+                                                    Name       = "ProfileProperty"
+                                                } | Add-Member -MemberType ScriptMethod -Name GetValue -Value {
+                                                    return "WorkEmailUpdate"
+                                                } -PassThru -Force),
                                                     (@{
-                                                            MemberType = "Property"
-                                                            Name       = "ADAttribute"
-                                                        } | Add-Member -MemberType ScriptMethod -Name GetValue -Value {
-                                                            return "department"
-                                                        } -PassThru -Force)
-                                                )
-                                            } -PassThru -Force
+                                                    MemberType = "Property"
+                                                    Name       = "ADAttribute"
+                                                } | Add-Member -MemberType ScriptMethod -Name GetValue -Value {
+                                                    return "department"
+                                                } -PassThru -Force)
+                                            )
                                         } -PassThru -Force
+                                    } -PassThru -Force
                                     ),
                                     (([PSCustomObject]"Microsoft.Office.Server.UserProfiles.ADImport.UserProfileADImportPropertyMapping") `
-                                        | Add-Member -MemberType ScriptMethod -Name GetType -Value {
-                                            return @{
-                                                FullName = ""
-                                            } | Add-Member -MemberType ScriptMethod -Name GetMembers -Value {
-                                                return @()
-                                            } -PassThru -Force
+                                    | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                                        return @{
+                                            FullName = ""
+                                        } | Add-Member -MemberType ScriptMethod -Name GetMembers -Value {
+                                            return @()
                                         } -PassThru -Force
+                                    } -PassThru -Force
                                     )
                                 )
                             } -PassThru -Force
@@ -1184,7 +1184,7 @@ try
             Name                 = "WorkEmail2";
             PolicySetting        = "Mandatory";
             PrivacySetting       = "Public";
-            PropertyMappings     = \@\(System.Collections.Hashtable\);
+            PropertyMappings     = \@\(\@{ConnectionName='contoso.com', Direction='Import', PropertyName='mail'}\);
             PsDscRunAsCredential = \$Credsspfarm;
             Type                 = "Email";
             UserOverridePrivacy  = \$False;
