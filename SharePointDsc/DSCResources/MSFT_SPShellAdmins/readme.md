@@ -28,14 +28,23 @@ Required permissions:
 
 The documentation of the Shell Admin cmdlets states that you need the following
 permissions to successfully run this resource:
-"When you run this cmdlet to add a user to the SharePoint_Shell_Access role,
+> "When you run this cmdlet to add a user to the SharePoint_Shell_Access role,
 you must have membership in the securityadmin fixed server role on the SQL
 Server instance, membership in the db_owner fixed database role on all
 affected databases, and local administrative permission on the local computer."
-https://docs.microsoft.com/en-us/powershell/module/sharepoint-server/add-spshelladmin?view=sharepoint-ps
 
-Notes:
-1.) If a content database is created using the Central Admin, the farm account
-is the owner of that content database in SQL Server. When this is true, you
-cannot add it to the Shell Admins (common for AllContentDatabases parameter)
-and the resource will throw an error. Workaround: Change database owner in SQL
+and
+> "This cmdlet is intended only to be used with a database that uses Windows
+authentication. There is no need to use this cmdlet for databases that use SQL
+authentication; in fact, doing so may result in an error message."
+
+*Source:* https://docs.microsoft.com/en-us/powershell/module/sharepoint-server/add-spshelladmin?view=sharepoint-ps
+
+**Notes:**
+
+- In some instances the Farm account has been configured as the owner of a
+SharePoint database. When that is the case, SharePoint is unable to add the Farm
+account as a Shell Admin. We have implemented a workaround for this issue,
+but it can mean some warnings are shown. The workaround for this issue is to change
+database owner in SQL and grant the Farm account permissions to the database
+directly and add the db_owner database role
