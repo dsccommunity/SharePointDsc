@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- SharePointDsc
+  - Added the SPShellAdmin resource to the ReverseDsc export
+  - Updated ReverseDsc version requirement to 2.0.0.11
 - SPFarmPropertyBag
   - Added support for boolean and int32 data types
 - SPInstall
@@ -17,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added additional logging to improve troubleshooting
 - SPShellAdmin
   - Added additional logging to improve troubleshooting
+  - Added Export logic
 
 ### Fixed
 
@@ -25,6 +29,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SPSearchServiceApp
   - Fixed issue where the database permissions were not corrected for new
     search service applications.
+- SPShellAdmin
+  - Fixed issue where the farm account was the owner of the database.
+    Now including the farm account in those cases.
 - SPWebApplication
   - Fixed an issue where the Set method tried to use the Parameter SecureSocketsLayer with
     Set-SPWebApplication on SharePoint Server older than Subscription Edition.

@@ -1589,7 +1589,7 @@ function Export-SPConfiguration
         $BinaryLocation
     )
 
-    $reverseDSCVersion = [Version]"2.0.0.10"
+    $reverseDSCVersion = [Version]"2.0.0.11"
     $reverseDSCModule = Get-Module ReverseDsc -ListAvailable | Where-Object -FilterScript { $_.Version -ge $reverseDSCVersion }
     if ($null -eq $reverseDSCModule)
     {
@@ -1615,7 +1615,7 @@ function Export-SPConfiguration
     $Script:dscConfigContent = ""
     $Global:CredsRepo = @()
     $Global:AllUsers = @()
-    $Script:ErrorLog = ""
+    $Global:ErrorLog = ""
     $Script:configName = ""
     $Script:currentServerName = ""
     $SPDSCSource = "$env:ProgramFiles\WindowsPowerShell\Modules\SharePointDSC\"
