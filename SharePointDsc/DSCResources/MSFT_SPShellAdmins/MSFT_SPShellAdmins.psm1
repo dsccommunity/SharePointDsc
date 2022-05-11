@@ -1449,7 +1449,7 @@ function Export-TargetResource
         $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
 
         # Change hashtable format into CIM Instance format
-        $currentBlock = $currentBlock -replace "Databases            = @\(", "Databases            = @(`r`n                " -replace "@{", "MSFT_SPDatabasePermissions { " -replace '},', " },`r`n                " -replace '}\);', " }`r`n            );" -replace "                \);", "            );"
+        $currentBlock = $currentBlock -replace "@{", "`r`n                MSFT_SPDatabasePermissions { " -replace '}', " }" -replace '}\);', "}`r`n            );" -replace "                \);", "            );"
 
         $PartialContent += $currentBlock
         $PartialContent += "        }`r`n"

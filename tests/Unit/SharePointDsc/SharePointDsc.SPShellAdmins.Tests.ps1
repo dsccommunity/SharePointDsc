@@ -1065,8 +1065,8 @@ try
         SPShellAdmins ShellAdmins
         {
             Databases            = @(
-                MSFT_SPDatabasePermissions { Members=@('contoso\sa_farm', 'contoso\spadmin'), Name='SP_Config' },
-                MSFT_SPDatabasePermissions { Members=@('contoso\sa_farm', 'contoso\SPAdmins', 'contoso\spadmin'), Name='SP_Content' }
+                MSFT_SPDatabasePermissions { Members=@('contoso\sa_farm', 'contoso\spadmin'); Name='SP_Config' }
+                MSFT_SPDatabasePermissions { Members=@('contoso\sa_farm', 'contoso\SPAdmins', 'contoso\spadmin'); Name='SP_Content' }
             );
             IsSingleInstance     = "Yes";
             Members              = @("contoso\sa_farm","contoso\SPAdmins","contoso\spadmin");

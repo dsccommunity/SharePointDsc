@@ -1184,7 +1184,7 @@ try
             Name                 = "WorkEmail2";
             PolicySetting        = "Mandatory";
             PrivacySetting       = "Public";
-            PropertyMappings     = \@\(\@{ConnectionName='contoso.com', Direction='Import', PropertyName='mail'}\);
+            PropertyMappings     = \@\(\@{ConnectionName='contoso.com'; Direction='Import'; PropertyName='mail'}\);
             PsDscRunAsCredential = \$Credsspfarm;
             Type                 = "Email";
             UserOverridePrivacy  = \$False;
