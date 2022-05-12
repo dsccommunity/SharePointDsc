@@ -103,18 +103,27 @@ function Get-TargetResource
         $params = $args[0]
         $scriptRoot = $args[1]
 
-        Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath "MSFT_SPShellAdmins.psm1")
+        $modulePath = "..\..\Modules\SharePointDsc.ShellAdmin\SPShellAdmin.psm1"
+        Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve) -Verbose:$false
 
         try
         {
-            $null = Get-SPFarm -Verbose:$false
+            $farm = Get-SPFarm -Verbose:$false
+            $farmAccount = $farm.DefaultServiceAccount.Name
         }
         catch
         {
             Write-Verbose -Message ("No local SharePoint farm was detected. Shell admin " + `
                     "settings will not be applied")
-            return $nullreturn
+            return @{
+                IsSingleInstance = "Yes"
+                Members          = $null
+                MembersToInclude = $null
+                MembersToExclude = $null
+            }
         }
+
+        $databaseOwners = Get-SPDscDatabaseOwnerList
 
         $shellAdmins = Get-SPShellAdmin -Verbose:$false
 
@@ -129,11 +138,31 @@ function Get-TargetResource
 
         foreach ($database in $databases)
         {
-            $dbShellAdmins = Get-SPShellAdmin -Database $database.Id -Verbose:$false
+            [array]$dbShellAdmins = (Get-SPShellAdmin -Database $database.Id -Verbose:$false).UserName
+
+            $dbOwner = ($databaseOwners | Where-Object { $_.Database -eq $database.Name }).Owner
+            if ($farmAccount -eq $dbOwner)
+            {
+                if ($params.AllDatabases -and `
+                    ($params.Members -contains $farmAccount -or `
+                            $params.MembersToInclude -contains $farmAccount))
+                {
+                    $dbShellAdmins += $dbOwner
+                }
+                elseif ($params.ContainsKey("Databases"))
+                {
+                    $currentDB = $params.Databases | Where-Object { $_.Name -eq $database.Name }
+                    if ($currentDB.Members -contains $farmAccount -or `
+                            $currentDB.MembersToInclude -contains $farmAccount)
+                    {
+                        $dbShellAdmins += $dbOwner
+                    }
+                }
+            }
 
             $cdbPermission = @{
                 Name    = $database.Name
-                Members = $dbShellAdmins.UserName
+                Members = $dbShellAdmins
             }
 
             $cdbPermissions += $cdbPermission
@@ -319,7 +348,9 @@ function Set-TargetResource
                             try
                             {
                                 Write-Verbose -Message "Adding $member"
-                                Add-SPShellAdmin -UserName $user -Verbose:$false
+                                Add-SPShellAdmin -UserName $user `
+                                    -Verbose:$false `
+                                    -ErrorAction Stop
                             }
                             catch
                             {
@@ -339,7 +370,10 @@ function Set-TargetResource
                             try
                             {
                                 Write-Verbose -Message "Removing $member"
-                                Remove-SPShellAdmin -UserName $user -Confirm:$false -Verbose:$false
+                                Remove-SPShellAdmin -UserName $user `
+                                    -Confirm:$false `
+                                    -Verbose:$false `
+                                    -ErrorAction Stop
                             }
                             catch
                             {
@@ -363,7 +397,9 @@ function Set-TargetResource
                     try
                     {
                         Write-Verbose -Message "Adding $member"
-                        Add-SPShellAdmin -UserName $member -Verbose:$false
+                        Add-SPShellAdmin -UserName $member `
+                            -Verbose:$false `
+                            -ErrorAction Stop
                     }
                     catch
                     {
@@ -392,7 +428,9 @@ function Set-TargetResource
                         try
                         {
                             Write-Verbose -Message "Adding $member"
-                            Add-SPShellAdmin -UserName $member -Verbose:$false
+                            Add-SPShellAdmin -UserName $member `
+                                -Verbose:$false `
+                                -ErrorAction Stop
                         }
                         catch
                         {
@@ -415,7 +453,9 @@ function Set-TargetResource
                     try
                     {
                         Write-Verbose -Message "Adding $member"
-                        Add-SPShellAdmin -UserName $member -Verbose:$false
+                        Add-SPShellAdmin -UserName $member `
+                            -Verbose:$false `
+                            -ErrorAction Stop
                     }
                     catch
                     {
@@ -443,7 +483,10 @@ function Set-TargetResource
                         try
                         {
                             Write-Verbose -Message "Removing $member"
-                            Remove-SPShellAdmin -UserName $member -Confirm:$false -Verbose:$false
+                            Remove-SPShellAdmin -UserName $member `
+                                -Confirm:$false `
+                                -Verbose:$false `
+                                -ErrorAction Stop
                         }
                         catch
                         {
@@ -496,7 +539,26 @@ function Set-TargetResource
                                         Write-Verbose -Message "Adding $user"
                                         Add-SPShellAdmin -Database $currentCDB.Id `
                                             -UserName $user `
-                                            -Verbose:$false
+                                            -Verbose:$false `
+                                            -ErrorAction Stop
+                                    }
+                                    catch [System.ArgumentException]
+                                    {
+                                        if ($_.Exception.Message -like "*A possible cause of this error is that the account name was already added to the database as a login using a different user name than the account name*")
+                                        {
+                                            Write-Warning "Cannot add the user $user to database $($currentCDB.Name) since it probably is the owner of the database."
+                                        }
+                                        else
+                                        {
+                                            $message = ("Error while setting the Shell Admin. The Shell " + `
+                                                    "Admin permissions will not be applied. Error " + `
+                                                    "details: $($_.Exception.Message)")
+                                            Add-SPDscEvent -Message $message `
+                                                -EntryType 'Error' `
+                                                -EventID 100 `
+                                                -Source $eventSource
+                                            throw $message
+                                        }
                                     }
                                     catch
                                     {
@@ -519,7 +581,8 @@ function Set-TargetResource
                                         Remove-SPShellAdmin -Database $currentCDB.Id `
                                             -UserName $user `
                                             -Confirm:$false `
-                                            -Verbose:$false
+                                            -Verbose:$false `
+                                            -ErrorAction Stop
                                     }
                                     catch
                                     {
@@ -544,7 +607,26 @@ function Set-TargetResource
                                     Write-Verbose -Message "Adding $member"
                                     Add-SPShellAdmin -Database $currentCDB.Id `
                                         -UserName $member `
-                                        -Verbose:$false
+                                        -Verbose:$false `
+                                        -ErrorAction Stop
+                                }
+                                catch [System.ArgumentException]
+                                {
+                                    if ($_.Exception.Message -like "*A possible cause of this error is that the account name was already added to the database as a login using a different user name than the account name*")
+                                    {
+                                        Write-Warning "Cannot add the user $member to database $($currentCDB.Name) since it probably is the owner of the database."
+                                    }
+                                    else
+                                    {
+                                        $message = ("Error while setting the Shell Admin. The Shell " + `
+                                                "Admin permissions will not be applied. Error " + `
+                                                "details: $($_.Exception.Message)")
+                                        Add-SPDscEvent -Message $message `
+                                            -EntryType 'Error' `
+                                            -EventID 100 `
+                                            -Source $eventSource
+                                        throw $message
+                                    }
                                 }
                                 catch
                                 {
@@ -575,7 +657,26 @@ function Set-TargetResource
                                         Write-Verbose -Message "Adding $member"
                                         Add-SPShellAdmin -Database $currentCDB.Id `
                                             -UserName $member `
-                                            -Verbose:$false
+                                            -Verbose:$false `
+                                            -ErrorAction Stop
+                                    }
+                                    catch [System.ArgumentException]
+                                    {
+                                        if ($_.Exception.Message -like "*A possible cause of this error is that the account name was already added to the database as a login using a different user name than the account name*")
+                                        {
+                                            Write-Warning "Cannot add the user $member to database $($currentCDB.Name) since it probably is the owner of the database."
+                                        }
+                                        else
+                                        {
+                                            $message = ("Error while setting the Shell Admin. The Shell " + `
+                                                    "Admin permissions will not be applied. Error " + `
+                                                    "details: $($_.Exception.Message)")
+                                            Add-SPDscEvent -Message $message `
+                                                -EntryType 'Error' `
+                                                -EventID 100 `
+                                                -Source $eventSource
+                                            throw $message
+                                        }
                                     }
                                     catch
                                     {
@@ -600,7 +701,26 @@ function Set-TargetResource
                                     Write-Verbose -Message "Adding $member"
                                     Add-SPShellAdmin -Database $currentCDB.Id `
                                         -UserName $member `
-                                        -Verbose:$false
+                                        -Verbose:$false `
+                                        -ErrorAction Stop
+                                }
+                                catch [System.ArgumentException]
+                                {
+                                    if ($_.Exception.Message -like "*A possible cause of this error is that the account name was already added to the database as a login using a different user name than the account name*")
+                                    {
+                                        Write-Warning "Cannot add the user $member to database $($currentCDB.Name) since it probably is the owner of the database."
+                                    }
+                                    else
+                                    {
+                                        $message = ("Error while setting the Shell Admin. The Shell " + `
+                                                "Admin permissions will not be applied. Error " + `
+                                                "details: $($_.Exception.Message)")
+                                        Add-SPDscEvent -Message $message `
+                                            -EntryType 'Error' `
+                                            -EventID 100 `
+                                            -Source $eventSource
+                                        throw $message
+                                    }
                                 }
                                 catch
                                 {
@@ -632,7 +752,8 @@ function Set-TargetResource
                                         Remove-SPShellAdmin -Database $currentCDB.Id `
                                             -UserName $member `
                                             -Confirm:$false `
-                                            -Verbose:$false
+                                            -Verbose:$false `
+                                            -ErrorAction Stop
                                     }
                                     catch
                                     {
@@ -704,7 +825,26 @@ function Set-TargetResource
                                         Write-Verbose -Message "Adding $user"
                                         Add-SPShellAdmin -Database $database.Id `
                                             -UserName $user `
-                                            -Verbose:$false
+                                            -Verbose:$false `
+                                            -ErrorAction Stop
+                                    }
+                                    catch [System.ArgumentException]
+                                    {
+                                        if ($_.Exception.Message -like "*A possible cause of this error is that the account name was already added to the database as a login using a different user name than the account name*")
+                                        {
+                                            Write-Warning "Cannot add the user $user to database $($database.Name) since it probably is the owner of the database."
+                                        }
+                                        else
+                                        {
+                                            $message = ("Error while setting the Shell Admin. The Shell " + `
+                                                    "Admin permissions will not be applied. Error " + `
+                                                    "details: $($_.Exception.Message)")
+                                            Add-SPDscEvent -Message $message `
+                                                -EntryType 'Error' `
+                                                -EventID 100 `
+                                                -Source $eventSource
+                                            throw $message
+                                        }
                                     }
                                     catch
                                     {
@@ -727,7 +867,8 @@ function Set-TargetResource
                                         Remove-SPShellAdmin -Database $database.Id `
                                             -UserName $user `
                                             -Confirm:$false `
-                                            -Verbose:$false
+                                            -Verbose:$false `
+                                            -ErrorAction Stop
                                     }
                                     catch
                                     {
@@ -753,7 +894,26 @@ function Set-TargetResource
                                 Write-Verbose -Message "Adding $member"
                                 Add-SPShellAdmin -Database $database.Id `
                                     -UserName $member `
-                                    -Verbose:$false
+                                    -Verbose:$false `
+                                    -ErrorAction Stop
+                            }
+                            catch [System.ArgumentException]
+                            {
+                                if ($_.Exception.Message -like "*A possible cause of this error is that the account name was already added to the database as a login using a different user name than the account name*")
+                                {
+                                    Write-Warning "Cannot add the user $member to database $($database.Name) since it probably is the owner of the database."
+                                }
+                                else
+                                {
+                                    $message = ("Error while setting the Shell Admin. The Shell " + `
+                                            "Admin permissions will not be applied. Error " + `
+                                            "details: $($_.Exception.Message)")
+                                    Add-SPDscEvent -Message $message `
+                                        -EntryType 'Error' `
+                                        -EventID 100 `
+                                        -Source $eventSource
+                                    throw $message
+                                }
                             }
                             catch
                             {
@@ -783,7 +943,26 @@ function Set-TargetResource
                                     Write-Verbose -Message "Adding $member"
                                     Add-SPShellAdmin -Database $database.Id `
                                         -UserName $member `
-                                        -Verbose:$false
+                                        -Verbose:$false `
+                                        -ErrorAction Stop
+                                }
+                                catch [System.ArgumentException]
+                                {
+                                    if ($_.Exception.Message -like "*A possible cause of this error is that the account name was already added to the database as a login using a different user name than the account name*")
+                                    {
+                                        Write-Warning "Cannot add the user $member to database $($database.Name) since it probably is the owner of the database."
+                                    }
+                                    else
+                                    {
+                                        $message = ("Error while setting the Shell Admin. The Shell " + `
+                                                "Admin permissions will not be applied. Error " + `
+                                                "details: $($_.Exception.Message)")
+                                        Add-SPDscEvent -Message $message `
+                                            -EntryType 'Error' `
+                                            -EventID 100 `
+                                            -Source $eventSource
+                                        throw $message
+                                    }
                                 }
                                 catch
                                 {
@@ -808,7 +987,26 @@ function Set-TargetResource
                                 Write-Verbose -Message "Adding $member"
                                 Add-SPShellAdmin -Database $database.Id `
                                     -UserName $member `
-                                    -Verbose:$false
+                                    -Verbose:$false `
+                                    -ErrorAction Stop
+                            }
+                            catch [System.ArgumentException]
+                            {
+                                if ($_.Exception.Message -like "*A possible cause of this error is that the account name was already added to the database as a login using a different user name than the account name*")
+                                {
+                                    Write-Warning "Cannot add the user $member to database $($database.Name) since it probably is the owner of the database."
+                                }
+                                else
+                                {
+                                    $message = ("Error while setting the Shell Admin. The Shell " + `
+                                            "Admin permissions will not be applied. Error " + `
+                                            "details: $($_.Exception.Message)")
+                                    Add-SPDscEvent -Message $message `
+                                        -EntryType 'Error' `
+                                        -EventID 100 `
+                                        -Source $eventSource
+                                    throw $message
+                                }
                             }
                             catch
                             {
@@ -840,7 +1038,8 @@ function Set-TargetResource
                                     Remove-SPShellAdmin -Database $database.Id `
                                         -UserName $member `
                                         -Confirm:$false `
-                                        -Verbose:$false
+                                        -Verbose:$false `
+                                        -ErrorAction Stop
                                 }
                                 catch
                                 {
@@ -1219,6 +1418,51 @@ function Test-TargetResource
 
     Write-Verbose -Message "Test-TargetResource returned true"
     return $true
+}
+
+function Export-TargetResource
+{
+    $VerbosePreference = "SilentlyContinue"
+    $ParentModuleBase = Get-Module "SharePointDsc" -ListAvailable | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPShellAdmins\MSFT_SPShellAdmins.psm1" -Resolve
+    $Content = ''
+    $params = Get-DSCFakeParameters -ModulePath $module
+
+    try
+    {
+        Write-Host "Scanning Shell Admins"
+        $PartialContent = "        SPShellAdmins ShellAdmins`r`n"
+        $PartialContent += "        {`r`n"
+        if ($params.ContainsKey("MembersToInclude"))
+        {
+            $params.Remove("MembersToInclude")
+        }
+        if ($params.ContainsKey("MembersToExclude"))
+        {
+            $params.Remove("MembersToExclude")
+        }
+        $results = Get-TargetResource @params
+
+        $results = Repair-Credentials -results $results
+
+        $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+        $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+
+        # Change hashtable format into CIM Instance format
+        $currentBlock = $currentBlock -replace "@{", "`r`n                MSFT_SPDatabasePermissions { " -replace '}', " }" -replace '}\);', "}`r`n            );" -replace "                \);", "            );"
+
+        $PartialContent += $currentBlock
+        $PartialContent += "        }`r`n"
+        $Content += $PartialContent
+    }
+    catch
+    {
+        $_
+        $Global:ErrorLog += "[Shell Admins]" + $ssa.DisplayName + "`r`n"
+        $Global:ErrorLog += "$_`r`n`r`n"
+    }
+
+    return $Content
 }
 
 Export-ModuleMember -Function *-TargetResource

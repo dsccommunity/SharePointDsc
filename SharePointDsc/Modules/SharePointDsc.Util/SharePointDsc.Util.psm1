@@ -251,7 +251,14 @@ function Convert-SPDscHashtableToString
         }
         else
         {
-            $str = "$($pair.Key)=$($pair.Value)"
+            if ($null -eq $pair.Value)
+            {
+                $str = "$($pair.Key)=`$null"
+            }
+            else
+            {
+                $str = "$($pair.Key)=$($pair.Value)"
+            }
         }
         $values += $str
     }
@@ -1582,7 +1589,7 @@ function Export-SPConfiguration
         $BinaryLocation
     )
 
-    $reverseDSCVersion = [Version]"2.0.0.10"
+    $reverseDSCVersion = [Version]"2.0.0.11"
     $reverseDSCModule = Get-Module ReverseDsc -ListAvailable | Where-Object -FilterScript { $_.Version -ge $reverseDSCVersion }
     if ($null -eq $reverseDSCModule)
     {
@@ -1608,7 +1615,7 @@ function Export-SPConfiguration
     $Script:dscConfigContent = ""
     $Global:CredsRepo = @()
     $Global:AllUsers = @()
-    $Script:ErrorLog = ""
+    $Global:ErrorLog = ""
     $Script:configName = ""
     $Script:currentServerName = ""
     $SPDSCSource = "$env:ProgramFiles\WindowsPowerShell\Modules\SharePointDSC\"
@@ -1642,11 +1649,11 @@ function Export-SPConfiguration
             {
                 if ($DynamicCompilation)
                 {
-                    Get-SPReverseDSC -ComponentsToExtract $ComponentsToExtract -Credentials $Credentials -OutputPath $OutputPath -StandAlone -DynamicCompilation -ProductKey $ProductKey -BinaryLocation $BinaryLocation
+                    Get-SPReverseDSC -ComponentsToExtract $ComponentsToExtract -Credentials $Credentials -OutputPath $OutputPath -Standalone -DynamicCompilation -ProductKey $ProductKey -BinaryLocation $BinaryLocation
                 }
                 else
                 {
-                    Get-SPReverseDSC -ComponentsToExtract $ComponentsToExtract -Credentials $Credentials -OutputPath $OutputPath -StandAlone -ProductKey $ProductKey -BinaryLocation $BinaryLocation
+                    Get-SPReverseDSC -ComponentsToExtract $ComponentsToExtract -Credentials $Credentials -OutputPath $OutputPath -Standalone -ProductKey $ProductKey -BinaryLocation $BinaryLocation
                 }
             }
             else

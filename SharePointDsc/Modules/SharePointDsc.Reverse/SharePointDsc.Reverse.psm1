@@ -457,6 +457,9 @@ function Orchestrator
                 Write-Host -Object "[$($spServer.Name)] Scanning Excel Services Application Settings(s)..." -BackgroundColor DarkGreen -ForegroundColor White
                 $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPExcelServiceApp'
 
+                Write-Host -Object "[$($spServer.Name)] Scanning Shell Administrator(s)..." -BackgroundColor DarkGreen -ForegroundColor White
+                $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPShellAdmins'
+
                 Write-Host -Object "[$($spServer.Name)] Scanning Farm Administrator(s)..." -BackgroundColor DarkGreen -ForegroundColor White
                 $Script:dscConfigContent += Read-TargetResource -ResourceName 'SPFarmAdministrators'
 
@@ -1242,6 +1245,11 @@ function DisplayGUI()
                 ExtractionMode = 2
             },
             @{
+                Name           = "SPShellAdmins"
+                Text           = "Shell Admins"
+                ExtractionMode = 3
+            },
+            @{
                 Name           = "SPTrustedIdentityTokenIssuer"
                 Text           = "Trusted Identity Token Issuers"
                 ExtractionMode = 2
@@ -1334,6 +1342,11 @@ function DisplayGUI()
                 Name           = "SPSearchContentSource"
                 Text           = "Content Sources"
                 ExtractionMode = 1
+            },
+            @{
+                Name           = "SPSearchCrawlDatabase"
+                Text           = "Crawl Database"
+                ExtractionMode = 2
             },
             @{
                 Name           = "SPSearchCrawlRule"

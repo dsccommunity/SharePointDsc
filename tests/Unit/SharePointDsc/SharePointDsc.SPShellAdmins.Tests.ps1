@@ -51,9 +51,35 @@ try
             BeforeAll {
                 Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
+                Import-Module -Name (Join-Path -Path (Get-Module SharePointDsc -ListAvailable).ModuleBase `
+                        -ChildPath "Modules\SharePointDsc.ShellAdmin\SPShellAdmin.psm1" `
+                        -Resolve)
+
                 # Mocks for all contexts
                 Mock -CommandName Add-SPShellAdmin -MockWith { }
                 Mock -CommandName Remove-SPShellAdmin -MockWith { }
+
+                Mock -CommandName Get-SPFarm -MockWith {
+                    return @{
+                        DefaultServiceAccount = @{
+                            Name = 'contoso\sa_farm'
+                        }
+                    }
+                }
+
+                Mock -CommandName Get-SPDscDatabaseOwnerList -MockWith {
+                    $returnval = @()
+                    $returnval += [PSCustomObject]@{
+                        Database = "SP_Config"
+                        Owner    = "contoso\sa_farm"
+                    }
+                    $returnval += [PSCustomObject]@{
+                        Database = "SP_Content"
+                        Owner    = "contoso\sa_farm"
+                    }
+
+                    return $returnval
+                }
 
                 function Add-SPDscEvent
                 {
@@ -114,9 +140,9 @@ try
                         Members          = "contoso\user1", "contoso\user2"
                         Databases        = @(
                             (New-CimInstance -ClassName MSFT_SPContentDatabasePermissions -Property @{
-                                    Name    = "SharePoint_Content_Contoso1"
-                                    Members = "contoso\user1", "contoso\user2"
-                                } -ClientOnly)
+                                Name    = "SharePoint_Content_Contoso1"
+                                Members = "contoso\user1", "contoso\user2"
+                            } -ClientOnly)
                         )
                         AllDatabases     = $true
                     }
@@ -192,10 +218,10 @@ try
                         IsSingleInstance = "Yes"
                         Databases        = @(
                             (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
-                                    Name             = "SharePoint_Content_Contoso1"
-                                    Members          = "contoso\user1", "contoso\user2"
-                                    MembersToInclude = "contoso\user1", "contoso\user2"
-                                } -ClientOnly)
+                                Name             = "SharePoint_Content_Contoso1"
+                                Members          = "contoso\user1", "contoso\user2"
+                                MembersToInclude = "contoso\user1", "contoso\user2"
+                            } -ClientOnly)
                         )
                     }
                 }
@@ -222,9 +248,9 @@ try
                         IsSingleInstance = "Yes"
                         Databases        = @(
                             (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
-                                    Name    = "SharePoint_Content_Contoso1"
-                                    Members = "contoso\user1", "contoso\user2"
-                                } -ClientOnly)
+                                Name    = "SharePoint_Content_Contoso1"
+                                Members = "contoso\user1", "contoso\user2"
+                            } -ClientOnly)
                         )
                         ExcludeDatabases = "SharePoint_Content_Contoso2"
                     }
@@ -249,8 +275,8 @@ try
                         IsSingleInstance = "Yes"
                         Databases        = @(
                             (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
-                                    Name = "SharePoint_Content_Contoso1"
-                                } -ClientOnly)
+                                Name = "SharePoint_Content_Contoso1"
+                            } -ClientOnly)
                         )
                     }
                 }
@@ -277,21 +303,23 @@ try
                         IsSingleInstance = "Yes"
                         Databases        = @(
                             (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
-                                    Name    = "SharePoint_Content_Contoso3"
-                                    Members = "contoso\user1", "contoso\user2"
-                                } -ClientOnly)
+                                Name    = "SharePoint_Content_Contoso3"
+                                Members = "contoso\user1", "contoso\user2"
+                            } -ClientOnly)
                         )
                     }
 
                     Mock -CommandName Get-SPDatabase -MockWith {
                         return @(
                             @{
-                                Name = "SharePoint_Content_Contoso1"
-                                Id   = "F9168C5E-CEB2-4faa-B6BF-329BF39FA1E4"
+                                Name                 = "SharePoint_Content_Contoso1"
+                                Id                   = "F9168C5E-CEB2-4faa-B6BF-329BF39FA1E4"
+                                NormalizedDataSource = 'SQL01'
                             },
                             @{
-                                Name = "SharePoint_Content_Contoso2"
-                                Id   = "936DA01F-9ABD-4d9d-80C7-02AF85C822A8"
+                                Name                 = "SharePoint_Content_Contoso2"
+                                Id                   = "936DA01F-9ABD-4d9d-80C7-02AF85C822A8"
+                                NormalizedDataSource = 'SQL01'
                             }
                         )
                     }
@@ -314,7 +342,7 @@ try
                 BeforeAll {
                     $testParams = @{
                         IsSingleInstance = "Yes"
-                        Members          = "contoso\user1", "contoso\user2"
+                        Members          = "contoso\user1", "contoso\user2", "contoso\sa_farm"
                         AllDatabases     = $true
                     }
 
@@ -338,12 +366,14 @@ try
                     Mock -CommandName Get-SPDatabase -MockWith {
                         return @(
                             @{
-                                Name = "SharePoint_Content_Contoso1"
-                                Id   = "F9168C5E-CEB2-4faa-B6BF-329BF39FA1E4"
+                                Name                 = "SharePoint_Content_Contoso1"
+                                Id                   = "F9168C5E-CEB2-4faa-B6BF-329BF39FA1E4"
+                                NormalizedDataSource = 'SQL01'
                             },
                             @{
-                                Name = "SharePoint_Content_Contoso2"
-                                Id   = "936DA01F-9ABD-4d9d-80C7-02AF85C822A8"
+                                Name                 = "SharePoint_Content_Contoso2"
+                                Id                   = "936DA01F-9ABD-4d9d-80C7-02AF85C822A8"
+                                NormalizedDataSource = 'SQL01'
                             }
                         )
                     }
@@ -393,29 +423,35 @@ try
                     Mock -CommandName Get-SPDatabase -MockWith {
                         return @(
                             @{
-                                Name = "SharePoint_Content_Contoso1"
-                                Id   = "F9168C5E-CEB2-4faa-B6BF-329BF39FA1E4"
+                                Name                 = "SharePoint_Content_Contoso1"
+                                Id                   = "F9168C5E-CEB2-4faa-B6BF-329BF39FA1E4"
+                                NormalizedDataSource = 'SQL01'
                             },
                             @{
-                                Name = "SharePoint_Content_Contoso2"
-                                Id   = "936DA01F-9ABD-4d9d-80C7-02AF85C822A8"
+                                Name                 = "SharePoint_Content_Contoso2"
+                                Id                   = "936DA01F-9ABD-4d9d-80C7-02AF85C822A8"
+                                NormalizedDataSource = 'SQL01'
                             },
                             @{
-                                Name = "SharePoint_Content_Contoso3"
-                                Id   = "936DA01F-9ABD-4d9d-80C7-02AF85C822A9"
+                                Name                 = "SharePoint_Content_Contoso3"
+                                Id                   = "936DA01F-9ABD-4d9d-80C7-02AF85C822A9"
+                                NormalizedDataSource = 'SQL01'
                             }
                         )
                     }
                 }
 
+                $global:SPDscReadSQL = 0
                 It "Should return null from the get method" {
                     Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                 }
 
+                $global:SPDscReadSQL = 0
                 It "Should return false from the test method" {
                     Test-TargetResource @testParams | Should -Be $false
                 }
 
+                $global:SPDscReadSQL = 0
                 It "Should throw an exception in the set method" {
                     Set-TargetResource @testParams
                     Assert-MockCalled Add-SPShellAdmin
@@ -497,13 +533,13 @@ try
                         IsSingleInstance = "Yes"
                         Databases        = @(
                             (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
-                                    Name    = "SharePoint_Content_Contoso1"
-                                    Members = "contoso\user1", "contoso\user2"
-                                } -ClientOnly)
+                                Name    = "SharePoint_Content_Contoso1"
+                                Members = "contoso\user1", "contoso\user2"
+                            } -ClientOnly)
                             (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
-                                    Name    = "SharePoint_Content_Contoso2"
-                                    Members = "contoso\user1", "contoso\user2"
-                                } -ClientOnly)
+                                Name    = "SharePoint_Content_Contoso2"
+                                Members = "contoso\user1", "contoso\user2"
+                            } -ClientOnly)
                         )
                     }
 
@@ -527,12 +563,14 @@ try
                     Mock -CommandName Get-SPDatabase -MockWith {
                         return @(
                             @{
-                                Name = "SharePoint_Content_Contoso1"
-                                Id   = "F9168C5E-CEB2-4faa-B6BF-329BF39FA1E4"
+                                Name                 = "SharePoint_Content_Contoso1"
+                                Id                   = "F9168C5E-CEB2-4faa-B6BF-329BF39FA1E4"
+                                NormalizedDataSource = 'SQL01'
                             },
                             @{
-                                Name = "SharePoint_Content_Contoso2"
-                                Id   = "936DA01F-9ABD-4d9d-80C7-02AF85C822A8"
+                                Name                 = "SharePoint_Content_Contoso2"
+                                Id                   = "936DA01F-9ABD-4d9d-80C7-02AF85C822A8"
+                                NormalizedDataSource = 'SQL01'
                             }
                         )
                     }
@@ -559,13 +597,13 @@ try
                         IsSingleInstance = "Yes"
                         Databases        = @(
                             (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
-                                    Name    = "SharePoint_Content_Contoso1"
-                                    Members = "contoso\user1", "contoso\user2"
-                                } -ClientOnly)
+                                Name    = "SharePoint_Content_Contoso1"
+                                Members = "contoso\user1", "contoso\user2"
+                            } -ClientOnly)
                             (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
-                                    Name    = "SharePoint_Content_Contoso2"
-                                    Members = "contoso\user1", "contoso\user2"
-                                } -ClientOnly)
+                                Name    = "SharePoint_Content_Contoso2"
+                                Members = "contoso\user1", "contoso\user2"
+                            } -ClientOnly)
                         )
                     }
 
@@ -589,12 +627,14 @@ try
                     Mock -CommandName Get-SPDatabase -MockWith {
                         return @(
                             @{
-                                Name = "SharePoint_Content_Contoso1"
-                                Id   = "F9168C5E-CEB2-4faa-B6BF-329BF39FA1E4"
+                                Name                 = "SharePoint_Content_Contoso1"
+                                Id                   = "F9168C5E-CEB2-4faa-B6BF-329BF39FA1E4"
+                                NormalizedDataSource = 'SQL01'
                             },
                             @{
-                                Name = "SharePoint_Content_Contoso2"
-                                Id   = "936DA01F-9ABD-4d9d-80C7-02AF85C822A8"
+                                Name                 = "SharePoint_Content_Contoso2"
+                                Id                   = "936DA01F-9ABD-4d9d-80C7-02AF85C822A8"
+                                NormalizedDataSource = 'SQL01'
                             }
                         )
                     }
@@ -684,13 +724,13 @@ try
                         IsSingleInstance = "Yes"
                         Databases        = @(
                             (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
-                                    Name             = "SharePoint_Content_Contoso1"
-                                    MembersToInclude = "contoso\user1", "contoso\user2"
-                                } -ClientOnly)
+                                Name             = "SharePoint_Content_Contoso1"
+                                MembersToInclude = "contoso\user1", "contoso\user2"
+                            } -ClientOnly)
                             (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
-                                    Name             = "SharePoint_Content_Contoso2"
-                                    MembersToInclude = "contoso\user1", "contoso\user2"
-                                } -ClientOnly)
+                                Name             = "SharePoint_Content_Contoso2"
+                                MembersToInclude = "contoso\user1", "contoso\user2"
+                            } -ClientOnly)
                         )
                     }
 
@@ -714,12 +754,14 @@ try
                     Mock -CommandName Get-SPDatabase -MockWith {
                         return @(
                             @{
-                                Name = "SharePoint_Content_Contoso1"
-                                Id   = "F9168C5E-CEB2-4faa-B6BF-329BF39FA1E4"
+                                Name                 = "SharePoint_Content_Contoso1"
+                                Id                   = "F9168C5E-CEB2-4faa-B6BF-329BF39FA1E4"
+                                NormalizedDataSource = 'SQL01'
                             },
                             @{
-                                Name = "SharePoint_Content_Contoso2"
-                                Id   = "936DA01F-9ABD-4d9d-80C7-02AF85C822A8"
+                                Name                 = "SharePoint_Content_Contoso2"
+                                Id                   = "936DA01F-9ABD-4d9d-80C7-02AF85C822A8"
+                                NormalizedDataSource = 'SQL01'
                             }
                         )
                     }
@@ -745,13 +787,13 @@ try
                         IsSingleInstance = "Yes"
                         Databases        = @(
                             (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
-                                    Name             = "SharePoint_Content_Contoso1"
-                                    MembersToInclude = "contoso\user1", "contoso\user2"
-                                } -ClientOnly)
+                                Name             = "SharePoint_Content_Contoso1"
+                                MembersToInclude = "contoso\user1", "contoso\user2"
+                            } -ClientOnly)
                             (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
-                                    Name             = "SharePoint_Content_Contoso2"
-                                    MembersToInclude = "contoso\user1", "contoso\user2"
-                                } -ClientOnly)
+                                Name             = "SharePoint_Content_Contoso2"
+                                MembersToInclude = "contoso\user1", "contoso\user2"
+                            } -ClientOnly)
                         )
                     }
 
@@ -775,12 +817,14 @@ try
                     Mock -CommandName Get-SPDatabase -MockWith {
                         return @(
                             @{
-                                Name = "SharePoint_Content_Contoso1"
-                                Id   = "F9168C5E-CEB2-4faa-B6BF-329BF39FA1E4"
+                                Name                 = "SharePoint_Content_Contoso1"
+                                Id                   = "F9168C5E-CEB2-4faa-B6BF-329BF39FA1E4"
+                                NormalizedDataSource = 'SQL01'
                             },
                             @{
-                                Name = "SharePoint_Content_Contoso2"
-                                Id   = "936DA01F-9ABD-4d9d-80C7-02AF85C822A8"
+                                Name                 = "SharePoint_Content_Contoso2"
+                                Id                   = "936DA01F-9ABD-4d9d-80C7-02AF85C822A8"
+                                NormalizedDataSource = 'SQL01'
                             }
                         )
                     }
@@ -870,13 +914,13 @@ try
                         IsSingleInstance = "Yes"
                         Databases        = @(
                             (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
-                                    Name             = "SharePoint_Content_Contoso1"
-                                    MembersToExclude = "contoso\user1", "contoso\user2"
-                                } -ClientOnly)
+                                Name             = "SharePoint_Content_Contoso1"
+                                MembersToExclude = "contoso\user1", "contoso\user2"
+                            } -ClientOnly)
                             (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
-                                    Name             = "SharePoint_Content_Contoso2"
-                                    MembersToExclude = "contoso\user1", "contoso\user2"
-                                } -ClientOnly)
+                                Name             = "SharePoint_Content_Contoso2"
+                                MembersToExclude = "contoso\user1", "contoso\user2"
+                            } -ClientOnly)
                         )
                     }
 
@@ -900,12 +944,14 @@ try
                     Mock -CommandName Get-SPDatabase -MockWith {
                         return @(
                             @{
-                                Name = "SharePoint_Content_Contoso1"
-                                Id   = "F9168C5E-CEB2-4faa-B6BF-329BF39FA1E4"
+                                Name                 = "SharePoint_Content_Contoso1"
+                                Id                   = "F9168C5E-CEB2-4faa-B6BF-329BF39FA1E4"
+                                NormalizedDataSource = 'SQL01'
                             },
                             @{
-                                Name = "SharePoint_Content_Contoso2"
-                                Id   = "936DA01F-9ABD-4d9d-80C7-02AF85C822A8"
+                                Name                 = "SharePoint_Content_Contoso2"
+                                Id                   = "936DA01F-9ABD-4d9d-80C7-02AF85C822A8"
+                                NormalizedDataSource = 'SQL01'
                             }
                         )
                     }
@@ -931,13 +977,13 @@ try
                         IsSingleInstance = "Yes"
                         Databases        = @(
                             (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
-                                    Name             = "SharePoint_Content_Contoso1"
-                                    MembersToExclude = "contoso\user3", "contoso\user4"
-                                } -ClientOnly)
+                                Name             = "SharePoint_Content_Contoso1"
+                                MembersToExclude = "contoso\user3", "contoso\user4"
+                            } -ClientOnly)
                             (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
-                                    Name             = "SharePoint_Content_Contoso2"
-                                    MembersToExclude = "contoso\user5", "contoso\user6"
-                                } -ClientOnly)
+                                Name             = "SharePoint_Content_Contoso2"
+                                MembersToExclude = "contoso\user5", "contoso\user6"
+                            } -ClientOnly)
                         )
                     }
 
@@ -961,12 +1007,14 @@ try
                     Mock -CommandName Get-SPDatabase -MockWith {
                         return @(
                             @{
-                                Name = "SharePoint_Content_Contoso1"
-                                Id   = "F9168C5E-CEB2-4faa-B6BF-329BF39FA1E4"
+                                Name                 = "SharePoint_Content_Contoso1"
+                                Id                   = "F9168C5E-CEB2-4faa-B6BF-329BF39FA1E4"
+                                NormalizedDataSource = 'SQL01'
                             },
                             @{
-                                Name = "SharePoint_Content_Contoso2"
-                                Id   = "936DA01F-9ABD-4d9d-80C7-02AF85C822A8"
+                                Name                 = "SharePoint_Content_Contoso2"
+                                Id                   = "936DA01F-9ABD-4d9d-80C7-02AF85C822A8"
+                                NormalizedDataSource = 'SQL01'
                             }
                         )
                     }
@@ -978,6 +1026,58 @@ try
 
                 It "Should return false from the test method" {
                     Test-TargetResource @testParams | Should -Be $true
+                }
+            }
+
+            Context -Name "Running ReverseDsc Export" -Fixture {
+                BeforeAll {
+                    Import-Module (Join-Path -Path (Split-Path -Path (Get-Module SharePointDsc -ListAvailable).Path -Parent) -ChildPath "Modules\SharePointDSC.Reverse\SharePointDSC.Reverse.psm1")
+
+                    Mock -CommandName Write-Host -MockWith { }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            IsSingleInstance = 'Yes'
+                            Members          = @('contoso\sa_farm', 'contoso\SPAdmins', 'contoso\spadmin')
+                            MembersToInclude = $null
+                            MembersToExclude = $null
+                            Databases        = @(
+                                @{
+                                    Name    = 'SP_Config'
+                                    Members = @('contoso\sa_farm', 'contoso\spadmin')
+                                },
+                                @{
+                                    Name    = 'SP_Content'
+                                    Members = @('contoso\sa_farm', 'contoso\SPAdmins', 'contoso\spadmin')
+                                }
+                            )
+                            AllDatabases     = $null
+                        }
+                    }
+
+                    if ($null -eq (Get-Variable -Name 'spFarmAccount' -ErrorAction SilentlyContinue))
+                    {
+                        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                        $Global:spFarmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("contoso\spfarm", $mockPassword)
+                    }
+
+                    $result = @'
+        SPShellAdmins ShellAdmins
+        {
+            Databases            = @(
+                MSFT_SPDatabasePermissions { Members=@('contoso\sa_farm', 'contoso\spadmin'); Name='SP_Config' }
+                MSFT_SPDatabasePermissions { Members=@('contoso\sa_farm', 'contoso\SPAdmins', 'contoso\spadmin'); Name='SP_Content' }
+            );
+            IsSingleInstance     = "Yes";
+            Members              = @("contoso\sa_farm","contoso\SPAdmins","contoso\spadmin");
+            PsDscRunAsCredential = $Credsspfarm;
+        }
+
+'@
+                }
+
+                It "Should return valid DSC block from the Export method" {
+                    Export-TargetResource | Should -Be $result
                 }
             }
         }
