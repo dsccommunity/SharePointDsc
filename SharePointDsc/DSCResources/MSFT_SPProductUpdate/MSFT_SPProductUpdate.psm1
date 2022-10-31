@@ -115,17 +115,24 @@ function Get-TargetResource
     $fileVersionInfo = New-Object -TypeName System.Version -ArgumentList $fileVersion
     if ($fileVersionInfo.Major -eq 15)
     {
-        $sharePointVersion = 2013
+        $sharePointVersion = '2013'
     }
     else
     {
         if ($fileVersionInfo.Build.ToString().Length -eq 4)
         {
-            $sharePointVersion = 2016
+            $sharePointVersion = '2016'
         }
         else
         {
-            $sharePointVersion = 2019
+            if ($fileVersionInfo.Build -lt 13000)
+            {
+                $sharePointVersion = '2019'
+            }
+            else
+            {
+                $sharePointVersion = 'SE'
+            }
         }
     }
 
@@ -501,6 +508,7 @@ function Set-TargetResource
             $searchSAs = Get-SPEnterpriseSearchServiceApplication
             foreach ($searchSA in $searchSAs)
             {
+                Write-Verbose -Message "Pausing all search service applications"
                 if ($searchSA.isPaused() -eq 0)
                 {
                     $searchSA.Pause()
@@ -661,13 +669,24 @@ function Set-TargetResource
         {
             # Resuming Search Service Application if paused###
             Invoke-SPDscCommand -ScriptBlock {
-                $searchSAs = Get-SPEnterpriseSearchServiceApplication
-                foreach ($searchSA in $searchSAs)
+                $unpatchedServers = Get-SPDscAllServersPatchStatus | Where-Object { $_.Status -ne "UpgradeRequired" -and $_.Status -ne "UpgradeAvailable" }
+
+                if ($unpatchedServers.Count -eq 0)
                 {
-                    if (($searchSA.IsPaused() -band 0x80) -ne 0)
+                    Write-Verbose -Message "All servers are on the same patch level. Resuming the all search service applications!"
+                    $searchSAs = Get-SPEnterpriseSearchServiceApplication
+                    foreach ($searchSA in $searchSAs)
                     {
-                        $searchSA.Resume()
+                        if (($searchSA.IsPaused() -band 0x80) -ne 0)
+                        {
+                            $searchSA.Resume()
+                        }
                     }
+                }
+                else
+                {
+                    Write-Verbose -Message "There are still some unpatched servers. Skipping resuming the search!"
+                    Write-Verbose -Message "The following servers aren't on the correct patch level: $($unpatchedServers -join ", ")"
                 }
             }
         }
@@ -741,8 +760,8 @@ function Get-SPDscLocalVersionInfo
     (
         # Parameter help description
         [Parameter(Mandatory = $true)]
-        [ValidateSet(2013, 2016, 2019)]
-        [System.Int32]
+        [ValidateSet('2013', '2016', '2019', 'SE')]
+        [System.String]
         $ProductVersion,
 
         [Parameter()]
@@ -754,16 +773,25 @@ function Get-SPDscLocalVersionInfo
         $IsWssPackage
     )
 
-    $productNameRegEx = "Microsoft SharePoint (Foundation|Server) $($ProductVersion) Core"
+    if ($ProductVersion -eq 'SE')
+    {
+        $spVersion = 'Subscription Edition'
+    }
+    else
+    {
+        $spVersion = $ProductVersion
+    }
+
+    $productNameRegEx = "Microsoft SharePoint (Foundation|Server) $($spVersion) Core"
 
     if (0 -ne $Lcid)
     {
-        $productNameRegEx = "Microsoft SharePoint (Foundation|Server) $($ProductVersion) $($Lcid) (Lang|Language) Pack"
+        $productNameRegEx = "Microsoft SharePoint (Foundation|Server) $($spVersion) $($Lcid) (Lang|Language) Pack"
     }
 
     if ($IsWssPackage)
     {
-        $productNameRegEx = "Microsoft SharePoint (Foundation|Server) $($ProductVersion) \d{4} (Lang|Language) Pack"
+        $productNameRegEx = "Microsoft SharePoint (Foundation|Server) $($spVersion) \d{4} (Lang|Language) Pack"
     }
     Write-Verbose "Product Name RegEx: $($productNameRegEx)"
 
@@ -812,7 +840,7 @@ function Get-SPDscLocalVersionInfo
 
             if ($null -ne $patchGuid)
             {
-                $detailedPatchInformation = Get-ItemProperty "$($patchRegistryPath)\$($patchGuid)"
+                $detailedPatchInformation = Get-ItemProperty "$($patchRegistryPath)\$($patchGuid)" -ErrorAction SilentlyContinue
                 $localPackage = $detailedPatchInformation.LocalPackage
 
                 if ($null -ne $localPackage)
