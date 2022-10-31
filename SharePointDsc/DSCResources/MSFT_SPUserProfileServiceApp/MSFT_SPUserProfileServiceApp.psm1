@@ -199,6 +199,7 @@ function Get-TargetResource
             $upMySiteLocation = $null
             $upMySiteManagedPath = $null
             $upSiteConflictNaming = $null
+            $mysiteHostLocation = $null
             try
             {
                 $ca = Get-SPWebApplication -IncludeCentralAdministration | Where-Object -FilterScript { $_.IsAdministrationWebApplication }
@@ -208,6 +209,10 @@ function Get-TargetResource
                 $upMySiteLocation = [System.Uri]$userProfileManager.MySiteHostUrl
                 $upMySiteManagedPath = $userProfileManager.PersonalSiteInclusion
                 $upSiteConflictNaming = $userProfileManager.PersonalSiteFormat
+                if (-not [string]::IsNullOrEmpty($upMySiteLocation.AbsoluteUri))
+                {
+                    $mysiteHostLocation = $upMySiteLocation.AbsoluteUri.TrimEnd('/')
+                }
             }
             catch
             {
@@ -223,7 +228,7 @@ function Get-TargetResource
                 Name                         = $serviceApp.DisplayName
                 ProxyName                    = $proxyName
                 ApplicationPool              = $serviceApp.ApplicationPool.Name
-                MySiteHostLocation           = $upMySiteLocation.AbsoluteUri.TrimEnd("/")
+                MySiteHostLocation           = $mysiteHostLocation
                 MySiteManagedPath            = $upMySiteManagedPath
                 ProfileDBName                = $databases.ProfileDatabase.Name
                 ProfileDBServer              = $databases.ProfileDatabase.NormalizedDataSource
