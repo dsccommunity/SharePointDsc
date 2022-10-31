@@ -550,6 +550,39 @@ function Get-SPDscServerPatchStatus
     return $statusType
 }
 
+function Get-SPDscAllServersPatchStatus
+{
+    param ()
+
+    $farm = Get-SPFarm
+    $productVersions = [Microsoft.SharePoint.Administration.SPProductVersions]::GetProductVersions($farm)
+    $servers = Get-SPServer | Where-Object -FilterScript { $_.Role -ne "Invalid" }
+
+    [array]$srvStatus = @()
+    foreach ($server in $servers)
+    {
+        $serverProductInfo = $productVersions.GetServerProductInfo($server.Id);
+        if ($null -ne $serverProductInfo)
+        {
+            $statusType = $serverProductInfo.InstallStatus;
+            if ($statusType -ne 0)
+            {
+                $statusType = $serverProductInfo.GetUpgradeStatus($farm, $server);
+            }
+        }
+        else
+        {
+            $statusType = [Microsoft.SharePoint.Administration.SPServerProductInfo+StatusType]::NoActionRequired;
+        }
+
+        $srvStatus += [PSCustomObject]@{
+            Name = $server.Name
+            Status = $statusType
+        }
+    }
+    return $srvStatus
+}
+
 function Get-SPDscServiceContext
 {
     [CmdletBinding()]
