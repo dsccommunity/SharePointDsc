@@ -123,7 +123,8 @@ function Get-TargetResource
             }
         }
 
-        $databaseOwners = Get-SPDscDatabaseOwnerList
+        $sqlInstances = (Get-SPDatabase -Verbose:$false).NormalizedDataSource | Sort-Object | Get-Unique
+        $databaseOwners = Get-SPDscDatabaseOwnerList -sqlInstances $sqlInstances
 
         $shellAdmins = Get-SPShellAdmin -Verbose:$false
 

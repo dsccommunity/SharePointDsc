@@ -5,12 +5,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Fixed
+### Added
 
 - SPProductUpdate
   - Added support for SharePoint Subscription Edition
+
+### Changed
+
+- SPProductUpdate
   - Added logic to check if all servers in the farm are on the same
     patch level before resuming the search crawls again
+
+### Fixed
+
+- SPShellAdmins
+  - Fix issue where Get-SPDatabase could not be found
 - SPUserProfileServiceApp
   - Fixed issue where error 'You cannot call a method on a null-valued expression' was
     thrown when no MySiteHost was specified

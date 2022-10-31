@@ -1,8 +1,12 @@
 function Get-SPDscDatabaseOwnerList
 {
-    param ( )
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [System.Object]
+        $sqlInstances
+    )
 
-    $sqlInstances = (Get-SPDatabase -Verbose:$false).NormalizedDataSource | Sort-Object | Get-Unique
     $databaseOwners = $sqlInstances | ForEach-Object {
         $connection = New-Object -TypeName "System.Data.SqlClient.SqlConnection"
         $command = New-Object -TypeName "System.Data.SqlClient.SqlCommand"
