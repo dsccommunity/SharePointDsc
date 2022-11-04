@@ -1425,6 +1425,13 @@ function Test-SPDscPrereqInstallStatus
                 }
                 else
                 {
+                    # Fix to prevent multiple items being returned when two items have the same BundleUpgradeCode
+                    # This sometimes happens when the VC++ isn't upgraded properly.
+                    if ($installedItem.Count -gt 1)
+                    {
+                        $installedItem = $installedItem | Sort-Object -Property DisplayVersion | Select-Object -Last 1
+                    }
+
                     $isRequiredVersionInstalled = $true;
 
                     [System.Version]$minimumRequiredVersion = $itemToCheck.MinimumRequiredVersion

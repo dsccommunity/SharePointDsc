@@ -18,6 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- SPInstallPrereqs
+  - Fix issue where a failed VC++ upgrade results in two versions being present, which
+    the code didn't handle properly
 - SPShellAdmins
   - Fix issue where Get-SPDatabase could not be found
 - SPUserProfileServiceApp
