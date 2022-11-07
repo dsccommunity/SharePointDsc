@@ -76,7 +76,7 @@ Pester:
   Script:
     - tests/Unit/SharePointDsc
   Tag:
-  CodeCoverageThreshold: 75 # Set to 0 to bypass
+  CodeCoverageThreshold: 73 # Set to 0 to bypass
   CodeCoverageOutputFile: CodeCoverage.xml
   CodeCoverageOutputFileEncoding: ascii
 
