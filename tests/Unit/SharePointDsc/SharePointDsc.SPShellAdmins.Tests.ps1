@@ -49,7 +49,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 Import-Module -Name (Join-Path -Path (Get-Module SharePointDsc -ListAvailable).ModuleBase `
                         -ChildPath "Modules\SharePointDsc.ShellAdmin\SPShellAdmin.psm1" `
@@ -478,6 +478,12 @@ try
                             return @{ UserName = "contoso\user3", "contoso\user4" }
                         }
                     }
+
+                    Mock -CommandName Get-SPDatabase -MockWith {
+                        return @{
+                            NormalizedDataSource = "SQL01"
+                        }
+                    }
                 }
 
                 It "Should return null from the get method" {
@@ -514,6 +520,12 @@ try
                             return @{
                                 UserName = "contoso\user1", "contoso\user2"
                             }
+                        }
+                    }
+
+                    Mock -CommandName Get-SPDatabase -MockWith {
+                        return @{
+                            NormalizedDataSource = "SQL01"
                         }
                     }
                 }
@@ -670,6 +682,12 @@ try
                             }
                         }
                     }
+
+                    Mock -CommandName Get-SPDatabase -MockWith {
+                        return @{
+                            NormalizedDataSource = "SQL01"
+                        }
+                    }
                 }
 
                 It "Should return null from the get method" {
@@ -705,6 +723,12 @@ try
                             return @{
                                 UserName = "contoso\user1", "contoso\user2", "contoso\user3"
                             }
+                        }
+                    }
+
+                    Mock -CommandName Get-SPDatabase -MockWith {
+                        return @{
+                            NormalizedDataSource = "SQL01"
                         }
                     }
                 }
@@ -860,6 +884,12 @@ try
                             }
                         }
                     }
+
+                    Mock -CommandName Get-SPDatabase -MockWith {
+                        return @{
+                            NormalizedDataSource = "SQL01"
+                        }
+                    }
                 }
 
                 It "Should return null from the get method" {
@@ -895,6 +925,12 @@ try
                             return @{
                                 UserName = "contoso\user3", "contoso\user4"
                             }
+                        }
+                    }
+
+                    Mock -CommandName Get-SPDatabase -MockWith {
+                        return @{
+                            NormalizedDataSource = "SQL01"
                         }
                     }
                 }
