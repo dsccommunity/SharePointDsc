@@ -384,6 +384,117 @@ try
                 }
             }
 
+            Context -Name "Validate Get-SPDscServerPatchStatus" -Fixture {
+                BeforeAll {
+                    try
+                    {
+                        [Microsoft.SharePoint.Administration.SPProductVersions]
+                    }
+                    catch
+                    {
+                        Add-Type -TypeDefinition @"
+                        namespace Microsoft.SharePoint.Administration {
+                            public class serverProductInfo {
+                                public string GetUpgradeStatus(System.Object farm, System.Object server)
+                                {
+                                    return "NoActionRequired";
+                                }
+
+                                public string InstallStatus
+                                {
+                                    get
+                                    {
+                                        return "NoActionRequired";
+                                    }
+                                }
+                            }
+                            public class ProductVersions {
+                                public object GetServerProductInfo(System.Object server)
+                                {
+                                    return new serverProductInfo();
+                                }
+                            }
+                            public class SPProductVersions {
+                                public static object GetProductVersions(System.Object obj)
+                                {
+                                    return new ProductVersions();
+                                }
+                            }
+                        }
+"@ -ErrorAction SilentlyContinue
+                    }
+
+                    Mock -CommandName Get-SPFarm -MockWith { return "" }
+                    Mock -CommandName Get-SPServer -MockWith {
+                        return @{
+                            Id = (New-Guid)
+                        }
+                    }
+                }
+
+                It "should return the patch status of the current server" {
+                    Get-SPDscServerPatchStatus | Should -Be "NoActionRequired"
+                }
+            }
+
+            Context -Name "Validate Get-SPDscAllServersPatchStatus" -Fixture {
+                BeforeAll {
+                    try
+                    {
+                        [Microsoft.SharePoint.Administration.SPProductVersions]
+                    }
+                    catch
+                    {
+                        Add-Type -TypeDefinition @"
+                        namespace Microsoft.SharePoint.Administration {
+                            public class serverProductInfo {
+                                public string GetUpgradeStatus(System.Object farm, System.Object server)
+                                {
+                                    return "NoActionRequired";
+                                }
+
+                                public string InstallStatus
+                                {
+                                    get
+                                    {
+                                        return "NoActionRequired";
+                                    }
+                                }
+                            }
+                            public class ProductVersions {
+                                public object GetServerProductInfo(System.Object server)
+                                {
+                                    return new serverProductInfo();
+                                }
+                            }
+                            public class SPProductVersions {
+                                public static object GetProductVersions(System.Object obj)
+                                {
+                                    return new ProductVersions();
+                                }
+                            }
+                        }
+"@ -ErrorAction SilentlyContinue
+                    }
+
+                    Mock -CommandName Get-SPFarm -MockWith { return "" }
+                    Mock -CommandName Get-SPServer -MockWith {
+                        return @{
+                            Name = "WFE01"
+                            Id   = (New-Guid)
+                            Role = "WebFrontEnd"
+                        }
+                    }
+                }
+
+                It "should return the patch status of the current server" {
+                    [array]$result = Get-SPDscAllServersPatchStatus
+                    $result.Count | Should -Be 1
+                    $result[0].Name | Should -Be "WFE01"
+                }
+            }
+
+
             Context -Name "Validate Export-SPDscDiagnosticData" -Fixture {
                 BeforeAll {
                     Mock -CommandName "New-Object" `
