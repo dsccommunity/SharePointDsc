@@ -123,7 +123,8 @@ function Get-TargetResource
             }
         }
 
-        $databaseOwners = Get-SPDscDatabaseOwnerList
+        $sqlInstances = (Get-SPDatabase -Verbose:$false).NormalizedDataSource | Sort-Object | Get-Unique
+        $databaseOwners = Get-SPDscDatabaseOwnerList -sqlInstances $sqlInstances
 
         $shellAdmins = Get-SPShellAdmin -Verbose:$false
 
@@ -515,7 +516,7 @@ function Set-TargetResource
                 # Check if configured database exists, throw error if not
                 Write-Verbose -Message "Processing Database: $($database.Name)"
 
-                $currentCDB = Get-SPDatabase  -Verbose:$false | Where-Object -FilterScript {
+                $currentCDB = Get-SPDatabase -Verbose:$false | Where-Object -FilterScript {
                     $_.Name -eq $database.Name
                 }
                 if ($null -ne $currentCDB)

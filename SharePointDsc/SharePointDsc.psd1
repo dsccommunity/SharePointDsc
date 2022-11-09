@@ -80,6 +80,7 @@
         'Export-SPDscDiagnosticData',
         'Format-OfficePatchGUID',
         'Get-SPDscDBForAlias',
+        'Get-SPDscAllServersPatchStatus',
         'Get-SPDscAssemblyVersion',
         'Get-SPDscBuildVersion',
         'Get-SPDscClaimTypeMapping',

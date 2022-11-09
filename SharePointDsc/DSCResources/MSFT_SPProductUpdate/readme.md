@@ -19,6 +19,12 @@ stream is added to indicate that the file is potentially from an unsafe source.
 To use these files, make sure you first unblock them using Unblock-File.
 SPProductUpdate will throw an error when it detects the file is blocked.
 
+NOTE2:
+When specifying the ShutdownServices parameter, the resource is stopping
+several SharePoint services and pausing all search crawls. After patching
+is complete, search crawls are only resumed when all servers in the farm
+are patched on the same patch level. 
+
 IMPORTANT:
 Since v3.3, this resource no longer relies on the farm being present to check
 the installed patches. This means it is now possible to deploy updates during

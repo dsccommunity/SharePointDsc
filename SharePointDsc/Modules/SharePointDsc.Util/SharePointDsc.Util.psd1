@@ -45,6 +45,7 @@
         'Export-SPConfiguration',
         'Export-SPDscDiagnosticData',
         'Format-OfficePatchGUID',
+        'Get-SPDscAllServersPatchStatus',
         'Get-SPDscAssemblyVersion',
         'Get-SPDscBuildVersion',
         'Get-SPDscContentService',

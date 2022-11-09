@@ -54,7 +54,7 @@ try
                         -ChildPath "SharePointDsc.SPProductUpdate.Tests.psd1" `
                         -Resolve)
 
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 function Add-TestRegistryData
                 {
@@ -71,20 +71,27 @@ try
                         $PrepDataForTests
                     )
 
-                    $productVersion = 2013
+                    $productVersion = "2013"
                     if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16)
                     {
                         if ($Global:SPDscHelper.CurrentStubBuildNumber.Build.ToString().Length -eq 4)
                         {
-                            $productVersion = 2016
+                            $productVersion = "2016"
                         }
                         else
                         {
-                            $productVersion = 2019
+                            if ($Global:SPDscHelper.CurrentStubBuildNumber.Build -lt 13000)
+                            {
+                                $productVersion = "2019"
+                            }
+                            else
+                            {
+                                $productVersion = "SE"
+                            }
                         }
                     }
 
-                    if ($productVersion -ne 2013 -and $PatchLevel -eq "SP1")
+                    if ($productVersion -ne "2013" -and $PatchLevel -eq "SP1")
                     {
                         throw "Invalid Parameter Set. 'SP1' can only be used with SharePoint Server 2013. Server version was $productVersion"
                     }
@@ -164,6 +171,19 @@ try
                         return $null
                     } -PassThru
                     return $service
+                }
+
+                Mock Get-SPDscAllServersPatchStatus -MockWith {
+                    return @(
+                        @{
+                            Name   = "WFE"
+                            Status = "NoActionRequired"
+                        }
+                        @{
+                            Name   = "APP"
+                            Status = "NoActionRequired"
+                        }
+                    )
                 }
 
                 Mock -CommandName Get-SPDscInstalledProductVersion {
@@ -362,13 +382,27 @@ try
                             }
                             else
                             {
-                                # 2019
-                                return @{
-                                    VersionInfo = @{
-                                        FileVersion     = "16.0.10342"
-                                        FileDescription = "Cumulative Update"
+                                if ($Global:SPDscHelper.CurrentStubBuildNumber.Build -lt 13000)
+                                {
+                                    # 2019
+                                    return @{
+                                        VersionInfo = @{
+                                            FileVersion     = "16.0.10342"
+                                            FileDescription = "Cumulative Update"
+                                        }
+                                        Name        = "ubersrv2019-kb3115029-fullfile-x64-glb.exe"
                                     }
-                                    Name        = "ubersrv2019-kb3115029-fullfile-x64-glb.exe"
+                                }
+                                else
+                                {
+                                    # 2019
+                                    return @{
+                                        VersionInfo = @{
+                                            FileVersion     = "16.0.15601"
+                                            FileDescription = "Cumulative Update"
+                                        }
+                                        Name        = "ubersrvse-kb3115029-fullfile-x64-glb.exe"
+                                    }
                                 }
                             }
                         }
@@ -429,12 +463,25 @@ try
                             }
                             else
                             {
-                                return @{
-                                    VersionInfo = @{
-                                        FileVersion     = "16.0.10342"
-                                        FileDescription = "Cumulative Update"
+                                if ($Global:SPDscHelper.CurrentStubBuildNumber.Build -lt 13000)
+                                {
+                                    return @{
+                                        VersionInfo = @{
+                                            FileVersion     = "16.0.10342"
+                                            FileDescription = "Cumulative Update"
+                                        }
+                                        Name        = "serverlpksp2019-kb2880554-fullfile-x64-en-us.exe"
                                     }
-                                    Name        = "serverlpksp2019-kb2880554-fullfile-x64-en-us.exe"
+                                }
+                                else
+                                {
+                                    return @{
+                                        VersionInfo = @{
+                                            FileVersion     = "16.0.15601"
+                                            FileDescription = "Cumulative Update"
+                                        }
+                                        Name        = "sts-subscription-kb5002271-fullfile-x64-glb.exe"
+                                    }
                                 }
                             }
                         }
@@ -442,31 +489,35 @@ try
                         $Path -and $Path.Length -eq 1 -and $Path[0].StartsWith("C:\")
                     }
 
-                    $installerMock = New-Module -AsCustomObject -ScriptBlock {
+                    $installerMock = New-Module -AsCustomObject -Scriptblock {
                         function GetType
-                        { # Installer
-                            New-Module -AsCustomObject -ScriptBlock {
+                        {
+                            # Installer
+                            New-Module -AsCustomObject -Scriptblock {
                                 function InvokeMember
                                 {
-                                    New-Module -AsCustomObject -ScriptBlock {
+                                    New-Module -AsCustomObject -Scriptblock {
                                         function GetType
-                                        { # InstallerDB
-                                            New-Module -AsCustomObject -ScriptBlock {
+                                        {
+                                            # InstallerDB
+                                            New-Module -AsCustomObject -Scriptblock {
                                                 function InvokeMember
                                                 {
-                                                    New-Module -AsCustomObject -ScriptBlock {
+                                                    New-Module -AsCustomObject -Scriptblock {
                                                         function GetType
-                                                        { # DBView
-                                                            New-Module -AsCustomObject -ScriptBlock {
+                                                        {
+                                                            # DBView
+                                                            New-Module -AsCustomObject -Scriptblock {
                                                                 function InvokeMember
                                                                 {
                                                                     param ($a, $b, $c, $d, $e)
                                                                     if ($a -eq "Fetch")
                                                                     {
-                                                                        New-Module -AsCustomObject -ScriptBlock {
+                                                                        New-Module -AsCustomObject -Scriptblock {
                                                                             function GetType
-                                                                            { # Value
-                                                                                New-Module -AsCustomObject -ScriptBlock {
+                                                                            {
+                                                                                # Value
+                                                                                New-Module -AsCustomObject -Scriptblock {
                                                                                     function InvokeMember
                                                                                     {
                                                                                         param ($a, $b, $c, $d, $e)
@@ -482,7 +533,14 @@ try
                                                                                             }
                                                                                             else
                                                                                             {
-                                                                                                return "16.0.10342"
+                                                                                                if ($Global:SPDscHelper.CurrentStubBuildNumber.Build -lt 13000)
+                                                                                                {
+                                                                                                    return "16.0.10342"
+                                                                                                }
+                                                                                                else
+                                                                                                {
+                                                                                                    return "16.0.15601"
+                                                                                                }
                                                                                             }
                                                                                         }
                                                                                     }
@@ -557,12 +615,25 @@ try
                             }
                             else
                             {
-                                return @{
-                                    VersionInfo = @{
-                                        FileVersion     = "16.0.10340"
-                                        FileDescription = "Cumulative Update"
+                                if ($Global:SPDscHelper.CurrentStubBuildNumber.Build -lt 13000)
+                                {
+                                    return @{
+                                        VersionInfo = @{
+                                            FileVersion     = "16.0.10340"
+                                            FileDescription = "Cumulative Update"
+                                        }
+                                        Name        = "serverlpksp2019-kb2880554-fullfile-x64-en-us.exe"
                                     }
-                                    Name        = "serverlpksp2019-kb2880554-fullfile-x64-en-us.exe"
+                                }
+                                else
+                                {
+                                    return @{
+                                        VersionInfo = @{
+                                            FileVersion     = "16.0.15601"
+                                            FileDescription = "Cumulative Update"
+                                        }
+                                        Name        = "sts-subscription-kb5002271-fullfile-x64-glb.exe"
+                                    }
                                 }
                             }
                         }
@@ -570,31 +641,35 @@ try
                         $Path -and $Path.Length -eq 1 -and $Path[0].StartsWith("C:\")
                     }
 
-                    $installerMock = New-Module -AsCustomObject -ScriptBlock {
+                    $installerMock = New-Module -AsCustomObject -Scriptblock {
                         function GetType
-                        { # Installer
-                            New-Module -AsCustomObject -ScriptBlock {
+                        {
+                            # Installer
+                            New-Module -AsCustomObject -Scriptblock {
                                 function InvokeMember
                                 {
-                                    New-Module -AsCustomObject -ScriptBlock {
+                                    New-Module -AsCustomObject -Scriptblock {
                                         function GetType
-                                        { # InstallerDB
-                                            New-Module -AsCustomObject -ScriptBlock {
+                                        {
+                                            # InstallerDB
+                                            New-Module -AsCustomObject -Scriptblock {
                                                 function InvokeMember
                                                 {
-                                                    New-Module -AsCustomObject -ScriptBlock {
+                                                    New-Module -AsCustomObject -Scriptblock {
                                                         function GetType
-                                                        { # DBView
-                                                            New-Module -AsCustomObject -ScriptBlock {
+                                                        {
+                                                            # DBView
+                                                            New-Module -AsCustomObject -Scriptblock {
                                                                 function InvokeMember
                                                                 {
                                                                     param ($a, $b, $c, $d, $e)
                                                                     if ($a -eq "Fetch")
                                                                     {
-                                                                        New-Module -AsCustomObject -ScriptBlock {
+                                                                        New-Module -AsCustomObject -Scriptblock {
                                                                             function GetType
-                                                                            { # Value
-                                                                                New-Module -AsCustomObject -ScriptBlock {
+                                                                            {
+                                                                                # Value
+                                                                                New-Module -AsCustomObject -Scriptblock {
                                                                                     function InvokeMember
                                                                                     {
                                                                                         param ($a, $b, $c, $d, $e)
@@ -610,7 +685,14 @@ try
                                                                                             }
                                                                                             else
                                                                                             {
-                                                                                                return "16.0.10342"
+                                                                                                if ($Global:SPDscHelper.CurrentStubBuildNumber.Build -lt 13000)
+                                                                                                {
+                                                                                                    return "16.0.10342"
+                                                                                                }
+                                                                                                else
+                                                                                                {
+                                                                                                    return "16.0.15601"
+                                                                                                }
                                                                                             }
                                                                                         }
                                                                                     }
@@ -685,12 +767,25 @@ try
                             }
                             else
                             {
-                                return @{
-                                    VersionInfo = @{
-                                        FileVersion     = "16.0.10342"
-                                        FileDescription = "Cumulative Update"
+                                if ($Global:SPDscHelper.CurrentStubBuildNumber.Build -lt 13000)
+                                {
+                                    return @{
+                                        VersionInfo = @{
+                                            FileVersion     = "16.0.10342"
+                                            FileDescription = "Cumulative Update"
+                                        }
+                                        Name        = "serverlpksp2019-kb2880554-fullfile-x64-en-us.exe"
                                     }
-                                    Name        = "serverlpksp2019-kb2880554-fullfile-x64-en-us.exe"
+                                }
+                                else
+                                {
+                                    return @{
+                                        VersionInfo = @{
+                                            FileVersion     = "16.0.15601"
+                                            FileDescription = "Cumulative Update"
+                                        }
+                                        Name        = "sts-subscription-kb5002271-fullfile-x64-glb.exe"
+                                    }
                                 }
                             }
                         }
@@ -698,31 +793,35 @@ try
                         $Path -and $Path.Length -eq 1 -and $Path[0].StartsWith("C:\")
                     }
 
-                    $installerMock = New-Module -AsCustomObject -ScriptBlock {
+                    $installerMock = New-Module -AsCustomObject -Scriptblock {
                         function GetType
-                        { # Installer
-                            New-Module -AsCustomObject -ScriptBlock {
+                        {
+                            # Installer
+                            New-Module -AsCustomObject -Scriptblock {
                                 function InvokeMember
                                 {
-                                    New-Module -AsCustomObject -ScriptBlock {
+                                    New-Module -AsCustomObject -Scriptblock {
                                         function GetType
-                                        { # InstallerDB
-                                            New-Module -AsCustomObject -ScriptBlock {
+                                        {
+                                            # InstallerDB
+                                            New-Module -AsCustomObject -Scriptblock {
                                                 function InvokeMember
                                                 {
-                                                    New-Module -AsCustomObject -ScriptBlock {
+                                                    New-Module -AsCustomObject -Scriptblock {
                                                         function GetType
-                                                        { # DBView
-                                                            New-Module -AsCustomObject -ScriptBlock {
+                                                        {
+                                                            # DBView
+                                                            New-Module -AsCustomObject -Scriptblock {
                                                                 function InvokeMember
                                                                 {
                                                                     param ($a, $b, $c, $d, $e)
                                                                     if ($a -eq "Fetch")
                                                                     {
-                                                                        New-Module -AsCustomObject -ScriptBlock {
+                                                                        New-Module -AsCustomObject -Scriptblock {
                                                                             function GetType
-                                                                            { # Value
-                                                                                New-Module -AsCustomObject -ScriptBlock {
+                                                                            {
+                                                                                # Value
+                                                                                New-Module -AsCustomObject -Scriptblock {
                                                                                     function InvokeMember
                                                                                     {
                                                                                         param ($a, $b, $c, $d, $e)
@@ -738,7 +837,14 @@ try
                                                                                             }
                                                                                             else
                                                                                             {
-                                                                                                return "16.0.10340"
+                                                                                                if ($Global:SPDscHelper.CurrentStubBuildNumber.Build -lt 13000)
+                                                                                                {
+                                                                                                    return "16.0.10340"
+                                                                                                }
+                                                                                                else
+                                                                                                {
+                                                                                                    return "16.0.14326"
+                                                                                                }
                                                                                             }
                                                                                         }
                                                                                     }
@@ -810,44 +916,61 @@ try
                             }
                             else
                             {
-                                # 2019
-                                return @{
-                                    VersionInfo = @{
-                                        FileVersion     = "16.0.10342"
-                                        FileDescription = "Update for Microsoft SharePoint Server 2019 Language Pack (KB4461514)"
+                                if ($Global:SPDscHelper.CurrentStubBuildNumber.Build -lt 13000)
+                                {
+                                    # 2019
+                                    return @{
+                                        VersionInfo = @{
+                                            FileVersion     = "16.0.10342"
+                                            FileDescription = "Update for Microsoft SharePoint Server 2019 Language Pack (KB4461514)"
+                                        }
+                                        Name        = "wssloc2019-kb4461514-fullfile-x64-glb.exe"
                                     }
-                                    Name        = "wssloc2019-kb4461514-fullfile-x64-glb.exe"
+                                }
+                                else
+                                {
+                                    return @{
+                                        VersionInfo = @{
+                                            FileVersion     = "16.0.15601"
+                                            FileDescription = "Update for Microsoft SharePoint Server Subscription Edition Language Pack (KB4461514)"
+                                        }
+                                        Name        = "wssloc-subscription-kb5002271-fullfile-x64-glb.exe"
+                                    }
                                 }
                             }
                         } -ParameterFilter {
                             $Path -and $Path.Length -eq 1 -and $Path[0].StartsWith("C:\")
                         }
 
-                        $installerMock = New-Module -AsCustomObject -ScriptBlock {
+                        $installerMock = New-Module -AsCustomObject -Scriptblock {
                             function GetType
-                            { # Installer
-                                New-Module -AsCustomObject -ScriptBlock {
+                            {
+                                # Installer
+                                New-Module -AsCustomObject -Scriptblock {
                                     function InvokeMember
                                     {
-                                        New-Module -AsCustomObject -ScriptBlock {
+                                        New-Module -AsCustomObject -Scriptblock {
                                             function GetType
-                                            { # InstallerDB
-                                                New-Module -AsCustomObject -ScriptBlock {
+                                            {
+                                                # InstallerDB
+                                                New-Module -AsCustomObject -Scriptblock {
                                                     function InvokeMember
                                                     {
-                                                        New-Module -AsCustomObject -ScriptBlock {
+                                                        New-Module -AsCustomObject -Scriptblock {
                                                             function GetType
-                                                            { # DBView
-                                                                New-Module -AsCustomObject -ScriptBlock {
+                                                            {
+                                                                # DBView
+                                                                New-Module -AsCustomObject -Scriptblock {
                                                                     function InvokeMember
                                                                     {
                                                                         param ($a, $b, $c, $d, $e)
                                                                         if ($a -eq "Fetch")
                                                                         {
-                                                                            New-Module -AsCustomObject -ScriptBlock {
+                                                                            New-Module -AsCustomObject -Scriptblock {
                                                                                 function GetType
-                                                                                { # Value
-                                                                                    New-Module -AsCustomObject -ScriptBlock {
+                                                                                {
+                                                                                    # Value
+                                                                                    New-Module -AsCustomObject -Scriptblock {
                                                                                         function InvokeMember
                                                                                         {
                                                                                             param ($a, $b, $c, $d, $e)
@@ -857,7 +980,14 @@ try
                                                                                             }
                                                                                             else
                                                                                             {
-                                                                                                return "16.0.10340"
+                                                                                                if ($Global:SPDscHelper.CurrentStubBuildNumber.Build -lt 13000)
+                                                                                                {
+                                                                                                    return "16.0.10340"
+                                                                                                }
+                                                                                                else
+                                                                                                {
+                                                                                                    return "16.0.14326"
+                                                                                                }
                                                                                             }
                                                                                         }
                                                                                     }
@@ -926,31 +1056,35 @@ try
                             $Path -and $Path.Length -eq 1 -and $Path[0].StartsWith("C:\")
                         }
 
-                        $installerMock = New-Module -AsCustomObject -ScriptBlock {
+                        $installerMock = New-Module -AsCustomObject -Scriptblock {
                             function GetType
-                            { # Installer
-                                New-Module -AsCustomObject -ScriptBlock {
+                            {
+                                # Installer
+                                New-Module -AsCustomObject -Scriptblock {
                                     function InvokeMember
                                     {
-                                        New-Module -AsCustomObject -ScriptBlock {
+                                        New-Module -AsCustomObject -Scriptblock {
                                             function GetType
-                                            { # InstallerDB
-                                                New-Module -AsCustomObject -ScriptBlock {
+                                            {
+                                                # InstallerDB
+                                                New-Module -AsCustomObject -Scriptblock {
                                                     function InvokeMember
                                                     {
-                                                        New-Module -AsCustomObject -ScriptBlock {
+                                                        New-Module -AsCustomObject -Scriptblock {
                                                             function GetType
-                                                            { # DBView
-                                                                New-Module -AsCustomObject -ScriptBlock {
+                                                            {
+                                                                # DBView
+                                                                New-Module -AsCustomObject -Scriptblock {
                                                                     function InvokeMember
                                                                     {
                                                                         param ($a, $b, $c, $d, $e)
                                                                         if ($a -eq "Fetch")
                                                                         {
-                                                                            New-Module -AsCustomObject -ScriptBlock {
+                                                                            New-Module -AsCustomObject -Scriptblock {
                                                                                 function GetType
-                                                                                { # Value
-                                                                                    New-Module -AsCustomObject -ScriptBlock {
+                                                                                {
+                                                                                    # Value
+                                                                                    New-Module -AsCustomObject -Scriptblock {
                                                                                         function InvokeMember
                                                                                         {
                                                                                             param ($a, $b, $c, $d, $e)
@@ -1014,31 +1148,35 @@ try
                             $Path -and $Path.Length -eq 1 -and $Path[0].StartsWith("C:\")
                         }
 
-                        $installerMock = New-Module -AsCustomObject -ScriptBlock {
+                        $installerMock = New-Module -AsCustomObject -Scriptblock {
                             function GetType
-                            { # Installer
-                                New-Module -AsCustomObject -ScriptBlock {
+                            {
+                                # Installer
+                                New-Module -AsCustomObject -Scriptblock {
                                     function InvokeMember
                                     {
-                                        New-Module -AsCustomObject -ScriptBlock {
+                                        New-Module -AsCustomObject -Scriptblock {
                                             function GetType
-                                            { # InstallerDB
-                                                New-Module -AsCustomObject -ScriptBlock {
+                                            {
+                                                # InstallerDB
+                                                New-Module -AsCustomObject -Scriptblock {
                                                     function InvokeMember
                                                     {
-                                                        New-Module -AsCustomObject -ScriptBlock {
+                                                        New-Module -AsCustomObject -Scriptblock {
                                                             function GetType
-                                                            { # DBView
-                                                                New-Module -AsCustomObject -ScriptBlock {
+                                                            {
+                                                                # DBView
+                                                                New-Module -AsCustomObject -Scriptblock {
                                                                     function InvokeMember
                                                                     {
                                                                         param ($a, $b, $c, $d, $e)
                                                                         if ($a -eq "Fetch")
                                                                         {
-                                                                            New-Module -AsCustomObject -ScriptBlock {
+                                                                            New-Module -AsCustomObject -Scriptblock {
                                                                                 function GetType
-                                                                                { # Value
-                                                                                    New-Module -AsCustomObject -ScriptBlock {
+                                                                                {
+                                                                                    # Value
+                                                                                    New-Module -AsCustomObject -Scriptblock {
                                                                                         function InvokeMember
                                                                                         {
                                                                                             param ($a, $b, $c, $d, $e)
@@ -1102,31 +1240,35 @@ try
                             $Path -and $Path.Length -eq 1 -and $Path[0].StartsWith("C:\")
                         }
 
-                        $installerMock = New-Module -AsCustomObject -ScriptBlock {
+                        $installerMock = New-Module -AsCustomObject -Scriptblock {
                             function GetType
-                            { # Installer
-                                New-Module -AsCustomObject -ScriptBlock {
+                            {
+                                # Installer
+                                New-Module -AsCustomObject -Scriptblock {
                                     function InvokeMember
                                     {
-                                        New-Module -AsCustomObject -ScriptBlock {
+                                        New-Module -AsCustomObject -Scriptblock {
                                             function GetType
-                                            { # InstallerDB
-                                                New-Module -AsCustomObject -ScriptBlock {
+                                            {
+                                                # InstallerDB
+                                                New-Module -AsCustomObject -Scriptblock {
                                                     function InvokeMember
                                                     {
-                                                        New-Module -AsCustomObject -ScriptBlock {
+                                                        New-Module -AsCustomObject -Scriptblock {
                                                             function GetType
-                                                            { # DBView
-                                                                New-Module -AsCustomObject -ScriptBlock {
+                                                            {
+                                                                # DBView
+                                                                New-Module -AsCustomObject -Scriptblock {
                                                                     function InvokeMember
                                                                     {
                                                                         param ($a, $b, $c, $d, $e)
                                                                         if ($a -eq "Fetch")
                                                                         {
-                                                                            New-Module -AsCustomObject -ScriptBlock {
+                                                                            New-Module -AsCustomObject -Scriptblock {
                                                                                 function GetType
-                                                                                { # Value
-                                                                                    New-Module -AsCustomObject -ScriptBlock {
+                                                                                {
+                                                                                    # Value
+                                                                                    New-Module -AsCustomObject -Scriptblock {
                                                                                         function InvokeMember
                                                                                         {
                                                                                             param ($a, $b, $c, $d, $e)
@@ -1212,12 +1354,26 @@ try
                             }
                             else
                             {
-                                return @{
-                                    VersionInfo = @{
-                                        FileVersion     = "16.0.10342"
-                                        FileDescription = "Cumulative Update"
+                                if ($Global:SPDscHelper.CurrentStubBuildNumber.Build -lt 13000)
+                                {
+                                    # 2019
+                                    return @{
+                                        VersionInfo = @{
+                                            FileVersion     = "16.0.10342"
+                                            FileDescription = "Cumulative Update"
+                                        }
+                                        Name        = "wssloc2019-kb4461514-fullfile-x64-glb.exe"
                                     }
-                                    Name        = "serverlpksp2019-kb2880554-fullfile-x64-en-us.exe"
+                                }
+                                else
+                                {
+                                    return @{
+                                        VersionInfo = @{
+                                            FileVersion     = "16.0.15601"
+                                            FileDescription = "Cumulative Update"
+                                        }
+                                        Name        = "wssloc-subscription-kb5002271-fullfile-x64-glb.exe"
+                                    }
                                 }
                             }
                         }
@@ -1225,31 +1381,35 @@ try
                         $Path -and $Path.Length -eq 1 -and $Path[0].StartsWith("\\server\")
                     }
 
-                    $installerMock = New-Module -AsCustomObject -ScriptBlock {
+                    $installerMock = New-Module -AsCustomObject -Scriptblock {
                         function GetType
-                        { # Installer
-                            New-Module -AsCustomObject -ScriptBlock {
+                        {
+                            # Installer
+                            New-Module -AsCustomObject -Scriptblock {
                                 function InvokeMember
                                 {
-                                    New-Module -AsCustomObject -ScriptBlock {
+                                    New-Module -AsCustomObject -Scriptblock {
                                         function GetType
-                                        { # InstallerDB
-                                            New-Module -AsCustomObject -ScriptBlock {
+                                        {
+                                            # InstallerDB
+                                            New-Module -AsCustomObject -Scriptblock {
                                                 function InvokeMember
                                                 {
-                                                    New-Module -AsCustomObject -ScriptBlock {
+                                                    New-Module -AsCustomObject -Scriptblock {
                                                         function GetType
-                                                        { # DBView
-                                                            New-Module -AsCustomObject -ScriptBlock {
+                                                        {
+                                                            # DBView
+                                                            New-Module -AsCustomObject -Scriptblock {
                                                                 function InvokeMember
                                                                 {
                                                                     param ($a, $b, $c, $d, $e)
                                                                     if ($a -eq "Fetch")
                                                                     {
-                                                                        New-Module -AsCustomObject -ScriptBlock {
+                                                                        New-Module -AsCustomObject -Scriptblock {
                                                                             function GetType
-                                                                            { # Value
-                                                                                New-Module -AsCustomObject -ScriptBlock {
+                                                                            {
+                                                                                # Value
+                                                                                New-Module -AsCustomObject -Scriptblock {
                                                                                     function InvokeMember
                                                                                     {
                                                                                         param ($a, $b, $c, $d, $e)
@@ -1265,7 +1425,14 @@ try
                                                                                             }
                                                                                             else
                                                                                             {
-                                                                                                return "16.0.10340"
+                                                                                                if ($Global:SPDscHelper.CurrentStubBuildNumber.Build -lt 13000)
+                                                                                                {
+                                                                                                    return "16.0.10340"
+                                                                                                }
+                                                                                                else
+                                                                                                {
+                                                                                                    return "16.0.14326"
+                                                                                                }
                                                                                             }
                                                                                         }
                                                                                     }
@@ -1354,12 +1521,26 @@ try
                             }
                             else
                             {
-                                return @{
-                                    VersionInfo = @{
-                                        FileVersion     = "16.0.10342"
-                                        FileDescription = "Cumulative Update"
+                                if ($Global:SPDscHelper.CurrentStubBuildNumber.Build -lt 13000)
+                                {
+                                    # 2019
+                                    return @{
+                                        VersionInfo = @{
+                                            FileVersion     = "16.0.10342"
+                                            FileDescription = "Cumulative Update"
+                                        }
+                                        Name        = "wssloc2019-kb4461514-fullfile-x64-glb.exe"
                                     }
-                                    Name        = "serverlpksp2019-kb2880554-fullfile-x64-en-us.exe"
+                                }
+                                else
+                                {
+                                    return @{
+                                        VersionInfo = @{
+                                            FileVersion     = "16.0.15601"
+                                            FileDescription = "Cumulative Update"
+                                        }
+                                        Name        = "wssloc-subscription-kb5002271-fullfile-x64-glb.exe"
+                                    }
                                 }
                             }
                         }
@@ -1367,31 +1548,35 @@ try
                         $Path -and $Path.Length -eq 1 -and $Path[0].StartsWith("C:\")
                     }
 
-                    $installerMock = New-Module -AsCustomObject -ScriptBlock {
+                    $installerMock = New-Module -AsCustomObject -Scriptblock {
                         function GetType
-                        { # Installer
-                            New-Module -AsCustomObject -ScriptBlock {
+                        {
+                            # Installer
+                            New-Module -AsCustomObject -Scriptblock {
                                 function InvokeMember
                                 {
-                                    New-Module -AsCustomObject -ScriptBlock {
+                                    New-Module -AsCustomObject -Scriptblock {
                                         function GetType
-                                        { # InstallerDB
-                                            New-Module -AsCustomObject -ScriptBlock {
+                                        {
+                                            # InstallerDB
+                                            New-Module -AsCustomObject -Scriptblock {
                                                 function InvokeMember
                                                 {
-                                                    New-Module -AsCustomObject -ScriptBlock {
+                                                    New-Module -AsCustomObject -Scriptblock {
                                                         function GetType
-                                                        { # DBView
-                                                            New-Module -AsCustomObject -ScriptBlock {
+                                                        {
+                                                            # DBView
+                                                            New-Module -AsCustomObject -Scriptblock {
                                                                 function InvokeMember
                                                                 {
                                                                     param ($a, $b, $c, $d, $e)
                                                                     if ($a -eq "Fetch")
                                                                     {
-                                                                        New-Module -AsCustomObject -ScriptBlock {
+                                                                        New-Module -AsCustomObject -Scriptblock {
                                                                             function GetType
-                                                                            { # Value
-                                                                                New-Module -AsCustomObject -ScriptBlock {
+                                                                            {
+                                                                                # Value
+                                                                                New-Module -AsCustomObject -Scriptblock {
                                                                                     function InvokeMember
                                                                                     {
                                                                                         param ($a, $b, $c, $d, $e)
@@ -1407,7 +1592,14 @@ try
                                                                                             }
                                                                                             else
                                                                                             {
-                                                                                                return "16.0.10340"
+                                                                                                if ($Global:SPDscHelper.CurrentStubBuildNumber.Build -lt 13000)
+                                                                                                {
+                                                                                                    return "16.0.10340"
+                                                                                                }
+                                                                                                else
+                                                                                                {
+                                                                                                    return "16.0.14326"
+                                                                                                }
                                                                                             }
                                                                                         }
                                                                                     }
@@ -1487,12 +1679,26 @@ try
                             }
                             else
                             {
-                                return @{
-                                    VersionInfo = @{
-                                        FileVersion     = "16.0.10342"
-                                        FileDescription = "Cumulative Update"
+                                if ($Global:SPDscHelper.CurrentStubBuildNumber.Build -lt 13000)
+                                {
+                                    # 2019
+                                    return @{
+                                        VersionInfo = @{
+                                            FileVersion     = "16.0.10342"
+                                            FileDescription = "Cumulative Update"
+                                        }
+                                        Name        = "wssloc2019-kb4461514-fullfile-x64-glb.exe"
                                     }
-                                    Name        = "serverlpksp2019-kb2880554-fullfile-x64-en-us.exe"
+                                }
+                                else
+                                {
+                                    return @{
+                                        VersionInfo = @{
+                                            FileVersion     = "16.0.15601"
+                                            FileDescription = "Cumulative Update"
+                                        }
+                                        Name        = "wssloc-subscription-kb5002271-fullfile-x64-glb.exe"
+                                    }
                                 }
                             }
                         }
@@ -1500,31 +1706,35 @@ try
                         $Path -and $Path.Length -eq 1 -and $Path[0].StartsWith("C:\")
                     }
 
-                    $installerMock = New-Module -AsCustomObject -ScriptBlock {
+                    $installerMock = New-Module -AsCustomObject -Scriptblock {
                         function GetType
-                        { # Installer
-                            New-Module -AsCustomObject -ScriptBlock {
+                        {
+                            # Installer
+                            New-Module -AsCustomObject -Scriptblock {
                                 function InvokeMember
                                 {
-                                    New-Module -AsCustomObject -ScriptBlock {
+                                    New-Module -AsCustomObject -Scriptblock {
                                         function GetType
-                                        { # InstallerDB
-                                            New-Module -AsCustomObject -ScriptBlock {
+                                        {
+                                            # InstallerDB
+                                            New-Module -AsCustomObject -Scriptblock {
                                                 function InvokeMember
                                                 {
-                                                    New-Module -AsCustomObject -ScriptBlock {
+                                                    New-Module -AsCustomObject -Scriptblock {
                                                         function GetType
-                                                        { # DBView
-                                                            New-Module -AsCustomObject -ScriptBlock {
+                                                        {
+                                                            # DBView
+                                                            New-Module -AsCustomObject -Scriptblock {
                                                                 function InvokeMember
                                                                 {
                                                                     param ($a, $b, $c, $d, $e)
                                                                     if ($a -eq "Fetch")
                                                                     {
-                                                                        New-Module -AsCustomObject -ScriptBlock {
+                                                                        New-Module -AsCustomObject -Scriptblock {
                                                                             function GetType
-                                                                            { # Value
-                                                                                New-Module -AsCustomObject -ScriptBlock {
+                                                                            {
+                                                                                # Value
+                                                                                New-Module -AsCustomObject -Scriptblock {
                                                                                     function InvokeMember
                                                                                     {
                                                                                         param ($a, $b, $c, $d, $e)
@@ -1540,7 +1750,14 @@ try
                                                                                             }
                                                                                             else
                                                                                             {
-                                                                                                return "16.0.10340"
+                                                                                                if ($Global:SPDscHelper.CurrentStubBuildNumber.Build -lt 13000)
+                                                                                                {
+                                                                                                    return "16.0.10340"
+                                                                                                }
+                                                                                                else
+                                                                                                {
+                                                                                                    return "16.0.14326"
+                                                                                                }
                                                                                             }
                                                                                         }
                                                                                     }
@@ -1616,12 +1833,26 @@ try
                             }
                             else
                             {
-                                return @{
-                                    VersionInfo = @{
-                                        FileVersion     = "16.0.10342"
-                                        FileDescription = "Cumulative Update"
+                                if ($Global:SPDscHelper.CurrentStubBuildNumber.Build -lt 13000)
+                                {
+                                    # 2019
+                                    return @{
+                                        VersionInfo = @{
+                                            FileVersion     = "16.0.10342"
+                                            FileDescription = "Cumulative Update"
+                                        }
+                                        Name        = "wssloc2019-kb4461514-fullfile-x64-glb.exe"
                                     }
-                                    Name        = "serverlpksp2019-kb2880554-fullfile-x64-en-us.exe"
+                                }
+                                else
+                                {
+                                    return @{
+                                        VersionInfo = @{
+                                            FileVersion     = "16.0.15601"
+                                            FileDescription = "Cumulative Update"
+                                        }
+                                        Name        = "wssloc-subscription-kb5002271-fullfile-x64-glb.exe"
+                                    }
                                 }
                             }
                         }
@@ -1629,31 +1860,35 @@ try
                         $Path -and $Path.Length -eq 1 -and $Path[0].StartsWith("C:\")
                     }
 
-                    $installerMock = New-Module -AsCustomObject -ScriptBlock {
+                    $installerMock = New-Module -AsCustomObject -Scriptblock {
                         function GetType
-                        { # Installer
-                            New-Module -AsCustomObject -ScriptBlock {
+                        {
+                            # Installer
+                            New-Module -AsCustomObject -Scriptblock {
                                 function InvokeMember
                                 {
-                                    New-Module -AsCustomObject -ScriptBlock {
+                                    New-Module -AsCustomObject -Scriptblock {
                                         function GetType
-                                        { # InstallerDB
-                                            New-Module -AsCustomObject -ScriptBlock {
+                                        {
+                                            # InstallerDB
+                                            New-Module -AsCustomObject -Scriptblock {
                                                 function InvokeMember
                                                 {
-                                                    New-Module -AsCustomObject -ScriptBlock {
+                                                    New-Module -AsCustomObject -Scriptblock {
                                                         function GetType
-                                                        { # DBView
-                                                            New-Module -AsCustomObject -ScriptBlock {
+                                                        {
+                                                            # DBView
+                                                            New-Module -AsCustomObject -Scriptblock {
                                                                 function InvokeMember
                                                                 {
                                                                     param ($a, $b, $c, $d, $e)
                                                                     if ($a -eq "Fetch")
                                                                     {
-                                                                        New-Module -AsCustomObject -ScriptBlock {
+                                                                        New-Module -AsCustomObject -Scriptblock {
                                                                             function GetType
-                                                                            { # Value
-                                                                                New-Module -AsCustomObject -ScriptBlock {
+                                                                            {
+                                                                                # Value
+                                                                                New-Module -AsCustomObject -Scriptblock {
                                                                                     function InvokeMember
                                                                                     {
                                                                                         param ($a, $b, $c, $d, $e)
@@ -1669,7 +1904,14 @@ try
                                                                                             }
                                                                                             else
                                                                                             {
-                                                                                                return "16.0.10340"
+                                                                                                if ($Global:SPDscHelper.CurrentStubBuildNumber.Build -lt 13000)
+                                                                                                {
+                                                                                                    return "16.0.10340"
+                                                                                                }
+                                                                                                else
+                                                                                                {
+                                                                                                    return "16.0.14326"
+                                                                                                }
                                                                                             }
                                                                                         }
                                                                                     }
@@ -1745,12 +1987,26 @@ try
                             }
                             else
                             {
-                                return @{
-                                    VersionInfo = @{
-                                        FileVersion     = "16.0.10342"
-                                        FileDescription = "Service Pack Language Pack"
+                                if ($Global:SPDscHelper.CurrentStubBuildNumber.Build -lt 13000)
+                                {
+                                    # 2019
+                                    return @{
+                                        VersionInfo = @{
+                                            FileVersion     = "16.0.10342"
+                                            FileDescription = "Service Pack Language Pack"
+                                        }
+                                        Name        = "serverlpksp2019-kb2880554-fullfile-x64-en-us.exe"
                                     }
-                                    Name        = "serverlpksp2019-kb2880554-fullfile-x64-en-us.exe"
+                                }
+                                else
+                                {
+                                    return @{
+                                        VersionInfo = @{
+                                            FileVersion     = "16.0.15601"
+                                            FileDescription = "Service Pack Language Pack"
+                                        }
+                                        Name        = "serverlpksp-subscription-kb2880554-fullfile-x64-en-us.exe"
+                                    }
                                 }
                             }
                         }
@@ -1758,31 +2014,35 @@ try
                         $Path -and $Path.Length -eq 1 -and $Path[0].StartsWith("C:\")
                     }
 
-                    $installerMock = New-Module -AsCustomObject -ScriptBlock {
+                    $installerMock = New-Module -AsCustomObject -Scriptblock {
                         function GetType
-                        { # Installer
-                            New-Module -AsCustomObject -ScriptBlock {
+                        {
+                            # Installer
+                            New-Module -AsCustomObject -Scriptblock {
                                 function InvokeMember
                                 {
-                                    New-Module -AsCustomObject -ScriptBlock {
+                                    New-Module -AsCustomObject -Scriptblock {
                                         function GetType
-                                        { # InstallerDB
-                                            New-Module -AsCustomObject -ScriptBlock {
+                                        {
+                                            # InstallerDB
+                                            New-Module -AsCustomObject -Scriptblock {
                                                 function InvokeMember
                                                 {
-                                                    New-Module -AsCustomObject -ScriptBlock {
+                                                    New-Module -AsCustomObject -Scriptblock {
                                                         function GetType
-                                                        { # DBView
-                                                            New-Module -AsCustomObject -ScriptBlock {
+                                                        {
+                                                            # DBView
+                                                            New-Module -AsCustomObject -Scriptblock {
                                                                 function InvokeMember
                                                                 {
                                                                     param ($a, $b, $c, $d, $e)
                                                                     if ($a -eq "Fetch")
                                                                     {
-                                                                        New-Module -AsCustomObject -ScriptBlock {
+                                                                        New-Module -AsCustomObject -Scriptblock {
                                                                             function GetType
-                                                                            { # Value
-                                                                                New-Module -AsCustomObject -ScriptBlock {
+                                                                            {
+                                                                                # Value
+                                                                                New-Module -AsCustomObject -Scriptblock {
                                                                                     function InvokeMember
                                                                                     {
                                                                                         param ($a, $b, $c, $d, $e)
@@ -1798,7 +2058,14 @@ try
                                                                                             }
                                                                                             else
                                                                                             {
-                                                                                                return "16.0.10340"
+                                                                                                if ($Global:SPDscHelper.CurrentStubBuildNumber.Build -lt 13000)
+                                                                                                {
+                                                                                                    return "16.0.10340"
+                                                                                                }
+                                                                                                else
+                                                                                                {
+                                                                                                    return "16.0.14326"
+                                                                                                }
                                                                                             }
                                                                                         }
                                                                                     }
@@ -1877,12 +2144,25 @@ try
                             }
                             else
                             {
-                                return @{
-                                    VersionInfo = @{
-                                        FileVersion     = "16.0.10337"
-                                        FileDescription = "Service Pack Language Pack"
+                                if ($Global:SPDscHelper.CurrentStubBuildNumber.Build -lt 13000)
+                                {
+                                    return @{
+                                        VersionInfo = @{
+                                            FileVersion     = "16.0.10337"
+                                            FileDescription = "Service Pack Language Pack"
+                                        }
+                                        Name        = "serverlpksp2019-kb2880554-fullfile-x64-en-us.exe"
                                     }
-                                    Name        = "serverlpksp2019-kb2880554-fullfile-x64-en-us.exe"
+                                }
+                                else
+                                {
+                                    return @{
+                                        VersionInfo = @{
+                                            FileVersion     = "16.0.14326"
+                                            FileDescription = "Service Pack Language Pack"
+                                        }
+                                        Name        = "serverlpksp-subscription-kb2880554-fullfile-x64-en-us.exe"
+                                    }
                                 }
                             }
                         }
@@ -1890,31 +2170,35 @@ try
                         $Path -and $Path.Length -eq 1 -and $Path[0].StartsWith("C:\")
                     }
 
-                    $installerMock = New-Module -AsCustomObject -ScriptBlock {
+                    $installerMock = New-Module -AsCustomObject -Scriptblock {
                         function GetType
-                        { # Installer
-                            New-Module -AsCustomObject -ScriptBlock {
+                        {
+                            # Installer
+                            New-Module -AsCustomObject -Scriptblock {
                                 function InvokeMember
                                 {
-                                    New-Module -AsCustomObject -ScriptBlock {
+                                    New-Module -AsCustomObject -Scriptblock {
                                         function GetType
-                                        { # InstallerDB
-                                            New-Module -AsCustomObject -ScriptBlock {
+                                        {
+                                            # InstallerDB
+                                            New-Module -AsCustomObject -Scriptblock {
                                                 function InvokeMember
                                                 {
-                                                    New-Module -AsCustomObject -ScriptBlock {
+                                                    New-Module -AsCustomObject -Scriptblock {
                                                         function GetType
-                                                        { # DBView
-                                                            New-Module -AsCustomObject -ScriptBlock {
+                                                        {
+                                                            # DBView
+                                                            New-Module -AsCustomObject -Scriptblock {
                                                                 function InvokeMember
                                                                 {
                                                                     param ($a, $b, $c, $d, $e)
                                                                     if ($a -eq "Fetch")
                                                                     {
-                                                                        New-Module -AsCustomObject -ScriptBlock {
+                                                                        New-Module -AsCustomObject -Scriptblock {
                                                                             function GetType
-                                                                            { # Value
-                                                                                New-Module -AsCustomObject -ScriptBlock {
+                                                                            {
+                                                                                # Value
+                                                                                New-Module -AsCustomObject -Scriptblock {
                                                                                     function InvokeMember
                                                                                     {
                                                                                         param ($a, $b, $c, $d, $e)
@@ -1930,7 +2214,14 @@ try
                                                                                             }
                                                                                             else
                                                                                             {
-                                                                                                return "16.0.10342"
+                                                                                                if ($Global:SPDscHelper.CurrentStubBuildNumber.Build -lt 13000)
+                                                                                                {
+                                                                                                    return "16.0.10342"
+                                                                                                }
+                                                                                                else
+                                                                                                {
+                                                                                                    return "16.0.15601"
+                                                                                                }
                                                                                             }
                                                                                         }
                                                                                     }
