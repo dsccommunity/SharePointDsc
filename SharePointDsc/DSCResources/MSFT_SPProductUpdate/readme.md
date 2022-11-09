@@ -22,7 +22,7 @@ SPProductUpdate will throw an error when it detects the file is blocked.
 NOTE2:
 When specifying the ShutdownServices parameter, the resource is stopping
 several SharePoint services and pausing all search crawls. After patching
-is complete, the search crawls is only resumed when all servers in the farm
+is complete, search crawls are only resumed when all servers in the farm
 are patched on the same patch level. 
 
 IMPORTANT:
