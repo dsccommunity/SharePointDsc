@@ -6,8 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 - SPTrustedRootAuthority
-  - `Set-TargetResource`: Added `-Recurse` flag to `Get-ChildItem` when
-    attempting to obtain reference to certificate by Thumbprint.
+  - Added `-Recurse` flag to `Get-ChildItem` when setting 
+    certificate by Thumbprint.
 
 ## [5.3.0] - 2022-11-15
 
