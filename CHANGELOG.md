@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 - SPTrustedRootAuthority
-  - Added `-Recurse` flag to `Get-ChildItem` when setting 
+  - Added `-Recurse` flag to `Get-ChildItem` when setting
     certificate by Thumbprint.
 
 ## [5.3.0] - 2022-11-15
