@@ -182,7 +182,7 @@ function Set-TargetResource
             else
             {
                 Write-Verbose -Message "Importing certificate from CertificateThumbprint"
-                $cert = Get-ChildItem -Path "Cert:\LocalMachine\*$($params.CertificateThumbprint)" `
+                $cert = Get-ChildItem -Path "Cert:\LocalMachine\*$($params.CertificateThumbprint)" -Recurse `
                     -ErrorAction SilentlyContinue | `
                         Sort-Object -Property PSParentPath -Descending | `
                             Select-Object -First 1
@@ -264,7 +264,7 @@ function Set-TargetResource
             else
             {
                 Write-Verbose -Message "Importing certificate from CertificateThumbprint"
-                $cert = Get-ChildItem -Path "Cert:\LocalMachine\*$($params.CertificateThumbprint)" `
+                $cert = Get-ChildItem -Path "Cert:\LocalMachine\*$($params.CertificateThumbprint)" -Recurse `
                     -ErrorAction SilentlyContinue | `
                         Sort-Object -Property PSParentPath -Descending | `
                             Select-Object -First 1

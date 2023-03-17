@@ -5,6 +5,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- SPTrustedRootAuthority
+  - Added `-Recurse` flag to `Get-ChildItem` when setting
+    certificate by Thumbprint.
+
 ## [5.3.0] - 2022-11-15
 
 ### Added
@@ -262,8 +266,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added support for LogonTokenCacheExpirationWindow, WindowsTokenLifetime and FormsTokenLifetime settings
 - SPService
   - New resource
- - SPSecurityTokenServiceConfig
-  - Added support for LogonTokenCacheExpirationWindow, WindowsTokenLifetime and FormsTokenLifetime settings
+- SPSecurityTokenServiceConfig
+- Added support for LogonTokenCacheExpirationWindow, WindowsTokenLifetime and FormsTokenLifetime settings
 - SPUsageDefinition
   - New resource
 - SPUserProfileProperty
