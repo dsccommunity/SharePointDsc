@@ -5,9 +5,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Export
+  - Fixed issue where the export would not run on Subscription Edition
 - SPTrustedRootAuthority
   - Added `-Recurse` flag to `Get-ChildItem` when setting
     certificate by Thumbprint.
+- SPPublishServiceApplication
+  - Fixed issue where the Set method never did anything because it was checking incorrect
+    values
 
 ## [5.3.0] - 2022-11-15
 
@@ -24,14 +31,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Export
-  - Fixed issue where the export would not run on Subscription Edition
 - SPInstallPrereqs
   - Fix issue where a failed VC++ upgrade results in two versions being present, which
     the code didn't handle properly
-- SPPublishServiceApplication
-  - Fixed issue where the Set method never did anything because it was checking incorrect
-    values
 - SPShellAdmins
   - Fix issue where Get-SPDatabase could not be found
 - SPUserProfileServiceApp
