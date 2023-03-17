@@ -104,13 +104,13 @@ function Set-TargetResource
             throw $message
         }
 
-        if ($Ensure -eq "Present")
+        if ($params.Ensure -eq "Present")
         {
             Write-Verbose -Message "Publishing Service Application $Name"
             Publish-SPServiceApplication -Identity $serviceApp
         }
 
-        if ($Ensure -eq "Absent")
+        if ($params.Ensure -eq "Absent")
         {
             Write-Verbose -Message "Unpublishing Service Application $Name"
             Unpublish-SPServiceApplication  -Identity $serviceApp
