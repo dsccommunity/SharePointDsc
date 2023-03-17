@@ -374,7 +374,7 @@ function Get-SPDscFarmAccount
         [System.Reflection.BindingFlags]::Instance -bor `
         [System.Reflection.BindingFlags]::NonPublic
 
-    $pw = $account.GetType().GetField("m_Password", $bindings).GetValue($account);
+    $pw = $account.GetType().GetField("m_Password", $bindings).GetValue($account)
 
     return New-Object -TypeName System.Management.Automation.PSCredential `
         -ArgumentList $farmaccount, $pw.SecureStringValue
@@ -533,18 +533,18 @@ function Get-SPDscServerPatchStatus
     $farm = Get-SPFarm
     $productVersions = [Microsoft.SharePoint.Administration.SPProductVersions]::GetProductVersions($farm)
     $server = Get-SPServer $env:COMPUTERNAME
-    $serverProductInfo = $productVersions.GetServerProductInfo($server.Id);
+    $serverProductInfo = $productVersions.GetServerProductInfo($server.Id)
     if ($null -ne $serverProductInfo)
     {
-        $statusType = $serverProductInfo.InstallStatus;
+        $statusType = $serverProductInfo.InstallStatus
         if ($statusType -ne 0)
         {
-            $statusType = $serverProductInfo.GetUpgradeStatus($farm, $server);
+            $statusType = $serverProductInfo.GetUpgradeStatus($farm, $server)
         }
     }
     else
     {
-        $statusType = [Microsoft.SharePoint.Administration.SPServerProductInfo+StatusType]::NoActionRequired;
+        $statusType = [Microsoft.SharePoint.Administration.SPServerProductInfo+StatusType]::NoActionRequired
     }
 
     return $statusType
@@ -561,22 +561,22 @@ function Get-SPDscAllServersPatchStatus
     [array]$srvStatus = @()
     foreach ($server in $servers)
     {
-        $serverProductInfo = $productVersions.GetServerProductInfo($server.Id);
+        $serverProductInfo = $productVersions.GetServerProductInfo($server.Id)
         if ($null -ne $serverProductInfo)
         {
-            $statusType = $serverProductInfo.InstallStatus;
+            $statusType = $serverProductInfo.InstallStatus
             if ($statusType -ne 0)
             {
-                $statusType = $serverProductInfo.GetUpgradeStatus($farm, $server);
+                $statusType = $serverProductInfo.GetUpgradeStatus($farm, $server)
             }
         }
         else
         {
-            $statusType = [Microsoft.SharePoint.Administration.SPServerProductInfo+StatusType]::NoActionRequired;
+            $statusType = [Microsoft.SharePoint.Administration.SPServerProductInfo+StatusType]::NoActionRequired
         }
 
         $srvStatus += [PSCustomObject]@{
-            Name = $server.Name
+            Name   = $server.Name
             Status = $statusType
         }
     }
@@ -1674,36 +1674,39 @@ function Export-SPConfiguration
     $Global:spFarmAccount = ""
 
     $sharePointSnapin = Get-PSSnapin | Where-Object { $_.Name -eq "Microsoft.SharePoint.PowerShell" }
-    if ($null -ne $sharePointSnapin)
+    if ($null -eq $sharePointSnapin)
     {
-        if ($Quiet -or $ComponentsToExtract.Count -gt 0)
+        $sharePointModule = Get-Module SharePointServer -ListAvailable
+        if ($null -eq $sharePointModule)
         {
-            if ($StandAlone)
+            Write-Host -Object "    - We couldn't detect a SharePoint installation on this machine. Please execute the SharePoint ReverseDSC script on an existing SharePoint server." -BackgroundColor Red -ForegroundColor Black
+            return
+        }
+    }
+
+    if ($Quiet -or $ComponentsToExtract.Count -gt 0)
+    {
+        if ($StandAlone)
+        {
+            if ($DynamicCompilation)
             {
-                if ($DynamicCompilation)
-                {
-                    Get-SPReverseDSC -ComponentsToExtract $ComponentsToExtract -Credentials $Credentials -OutputPath $OutputPath -Standalone -DynamicCompilation -ProductKey $ProductKey -BinaryLocation $BinaryLocation
-                }
-                else
-                {
-                    Get-SPReverseDSC -ComponentsToExtract $ComponentsToExtract -Credentials $Credentials -OutputPath $OutputPath -Standalone -ProductKey $ProductKey -BinaryLocation $BinaryLocation
-                }
+                Get-SPReverseDSC -ComponentsToExtract $ComponentsToExtract -Credentials $Credentials -OutputPath $OutputPath -Standalone -DynamicCompilation -ProductKey $ProductKey -BinaryLocation $BinaryLocation
             }
             else
             {
-                Get-SPReverseDSC -ComponentsToExtract $ComponentsToExtract -Credentials $Credentials -OutputPath $OutputPath -ProductKey $ProductKey -BinaryLocation $BinaryLocation
+                Get-SPReverseDSC -ComponentsToExtract $ComponentsToExtract -Credentials $Credentials -OutputPath $OutputPath -Standalone -ProductKey $ProductKey -BinaryLocation $BinaryLocation
             }
         }
         else
         {
-            [System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms") | Out-Null
-            [System.Reflection.Assembly]::LoadWithPartialName("System.Drawing") | Out-Null
-            DisplayGUI
+            Get-SPReverseDSC -ComponentsToExtract $ComponentsToExtract -Credentials $Credentials -OutputPath $OutputPath -ProductKey $ProductKey -BinaryLocation $BinaryLocation
         }
     }
     else
     {
-        Write-Host -Object "    - We couldn't detect a SharePoint installation on this machine. Please execute the SharePoint ReverseDSC script on an existing SharePoint server." -BackgroundColor Red -ForegroundColor Black
+        [System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms") | Out-Null
+        [System.Reflection.Assembly]::LoadWithPartialName("System.Drawing") | Out-Null
+        DisplayGUI
     }
 }
 
