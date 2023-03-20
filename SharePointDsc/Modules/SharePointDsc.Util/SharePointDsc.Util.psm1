@@ -666,13 +666,6 @@ function Invoke-SPDscCommand
 
 "@
     }
-    else
-    {
-        $baseScript = @"
-            Import-Module SharePointServer -Verbose:`$false -WarningAction SilentlyContinue
-
-"@
-    }
 
     $invokeArgs = @{
         ScriptBlock = [ScriptBlock]::Create($baseScript + $ScriptBlock.ToString())
