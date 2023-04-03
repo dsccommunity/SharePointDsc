@@ -11,9 +11,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Remove unnecessary Import-Module to fix an error when running resource SPFarm
     on a server with SharePoint Subscription 23H1 that has never been joined to
     a farm.
-
-### Fixed
-
 - Export
   - Fixed issue where the export would not run on Subscription Edition
 - SPTrustedRootAuthority
