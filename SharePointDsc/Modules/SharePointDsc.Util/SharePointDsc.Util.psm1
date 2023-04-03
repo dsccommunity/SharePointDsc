@@ -668,10 +668,7 @@ function Invoke-SPDscCommand
     }
     else
     {
-        $baseScript = @"
-            Import-Module SharePointServer -Verbose:`$false -WarningAction SilentlyContinue
-
-"@
+        $baseScript = ""
     }
 
     $invokeArgs = @{
