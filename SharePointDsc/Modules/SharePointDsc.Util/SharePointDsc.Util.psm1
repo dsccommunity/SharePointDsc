@@ -666,6 +666,10 @@ function Invoke-SPDscCommand
 
 "@
     }
+    else
+    {
+        $baseScript = ""
+    }
 
     $invokeArgs = @{
         ScriptBlock = [ScriptBlock]::Create($baseScript + $ScriptBlock.ToString())
