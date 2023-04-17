@@ -106,6 +106,7 @@ function Get-TargetResource
     }
 
     $supportsSettingApplicationCredentialKey = $false
+    $supportsFlighting = $false
     $installedVersion = Get-SPDscInstalledProductVersion
     switch ($installedVersion.FileMajorPart)
     {
@@ -879,6 +880,7 @@ function Set-TargetResource
                             Write-Verbose -Message ("Detected Version: SharePoint Server Subscription Edition - " +
                                 "configuring server as $($params.ServerRole)")
                             $supportsSettingApplicationCredentialKey = $true
+                            $supportsFlighting = $true
                         }
                         $executeArgs.Add("LocalServerRole", $params.ServerRole)
                     }
@@ -907,6 +909,7 @@ function Set-TargetResource
                             Write-Verbose -Message ("Detected Version: SharePoint Server Subscription Edition - " +
                                 "configuring server as $($params.ServerRole)")
                             $supportsSettingApplicationCredentialKey = $true
+                            $supportsFlighting = $true
                         }
                         $executeArgs.Add("ServerRoleOptional", $true)
                     }
@@ -1092,6 +1095,18 @@ function Set-TargetResource
                         -Database $params.FarmConfigDatabaseName `
                         -Connection $lockConnection `
                         @databaseCredentialsParam
+                }
+            }
+
+            if ($supportsFlighting -eq $true)
+            {
+                $spRootRegKey = "hklm:SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\16.0"
+                $spsLocation = Get-SPDscRegistryKey -Key $spRootRegKey -Value "Location"
+                $flightsConfigJsonFile = Join-Path -Path $spsLocation -ChildPath "CONFIG\SPFlightRawConfig.json"
+                if((Test-Path $flightsConfigJsonFile -PathType Leaf) -eq $true)
+                {
+                    Write-Verbose -Message "Starting Update-SPFlightsConfigFile"
+                    Update-SPFlightsConfigFile -FilePath $flightsConfigJsonFile | Out-Null
                 }
             }
 
