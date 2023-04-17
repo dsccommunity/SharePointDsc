@@ -106,7 +106,6 @@ function Get-TargetResource
     }
 
     $supportsSettingApplicationCredentialKey = $false
-    $supportsFlighting = $false
     $installedVersion = Get-SPDscInstalledProductVersion
     switch ($installedVersion.FileMajorPart)
     {
@@ -475,6 +474,7 @@ function Set-TargetResource
     }
 
     $PSBoundParameters.SkipRegisterAsDistributedCacheHost = $SkipRegisterAsDistributedCacheHost
+    $supportsFlighting = $false
 
     if ($PSBoundParameters.ContainsKey("CentralAdministrationUrl"))
     {
@@ -1103,7 +1103,7 @@ function Set-TargetResource
                 $spRootRegKey = "hklm:SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\16.0"
                 $spsLocation = Get-SPDscRegistryKey -Key $spRootRegKey -Value "Location"
                 $flightsConfigJsonFile = Join-Path -Path $spsLocation -ChildPath "CONFIG\SPFlightRawConfig.json"
-                if((Test-Path $flightsConfigJsonFile -PathType Leaf) -eq $true)
+                if ((Test-Path $flightsConfigJsonFile -PathType Leaf) -eq $true)
                 {
                     Write-Verbose -Message "Starting Update-SPFlightsConfigFile"
                     Update-SPFlightsConfigFile -FilePath $flightsConfigJsonFile | Out-Null
