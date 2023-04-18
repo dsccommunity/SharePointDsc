@@ -50,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
                 $mockPassword = ConvertTo-SecureString -String 'password' -AsPlainText -Force
@@ -108,6 +108,27 @@ try
                         DeveloperDashboardSettings = $developerDashboardSettings
                     }
                     return $returnVal
+                }
+                Mock -CommandName Update-SPFlightsConfigFile -MockWith { }
+                Mock -CommandName Get-SPDscRegistryKey -MockWith {
+                    if ($Value -eq "Location")
+                    {
+                        return "C:\Program Files\Common Files\microsoft shared\Web Server Extensions\16"
+                    }
+                    elseif ($Value -eq "dsn")
+                    {
+                        return "Connection string example"
+                    }
+                }
+                Mock -CommandName Test-Path {
+                    if ($Path -eq "C:\Program Files\Common Files\microsoft shared\Web Server Extensions\16\CONFIG\SPFlightRawConfig.json")
+                    {
+                        return $true
+                    }
+                    else
+                    {
+                        return $true
+                    }
                 }
 
                 function Add-SPDscEvent
@@ -231,7 +252,6 @@ try
                         RunCentralAdmin          = $true
                     }
 
-                    Mock -CommandName "Get-SPDscRegistryKey" -MockWith { return $null }
                     Mock -CommandName "Get-SPFarm" -MockWith { return $null }
                     Mock -CommandName "Get-SPDscConfigDBStatus" -MockWith {
                         return @{
@@ -281,7 +301,6 @@ try
                         RunCentralAdmin          = $false
                     }
 
-                    Mock -CommandName "Get-SPDscRegistryKey" -MockWith { return $null }
                     Mock -CommandName "Get-SPFarm" -MockWith { return $null }
                     Mock -CommandName "Get-SPDscConfigDBStatus" -MockWith {
                         return @{
@@ -330,7 +349,6 @@ try
                         RunCentralAdmin          = $true
                     }
 
-                    Mock -CommandName "Get-SPDscRegistryKey" -MockWith { return $null }
                     Mock -CommandName "Get-SPFarm" -MockWith { return $null }
                     Mock -CommandName "Get-SPDscConfigDBStatus" -MockWith {
                         return @{
@@ -381,7 +399,6 @@ try
                         RunCentralAdmin          = $false
                     }
 
-                    Mock -CommandName "Get-SPDscRegistryKey" -MockWith { return $null }
                     Mock -CommandName "Get-SPFarm" -MockWith { return $null }
                     Mock -CommandName "Get-SPDscConfigDBStatus" -MockWith {
                         return @{
@@ -475,7 +492,6 @@ try
                         RunCentralAdmin          = $true
                     }
 
-                    Mock -CommandName "Get-SPDscRegistryKey" -MockWith { return $null }
                     Mock -CommandName "Get-SPFarm" -MockWith { return $null }
                     Mock -CommandName "Get-SPDscConfigDBStatus" -MockWith {
                         return @{
@@ -558,7 +574,6 @@ try
                         RunCentralAdmin          = $true
                     }
 
-                    Mock -CommandName "Get-SPDscRegistryKey" -MockWith { return $null }
                     Mock -CommandName "Get-SPFarm" -MockWith { return $null }
                     Mock -CommandName "Get-SPDscConfigDBStatus" -MockWith {
                         if ($global:SPDscConfigLockTriggered)
@@ -621,10 +636,6 @@ try
                         AdminContentDatabaseName = "SP_AdminContent"
                         RunCentralAdmin          = $true
                         CentralAdministrationUrl = "https://admin.contoso.com"
-                    }
-
-                    Mock -CommandName Get-SPDscRegistryKey -MockWith {
-                        return "Connection string example"
                     }
 
                     Mock -CommandName Get-SPFarm -MockWith {
@@ -738,10 +749,6 @@ try
                         CentralAdministrationUrl = "http://localhost:8080"
                     }
 
-                    Mock -CommandName Get-SPDscRegistryKey -MockWith {
-                        return "Connection string example"
-                    }
-
                     Mock -CommandName Get-SPFarm -MockWith {
                         return @{
                             Name                     = $testParams.FarmConfigDatabaseName
@@ -841,10 +848,6 @@ try
                         CentralAdministrationPort = 8080
                     }
 
-                    Mock -CommandName Get-SPDscRegistryKey -MockWith {
-                        return "Connection string example"
-                    }
-
                     Mock -CommandName Get-SPFarm -MockWith {
                         return @{
                             Name                     = $testParams.FarmConfigDatabaseName
@@ -932,10 +935,6 @@ try
                         CentralAdministrationUrl  = "http://admin.contoso.com"
                         CentralAdministrationPort = 80
                         CentralAdministrationAuth = "Kerberos"
-                    }
-
-                    Mock -CommandName Get-SPDscRegistryKey -MockWith {
-                        return "Connection string example"
                     }
 
                     Mock -CommandName Get-SPFarm -MockWith {
@@ -1075,10 +1074,6 @@ try
                         CentralAdministrationAuth = "NTLM"
                     }
 
-                    Mock -CommandName Get-SPDscRegistryKey -MockWith {
-                        return "Connection string example"
-                    }
-
                     Mock -CommandName Get-SPFarm -MockWith {
                         return @{
                             Name                     = $testParams.FarmConfigDatabaseName
@@ -1213,10 +1208,6 @@ try
                         RunCentralAdmin           = $true
                         CentralAdministrationUrl  = "http://admin.contoso.com"
                         CentralAdministrationPort = 80
-                    }
-
-                    Mock -CommandName Get-SPDscRegistryKey -MockWith {
-                        return "Connection string example"
                     }
 
                     Mock -CommandName Get-SPFarm -MockWith {
@@ -1358,10 +1349,6 @@ try
                         CentralAdministrationPort = 443
                     }
 
-                    Mock -CommandName Get-SPDscRegistryKey -MockWith {
-                        return "Connection string example"
-                    }
-
                     Mock -CommandName Get-SPFarm -MockWith {
                         return @{
                             Name                     = $testParams.FarmConfigDatabaseName
@@ -1500,7 +1487,6 @@ try
                         RunCentralAdmin          = $true
                     }
 
-                    Mock -CommandName "Get-SPDscRegistryKey" -MockWith { return $null }
                     Mock -CommandName "Get-SPFarm" -MockWith { return $null }
                     Mock -CommandName "Get-SPDscConfigDBStatus" -MockWith {
                         return @{
@@ -1578,7 +1564,6 @@ try
                         RunCentralAdmin          = $true
                     }
 
-                    Mock -CommandName "Get-SPDscRegistryKey" -MockWith { return $null }
                     Mock -CommandName "Get-SPFarm" -MockWith { return $null }
                     Mock -CommandName "Get-SPDscConfigDBStatus" -MockWith {
                         return @{
@@ -1655,10 +1640,6 @@ try
                         RunCentralAdmin           = $true
                         CentralAdministrationUrl  = "https://admin.contoso.com"
                         CentralAdministrationPort = 443
-                    }
-
-                    Mock -CommandName Get-SPDscRegistryKey -MockWith {
-                        return "Connection string example"
                     }
 
                     Mock -CommandName Get-SPFarm -MockWith {
@@ -2265,7 +2246,6 @@ try
                             RunCentralAdmin          = $true
                         }
 
-                        Mock -CommandName "Get-SPDscRegistryKey" -MockWith { return $null }
                         Mock -CommandName "Get-SPFarm" -MockWith { return $null }
                         Mock -CommandName "Get-SPDscConfigDBStatus" -MockWith {
                             return @{
@@ -2413,7 +2393,6 @@ try
                             RunCentralAdmin          = $false
                         }
 
-                        Mock -CommandName "Get-SPDscRegistryKey" -MockWith { return $null }
                         Mock -CommandName "Get-SPFarm" -MockWith { return $null }
                         Mock -CommandName "Get-SPDscConfigDBStatus" -MockWith {
                             return @{
