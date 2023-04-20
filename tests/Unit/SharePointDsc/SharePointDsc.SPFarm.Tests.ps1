@@ -33,7 +33,7 @@ function Invoke-TestSetup
 
     $script:testEnvironment = Initialize-TestEnvironment `
         -DSCModuleName $script:DSCModuleName `
-        -DSCResourceName $script:DSCResourceFullName `
+        -DscResourceName $script:DSCResourceFullName `
         -ResourceType 'Mof' `
         -TestType 'Unit'
 }
@@ -252,6 +252,16 @@ try
                         RunCentralAdmin          = $true
                     }
 
+                    Mock -CommandName Get-SPDscRegistryKey -MockWith {
+                        if ($Value -eq "Location")
+                        {
+                            return "C:\Program Files\Common Files\microsoft shared\Web Server Extensions\16"
+                        }
+                        elseif ($Value -eq "dsn")
+                        {
+                            return $null
+                        }
+                    }
                     Mock -CommandName "Get-SPFarm" -MockWith { return $null }
                     Mock -CommandName "Get-SPDscConfigDBStatus" -MockWith {
                         return @{
@@ -301,6 +311,16 @@ try
                         RunCentralAdmin          = $false
                     }
 
+                    Mock -CommandName Get-SPDscRegistryKey -MockWith {
+                        if ($Value -eq "Location")
+                        {
+                            return "C:\Program Files\Common Files\microsoft shared\Web Server Extensions\16"
+                        }
+                        elseif ($Value -eq "dsn")
+                        {
+                            return $null
+                        }
+                    }
                     Mock -CommandName "Get-SPFarm" -MockWith { return $null }
                     Mock -CommandName "Get-SPDscConfigDBStatus" -MockWith {
                         return @{
@@ -349,6 +369,16 @@ try
                         RunCentralAdmin          = $true
                     }
 
+                    Mock -CommandName Get-SPDscRegistryKey -MockWith {
+                        if ($Value -eq "Location")
+                        {
+                            return "C:\Program Files\Common Files\microsoft shared\Web Server Extensions\16"
+                        }
+                        elseif ($Value -eq "dsn")
+                        {
+                            return $null
+                        }
+                    }
                     Mock -CommandName "Get-SPFarm" -MockWith { return $null }
                     Mock -CommandName "Get-SPDscConfigDBStatus" -MockWith {
                         return @{
@@ -399,6 +429,16 @@ try
                         RunCentralAdmin          = $false
                     }
 
+                    Mock -CommandName Get-SPDscRegistryKey -MockWith {
+                        if ($Value -eq "Location")
+                        {
+                            return "C:\Program Files\Common Files\microsoft shared\Web Server Extensions\16"
+                        }
+                        elseif ($Value -eq "dsn")
+                        {
+                            return $null
+                        }
+                    }
                     Mock -CommandName "Get-SPFarm" -MockWith { return $null }
                     Mock -CommandName "Get-SPDscConfigDBStatus" -MockWith {
                         return @{
@@ -492,6 +532,16 @@ try
                         RunCentralAdmin          = $true
                     }
 
+                    Mock -CommandName Get-SPDscRegistryKey -MockWith {
+                        if ($Value -eq "Location")
+                        {
+                            return "C:\Program Files\Common Files\microsoft shared\Web Server Extensions\16"
+                        }
+                        elseif ($Value -eq "dsn")
+                        {
+                            return $null
+                        }
+                    }
                     Mock -CommandName "Get-SPFarm" -MockWith { return $null }
                     Mock -CommandName "Get-SPDscConfigDBStatus" -MockWith {
                         return @{
@@ -574,6 +624,16 @@ try
                         RunCentralAdmin          = $true
                     }
 
+                    Mock -CommandName Get-SPDscRegistryKey -MockWith {
+                        if ($Value -eq "Location")
+                        {
+                            return "C:\Program Files\Common Files\microsoft shared\Web Server Extensions\16"
+                        }
+                        elseif ($Value -eq "dsn")
+                        {
+                            return $null
+                        }
+                    }
                     Mock -CommandName "Get-SPFarm" -MockWith { return $null }
                     Mock -CommandName "Get-SPDscConfigDBStatus" -MockWith {
                         if ($global:SPDscConfigLockTriggered)
@@ -1487,6 +1547,16 @@ try
                         RunCentralAdmin          = $true
                     }
 
+                    Mock -CommandName Get-SPDscRegistryKey -MockWith {
+                        if ($Value -eq "Location")
+                        {
+                            return "C:\Program Files\Common Files\microsoft shared\Web Server Extensions\16"
+                        }
+                        elseif ($Value -eq "dsn")
+                        {
+                            return $null
+                        }
+                    }
                     Mock -CommandName "Get-SPFarm" -MockWith { return $null }
                     Mock -CommandName "Get-SPDscConfigDBStatus" -MockWith {
                         return @{
@@ -1564,6 +1634,16 @@ try
                         RunCentralAdmin          = $true
                     }
 
+                    Mock -CommandName Get-SPDscRegistryKey -MockWith {
+                        if ($Value -eq "Location")
+                        {
+                            return "C:\Program Files\Common Files\microsoft shared\Web Server Extensions\16"
+                        }
+                        elseif ($Value -eq "dsn")
+                        {
+                            return $null
+                        }
+                    }
                     Mock -CommandName "Get-SPFarm" -MockWith { return $null }
                     Mock -CommandName "Get-SPDscConfigDBStatus" -MockWith {
                         return @{
@@ -2246,6 +2326,16 @@ try
                             RunCentralAdmin          = $true
                         }
 
+                        Mock -CommandName Get-SPDscRegistryKey -MockWith {
+                            if ($Value -eq "Location")
+                            {
+                                return "C:\Program Files\Common Files\microsoft shared\Web Server Extensions\16"
+                            }
+                            elseif ($Value -eq "dsn")
+                            {
+                                return $null
+                            }
+                        }
                         Mock -CommandName "Get-SPFarm" -MockWith { return $null }
                         Mock -CommandName "Get-SPDscConfigDBStatus" -MockWith {
                             return @{
@@ -2393,6 +2483,16 @@ try
                             RunCentralAdmin          = $false
                         }
 
+                        Mock -CommandName Get-SPDscRegistryKey -MockWith {
+                            if ($Value -eq "Location")
+                            {
+                                return "C:\Program Files\Common Files\microsoft shared\Web Server Extensions\16"
+                            }
+                            elseif ($Value -eq "dsn")
+                            {
+                                return $null
+                            }
+                        }
                         Mock -CommandName "Get-SPFarm" -MockWith { return $null }
                         Mock -CommandName "Get-SPDscConfigDBStatus" -MockWith {
                             return @{
