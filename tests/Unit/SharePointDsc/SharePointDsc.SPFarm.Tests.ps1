@@ -50,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
                 $mockPassword = ConvertTo-SecureString -String 'password' -AsPlainText -Force
@@ -109,7 +109,6 @@ try
                     }
                     return $returnVal
                 }
-                Mock -CommandName Update-SPFlightsConfigFile -MockWith { }
                 Mock -CommandName Get-SPDscRegistryKey -MockWith {
                     if ($Value -eq "Location")
                     {
@@ -129,6 +128,11 @@ try
                     {
                         return $true
                     }
+                }
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16 -and
+                    $Global:SPDscHelper.CurrentStubBuildNumber.Build -gt 13000)
+                {
+                    Mock -CommandName Update-SPFlightsConfigFile -MockWith { }
                 }
 
                 function Add-SPDscEvent
