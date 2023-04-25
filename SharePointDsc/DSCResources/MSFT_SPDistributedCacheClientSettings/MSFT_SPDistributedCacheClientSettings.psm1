@@ -910,6 +910,56 @@ function Set-TargetResource
         }
     }
 
+    if ($PSBoundParameters.ContainsKey("DDBFCMaxConnectionsToServer") -eq $true -or
+        $PSBoundParameters.ContainsKey("DDBFCRequestTimeout") -eq $true -or
+        $PSBoundParameters.ContainsKey("DDBFCChannelOpenTimeOut") -eq $true -or
+        $PSBoundParameters.ContainsKey("DEHCMaxConnectionsToServer") -eq $true -or
+        $PSBoundParameters.ContainsKey("DEHCRequestTimeout") -eq $true -or
+        $PSBoundParameters.ContainsKey("DEHCChannelOpenTimeOut") -eq $true -or
+        $PSBoundParameters.ContainsKey("DFSPTCMaxConnectionsToServer") -eq $true -or
+        $PSBoundParameters.ContainsKey("DFSPTCRequestTimeout") -eq $true -or
+        $PSBoundParameters.ContainsKey("DFSPTCChannelOpenTimeOut") -eq $true -or
+        $PSBoundParameters.ContainsKey("DSPABSCMaxConnectionsToServer") -eq $true -or
+        $PSBoundParameters.ContainsKey("DSPABSCRequestTimeout") -eq $true -or
+        $PSBoundParameters.ContainsKey("DSPABSCChannelOpenTimeOut") -eq $true -or
+        $PSBoundParameters.ContainsKey("DSPCVCMaxConnectionsToServer") -eq $true -or
+        $PSBoundParameters.ContainsKey("DSPCVCRequestTimeout") -eq $true -or
+        $PSBoundParameters.ContainsKey("DSPCVCChannelOpenTimeOut") -eq $true -or
+        $PSBoundParameters.ContainsKey("DSPOATCMaxConnectionsToServer") -eq $true -or
+        $PSBoundParameters.ContainsKey("DSPOATCRequestTimeout") -eq $true -or
+        $PSBoundParameters.ContainsKey("DSPOATCChannelOpenTimeOut") -eq $true -or
+        $PSBoundParameters.ContainsKey("DSGCMaxConnectionsToServer") -eq $true -or
+        $PSBoundParameters.ContainsKey("DSGCRequestTimeout") -eq $true -or
+        $PSBoundParameters.ContainsKey("DSGCChannelOpenTimeOut") -eq $true -or
+        $PSBoundParameters.ContainsKey("DUACMaxConnectionsToServer") -eq $true -or
+        $PSBoundParameters.ContainsKey("DUACRequestTimeout") -eq $true -or
+        $PSBoundParameters.ContainsKey("DUACChannelOpenTimeOut") -eq $true -or
+        $PSBoundParameters.ContainsKey("DUAuCMaxConnectionsToServer") -eq $true -or
+        $PSBoundParameters.ContainsKey("DUAuCRequestTimeout") -eq $true -or
+        $PSBoundParameters.ContainsKey("DUAuCChannelOpenTimeOut") -eq $true)
+    {
+        $installedVersion = Get-SPDscInstalledProductVersion
+        if ($installedVersion.FileMajorPart -eq 15 -or `
+                $installedVersion.ProductBuildPart.ToString().Length -eq 4)
+        {
+            $message = ("The following parameters are only supported in SharePoint 2019 and above: " + `
+                    "DDBFCMaxConnectionsToServer, DDBFCRequestTimeout, DDBFCChannelOpenTimeOut, " + `
+                    "DEHCMaxConnectionsToServer, DEHCRequestTimeout, DEHCChannelOpenTimeOut, " + `
+                    "DFSPTCMaxConnectionsToServer, DFSPTCRequestTimeout, DFSPTCChannelOpenTimeOut, " + `
+                    "DSPABSCMaxConnectionsToServer, DSPABSCRequestTimeout, DSPABSCChannelOpenTimeOut, " + `
+                    "DSPCVCMaxConnectionsToServer, DSPCVCRequestTimeout, DSPCVCChannelOpenTimeOut, " + `
+                    "DSPOATCMaxConnectionsToServer, DSPOATCRequestTimeout, DSPOATCChannelOpenTimeOut, " + `
+                    "DSGCMaxConnectionsToServer, DSGCRequestTimeout, DSGCChannelOpenTimeOut, " + `
+                    "DUACMaxConnectionsToServer, DUACRequestTimeout, DUACChannelOpenTimeOut, " + `
+                    "DUAuCMaxConnectionsToServer, DUAuCRequestTimeout, DUAuCChannelOpenTimeOut")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
+        }
+    }
+
     Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]

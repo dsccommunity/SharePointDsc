@@ -5,6 +5,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- SPDistributedCacheClientSettings
+  - Added additional parameters for SP2019 and SPSE
+  
 ### Changed
 
 - SPFarm

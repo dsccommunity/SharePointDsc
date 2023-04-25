@@ -329,6 +329,39 @@ try
                     }
                 }
             }
+
+            if ($Global:SPDscHelper.CurrentStubBuildNumber.Build.ToString().Length -lt 5)
+            {
+                Context -Name "SP2019+ parameters specified with older versions" -Fixture {
+                    BeforeAll {
+                        Mock -CommandName Get-SPDistributedCacheClientSetting -MockWith {
+                            return @{
+                                MaxConnectionsToServer = 1
+                                RequestTimeout         = 3000
+                                ChannelOpenTimeOut     = 3000
+                            }
+                        }
+                        $testParams = @{
+                            IsSingleInstance            = "Yes"
+                            DUAuCMaxConnectionsToServer = 1
+                            DUAuCRequestTimeout         = 3000
+                            DUAuCChannelOpenTimeOut     = 3000
+                        }
+                    }
+
+                    It "Should throw exception in the Get method" {
+                        { Get-TargetResource @testParams } | Should -Throw "The following parameters are only supported in SharePoint 2019 and above"
+                    }
+
+                    It "Should throw exception in the Set method" {
+                        { Set-TargetResource @testParams } | Should -Throw "The following parameters are only supported in SharePoint 2019 and above"
+                    }
+
+                    It "Should throw exception in the Test method" {
+                        { Test-TargetResource @testParams } | Should -Throw "The following parameters are only supported in SharePoint 2019 and above"
+                    }
+                }
+            }
         }
     }
 }
