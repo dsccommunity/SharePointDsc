@@ -187,7 +187,115 @@ function Get-TargetResource
 
         [Parameter()]
         [System.UInt32]
-        $DHSCChannelOpenTimeOut
+        $DHSCChannelOpenTimeOut,
+
+        [Parameter()]
+        [System.UInt32]
+        $DDBFCMaxConnectionsToServer,
+
+        [Parameter()]
+        [System.UInt32]
+        $DDBFCRequestTimeout,
+
+        [Parameter()]
+        [System.UInt32]
+        $DDBFCChannelOpenTimeOut,
+
+        [Parameter()]
+        [System.UInt32]
+        $DEHCMaxConnectionsToServer,
+
+        [Parameter()]
+        [System.UInt32]
+        $DEHCRequestTimeout,
+
+        [Parameter()]
+        [System.UInt32]
+        $DEHCChannelOpenTimeOut,
+
+        [Parameter()]
+        [System.UInt32]
+        $DFSPTCMaxConnectionsToServer,
+
+        [Parameter()]
+        [System.UInt32]
+        $DFSPTCRequestTimeout,
+
+        [Parameter()]
+        [System.UInt32]
+        $DFSPTCChannelOpenTimeOut,
+
+        [Parameter()]
+        [System.UInt32]
+        $DSPABSCMaxConnectionsToServer,
+
+        [Parameter()]
+        [System.UInt32]
+        $DSPABSCRequestTimeout,
+
+        [Parameter()]
+        [System.UInt32]
+        $DSPABSCChannelOpenTimeOut,
+
+        [Parameter()]
+        [System.UInt32]
+        $DSPCVCMaxConnectionsToServer,
+
+        [Parameter()]
+        [System.UInt32]
+        $DSPCVCRequestTimeout,
+
+        [Parameter()]
+        [System.UInt32]
+        $DSPCVCChannelOpenTimeOut,
+
+        [Parameter()]
+        [System.UInt32]
+        $DSPOATCMaxConnectionsToServer,
+
+        [Parameter()]
+        [System.UInt32]
+        $DSPOATCRequestTimeout,
+
+        [Parameter()]
+        [System.UInt32]
+        $DSPOATCChannelOpenTimeOut,
+
+        [Parameter()]
+        [System.UInt32]
+        $DSGCMaxConnectionsToServer,
+
+        [Parameter()]
+        [System.UInt32]
+        $DSGCRequestTimeout,
+
+        [Parameter()]
+        [System.UInt32]
+        $DSGCChannelOpenTimeOut,
+
+        [Parameter()]
+        [System.UInt32]
+        $DUACMaxConnectionsToServer,
+
+        [Parameter()]
+        [System.UInt32]
+        $DUACRequestTimeout,
+
+        [Parameter()]
+        [System.UInt32]
+        $DUACChannelOpenTimeOut,
+
+        [Parameter()]
+        [System.UInt32]
+        $DUAuCMaxConnectionsToServer,
+
+        [Parameter()]
+        [System.UInt32]
+        $DUAuCRequestTimeout,
+
+        [Parameter()]
+        [System.UInt32]
+        $DUAuCChannelOpenTimeOut
     )
 
     Write-Verbose -Message "Getting the Distributed Cache Client Settings"
@@ -225,57 +333,134 @@ function Get-TargetResource
         }
     }
 
+    if ($PSBoundParameters.ContainsKey("DDBFCMaxConnectionsToServer") -eq $true -or
+        $PSBoundParameters.ContainsKey("DDBFCRequestTimeout") -eq $true -or
+        $PSBoundParameters.ContainsKey("DDBFCChannelOpenTimeOut") -eq $true -or
+        $PSBoundParameters.ContainsKey("DEHCMaxConnectionsToServer") -eq $true -or
+        $PSBoundParameters.ContainsKey("DEHCRequestTimeout") -eq $true -or
+        $PSBoundParameters.ContainsKey("DEHCChannelOpenTimeOut") -eq $true -or
+        $PSBoundParameters.ContainsKey("DFSPTCMaxConnectionsToServer") -eq $true -or
+        $PSBoundParameters.ContainsKey("DFSPTCRequestTimeout") -eq $true -or
+        $PSBoundParameters.ContainsKey("DFSPTCChannelOpenTimeOut") -eq $true -or
+        $PSBoundParameters.ContainsKey("DSPABSCMaxConnectionsToServer") -eq $true -or
+        $PSBoundParameters.ContainsKey("DSPABSCRequestTimeout") -eq $true -or
+        $PSBoundParameters.ContainsKey("DSPABSCChannelOpenTimeOut") -eq $true -or
+        $PSBoundParameters.ContainsKey("DSPCVCMaxConnectionsToServer") -eq $true -or
+        $PSBoundParameters.ContainsKey("DSPCVCRequestTimeout") -eq $true -or
+        $PSBoundParameters.ContainsKey("DSPCVCChannelOpenTimeOut") -eq $true -or
+        $PSBoundParameters.ContainsKey("DSPOATCMaxConnectionsToServer") -eq $true -or
+        $PSBoundParameters.ContainsKey("DSPOATCRequestTimeout") -eq $true -or
+        $PSBoundParameters.ContainsKey("DSPOATCChannelOpenTimeOut") -eq $true -or
+        $PSBoundParameters.ContainsKey("DSGCMaxConnectionsToServer") -eq $true -or
+        $PSBoundParameters.ContainsKey("DSGCRequestTimeout") -eq $true -or
+        $PSBoundParameters.ContainsKey("DSGCChannelOpenTimeOut") -eq $true -or
+        $PSBoundParameters.ContainsKey("DUACMaxConnectionsToServer") -eq $true -or
+        $PSBoundParameters.ContainsKey("DUACRequestTimeout") -eq $true -or
+        $PSBoundParameters.ContainsKey("DUACChannelOpenTimeOut") -eq $true -or
+        $PSBoundParameters.ContainsKey("DUAuCMaxConnectionsToServer") -eq $true -or
+        $PSBoundParameters.ContainsKey("DUAuCRequestTimeout") -eq $true -or
+        $PSBoundParameters.ContainsKey("DUAuCChannelOpenTimeOut") -eq $true)
+    {
+        $installedVersion = Get-SPDscInstalledProductVersion
+        if ($installedVersion.FileMajorPart -eq 15 -or `
+                $installedVersion.ProductBuildPart.ToString().Length -eq 4)
+        {
+            $message = ("The following parameters are only supported in SharePoint 2019 and above: " + `
+                    "DDBFCMaxConnectionsToServer, DDBFCRequestTimeout, DDBFCChannelOpenTimeOut, " + `
+                    "DEHCMaxConnectionsToServer, DEHCRequestTimeout, DEHCChannelOpenTimeOut, " + `
+                    "DFSPTCMaxConnectionsToServer, DFSPTCRequestTimeout, DFSPTCChannelOpenTimeOut, " + `
+                    "DSPABSCMaxConnectionsToServer, DSPABSCRequestTimeout, DSPABSCChannelOpenTimeOut, " + `
+                    "DSPCVCMaxConnectionsToServer, DSPCVCRequestTimeout, DSPCVCChannelOpenTimeOut, " + `
+                    "DSPOATCMaxConnectionsToServer, DSPOATCRequestTimeout, DSPOATCChannelOpenTimeOut, " + `
+                    "DSGCMaxConnectionsToServer, DSGCRequestTimeout, DSGCChannelOpenTimeOut, " + `
+                    "DUACMaxConnectionsToServer, DUACRequestTimeout, DUACChannelOpenTimeOut, " + `
+                    "DUAuCMaxConnectionsToServer, DUAuCRequestTimeout, DUAuCChannelOpenTimeOut")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
+        }
+    }
+
     $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
         $nullReturnValue = @{
-            IsSingleInstance            = "Yes"
-            DLTCMaxConnectionsToServer  = $null
-            DLTCRequestTimeout          = $null
-            DLTCChannelOpenTimeOut      = $null
-            DVSCMaxConnectionsToServer  = $null
-            DVSCRequestTimeout          = $null
-            DVSCChannelOpenTimeOut      = $null
-            DACMaxConnectionsToServer   = $null
-            DACRequestTimeout           = $null
-            DACChannelOpenTimeOut       = $null
-            DAFMaxConnectionsToServer   = $null
-            DAFRequestTimeout           = $null
-            DAFChannelOpenTimeOut       = $null
-            DAFCMaxConnectionsToServer  = $null
-            DAFCRequestTimeout          = $null
-            DAFCChannelOpenTimeOut      = $null
-            DBCMaxConnectionsToServer   = $null
-            DBCRequestTimeout           = $null
-            DBCChannelOpenTimeOut       = $null
-            DDCMaxConnectionsToServer   = $null
-            DDCRequestTimeout           = $null
-            DDCChannelOpenTimeOut       = $null
-            DSCMaxConnectionsToServer   = $null
-            DSCRequestTimeout           = $null
-            DSCChannelOpenTimeOut       = $null
-            DTCMaxConnectionsToServer   = $null
-            DTCRequestTimeout           = $null
-            DTCChannelOpenTimeOut       = $null
-            DSTACMaxConnectionsToServer = $null
-            DSTACRequestTimeout         = $null
-            DSTACChannelOpenTimeOut     = $null
-            DFLTCMaxConnectionsToServer = $null
-            DFLTCRequestTimeout         = $null
-            DFLTCChannelOpenTimeOut     = $null
-            DSWUCMaxConnectionsToServer = $null
-            DSWUCRequestTimeout         = $null
-            DSWUCChannelOpenTimeOut     = $null
-            DUGCMaxConnectionsToServer  = $null
-            DUGCRequestTimeout          = $null
-            DUGCChannelOpenTimeOut      = $null
-            DRTCMaxConnectionsToServer  = $null
-            DRTCRequestTimeout          = $null
-            DRTCChannelOpenTimeOut      = $null
-            DHSCMaxConnectionsToServer  = $null
-            DHSCRequestTimeout          = $null
-            DHSCChannelOpenTimeOut      = $null
+            IsSingleInstance              = "Yes"
+            DLTCMaxConnectionsToServer    = $null
+            DLTCRequestTimeout            = $null
+            DLTCChannelOpenTimeOut        = $null
+            DVSCMaxConnectionsToServer    = $null
+            DVSCRequestTimeout            = $null
+            DVSCChannelOpenTimeOut        = $null
+            DACMaxConnectionsToServer     = $null
+            DACRequestTimeout             = $null
+            DACChannelOpenTimeOut         = $null
+            DAFMaxConnectionsToServer     = $null
+            DAFRequestTimeout             = $null
+            DAFChannelOpenTimeOut         = $null
+            DAFCMaxConnectionsToServer    = $null
+            DAFCRequestTimeout            = $null
+            DAFCChannelOpenTimeOut        = $null
+            DBCMaxConnectionsToServer     = $null
+            DBCRequestTimeout             = $null
+            DBCChannelOpenTimeOut         = $null
+            DDCMaxConnectionsToServer     = $null
+            DDCRequestTimeout             = $null
+            DDCChannelOpenTimeOut         = $null
+            DSCMaxConnectionsToServer     = $null
+            DSCRequestTimeout             = $null
+            DSCChannelOpenTimeOut         = $null
+            DTCMaxConnectionsToServer     = $null
+            DTCRequestTimeout             = $null
+            DTCChannelOpenTimeOut         = $null
+            DSTACMaxConnectionsToServer   = $null
+            DSTACRequestTimeout           = $null
+            DSTACChannelOpenTimeOut       = $null
+            DFLTCMaxConnectionsToServer   = $null
+            DFLTCRequestTimeout           = $null
+            DFLTCChannelOpenTimeOut       = $null
+            DSWUCMaxConnectionsToServer   = $null
+            DSWUCRequestTimeout           = $null
+            DSWUCChannelOpenTimeOut       = $null
+            DUGCMaxConnectionsToServer    = $null
+            DUGCRequestTimeout            = $null
+            DUGCChannelOpenTimeOut        = $null
+            DRTCMaxConnectionsToServer    = $null
+            DRTCRequestTimeout            = $null
+            DRTCChannelOpenTimeOut        = $null
+            DHSCMaxConnectionsToServer    = $null
+            DHSCRequestTimeout            = $null
+            DHSCChannelOpenTimeOut        = $null
+            DDBFCMaxConnectionsToServer   = $null
+            DDBFCRequestTimeout           = $null
+            DDBFCChannelOpenTimeOut       = $null
+            DEHCMaxConnectionsToServer    = $null
+            DEHCRequestTimeout            = $null
+            DEHCChannelOpenTimeOut        = $null
+            DFSPTCMaxConnectionsToServer  = $null
+            DFSPTCRequestTimeout          = $null
+            DFSPTCChannelOpenTimeOut      = $null
+            DSPABSCMaxConnectionsToServer = $null
+            DSPABSCRequestTimeout         = $null
+            DSPABSCChannelOpenTimeOut     = $null
+            DSPCVCMaxConnectionsToServer  = $null
+            DSPCVCRequestTimeout          = $null
+            DSPCVCChannelOpenTimeOut      = $null
+            DSPOATCMaxConnectionsToServer = $null
+            DSPOATCRequestTimeout         = $null
+            DSPOATCChannelOpenTimeOut     = $null
+            DSGCMaxConnectionsToServer    = $null
+            DSGCRequestTimeout            = $null
+            DSGCChannelOpenTimeOut        = $null
+            DUACMaxConnectionsToServer    = $null
+            DUACRequestTimeout            = $null
+            DUACChannelOpenTimeOut        = $null
+            DUAuCMaxConnectionsToServer   = $null
+            DUAuCRequestTimeout           = $null
+            DUAuCChannelOpenTimeOut       = $null
         }
 
         try
@@ -295,54 +480,90 @@ function Get-TargetResource
             $DUGC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedUnifiedGroupsCache"
             $DRTC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedResourceTallyCache"
             $DHSC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedHealthScoreCache"
+            $DDBFC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedDbLevelFailoverCache"
+            $DEHC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedEdgeHeaderCache"
+            $DFSPTC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedFileStorePerformanceTraceCache"
+            $DSPABSC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedSPAbsBlobCache"
+            $DSPCVC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedSPCertificateValidatorCache"
+            $DSPOATC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedSPOAuthTokenCache"
+            $DSGC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedStopgapCache"
+            $DUAC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedUnifiedAppsCache"
+            $DUAuC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedUnifiedAuditCache"
 
             $returnValue = @{
-                IsSingleInstance            = "Yes"
-                DLTCMaxConnectionsToServer  = $DLTC.MaxConnectionsToServer
-                DLTCRequestTimeout          = $DLTC.RequestTimeout
-                DLTCChannelOpenTimeOut      = $DLTC.ChannelOpenTimeOut
-                DVSCMaxConnectionsToServer  = $DVSC.MaxConnectionsToServer
-                DVSCRequestTimeout          = $DVSC.RequestTimeout
-                DVSCChannelOpenTimeOut      = $DVSC.ChannelOpenTimeOut
-                DACMaxConnectionsToServer   = $DAC.MaxConnectionsToServer
-                DACRequestTimeout           = $DAC.RequestTimeout
-                DACChannelOpenTimeOut       = $DAC.ChannelOpenTimeOut
-                DAFMaxConnectionsToServer   = $DAF.MaxConnectionsToServer
-                DAFRequestTimeout           = $DAF.RequestTimeout
-                DAFChannelOpenTimeOut       = $DAF.ChannelOpenTimeOut
-                DAFCMaxConnectionsToServer  = $DAFC.MaxConnectionsToServer
-                DAFCRequestTimeout          = $DAFC.RequestTimeout
-                DAFCChannelOpenTimeOut      = $DAFC.ChannelOpenTimeOut
-                DBCMaxConnectionsToServer   = $DBC.MaxConnectionsToServer
-                DBCRequestTimeout           = $DBC.RequestTimeout
-                DBCChannelOpenTimeOut       = $DBC.ChannelOpenTimeOut
-                DDCMaxConnectionsToServer   = $DDC.MaxConnectionsToServer
-                DDCRequestTimeout           = $DDC.RequestTimeout
-                DDCChannelOpenTimeOut       = $DDC.ChannelOpenTimeOut
-                DSCMaxConnectionsToServer   = $DSC.MaxConnectionsToServer
-                DSCRequestTimeout           = $DSC.RequestTimeout
-                DSCChannelOpenTimeOut       = $DSC.ChannelOpenTimeOut
-                DTCMaxConnectionsToServer   = $DTC.MaxConnectionsToServer
-                DTCRequestTimeout           = $DTC.RequestTimeout
-                DTCChannelOpenTimeOut       = $DTC.ChannelOpenTimeOut
-                DSTACMaxConnectionsToServer = $DSTAC.MaxConnectionsToServer
-                DSTACRequestTimeout         = $DSTAC.RequestTimeout
-                DSTACChannelOpenTimeOut     = $DSTAC.ChannelOpenTimeOut
-                DFLTCMaxConnectionsToServer = $DFLTC.MaxConnectionsToServer
-                DFLTCRequestTimeout         = $DFLTC.RequestTimeout
-                DFLTCChannelOpenTimeOut     = $DFLTC.ChannelOpenTimeOut
-                DSWUCMaxConnectionsToServer = $DSWUC.MaxConnectionsToServer
-                DSWUCRequestTimeout         = $DSWUC.RequestTimeout
-                DSWUCChannelOpenTimeOut     = $DSWUC.ChannelOpenTimeOut
-                DUGCMaxConnectionsToServer  = $DUGC.MaxConnectionsToServer
-                DUGCRequestTimeout          = $DUGC.RequestTimeout
-                DUGCChannelOpenTimeOut      = $DUGC.ChannelOpenTimeOut
-                DRTCMaxConnectionsToServer  = $DRTC.MaxConnectionsToServer
-                DRTCRequestTimeout          = $DRTC.RequestTimeout
-                DRTCChannelOpenTimeOut      = $DRTC.ChannelOpenTimeOut
-                DHSCMaxConnectionsToServer  = $DHSC.MaxConnectionsToServer
-                DHSCRequestTimeout          = $DHSC.RequestTimeout
-                DHSCChannelOpenTimeOut      = $DHSC.ChannelOpenTimeOut
+                IsSingleInstance              = "Yes"
+                DLTCMaxConnectionsToServer    = $DLTC.MaxConnectionsToServer
+                DLTCRequestTimeout            = $DLTC.RequestTimeout
+                DLTCChannelOpenTimeOut        = $DLTC.ChannelOpenTimeOut
+                DVSCMaxConnectionsToServer    = $DVSC.MaxConnectionsToServer
+                DVSCRequestTimeout            = $DVSC.RequestTimeout
+                DVSCChannelOpenTimeOut        = $DVSC.ChannelOpenTimeOut
+                DACMaxConnectionsToServer     = $DAC.MaxConnectionsToServer
+                DACRequestTimeout             = $DAC.RequestTimeout
+                DACChannelOpenTimeOut         = $DAC.ChannelOpenTimeOut
+                DAFMaxConnectionsToServer     = $DAF.MaxConnectionsToServer
+                DAFRequestTimeout             = $DAF.RequestTimeout
+                DAFChannelOpenTimeOut         = $DAF.ChannelOpenTimeOut
+                DAFCMaxConnectionsToServer    = $DAFC.MaxConnectionsToServer
+                DAFCRequestTimeout            = $DAFC.RequestTimeout
+                DAFCChannelOpenTimeOut        = $DAFC.ChannelOpenTimeOut
+                DBCMaxConnectionsToServer     = $DBC.MaxConnectionsToServer
+                DBCRequestTimeout             = $DBC.RequestTimeout
+                DBCChannelOpenTimeOut         = $DBC.ChannelOpenTimeOut
+                DDCMaxConnectionsToServer     = $DDC.MaxConnectionsToServer
+                DDCRequestTimeout             = $DDC.RequestTimeout
+                DDCChannelOpenTimeOut         = $DDC.ChannelOpenTimeOut
+                DSCMaxConnectionsToServer     = $DSC.MaxConnectionsToServer
+                DSCRequestTimeout             = $DSC.RequestTimeout
+                DSCChannelOpenTimeOut         = $DSC.ChannelOpenTimeOut
+                DTCMaxConnectionsToServer     = $DTC.MaxConnectionsToServer
+                DTCRequestTimeout             = $DTC.RequestTimeout
+                DTCChannelOpenTimeOut         = $DTC.ChannelOpenTimeOut
+                DSTACMaxConnectionsToServer   = $DSTAC.MaxConnectionsToServer
+                DSTACRequestTimeout           = $DSTAC.RequestTimeout
+                DSTACChannelOpenTimeOut       = $DSTAC.ChannelOpenTimeOut
+                DFLTCMaxConnectionsToServer   = $DFLTC.MaxConnectionsToServer
+                DFLTCRequestTimeout           = $DFLTC.RequestTimeout
+                DFLTCChannelOpenTimeOut       = $DFLTC.ChannelOpenTimeOut
+                DSWUCMaxConnectionsToServer   = $DSWUC.MaxConnectionsToServer
+                DSWUCRequestTimeout           = $DSWUC.RequestTimeout
+                DSWUCChannelOpenTimeOut       = $DSWUC.ChannelOpenTimeOut
+                DUGCMaxConnectionsToServer    = $DUGC.MaxConnectionsToServer
+                DUGCRequestTimeout            = $DUGC.RequestTimeout
+                DUGCChannelOpenTimeOut        = $DUGC.ChannelOpenTimeOut
+                DRTCMaxConnectionsToServer    = $DRTC.MaxConnectionsToServer
+                DRTCRequestTimeout            = $DRTC.RequestTimeout
+                DRTCChannelOpenTimeOut        = $DRTC.ChannelOpenTimeOut
+                DHSCMaxConnectionsToServer    = $DHSC.MaxConnectionsToServer
+                DHSCRequestTimeout            = $DHSC.RequestTimeout
+                DHSCChannelOpenTimeOut        = $DHSC.ChannelOpenTimeOut
+                DDBFCMaxConnectionsToServer   = $DDBFC.MaxConnectionsToServer
+                DDBFCRequestTimeout           = $DDBFC.RequestTimeout
+                DDBFCChannelOpenTimeOut       = $DDBFC.ChannelOpenTimeOut
+                DEHCMaxConnectionsToServer    = $DEHC.MaxConnectionsToServer
+                DEHCRequestTimeout            = $DEHC.RequestTimeout
+                DEHCChannelOpenTimeOut        = $DEHC.ChannelOpenTimeOut
+                DFSPTCMaxConnectionsToServer  = $DFSPTC.MaxConnectionsToServer
+                DFSPTCRequestTimeout          = $DFSPTC.RequestTimeout
+                DFSPTCChannelOpenTimeOut      = $DFSPTC.ChannelOpenTimeOut
+                DSPABSCMaxConnectionsToServer = $DSPABSC.MaxConnectionsToServer
+                DSPABSCRequestTimeout         = $DSPABSC.RequestTimeout
+                DSPABSCChannelOpenTimeOut     = $DSPABSC.ChannelOpenTimeOut
+                DSPCVCMaxConnectionsToServer  = $DSPCVC.MaxConnectionsToServer
+                DSPCVCRequestTimeout          = $DSPCVC.RequestTimeout
+                DSPCVCChannelOpenTimeOut      = $DSPCVC.ChannelOpenTimeOut
+                DSPOATCMaxConnectionsToServer = $DSPOATC.MaxConnectionsToServer
+                DSPOATCRequestTimeout         = $DSPOATC.RequestTimeout
+                DSPOATCChannelOpenTimeOut     = $DSPOATC.ChannelOpenTimeOut
+                DSGCMaxConnectionsToServer    = $DSGC.MaxConnectionsToServer
+                DSGCRequestTimeout            = $DSGC.RequestTimeout
+                DSGCChannelOpenTimeOut        = $DSGC.ChannelOpenTimeOut
+                DUACMaxConnectionsToServer    = $DUAC.MaxConnectionsToServer
+                DUACRequestTimeout            = $DUAC.RequestTimeout
+                DUACChannelOpenTimeOut        = $DUAC.ChannelOpenTimeOut
+                DUAuCMaxConnectionsToServer   = $DUAuC.MaxConnectionsToServer
+                DUAuCRequestTimeout           = $DUAuC.RequestTimeout
+                DUAuCChannelOpenTimeOut       = $DUAuC.ChannelOpenTimeOut
             }
             return $returnValue
         }
@@ -543,7 +764,115 @@ function Set-TargetResource
 
         [Parameter()]
         [System.UInt32]
-        $DHSCChannelOpenTimeOut = 20
+        $DHSCChannelOpenTimeOut = 20,
+
+        [Parameter()]
+        [System.UInt32]
+        $DDBFCMaxConnectionsToServer,
+
+        [Parameter()]
+        [System.UInt32]
+        $DDBFCRequestTimeout,
+
+        [Parameter()]
+        [System.UInt32]
+        $DDBFCChannelOpenTimeOut,
+
+        [Parameter()]
+        [System.UInt32]
+        $DEHCMaxConnectionsToServer,
+
+        [Parameter()]
+        [System.UInt32]
+        $DEHCRequestTimeout,
+
+        [Parameter()]
+        [System.UInt32]
+        $DEHCChannelOpenTimeOut,
+
+        [Parameter()]
+        [System.UInt32]
+        $DFSPTCMaxConnectionsToServer,
+
+        [Parameter()]
+        [System.UInt32]
+        $DFSPTCRequestTimeout,
+
+        [Parameter()]
+        [System.UInt32]
+        $DFSPTCChannelOpenTimeOut,
+
+        [Parameter()]
+        [System.UInt32]
+        $DSPABSCMaxConnectionsToServer,
+
+        [Parameter()]
+        [System.UInt32]
+        $DSPABSCRequestTimeout,
+
+        [Parameter()]
+        [System.UInt32]
+        $DSPABSCChannelOpenTimeOut,
+
+        [Parameter()]
+        [System.UInt32]
+        $DSPCVCMaxConnectionsToServer,
+
+        [Parameter()]
+        [System.UInt32]
+        $DSPCVCRequestTimeout,
+
+        [Parameter()]
+        [System.UInt32]
+        $DSPCVCChannelOpenTimeOut,
+
+        [Parameter()]
+        [System.UInt32]
+        $DSPOATCMaxConnectionsToServer,
+
+        [Parameter()]
+        [System.UInt32]
+        $DSPOATCRequestTimeout,
+
+        [Parameter()]
+        [System.UInt32]
+        $DSPOATCChannelOpenTimeOut,
+
+        [Parameter()]
+        [System.UInt32]
+        $DSGCMaxConnectionsToServer,
+
+        [Parameter()]
+        [System.UInt32]
+        $DSGCRequestTimeout,
+
+        [Parameter()]
+        [System.UInt32]
+        $DSGCChannelOpenTimeOut,
+
+        [Parameter()]
+        [System.UInt32]
+        $DUACMaxConnectionsToServer,
+
+        [Parameter()]
+        [System.UInt32]
+        $DUACRequestTimeout,
+
+        [Parameter()]
+        [System.UInt32]
+        $DUACChannelOpenTimeOut,
+
+        [Parameter()]
+        [System.UInt32]
+        $DUAuCMaxConnectionsToServer,
+
+        [Parameter()]
+        [System.UInt32]
+        $DUAuCRequestTimeout,
+
+        [Parameter()]
+        [System.UInt32]
+        $DUAuCChannelOpenTimeOut
     )
 
     Write-Verbose -Message "Setting the Distributed Cache Client Settings"
@@ -830,6 +1159,155 @@ function Set-TargetResource
             }
             Set-SPDistributedCacheClientSetting -ContainerType "DistributedHealthScoreCache" $DHSC
         }
+
+        # The following parameters are only required on SharePoint 2019 and above
+        if ($installedVersion.FileMajorPart -eq 16 -and `
+                $installedVersion.ProductBuildPart.ToString().Length -gt 4)
+        {
+            #DistributedDbLevelFailoverCache
+            $DDBFC = Get-SPDistributedCacheClientSetting -ContainerType DistributedDbLevelFailoverCache
+            if ($params.DDBFCMaxConnectionsToServer)
+            {
+                $DDBFC.MaxConnectionsToServer = $params.DDBFCMaxConnectionsToServer
+            }
+            if ($params.DDBFCRequestTimeout)
+            {
+                $DDBFC.RequestTimeout = $params.DDBFCRequestTimeout
+            }
+            if ($params.DDBFCChannelOpenTimeOut)
+            {
+                $DDBFC.ChannelOpenTimeOut = $params.DDBFCChannelOpenTimeOut
+            }
+            Set-SPDistributedCacheClientSetting -ContainerType "DistributedDbLevelFailoverCache" $DDBFC
+
+            #DistributedEdgeHeaderCache
+            $DEHC = Get-SPDistributedCacheClientSetting -ContainerType DistributedEdgeHeaderCache
+            if ($params.DEHCMaxConnectionsToServer)
+            {
+                $DEHC.MaxConnectionsToServer = $params.DEHCMaxConnectionsToServer
+            }
+            if ($params.DEHCRequestTimeout)
+            {
+                $DEHC.RequestTimeout = $params.DEHCRequestTimeout
+            }
+            if ($params.DEHCChannelOpenTimeOut)
+            {
+                $DEHC.ChannelOpenTimeOut = $params.DEHCChannelOpenTimeOut
+            }
+            Set-SPDistributedCacheClientSetting -ContainerType "DistributedEdgeHeaderCache" $DEHC
+
+            #DistributedFileStorePerformanceTraceCache
+            $DFSPTC = Get-SPDistributedCacheClientSetting -ContainerType DistributedFileStorePerformanceTraceCache
+            if ($params.DFSPTCMaxConnectionsToServer)
+            {
+                $DFSPTC.MaxConnectionsToServer = $params.DFSPTCMaxConnectionsToServer
+            }
+            if ($params.DFSPTCRequestTimeout)
+            {
+                $DFSPTC.RequestTimeout = $params.DFSPTCRequestTimeout
+            }
+            if ($params.DFSPTCChannelOpenTimeOut)
+            {
+                $DFSPTC.ChannelOpenTimeOut = $params.DFSPTCChannelOpenTimeOut
+            }
+            Set-SPDistributedCacheClientSetting -ContainerType "DistributedFileStorePerformanceTraceCache" $DFSPTC
+
+            #DistributedSPAbsBlobCache
+            $DSPABSC = Get-SPDistributedCacheClientSetting -ContainerType DistributedSPAbsBlobCache
+            if ($params.DSPABSCMaxConnectionsToServer)
+            {
+                $DSPABSC.MaxConnectionsToServer = $params.DSPABSCMaxConnectionsToServer
+            }
+            if ($params.DSPABSCRequestTimeout)
+            {
+                $DSPABSC.RequestTimeout = $params.DSPABSCRequestTimeout
+            }
+            if ($params.DSPABSCChannelOpenTimeOut)
+            {
+                $DSPABSC.ChannelOpenTimeOut = $params.DSPABSCChannelOpenTimeOut
+            }
+            Set-SPDistributedCacheClientSetting -ContainerType "DistributedSPAbsBlobCache" $DSPABSC
+
+            #DistributedSPCertificateValidatorCache
+            $DSPCVC = Get-SPDistributedCacheClientSetting -ContainerType DistributedSPCertificateValidatorCache
+            if ($params.DSPCVCMaxConnectionsToServer)
+            {
+                $DSPCVC.MaxConnectionsToServer = $params.DSPCVCMaxConnectionsToServer
+            }
+            if ($params.DSPCVCRequestTimeout)
+            {
+                $DSPCVC.RequestTimeout = $params.DSPCVCRequestTimeout
+            }
+            if ($params.DSPCVCChannelOpenTimeOut)
+            {
+                $DSPCVC.ChannelOpenTimeOut = $params.DSPCVCChannelOpenTimeOut
+            }
+            Set-SPDistributedCacheClientSetting -ContainerType "DistributedSPCertificateValidatorCache" $DSPCVC
+
+            #DistributedSPOAuthTokenCache
+            $DSPOATC = Get-SPDistributedCacheClientSetting -ContainerType DistributedSPOAuthTokenCache
+            if ($params.DSPOATCMaxConnectionsToServer)
+            {
+                $DSPOATC.MaxConnectionsToServer = $params.DSPOATCMaxConnectionsToServer
+            }
+            if ($params.DSPOATCRequestTimeout)
+            {
+                $DSPOATC.RequestTimeout = $params.DSPOATCRequestTimeout
+            }
+            if ($params.DSPOATCChannelOpenTimeOut)
+            {
+                $DSPOATC.ChannelOpenTimeOut = $params.DSPOATCChannelOpenTimeOut
+            }
+            Set-SPDistributedCacheClientSetting -ContainerType "DistributedSPOAuthTokenCache" $DSPOATC
+
+            #DistributedStopgapCache
+            $DSGC = Get-SPDistributedCacheClientSetting -ContainerType DistributedStopgapCache
+            if ($params.DSGCMaxConnectionsToServer)
+            {
+                $DSGC.MaxConnectionsToServer = $params.DSGCMaxConnectionsToServer
+            }
+            if ($params.DSGCRequestTimeout)
+            {
+                $DSGC.RequestTimeout = $params.DSGCRequestTimeout
+            }
+            if ($params.DSGCChannelOpenTimeOut)
+            {
+                $DSGC.ChannelOpenTimeOut = $params.DSGCChannelOpenTimeOut
+            }
+            Set-SPDistributedCacheClientSetting -ContainerType "DistributedStopgapCache" $DSGC
+
+            #DistributedUnifiedAppsCache
+            $DUAC = Get-SPDistributedCacheClientSetting -ContainerType DistributedUnifiedAppsCache
+            if ($params.DUACMaxConnectionsToServer)
+            {
+                $DUAC.MaxConnectionsToServer = $params.DUACMaxConnectionsToServer
+            }
+            if ($params.DUACRequestTimeout)
+            {
+                $DUAC.RequestTimeout = $params.DUACRequestTimeout
+            }
+            if ($params.DUACChannelOpenTimeOut)
+            {
+                $DUAC.ChannelOpenTimeOut = $params.DUACChannelOpenTimeOut
+            }
+            Set-SPDistributedCacheClientSetting -ContainerType "DistributedUnifiedAppsCache" $DUAC
+
+            #DistributedUnifiedAuditCache
+            $DUAuC = Get-SPDistributedCacheClientSetting -ContainerType DistributedUnifiedAuditCache
+            if ($params.DUAuCMaxConnectionsToServer)
+            {
+                $DUAuC.MaxConnectionsToServer = $params.DUAuCMaxConnectionsToServer
+            }
+            if ($params.DUAuCRequestTimeout)
+            {
+                $DUAuC.RequestTimeout = $params.DUAuCRequestTimeout
+            }
+            if ($params.DUAuCChannelOpenTimeOut)
+            {
+                $DUAuC.ChannelOpenTimeOut = $params.DUAuCChannelOpenTimeOut
+            }
+            Set-SPDistributedCacheClientSetting -ContainerType "DistributedUnifiedAuditCache" $DUAuC
+        }
     }
 }
 
@@ -1022,7 +1500,115 @@ function Test-TargetResource
 
         [Parameter()]
         [System.UInt32]
-        $DHSCChannelOpenTimeOut
+        $DHSCChannelOpenTimeOut,
+
+        [Parameter()]
+        [System.UInt32]
+        $DDBFCMaxConnectionsToServer,
+
+        [Parameter()]
+        [System.UInt32]
+        $DDBFCRequestTimeout,
+
+        [Parameter()]
+        [System.UInt32]
+        $DDBFCChannelOpenTimeOut,
+
+        [Parameter()]
+        [System.UInt32]
+        $DEHCMaxConnectionsToServer,
+
+        [Parameter()]
+        [System.UInt32]
+        $DEHCRequestTimeout,
+
+        [Parameter()]
+        [System.UInt32]
+        $DEHCChannelOpenTimeOut,
+
+        [Parameter()]
+        [System.UInt32]
+        $DFSPTCMaxConnectionsToServer,
+
+        [Parameter()]
+        [System.UInt32]
+        $DFSPTCRequestTimeout,
+
+        [Parameter()]
+        [System.UInt32]
+        $DFSPTCChannelOpenTimeOut,
+
+        [Parameter()]
+        [System.UInt32]
+        $DSPABSCMaxConnectionsToServer,
+
+        [Parameter()]
+        [System.UInt32]
+        $DSPABSCRequestTimeout,
+
+        [Parameter()]
+        [System.UInt32]
+        $DSPABSCChannelOpenTimeOut,
+
+        [Parameter()]
+        [System.UInt32]
+        $DSPCVCMaxConnectionsToServer,
+
+        [Parameter()]
+        [System.UInt32]
+        $DSPCVCRequestTimeout,
+
+        [Parameter()]
+        [System.UInt32]
+        $DSPCVCChannelOpenTimeOut,
+
+        [Parameter()]
+        [System.UInt32]
+        $DSPOATCMaxConnectionsToServer,
+
+        [Parameter()]
+        [System.UInt32]
+        $DSPOATCRequestTimeout,
+
+        [Parameter()]
+        [System.UInt32]
+        $DSPOATCChannelOpenTimeOut,
+
+        [Parameter()]
+        [System.UInt32]
+        $DSGCMaxConnectionsToServer,
+
+        [Parameter()]
+        [System.UInt32]
+        $DSGCRequestTimeout,
+
+        [Parameter()]
+        [System.UInt32]
+        $DSGCChannelOpenTimeOut,
+
+        [Parameter()]
+        [System.UInt32]
+        $DUACMaxConnectionsToServer,
+
+        [Parameter()]
+        [System.UInt32]
+        $DUACRequestTimeout,
+
+        [Parameter()]
+        [System.UInt32]
+        $DUACChannelOpenTimeOut,
+
+        [Parameter()]
+        [System.UInt32]
+        $DUAuCMaxConnectionsToServer,
+
+        [Parameter()]
+        [System.UInt32]
+        $DUAuCRequestTimeout,
+
+        [Parameter()]
+        [System.UInt32]
+        $DUAuCChannelOpenTimeOut
     )
 
     Write-Verbose -Message "Testing the Distributed Cache Client Settings"
@@ -1079,7 +1665,34 @@ function Test-TargetResource
         "DRTCChannelOpenTimeOut",
         "DHSCMaxConnectionsToServer",
         "DHSCRequestTimeout",
-        "DHSCChannelOpenTimeOut"
+        "DHSCChannelOpenTimeOut",
+        'DDBFCMaxConnectionsToServer',
+        'DDBFCRequestTimeout',
+        'DDBFCChannelOpenTimeOut',
+        'DEHCMaxConnectionsToServer',
+        'DEHCRequestTimeout',
+        'DEHCChannelOpenTimeOut',
+        'DFSPTCMaxConnectionsToServer',
+        'DFSPTCRequestTimeout',
+        'DFSPTCChannelOpenTimeOut',
+        'DSPABSCMaxConnectionsToServer',
+        'DSPABSCRequestTimeout',
+        'DSPABSCChannelOpenTimeOut',
+        'DSPCVCMaxConnectionsToServer',
+        'DSPCVCRequestTimeout',
+        'DSPCVCChannelOpenTimeOut',
+        'DSPOATCMaxConnectionsToServer',
+        'DSPOATCRequestTimeout',
+        'DSPOATCChannelOpenTimeOut',
+        'DSGCMaxConnectionsToServer',
+        'DSGCRequestTimeout',
+        'DSGCChannelOpenTimeOut',
+        'DUACMaxConnectionsToServer',
+        'DUACRequestTimeout',
+        'DUACChannelOpenTimeOut',
+        'DUAuCMaxConnectionsToServer',
+        'DUAuCRequestTimeout',
+        'DUAuCChannelOpenTimeOut'
     )
 
     Write-Verbose -Message "Test-TargetResource returned $result"

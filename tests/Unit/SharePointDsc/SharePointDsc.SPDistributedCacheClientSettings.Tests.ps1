@@ -50,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Mocks for all contexts
                 Mock -CommandName Set-SPDistributedCacheClientSetting { }
@@ -141,6 +141,38 @@ try
                         $testparams.add("DHSCRequestTimeout", 1000)
                         $testparams.add("DHSCChannelOpenTimeOut", 1000)
                     }
+
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16 -and
+                        $Global:SPDscHelper.CurrentStubBuildNumber.Build -gt 13000)
+                    {
+                        $testparams.add("DDBFCMaxConnectionsToServer", 3)
+                        $testparams.add("DDBFCRequestTimeout", 1000)
+                        $testparams.add("DDBFCChannelOpenTimeOut", 1000)
+                        $testparams.add("DEHCMaxConnectionsToServer", 3)
+                        $testparams.add("DEHCRequestTimeout", 1000)
+                        $testparams.add("DEHCChannelOpenTimeOut", 1000)
+                        $testparams.add("DFSPTCMaxConnectionsToServer", 3)
+                        $testparams.add("DFSPTCRequestTimeout", 1000)
+                        $testparams.add("DFSPTCChannelOpenTimeOut", 1000)
+                        $testparams.add("DSPABSCMaxConnectionsToServer", 3)
+                        $testparams.add("DSPABSCRequestTimeout", 1000)
+                        $testparams.add("DSPABSCChannelOpenTimeOut", 1000)
+                        $testparams.add("DSPCVCMaxConnectionsToServer", 3)
+                        $testparams.add("DSPCVCRequestTimeout", 1000)
+                        $testparams.add("DSPCVCChannelOpenTimeOut", 1000)
+                        $testparams.add("DSPOATCMaxConnectionsToServer", 3)
+                        $testparams.add("DSPOATCRequestTimeout", 1000)
+                        $testparams.add("DSPOATCChannelOpenTimeOut", 1000)
+                        $testparams.add("DSGCMaxConnectionsToServer", 3)
+                        $testparams.add("DSGCRequestTimeout", 1000)
+                        $testparams.add("DSGCChannelOpenTimeOut", 1000)
+                        $testparams.add("DUACMaxConnectionsToServer", 3)
+                        $testparams.add("DUACRequestTimeout", 1000)
+                        $testparams.add("DUACChannelOpenTimeOut", 1000)
+                        $testparams.add("DUAuCMaxConnectionsToServer", 3)
+                        $testparams.add("DUAuCRequestTimeout", 1000)
+                        $testparams.add("DUAuCChannelOpenTimeOut", 1000)
+                    }
                 }
 
                 It "Should return DLTCMaxConnectionsToServer equals 5" {
@@ -218,6 +250,38 @@ try
                         $testparams.add("DHSCMaxConnectionsToServer", 1)
                         $testparams.add("DHSCRequestTimeout", 3000)
                         $testparams.add("DHSCChannelOpenTimeOut", 3000)
+                    }
+
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16 -and
+                        $Global:SPDscHelper.CurrentStubBuildNumber.Build -gt 13000)
+                    {
+                        $testparams.add("DDBFCMaxConnectionsToServer", 1)
+                        $testparams.add("DDBFCRequestTimeout", 3000)
+                        $testparams.add("DDBFCChannelOpenTimeOut", 3000)
+                        $testparams.add("DEHCMaxConnectionsToServer", 1)
+                        $testparams.add("DEHCRequestTimeout", 3000)
+                        $testparams.add("DEHCChannelOpenTimeOut", 3000)
+                        $testparams.add("DFSPTCMaxConnectionsToServer", 1)
+                        $testparams.add("DFSPTCRequestTimeout", 3000)
+                        $testparams.add("DFSPTCChannelOpenTimeOut", 3000)
+                        $testparams.add("DSPABSCMaxConnectionsToServer", 1)
+                        $testparams.add("DSPABSCRequestTimeout", 3000)
+                        $testparams.add("DSPABSCChannelOpenTimeOut", 3000)
+                        $testparams.add("DSPCVCMaxConnectionsToServer", 1)
+                        $testparams.add("DSPCVCRequestTimeout", 3000)
+                        $testparams.add("DSPCVCChannelOpenTimeOut", 3000)
+                        $testparams.add("DSPOATCMaxConnectionsToServer", 1)
+                        $testparams.add("DSPOATCRequestTimeout", 3000)
+                        $testparams.add("DSPOATCChannelOpenTimeOut", 3000)
+                        $testparams.add("DSGCMaxConnectionsToServer", 1)
+                        $testparams.add("DSGCRequestTimeout", 3000)
+                        $testparams.add("DSGCChannelOpenTimeOut", 3000)
+                        $testparams.add("DUACMaxConnectionsToServer", 1)
+                        $testparams.add("DUACRequestTimeout", 3000)
+                        $testparams.add("DUACChannelOpenTimeOut", 3000)
+                        $testparams.add("DUAuCMaxConnectionsToServer", 1)
+                        $testparams.add("DUAuCRequestTimeout", 3000)
+                        $testparams.add("DUAuCChannelOpenTimeOut", 3000)
                     }
                 }
 
