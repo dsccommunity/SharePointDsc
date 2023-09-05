@@ -94,6 +94,7 @@ DscTest:
     - output
   ExcludeModuleFile:
     - Modules/DscResource.Common
+  MainGitBranch: master
 
 # Import ModuleBuilder tasks from a specific PowerShell module using the build
 # task's alias. Wildcard * can be used to specify all tasks that has a similar
