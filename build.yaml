@@ -42,7 +42,7 @@ BuildWorkflow:
     - package_module_nupkg
 
   hqrmtest:
-    - DscResource_Tests_Stop_On_Fail
+    - Invoke_HQRM_Tests_Stop_On_Fail
 
   # Defining test task to be run when invoking `./build.ps1 -Tasks test`
   test:

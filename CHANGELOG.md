@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   
 ### Changed
 
+- SharePointDsc
+  - The task `DscResource_Tests_Stop_On_Fail` that have ran HQRM tests will be removed in
+    the next version of Sampler and replaced by the task `Invoke_HQRM_Tests_Stop_On_Fail`.
 - SPFarm
   - Updated to run cmdlet `Update-SPFlightsConfigFile` on SharePoint Subscription.
 
