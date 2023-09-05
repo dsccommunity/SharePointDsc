@@ -106,6 +106,8 @@ ModuleBuildTasks:
     - '*.ib.tasks'
   DscResource.DocGenerator:
     - 'Task.*'
+  DscResource.Test:
+    - 'Task.*'
 
 # Invoke-Build Header to be used to 'decorate' the terminal output of the tasks.
 TaskHeader: |
