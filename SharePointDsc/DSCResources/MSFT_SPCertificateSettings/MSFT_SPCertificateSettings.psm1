@@ -285,141 +285,153 @@ function Set-TargetResource
         if ($contactsProvided)
         {
             Write-Verbose "Checking Certificate Notification Contacts"
-            $currentContacts = [array](Get-SPCertificateNotificationContact).Address
+            [array]$currentContacts = Get-SPCertificateNotificationContact
 
-            $diffs = Compare-Object -ReferenceObject $desiredContacts -DifferenceObject $currentContacts
-            foreach ($diff in $diffs)
+            # If there aren't any current Contacts we'll add them all. Also Compare-Object does not like $null Objects.
+            # This fixes Issue "SPCertificateSettings: Unable to set contacts when previously blank" https://github.com/dsccommunity/SharePointDsc/issues/1430
+            if ($currentContacts.Count -eq 0)
             {
-                switch ($diff.SideIndicator)
+                foreach ($contact in $desiredContacts)
                 {
-                    "<="
+                    Write-Verbose "Adding $($diff.InputObject)"
+                    $null = Add-SPCertificateNotificationContact -EmailAddress $contact
+                }
+            }
+            else
+            {
+                $diffs = Compare-Object -ReferenceObject $desiredContacts -DifferenceObject ($currentContacts | Select-Object -ExpandProperty Address)
+                foreach ($diff in $diffs)
+                {
+                    switch ($diff.SideIndicator)
                     {
-                        Write-Verbose "Adding $($diff.InputObject)"
-                        $null = Add-SPCertificateNotificationContact -EmailAddress $diff.InputObject
-                    }
-                    "=>"
-                    {
-                        Write-Verbose "Removing $($diff.InputObject)"
-                        $null = Remove-SPCertificateNotificationContact -EmailAddress $diff.InputObject -Confirm:$false
+                        "<="
+                        {
+                            Write-Verbose "Adding $($diff.InputObject)"
+                            $null = Add-SPCertificateNotificationContact -EmailAddress $diff.InputObject
+                        }
+                        "=>"
+                        {
+                            Write-Verbose "Removing $($diff.InputObject)"
+                            $null = Remove-SPCertificateNotificationContact -EmailAddress $diff.InputObject -Confirm:$false
+                        }
                     }
                 }
             }
         }
     }
-}
 
-function Test-TargetResource
-{
-    [CmdletBinding()]
-    [OutputType([System.Boolean])]
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [ValidateSet('Yes')]
-        [System.String]
-        $IsSingleInstance,
+    function Test-TargetResource
+    {
+        [CmdletBinding()]
+        [OutputType([System.Boolean])]
+        param
+        (
+            [Parameter(Mandatory = $true)]
+            [ValidateSet('Yes')]
+            [System.String]
+            $IsSingleInstance,
 
-        [Parameter()]
-        [System.String]
-        $OrganizationalUnit,
+            [Parameter()]
+            [System.String]
+            $OrganizationalUnit,
 
-        [Parameter()]
-        [System.String]
-        $Organization,
+            [Parameter()]
+            [System.String]
+            $Organization,
 
-        [Parameter()]
-        [System.String]
-        $Locality,
+            [Parameter()]
+            [System.String]
+            $Locality,
 
-        [Parameter()]
-        [System.String]
-        $State,
+            [Parameter()]
+            [System.String]
+            $State,
 
-        [Parameter()]
-        [ValidateLength(2, 2)]
-        [System.String]
-        $Country,
+            [Parameter()]
+            [ValidateLength(2, 2)]
+            [System.String]
+            $Country,
 
-        [Parameter()]
-        [ValidateSet('ECC', 'RSA')]
-        [System.String]
-        $KeyAlgorithm,
+            [Parameter()]
+            [ValidateSet('ECC', 'RSA')]
+            [System.String]
+            $KeyAlgorithm,
 
-        [Parameter()]
-        [ValidateSet('0', '2048', '4096', '8192', '16384')]
-        [System.UInt16]
-        $KeySize,
+            [Parameter()]
+            [ValidateSet('0', '2048', '4096', '8192', '16384')]
+            [System.UInt16]
+            $KeySize,
 
-        [Parameter()]
-        [ValidateSet('nistP256', 'nistP384', 'nistP521')]
-        [System.String]
-        $EllipticCurve,
+            [Parameter()]
+            [ValidateSet('nistP256', 'nistP384', 'nistP521')]
+            [System.String]
+            $EllipticCurve,
 
-        [Parameter()]
-        [ValidateSet('SHA256', 'SHA384', 'SHA512')]
-        [System.String]
-        $HashAlgorithm,
+            [Parameter()]
+            [ValidateSet('SHA256', 'SHA384', 'SHA512')]
+            [System.String]
+            $HashAlgorithm,
 
-        [Parameter()]
-        [ValidateSet('Pkcs1', 'Pss')]
-        [System.String]
-        $RsaSignaturePadding,
+            [Parameter()]
+            [ValidateSet('Pkcs1', 'Pss')]
+            [System.String]
+            $RsaSignaturePadding,
 
-        [Parameter()]
-        [System.UInt32]
-        $CertificateExpirationAttentionThreshold,
+            [Parameter()]
+            [System.UInt32]
+            $CertificateExpirationAttentionThreshold,
 
-        [Parameter()]
-        [System.UInt32]
-        $CertificateExpirationWarningThreshold,
+            [Parameter()]
+            [System.UInt32]
+            $CertificateExpirationWarningThreshold,
 
-        [Parameter()]
-        [System.UInt32]
-        $CertificateExpirationErrorThreshold,
+            [Parameter()]
+            [System.UInt32]
+            $CertificateExpirationErrorThreshold,
 
-        [Parameter()]
-        [System.String[]]
-        $CertificateNotificationContacts
-    )
+            [Parameter()]
+            [System.String[]]
+            $CertificateNotificationContacts
+        )
 
-    Write-Verbose -Message "Testing certificate configuration settings"
+        Write-Verbose -Message "Testing certificate configuration settings"
 
-    $CurrentValues = Get-TargetResource @PSBoundParameters
+        $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
-    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+        Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+        Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
-    $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
-        -Source $($MyInvocation.MyCommand.Source) `
-        -DesiredValues $PSBoundParameters
+        $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+            -Source $($MyInvocation.MyCommand.Source) `
+            -DesiredValues $PSBoundParameters
 
-    Write-Verbose -Message "Test-TargetResource returned $result"
+        Write-Verbose -Message "Test-TargetResource returned $result"
 
-    return $result
-}
+        return $result
+    }
 
-function Export-TargetResource
-{
-    $VerbosePreference = "SilentlyContinue"
-    $ParentModuleBase = Get-Module "SharePointDsc" -ListAvailable | Select-Object -ExpandProperty Modulebase
-    $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPCertificateSettings\MSFT_SPCertificateSettings.psm1" -Resolve
+    function Export-TargetResource
+    {
+        $VerbosePreference = "SilentlyContinue"
+        $ParentModuleBase = Get-Module "SharePointDsc" -ListAvailable | Select-Object -ExpandProperty Modulebase
+        $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPCertificateSettings\MSFT_SPCertificateSettings.psm1" -Resolve
 
-    $Content = ''
-    $params = Get-DSCFakeParameters -ModulePath $module
-    $params.Country = "US"
+        $Content = ''
+        $params = Get-DSCFakeParameters -ModulePath $module
+        $params.Country = "US"
 
-    $PartialContent = "        SPCertificateSettings CertificateSettings`r`n"
-    $PartialContent += "        {`r`n"
-    $results = Get-TargetResource @params
-    $results = Repair-Credentials -results $results
-    $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
-    $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
-    $PartialContent += $currentBlock
-    $PartialContent += "        }`r`n"
+        $PartialContent = "        SPCertificateSettings CertificateSettings`r`n"
+        $PartialContent += "        {`r`n"
+        $results = Get-TargetResource @params
+        $results = Repair-Credentials -results $results
+        $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+        $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+        $PartialContent += $currentBlock
+        $PartialContent += "        }`r`n"
 
-    $Content += $PartialContent
+        $Content += $PartialContent
 
-    return $Content
-}
+        return $Content
+    }
 
-Export-ModuleMember -Function *-TargetResource
+    Export-ModuleMember -Function *-TargetResource
