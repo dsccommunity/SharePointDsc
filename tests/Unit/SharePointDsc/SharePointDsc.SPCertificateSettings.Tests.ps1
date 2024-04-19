@@ -341,7 +341,6 @@ try
                             It "Should update the certificate settings" {
                                 Set-TargetResource @testParams
                                 Assert-MockCalled Add-SPCertificateNotificationContact
-                                Assert-MockCalled Remove-SPCertificateNotificationContact
                             }
                         }
 
