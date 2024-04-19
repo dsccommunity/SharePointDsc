@@ -260,7 +260,7 @@ try
                                         CertificateExpirationWarningThresholdDays   = 15
                                         CertificateExpirationErrorThresholdDays     = 15
                                         CertificateNotificationContacts             = @(
-                                            @{
+                                            [PSCustomObject]@{
                                                 Address = 'wrong@contoso.com'
                                             }
                                         )
@@ -270,7 +270,7 @@ try
                                 Mock -CommandName Get-SPFarm -MockWith { return @{ } }
                                 Mock -CommandName Get-SPCertificateNotificationContact -MockWith {
                                     return @(
-                                        @{
+                                        [PSCustomObject]@{
                                             Address = 'wrong@contoso.com'
                                         }
                                     )
