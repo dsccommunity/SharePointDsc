@@ -285,22 +285,35 @@ function Set-TargetResource
         if ($contactsProvided)
         {
             Write-Verbose "Checking Certificate Notification Contacts"
-            $currentContacts = [array](Get-SPCertificateNotificationContact).Address
+            [array]$currentContacts = Get-SPCertificateNotificationContact
 
-            $diffs = Compare-Object -ReferenceObject $desiredContacts -DifferenceObject $currentContacts
-            foreach ($diff in $diffs)
+            # If there aren't any current Contacts we'll add them all. Also Compare-Object does not like $null Objects.
+            # This fixes Issue "SPCertificateSettings: Unable to set contacts when previously blank" https://github.com/dsccommunity/SharePointDsc/issues/1430
+            if ($currentContacts.Count -eq 0)
             {
-                switch ($diff.SideIndicator)
+                foreach ($contact in $desiredContacts)
                 {
-                    "<="
+                    Write-Verbose "Adding $($diff.InputObject)"
+                    $null = Add-SPCertificateNotificationContact -EmailAddress $contact
+                }
+            }
+            else
+            {
+                $diffs = Compare-Object -ReferenceObject $desiredContacts -DifferenceObject ($currentContacts | Select-Object -ExpandProperty Address)
+                foreach ($diff in $diffs)
+                {
+                    switch ($diff.SideIndicator)
                     {
-                        Write-Verbose "Adding $($diff.InputObject)"
-                        $null = Add-SPCertificateNotificationContact -EmailAddress $diff.InputObject
-                    }
-                    "=>"
-                    {
-                        Write-Verbose "Removing $($diff.InputObject)"
-                        $null = Remove-SPCertificateNotificationContact -EmailAddress $diff.InputObject -Confirm:$false
+                        "<="
+                        {
+                            Write-Verbose "Adding $($diff.InputObject)"
+                            $null = Add-SPCertificateNotificationContact -EmailAddress $diff.InputObject
+                        }
+                        "=>"
+                        {
+                            Write-Verbose "Removing $($diff.InputObject)"
+                            $null = Remove-SPCertificateNotificationContact -EmailAddress $diff.InputObject -Confirm:$false
+                        }
                     }
                 }
             }

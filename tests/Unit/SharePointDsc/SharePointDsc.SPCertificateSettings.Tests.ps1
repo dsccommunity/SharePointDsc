@@ -33,7 +33,7 @@ function Invoke-TestSetup
 
     $script:testEnvironment = Initialize-TestEnvironment `
         -DSCModuleName $script:DSCModuleName `
-        -DSCResourceName $script:DSCResourceFullName `
+        -DscResourceName $script:DSCResourceFullName `
         -ResourceType 'Mof' `
         -TestType 'Unit'
 }
@@ -260,7 +260,7 @@ try
                                         CertificateExpirationWarningThresholdDays   = 15
                                         CertificateExpirationErrorThresholdDays     = 15
                                         CertificateNotificationContacts             = @(
-                                            @{
+                                            [PSCustomObject]@{
                                                 Address = 'wrong@contoso.com'
                                             }
                                         )
@@ -270,7 +270,7 @@ try
                                 Mock -CommandName Get-SPFarm -MockWith { return @{ } }
                                 Mock -CommandName Get-SPCertificateNotificationContact -MockWith {
                                     return @(
-                                        @{
+                                        [PSCustomObject]@{
                                             Address = 'wrong@contoso.com'
                                         }
                                     )
@@ -292,6 +292,55 @@ try
                                 Set-TargetResource @testParams
                                 Assert-MockCalled Add-SPCertificateNotificationContact
                                 Assert-MockCalled Remove-SPCertificateNotificationContact
+                            }
+                        }
+
+                        Context -Name "The server is in a farm and zero contacts have been applied" -Fixture {
+                            BeforeAll {
+                                $testParams = @{
+                                    IsSingleInstance                = 'Yes'
+                                    CertificateNotificationContacts = 'admin@contoso.com'
+                                }
+
+                                Mock -CommandName Get-SPCertificateSettings -MockWith {
+                                    $returnVal = @{
+                                        DefaultOrganizationalUnit                   = ''
+                                        DefaultOrganization                         = ''
+                                        DefaultLocality                             = ''
+                                        DefaultState                                = ''
+                                        DefaultCountry                              = ''
+                                        DefaultKeyAlgorithm                         = 'RSA'
+                                        DefaultRsaKeySize                           = 2048
+                                        DefaultEllipticCurve                        = 'nistP256'
+                                        DefaultHashAlgorithm                        = 'SHA256'
+                                        DefaultRsaSignaturePadding                  = 'Pkcs1'
+                                        CertificateExpirationAttentionThresholdDays = 60
+                                        CertificateExpirationWarningThresholdDays   = 15
+                                        CertificateExpirationErrorThresholdDays     = 15
+                                        CertificateNotificationContacts             = [System.Net.Mail.MailAddressCollection]::new()
+                                    }
+                                    return $returnVal
+                                }
+                                Mock -CommandName Get-SPFarm -MockWith { return @{ } }
+                                Mock -CommandName Get-SPCertificateNotificationContact -MockWith {
+                                    return [System.Net.Mail.MailAddressCollection]::new()
+                                }
+                                Mock -CommandName Add-SPCertificateNotificationContact -MockWith {}
+                                Mock -CommandName Remove-SPCertificateNotificationContact -MockWith {}
+                            }
+
+                            It "Should return values from the get method" {
+                                $result = Get-TargetResource @testParams
+                                $result.CertificateNotificationContacts.Count | Should -Be 0
+                            }
+
+                            It "Should return false from the test method" {
+                                Test-TargetResource @testParams | Should -Be $false
+                            }
+
+                            It "Should update the certificate settings" {
+                                Set-TargetResource @testParams
+                                Assert-MockCalled Add-SPCertificateNotificationContact
                             }
                         }
 
