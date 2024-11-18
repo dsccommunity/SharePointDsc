@@ -517,8 +517,9 @@ try
                         else
                         {
                             # Database parameter not used, return general permissions
+                            # The Username "contoso\User2" is mocked with Upercase to test if the resource is case insenitive.
                             return @{
-                                UserName = "contoso\user1", "contoso\user2"
+                                UserName = "contoso\user1", "contoso\User2"
                             }
                         }
                     }
@@ -623,15 +624,17 @@ try
                         if ($database)
                         {
                             # Database parameter used, return database permissions
+                            # The Username "contoso\User2" is mocked with Upercase to test if the resource is case insenitive.
                             return @{
-                                UserName = "contoso\user1", "contoso\user2"
+                                UserName = "contoso\user1", "contoso\User2"
                             }
                         }
                         else
                         {
                             # Database parameter not used, return general permissions
+                            # The Username "contoso\User2" is mocked with Upercase to test if the resource is case insenitive.
                             return @{
-                                UserName = "contoso\user1", "contoso\user2"
+                                UserName = "contoso\user1", "contoso\User2"
                             }
                         }
                     }
@@ -720,8 +723,9 @@ try
                         else
                         {
                             # Database parameter not used, return general permissions
+                            # The Username "contoso\User2" is mocked with Upercase to test if the resource is case insenitive.
                             return @{
-                                UserName = "contoso\user1", "contoso\user2", "contoso\user3"
+                                UserName = "contoso\user1", "contoso\User2", "contoso\user3"
                             }
                         }
                     }
@@ -825,15 +829,17 @@ try
                         if ($database)
                         {
                             # Database parameter used, return database permissions
+                            # The Username "contoso\User2" is mocked with Upercase to test if the resource is case insenitive.
                             return @{
-                                UserName = "contoso\user1", "contoso\user2", "contoso\user3"
+                                UserName = "contoso\user1", "contoso\User2", "contoso\user3"
                             }
                         }
                         else
                         {
                             # Database parameter not used, return general permissions
+                            # The Username "contoso\User2" is mocked with Upercase to test if the resource is case insenitive.
                             return @{
-                                UserName = "contoso\user1", "contoso\user2"
+                                UserName = "contoso\user1", "contoso\User2"
                             }
                         }
                     }
@@ -964,15 +970,17 @@ try
                         if ($database)
                         {
                             # Database parameter used, return database permissions
+                            # The Username "contoso\User2" is mocked with Upercase to test if the resource is case insenitive.
                             return @{
-                                UserName = "contoso\user1", "contoso\user2"
+                                UserName = "contoso\user1", "contoso\User2"
                             }
                         }
                         else
                         {
                             # Database parameter not used, return general permissions
+                            # The Username "contoso\User2" is mocked with Upercase to test if the resource is case insenitive.
                             return @{
-                                UserName = "contoso\user1", "contoso\user2"
+                                UserName = "contoso\user1", "contoso\User2"
                             }
                         }
                     }

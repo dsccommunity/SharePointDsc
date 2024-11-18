@@ -424,7 +424,7 @@ function Set-TargetResource
             {
                 foreach ($member in $params.MembersToInclude)
                 {
-                    if (-not $shellAdmins.UserName.Contains($member))
+                    if ($shellAdmins.UserName -notcontains $member)
                     {
                         try
                         {
@@ -479,7 +479,7 @@ function Set-TargetResource
             {
                 foreach ($member in $params.MembersToExclude)
                 {
-                    if ($shellAdmins.UserName.Contains($member))
+                    if ($shellAdmins.UserName -contains $member)
                     {
                         try
                         {
@@ -651,7 +651,7 @@ function Set-TargetResource
                         {
                             foreach ($member in $database.MembersToInclude)
                             {
-                                if (-not $dbShellAdmins.UserName.Contains($member))
+                                if ($dbShellAdmins.UserName -notcontains $member)
                                 {
                                     try
                                     {
@@ -745,7 +745,7 @@ function Set-TargetResource
                         {
                             foreach ($member in $database.MembersToExclude)
                             {
-                                if ($dbShellAdmins.UserName.Contains($member))
+                                if ($dbShellAdmins.UserName -contains $member)
                                 {
                                     try
                                     {
@@ -937,7 +937,7 @@ function Set-TargetResource
                     {
                         foreach ($member in $params.MembersToInclude)
                         {
-                            if (-not $dbShellAdmins.UserName.Contains($member))
+                            if ($dbShellAdmins.UserName -notcontains $member)
                             {
                                 try
                                 {
@@ -1031,7 +1031,7 @@ function Set-TargetResource
                     {
                         foreach ($member in $params.MembersToExclude)
                         {
-                            if ($dbShellAdmins.UserName.Contains($member))
+                            if ($dbShellAdmins.UserName -contains $member)
                             {
                                 try
                                 {
@@ -1164,7 +1164,7 @@ function Test-TargetResource
 
         foreach ($member in $MembersToInclude)
         {
-            if (-not($CurrentValues.Members.Contains($member)))
+            if ($CurrentValues.Members -notcontains $member)
             {
                 $message = "$member is not a Shell Admin."
                 Write-Verbose -Message $message
@@ -1187,7 +1187,7 @@ function Test-TargetResource
         {
             foreach ($member in $MembersToExclude)
             {
-                if ($CurrentValues.Members.Contains($member))
+                if ($CurrentValues.Members -contains $member)
                 {
                     $message = "$member is a Shell Admin."
                     Write-Verbose -Message $message
@@ -1260,7 +1260,7 @@ function Test-TargetResource
 
                 foreach ($member in $MembersToInclude)
                 {
-                    if (-not($database.Members.Contains($member)))
+                    if ($database.Members -notcontains $member)
                     {
                         $message = "$member is not a Shell Admin."
                         Write-Verbose -Message $message
@@ -1282,7 +1282,7 @@ function Test-TargetResource
                 {
                     foreach ($member in $MembersToExclude)
                     {
-                        if ($database.Members.Contains($member))
+                        if ($database.Members -contains $member)
                         {
                             $message = "$member is a Shell Admin."
                             Write-Verbose -Message $message
@@ -1365,7 +1365,7 @@ function Test-TargetResource
 
                     foreach ($member in $database.MembersToInclude)
                     {
-                        if (-not($currentCDB.Members.Contains($member)))
+                        if ($currentCDB.Members -notcontains $member)
                         {
                             $message = "$member is not a Shell Admin."
                             Write-Verbose -Message $message
@@ -1388,7 +1388,7 @@ function Test-TargetResource
                     {
                         foreach ($member in $database.MembersToExclude)
                         {
-                            if ($currentCDB.Members.Contains($member))
+                            if ($currentCDB.Members -contains $member)
                             {
                                 $message = "$member is a Shell Admin."
                                 Write-Verbose -Message $message
