@@ -17,7 +17,13 @@
     'Sampler.GitHubTasks'       = 'latest'
     MarkdownLinkCheck           = 'latest'
     'DscResource.Common'        = 'latest'
-    'DscResource.Test'          = 'latest'
+    # Using Prerelease to Fix HQRM Test for SharePointDsc.Reverse: https://github.com/dsccommunity/SharePointDsc/pull/1440#issuecomment-2485466538
+    'DscResource.Test'          = @{
+        Version    = 'latest'
+        Parameters = @{
+            AllowPrerelease = $true
+        }
+    }
     'DscResource.AnalyzerRules' = 'latest'
     xDscResourceDesigner        = 'latest'
     'DscResource.DocGenerator'  = 'latest'
