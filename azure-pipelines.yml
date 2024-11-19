@@ -26,7 +26,7 @@ stages:
           vmImage: "windows-latest"
         steps:
           - pwsh: |
-              dotnet tool install --global GitVersion.Tool
+              dotnet tool install --global GitVersion.Tool --version 5.12.0
               $gitVersionObject = dotnet-gitversion | ConvertFrom-Json
               $gitVersionObject.PSObject.Properties.ForEach{
                   Write-Host -Object "Setting Task Variable '$($_.Name)' with value '$($_.Value)'."
