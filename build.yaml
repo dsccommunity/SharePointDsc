@@ -93,6 +93,8 @@ DscTest:
   ExcludeSourceFile:
     - output
     - 'SharePointDsc/Modules/SharePointDsc.Reverse/SharePointDsc.Reverse.psm1'
+    - 'SharePointDsc/Modules/SharePointDsc.Reverse/SharePointDsc.Reverse'
+    - SharePointDsc.Reverse
   ExcludeModuleFile:
     - Modules/DscResource.Common
 
