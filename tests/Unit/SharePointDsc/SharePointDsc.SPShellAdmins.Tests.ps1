@@ -459,6 +459,116 @@ try
                 }
             }
 
+            Context -Name "AllDatabases parameter is used with MembersToInclude and permissions do not match" -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance = "Yes"
+                        MembersToInclude = "contoso\user1", "contoso\user2", "contoso\sa_farm"
+                        AllDatabases     = $true
+                    }
+
+                    Mock -CommandName Get-SPShellAdmin -MockWith {
+                        if ($database)
+                        {
+                            # Database parameter used, return database permissions
+                            return @{
+                                UserName = "contoso\user3", "contoso\user4"
+                            }
+                        }
+                        else
+                        {
+                            # Database parameter not used, return general permissions
+                            return @{
+                                UserName = "contoso\user3", "contoso\user4"
+                            }
+                        }
+                    }
+
+                    Mock -CommandName Get-SPDatabase -MockWith {
+                        return @(
+                            @{
+                                Name                 = "SharePoint_Content_Contoso1"
+                                Id                   = "F9168C5E-CEB2-4faa-B6BF-329BF39FA1E4"
+                                NormalizedDataSource = 'SQL01'
+                            },
+                            @{
+                                Name                 = "SharePoint_Content_Contoso2"
+                                Id                   = "936DA01F-9ABD-4d9d-80C7-02AF85C822A8"
+                                NormalizedDataSource = 'SQL01'
+                            }
+                        )
+                    }
+                }
+
+                It "Should return null from the get method" {
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
+                }
+
+                It "Should return false from the test method" {
+                    Test-TargetResource @testParams | Should -Be $false
+                }
+
+                It "Should throw an exception in the set method" {
+                    Set-TargetResource @testParams
+                    Assert-MockCalled Add-SPShellAdmin
+                }
+            }
+
+            Context -Name "AllDatabases parameter is used with MembersToExclude and permissions do not match" -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance = "Yes"
+                        MembersToExclude = "contoso\user3", "contoso\user4"
+                        AllDatabases     = $true
+                    }
+
+                    Mock -CommandName Get-SPShellAdmin -MockWith {
+                        if ($database)
+                        {
+                            # Database parameter used, return database permissions
+                            return @{
+                                UserName = "contoso\user1", "contoso\user3", "contoso\user4"
+                            }
+                        }
+                        else
+                        {
+                            # Database parameter not used, return general permissions
+                            return @{
+                                UserName = "contoso\user2", "contoso\user3", "contoso\user4"
+                            }
+                        }
+                    }
+
+                    Mock -CommandName Get-SPDatabase -MockWith {
+                        return @(
+                            @{
+                                Name                 = "SharePoint_Content_Contoso1"
+                                Id                   = "F9168C5E-CEB2-4faa-B6BF-329BF39FA1E4"
+                                NormalizedDataSource = 'SQL01'
+                            },
+                            @{
+                                Name                 = "SharePoint_Content_Contoso2"
+                                Id                   = "936DA01F-9ABD-4d9d-80C7-02AF85C822A8"
+                                NormalizedDataSource = 'SQL01'
+                            }
+                        )
+                    }
+                }
+
+                It "Should return null from the get method" {
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
+                }
+
+                It "Should return false from the test method" {
+                    Test-TargetResource @testParams | Should -Be $false
+                }
+
+                It "Should throw an exception in the set method" {
+                    Set-TargetResource @testParams
+                    Assert-MockCalled Remove-SPShellAdmin
+                }
+            }
+
             Context -Name "Configured Members do not match the actual members - General permissions" -Fixture {
                 BeforeAll {
                     $testParams = @{
