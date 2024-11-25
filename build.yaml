@@ -92,6 +92,7 @@ DscTest:
   Tag:
   ExcludeSourceFile:
     - output
+    - Modules/SharePointDsc.Reverse/SharePointDsc.Reverse.psm1
   ExcludeModuleFile:
     - Modules/DscResource.Common
 
