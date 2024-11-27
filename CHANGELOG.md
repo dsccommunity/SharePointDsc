@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - SPShellAdmins
   - Fixed that the Member comparison was not case insensitive.
+- SPSite
+  - The Get Method failed to get an existing Site Collection on SharePoint Server
+    Subscription Edition
+
 
 ## [5.5.0] - 2024-04-22
 

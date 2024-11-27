@@ -73,16 +73,28 @@ function Get-TargetResource
         $params = $args[0]
         $site = $null
 
-        try
+        $productVersion = Get-SPDscInstalledProductVersion
+        if ($productVersion.FileMajorPart -eq 16 `
+                -and $productVersion.FileBuildPart -gt 13000)
         {
-            $centralAdminWebApp = [Microsoft.SharePoint.Administration.SPAdministrationWebApplication]::Local
-            $centralAdminSite = Get-SPSite -Identity $centralAdminWebApp.Url -ErrorAction Stop
+            # On SharePoint Subscription Edition the Microsoft.SharePoint.SPSite Constructor never gets a Site Collection when run by the LCM.
+            # Fixes 1442: https://github.com/dsccommunity/SharePointDsc/issues/1442
+            $site = Get-SPSite -Identity $params.Url -ErrorAction SilentlyContinue
+        }
+        else
+        {
+            try
+            {
+                $centralAdminWebApp = [Microsoft.SharePoint.Administration.SPAdministrationWebApplication]::Local
+                $centralAdminSite = Get-SPSite -Identity $centralAdminWebApp.Url -ErrorAction Stop
 
-            $site = New-Object "Microsoft.SharePoint.SPSite" -ArgumentList @($params.Url, $centralAdminSite.SystemAccount.UserToken)
+                $site = New-Object "Microsoft.SharePoint.SPSite" -ArgumentList @($params.Url, $centralAdminSite.SystemAccount.UserToken)
+            }
+            catch [System.Exception]
+            {
+            }
         }
-        catch [System.Exception]
-        {
-        }
+
 
         if ($null -eq $site)
         {
