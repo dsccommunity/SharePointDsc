@@ -49,7 +49,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
                 $getTypeFullName = "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
@@ -61,16 +61,16 @@ try
                 Mock -CommandName Get-SPServiceApplication -MockWith {
                     return @(
                         New-Object -TypeName "Object" |
-                        Add-Member -MemberType ScriptMethod `
-                            -Name GetType `
-                            -Value {
-                            New-Object -TypeName "Object" |
-                            Add-Member -MemberType NoteProperty `
-                                -Name FullName `
-                                -Value $getTypeFullName `
-                                -PassThru
-                        } `
-                            -PassThru -Force)
+                            Add-Member -MemberType ScriptMethod `
+                                -Name GetType `
+                                -Value {
+                                New-Object -TypeName "Object" |
+                                    Add-Member -MemberType NoteProperty `
+                                        -Name FullName `
+                                        -Value $getTypeFullName `
+                                        -PassThru
+                                } `
+                                    -PassThru -Force)
                 }
 
                 function Add-SPDscEvent
@@ -101,7 +101,7 @@ try
                 BeforeAll {
                     $testParams = @{
                         ServiceAppName = "Search Service Application"
-                        Name           = "http://site.sharepoint.com"
+                        Name           = "site.sharepoint.com"
                         RequestLimit   = 8
                         Ensure         = "Present"
                     }
@@ -135,7 +135,7 @@ try
                 BeforeAll {
                     $testParams = @{
                         ServiceAppName = "Search Service Application"
-                        Name           = "http://site.sharepoint.com"
+                        Name           = "site.sharepoint.com"
                         RequestLimit   = 8
                         Ensure         = "Present"
                     }
@@ -174,7 +174,7 @@ try
                 BeforeAll {
                     $testParams = @{
                         ServiceAppName = "Search Service Application"
-                        Name           = "http://site.sharepoint.com"
+                        Name           = "site.sharepoint.com"
                         Ensure         = "Absent"
                     }
 
@@ -211,7 +211,7 @@ try
                 BeforeAll {
                     $testParams = @{
                         ServiceAppName = "Search Service Application"
-                        Name           = "http://site.sharepoint.com"
+                        Name           = "site.sharepoint.com"
                         Ensure         = "Absent"
                     }
 
@@ -244,7 +244,7 @@ try
                 BeforeAll {
                     $testParams = @{
                         ServiceAppName = "Search Service Application"
-                        Name           = "http://site.sharepoint.com"
+                        Name           = "site.sharepoint.com"
                         Ensure         = "Absent"
                     }
 
@@ -271,7 +271,7 @@ try
                 BeforeAll {
                     $testParams = @{
                         ServiceAppName = "Search Service Application"
-                        Name           = "http://site.sharepoint.com"
+                        Name           = "site.sharepoint.com"
                         RequestLimit   = 8
                         WaitTime       = 60
                         Ensure         = "Present"
@@ -290,7 +290,7 @@ try
                 BeforeAll {
                     $testParams = @{
                         ServiceAppName = "Search Service Application"
-                        Name           = "http://site.sharepoint.com"
+                        Name           = "site.sharepoint.com"
                         WaitTime       = 300
                         Ensure         = "Present"
                     }
@@ -324,7 +324,7 @@ try
                 BeforeAll {
                     $testParams = @{
                         ServiceAppName = "Search Service Application"
-                        Name           = "http://site.sharepoint.com"
+                        Name           = "site.sharepoint.com"
                         WaitTime       = 300
                         Ensure         = "Present"
                     }
