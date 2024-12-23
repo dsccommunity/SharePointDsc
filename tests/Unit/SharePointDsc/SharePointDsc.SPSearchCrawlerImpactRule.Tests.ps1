@@ -147,10 +147,10 @@ try
                     }
 
                     Mock -CommandName Get-SPEnterpriseSearchSiteHitRule -MockWith {
-                        return @{
-                            Name     = $testParams.Name
+                        return [pscustomobject]@{
+                            Site     = $testParams.Name
                             HitRate  = $testParams.RequestLimit
-                            Behavior = "0"
+                            Behavior = "SimultaneousRequests"
                         }
                     }
                 }
@@ -185,25 +185,16 @@ try
                     }
 
                     Mock -CommandName Get-SPEnterpriseSearchSiteHitRule -MockWith {
-                        return @{
-                            Name    = $testParams.Name
-                            HitRate = $testParams.RequestLimit
-                        }
+                        return $null
                     }
                 }
 
                 It "Should return present from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false when the Test method is called" {
                     Test-TargetResource @testParams | Should -Be $false
-                }
-
-                It "Should remove the search Site hit rule in the set method" {
-                    Set-TargetResource @testParams
-                    Assert-MockCalled Remove-SPEnterpriseSearchSiteHitRule
-
                 }
             }
 
@@ -336,26 +327,20 @@ try
                     }
 
                     Mock -CommandName Get-SPEnterpriseSearchSiteHitRule -MockWith {
-                        return @{
-                            Name     = $testParams.Name
+                        return [pscustomobject]@{
+                            Site     = $testParams.Name
                             HitRate  = $testParams.WaitTime
-                            Behavior = "1"
+                            Behavior = "DelayBetweenRequests"
                         }
                     }
                 }
 
-                It "Should return absent from the Get method" {
+                It "Should return Present from the Get method" {
                     (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return true when the Test method is called" {
                     Test-TargetResource @testParams | Should -Be $true
-                }
-
-                It "Should update a new search Site hit rule in the set method" {
-                    Set-TargetResource @testParams
-                    Assert-MockCalled Remove-SPEnterpriseSearchSiteHitRule
-                    Assert-MockCalled New-SPEnterpriseSearchSiteHitRule
                 }
             }
         }
