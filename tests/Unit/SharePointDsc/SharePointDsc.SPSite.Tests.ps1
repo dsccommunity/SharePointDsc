@@ -33,7 +33,7 @@ function Invoke-TestSetup
 
     $script:testEnvironment = Initialize-TestEnvironment `
         -DSCModuleName $script:DSCModuleName `
-        -DSCResourceName $script:DSCResourceFullName `
+        -DscResourceName $script:DSCResourceFullName `
         -ResourceType 'Mof' `
         -TestType 'Unit'
 }
@@ -50,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
                 try
@@ -184,6 +184,16 @@ try
                         $ArgumentList[1] -eq "CentralAdminSystemAccountUserToken"
                     }
 
+                    # Mock Get-SPSite for SPSSE on Get-TargetResource Call
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Build -gt 13000)
+                    {
+                        Mock -CommandName Get-SPSite -MockWith {
+                            return $null
+                        } -ParameterFilter {
+                            $Identity -eq "http://site.sharepoint.com"
+                        }
+                    }
+
                     $global:SPDscGetSPSiteCalled = $false
                     Mock -CommandName Get-SPSite -MockWith {
                         if ($global:SPDscGetSPSiteCalled)
@@ -294,7 +304,7 @@ try
                     Assert-MockCalled Set-SPSite
                 }
 
-                It "Should return true from the test method" {
+                It "Should return false from the test method" {
                     Test-TargetResource @testParams | Should -Be $false
                 }
             }
