@@ -60,7 +60,7 @@ function Get-TargetResource
         }
         else
         {
-            $crawlerImpactRule = Get-SPEnterpriseSearchSiteHitRule -Identity $params.Name -SearchService $params.ServiceAppName
+            $crawlerImpactRule = Get-SPEnterpriseSearchSiteHitRule -SearchService $params.ServiceAppName | Where-Object -FilterScript { $_.Site -eq $params.Name }
             if ($null -eq $crawlerImpactRule)
             {
                 return $nullReturn
