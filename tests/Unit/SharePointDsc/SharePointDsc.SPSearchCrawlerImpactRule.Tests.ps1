@@ -32,7 +32,7 @@ function Invoke-TestSetup
 
     $script:testEnvironment = Initialize-TestEnvironment `
         -DSCModuleName $script:DSCModuleName `
-        -DSCResourceName $script:DSCResourceFullName `
+        -DscResourceName $script:DSCResourceFullName `
         -ResourceType 'Mof' `
         -TestType 'Unit'
 }
@@ -150,12 +150,12 @@ try
                         return [pscustomobject]@{
                             Site     = $testParams.Name
                             HitRate  = $testParams.RequestLimit
-                            Behavior = "SimultaneousRequests"
+                            Behavior = 0
                         }
                     }
                 }
 
-                It "Should return absent from the Get method" {
+                It "Should return Present from the Get method" {
                     (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
@@ -193,8 +193,8 @@ try
                     (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
-                It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should -Be $false
+                It "Should return true when the Test method is called" {
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -330,7 +330,7 @@ try
                         return [pscustomobject]@{
                             Site     = $testParams.Name
                             HitRate  = $testParams.WaitTime
-                            Behavior = "DelayBetweenRequests"
+                            Behavior = 1
                         }
                     }
                 }
