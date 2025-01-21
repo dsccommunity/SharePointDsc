@@ -50,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Initialize tests
                 try
@@ -187,25 +187,38 @@ try
                     # Mock Get-SPSite for SPSSE on Get-TargetResource Call
                     if ($Global:SPDscHelper.CurrentStubBuildNumber.Build -gt 13000)
                     {
+                        $global:SPDscGetSPSiteCalled = 0
                         Mock -CommandName Get-SPSite -MockWith {
-                            return $null
+                            if ($global:SPDscGetSPSiteCalled -lt 2)
+                            {
+                                ++$global:SPDscGetSPSiteCalled
+                                return $null
+                            }
+                            else
+                            {
+                                return ""
+                            }
                         } -ParameterFilter {
                             $Identity -eq "http://site.sharepoint.com"
                         }
                     }
-
-                    $global:SPDscGetSPSiteCalled = $false
-                    Mock -CommandName Get-SPSite -MockWith {
-                        if ($global:SPDscGetSPSiteCalled)
-                        {
-                            return ""
-                        }
-                        else
-                        {
-                            $global:SPDscGetSPSiteCalled = $true
-                            return $null
+                    else
+                    {
+                        $global:SPDscGetSPSiteCalled = $false
+                        Mock -CommandName Get-SPSite -MockWith {
+                            if ($global:SPDscGetSPSiteCalled)
+                            {
+                                return ""
+                            }
+                            else
+                            {
+                                $global:SPDscGetSPSiteCalled = $true
+                                return $null
+                            }
                         }
                     }
+
+
 
                     Mock -CommandName Start-Process -MockWith {
                         return @{
