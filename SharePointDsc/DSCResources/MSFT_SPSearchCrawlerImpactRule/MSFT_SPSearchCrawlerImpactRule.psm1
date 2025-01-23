@@ -157,7 +157,7 @@ function Set-TargetResource
                 $hitRate = $params.RequestLimit
             }
 
-            $serviceApp = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName
+            $serviceApp = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName | Select-Object -ExpandProperty DisplayName
             if ($null -eq $serviceApp)
             {
                 $message = "The Search Service Application does not exist."
@@ -193,7 +193,7 @@ function Set-TargetResource
                 $behavior = "0"
                 $hitRate = $params.RequestLimit
             }
-            $serviceApp = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName
+            $serviceApp = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName | Select-Object -ExpandProperty DisplayName
             if ($null -eq $serviceApp)
             {
                 $message = "The Search Service Application does not exist."
@@ -223,7 +223,7 @@ function Set-TargetResource
             $params = $args[0]
             $eventSource = $args[1]
 
-            $serviceApp = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName
+            $serviceApp = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName | Select-Object -ExpandProperty DisplayName
             if ($null -eq $serviceApp)
             {
                 $message = "The Search Service Application does not exist."

@@ -15,8 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 - SPSearchCrawlerImpactRule
-  - Ressource threw an error if the Crawler Impact Rule did not exist when
+  - Resource threw an error if the Crawler Impact Rule did not exist when
     running the Get Method
+  - Resource threw an error on the Set-TargetResource Method because the `SPEnterpriseSearchSiteHitRule`
+    cmdlet Parameter `SearchService` does not support a Search Service Application Object.
 
 ## [5.5.0] - 2024-04-22
 
