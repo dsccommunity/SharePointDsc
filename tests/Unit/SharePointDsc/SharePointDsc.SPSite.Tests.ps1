@@ -33,7 +33,7 @@ function Invoke-TestSetup
 
     $script:testEnvironment = Initialize-TestEnvironment `
         -DSCModuleName $script:DSCModuleName `
-        -DSCResourceName $script:DSCResourceFullName `
+        -DscResourceName $script:DSCResourceFullName `
         -ResourceType 'Mof' `
         -TestType 'Unit'
 }
@@ -184,18 +184,41 @@ try
                         $ArgumentList[1] -eq "CentralAdminSystemAccountUserToken"
                     }
 
-                    $global:SPDscGetSPSiteCalled = $false
-                    Mock -CommandName Get-SPSite -MockWith {
-                        if ($global:SPDscGetSPSiteCalled)
-                        {
-                            return ""
-                        }
-                        else
-                        {
-                            $global:SPDscGetSPSiteCalled = $true
-                            return $null
+                    # Mock Get-SPSite for SPSSE on Get-TargetResource Call
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Build -gt 13000)
+                    {
+                        $global:SPDscGetSPSiteCalledCount = 0
+                        Mock -CommandName Get-SPSite -MockWith {
+                            if ($global:SPDscGetSPSiteCalledCount -lt 4)
+                            {
+                                ++$global:SPDscGetSPSiteCalledCount
+                                return $null
+                            }
+                            else
+                            {
+                                return ""
+                            }
+                        } -ParameterFilter {
+                            $Identity -eq "http://site.sharepoint.com"
                         }
                     }
+                    else
+                    {
+                        $global:SPDscGetSPSiteCalled = $false
+                        Mock -CommandName Get-SPSite -MockWith {
+                            if ($global:SPDscGetSPSiteCalled)
+                            {
+                                return ""
+                            }
+                            else
+                            {
+                                $global:SPDscGetSPSiteCalled = $true
+                                return $null
+                            }
+                        }
+                    }
+
+
 
                     Mock -CommandName Start-Process -MockWith {
                         return @{
@@ -294,7 +317,7 @@ try
                     Assert-MockCalled Set-SPSite
                 }
 
-                It "Should return true from the test method" {
+                It "Should return false from the test method" {
                     Test-TargetResource @testParams | Should -Be $false
                 }
             }
@@ -349,8 +372,9 @@ try
             Context -Name "The site exists, but doesn't have default groups configured" -Fixture {
                 BeforeAll {
                     $testParams = @{
-                        Url        = "http://site.sharepoint.com"
-                        OwnerAlias = "DEMO\User"
+                        Url                 = "http://site.sharepoint.com"
+                        OwnerAlias          = "DEMO\User"
+                        CreateDefaultGroups = $true
                     }
 
                     Mock -CommandName Get-SPSite -MockWith {
@@ -375,7 +399,7 @@ try
                     (Get-TargetResource @testParams).CreateDefaultGroups | Should -Be $false
                 }
 
-                It "Should return true from the test method" {
+                It "Should return false from the test method" {
                     Test-TargetResource @testParams | Should -Be $false
                 }
 
