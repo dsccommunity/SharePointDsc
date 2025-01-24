@@ -5,6 +5,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- SPSearchCrawlerImpactRule
+  - Resource threw an error on the Set-TargetResource Function because the `SPEnterpriseSearchSiteHitRule`
+    cmdlet Parameter `SearchService` does not support a Search Service Application Object.
+
 ## [5.6.0] - 2025-01-23
 
 ### Fixed
@@ -14,13 +20,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SPSite
   - The Get Method failed to get an existing Site Collection on SharePoint Server
     Subscription Edition
-
-
 - SPSearchCrawlerImpactRule
   - Resource threw an error if the Crawler Impact Rule did not exist when
     running the Get Method
-  - Resource threw an error on the Set-TargetResource Function because the `SPEnterpriseSearchSiteHitRule`
-    cmdlet Parameter `SearchService` does not support a Search Service Application Object.
+
 
 ## [5.5.0] - 2024-04-22
 
