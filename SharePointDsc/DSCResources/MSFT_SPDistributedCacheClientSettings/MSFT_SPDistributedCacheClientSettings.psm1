@@ -964,6 +964,108 @@ function Set-TargetResource
         -ScriptBlock {
         $params = $args[0]
 
+        #region Mapping Table
+        $parameterToContainerTypeMapping = @{
+            # DistributedLogonTokenCache
+            DLTCMaxConnectionsToServer    = 'DistributedLogonTokenCache'
+            DLTCRequestTimeout            = 'DistributedLogonTokenCache'
+            DLTCChannelOpenTimeOut        = 'DistributedLogonTokenCache'
+            # DistributedViewStateCache
+            DVSCMaxConnectionsToServer    = 'DistributedViewStateCache'
+            DVSCRequestTimeout            = 'DistributedViewStateCache'
+            DVSCChannelOpenTimeOut        = 'DistributedViewStateCache'
+            # DistributedAccessCache
+            DACMaxConnectionsToServer     = 'DistributedAccessCache'
+            DACRequestTimeout             = 'DistributedAccessCache'
+            DACChannelOpenTimeOut         = 'DistributedAccessCache'
+            # DistributedActivityFeedCache
+            DAFMaxConnectionsToServer     = 'DistributedActivityFeedCache'
+            DAFRequestTimeout             = 'DistributedActivityFeedCache'
+            DAFChannelOpenTimeOut         = 'DistributedActivityFeedCache'
+            # DistributedActivityFeedLMTCache
+            DAFCMaxConnectionsToServer    = 'DistributedActivityFeedLMTCache'
+            DAFCRequestTimeout            = 'DistributedActivityFeedLMTCache'
+            DAFCChannelOpenTimeOut        = 'DistributedActivityFeedLMTCache'
+            # DistributedBouncerCache
+            DBCMaxConnectionsToServer     = 'DistributedBouncerCache'
+            DBCRequestTimeout             = 'DistributedBouncerCache'
+            DBCChannelOpenTimeOut         = 'DistributedBouncerCache'
+            # DistributedDefaultCache
+            DDCMaxConnectionsToServer     = 'DistributedDefaultCache'
+            DDCRequestTimeout             = 'DistributedDefaultCache'
+            DDCChannelOpenTimeOut         = 'DistributedDefaultCache'
+            # DistributedSearchCache
+            DSCMaxConnectionsToServer     = 'DistributedSearchCache'
+            DSCRequestTimeout             = 'DistributedSearchCache'
+            DSCChannelOpenTimeOut         = 'DistributedSearchCache'
+            # DistributedSecurityTrimmingCache
+            DTCMaxConnectionsToServer     = 'DistributedSecurityTrimmingCache'
+            DTCRequestTimeout             = 'DistributedSecurityTrimmingCache'
+            DTCChannelOpenTimeOut         = 'DistributedSecurityTrimmingCache'
+            # DistributedServerToAppServerAccessTokenCache
+            DSTACMaxConnectionsToServer   = 'DistributedServerToAppServerAccessTokenCache'
+            DSTACRequestTimeout           = 'DistributedServerToAppServerAccessTokenCache'
+            DSTACChannelOpenTimeOut       = 'DistributedServerToAppServerAccessTokenCache'
+            # DistributedFileLockThrottlerCache
+            DFLTCMaxConnectionsToServer   = 'DistributedFileLockThrottlerCache'
+            DFLTCRequestTimeout           = 'DistributedFileLockThrottlerCache'
+            DFLTCChannelOpenTimeOut       = 'DistributedFileLockThrottlerCache'
+            # DistributedSharedWithUserCache
+            DSWUCMaxConnectionsToServer   = 'DistributedSharedWithUserCache'
+            DSWUCRequestTimeout           = 'DistributedSharedWithUserCache'
+            DSWUCChannelOpenTimeOut       = 'DistributedSharedWithUserCache'
+            # DistributedUnifiedGroupsCache
+            DUGCMaxConnectionsToServer    = 'DistributedUnifiedGroupsCache'
+            DUGCRequestTimeout            = 'DistributedUnifiedGroupsCache'
+            DUGCChannelOpenTimeOut        = 'DistributedUnifiedGroupsCache'
+            # DistributedResourceTallyCache
+            DRTCMaxConnectionsToServer    = 'DistributedResourceTallyCache'
+            DRTCRequestTimeout            = 'DistributedResourceTallyCache'
+            DRTCChannelOpenTimeOut        = 'DistributedResourceTallyCache'
+            # DistributedHealthScoreCache
+            DHSCMaxConnectionsToServer    = 'DistributedHealthScoreCache'
+            DHSCRequestTimeout            = 'DistributedHealthScoreCache'
+            DHSCChannelOpenTimeOut        = 'DistributedHealthScoreCache'
+            # DistributedDbLevelFailoverCache
+            DDBFCMaxConnectionsToServer   = 'DistributedDbLevelFailoverCache'
+            DDBFCRequestTimeout           = 'DistributedDbLevelFailoverCache'
+            DDBFCChannelOpenTimeOut       = 'DistributedDbLevelFailoverCache'
+            # DistributedEdgeHeaderCache
+            DEHCMaxConnectionsToServer    = 'DistributedEdgeHeaderCache'
+            DEHCRequestTimeout            = 'DistributedEdgeHeaderCache'
+            DEHCChannelOpenTimeOut        = 'DistributedEdgeHeaderCache'
+            # DistributedFileStorePerformanceTraceCache
+            DFSPTCMaxConnectionsToServer  = 'DistributedFileStorePerformanceTraceCache'
+            DFSPTCRequestTimeout          = 'DistributedFileStorePerformanceTraceCache'
+            DFSPTCChannelOpenTimeOut      = 'DistributedFileStorePerformanceTraceCache'
+            # DistributedSPAbsBlobCache
+            DSPABSCMaxConnectionsToServer = 'DistributedSPAbsBlobCache'
+            MaxConnectionsToServer        = 'DistributedSPAbsBlobCache'
+            DSPABSCChannelOpenTimeOut     = 'DistributedSPAbsBlobCache'
+            # DistributedSPCertificateValidatorCache
+            DSPCVCMaxConnectionsToServer  = 'DistributedSPCertificateValidatorCache'
+            DSPCVCRequestTimeout          = 'DistributedSPCertificateValidatorCache'
+            DSPCVCChannelOpenTimeOut      = 'DistributedSPCertificateValidatorCache'
+            # DistributedSPOAuthTokenCache
+            DSPOATCMaxConnectionsToServer = 'DistributedSPOAuthTokenCache'
+            DSPOATCRequestTimeout         = 'DistributedSPOAuthTokenCache'
+            DSPOATCChannelOpenTimeOut     = 'DistributedSPOAuthTokenCache'
+            # DistributedStopgapCache
+            DSGCMaxConnectionsToServer    = 'DistributedStopgapCache'
+            DSGCRequestTimeout            = 'DistributedStopgapCache'
+            DSGCChannelOpenTimeOut        = 'DistributedStopgapCache'
+            # DistributedUnifiedAppsCache
+            DUACMaxConnectionsToServer    = 'DistributedUnifiedAppsCache'
+            DUACRequestTimeout            = 'DistributedUnifiedAppsCache'
+            DUACChannelOpenTimeOut        = 'DistributedUnifiedAppsCache'
+            # DistributedUnifiedAuditCache
+            DUAuCMaxConnectionsToServer   = 'DistributedUnifiedAuditCache'
+            DUAuCRequestTimeout           = 'DistributedUnifiedAuditCache'
+            DUAuCChannelOpenTimeOut       = 'DistributedUnifiedAuditCache'
+        }
+        #endregion
+
+
         #DistributedLogonTokenCache
         $DLTC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedLogonTokenCache"
 
