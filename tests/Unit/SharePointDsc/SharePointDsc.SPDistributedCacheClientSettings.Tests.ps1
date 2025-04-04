@@ -33,7 +33,7 @@ function Invoke-TestSetup
 
     $script:testEnvironment = Initialize-TestEnvironment `
         -DSCModuleName $script:DSCModuleName `
-        -DSCResourceName $script:DSCResourceFullName `
+        -DscResourceName $script:DSCResourceFullName `
         -ResourceType 'Mof' `
         -TestType 'Unit'
 }
@@ -76,17 +76,147 @@ try
                         $EventID
                     )
                 }
+
+                # Return Class for Mocked Get-SPDistributedCacheClientSetting
+                class SPDistributedCacheClientSettings
+                {
+                    [int]$MaxConnectionsToServer
+                    [int]$RequestTimeout
+                    [int]$ChannelOpenTimeOut
+                }
+
+                # Mock Enum for Microsoft.SharePoint.DistributedCaching.Utilities.SPDistributedCacheContainerType
+                # SharePoint 2013
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
+                {
+                    Add-Type -Language CSharp -TypeDefinition @"
+namespace Microsoft.SharePoint.DistributedCaching.Utilities
+{
+    public enum SPDistributedCacheContainerType {
+        DistributedLogonTokenCache,
+        DistributedViewStateCache,
+        DistributedAccessCache,
+        DistributedActivityFeedCache,
+        DistributedActivityFeedLMTCache,
+        DistributedBouncerCache,
+        DistributedDefaultCache,
+        DistributedSearchCache,
+        DistributedSecurityTrimmingCache,
+        DistributedServerToAppServerAccessTokenCache
+    }
+}
+"@
+                }
+                # SharePoint 2016
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16 -and
+                    $Global:SPDscHelper.CurrentStubBuildNumber.Build -lt 10000)
+                {
+                    Add-Type -Language CSharp -TypeDefinition @"
+namespace Microsoft.SharePoint.DistributedCaching.Utilities
+{
+    public enum SPDistributedCacheContainerType {
+        DistributedDefaultCache,
+        DistributedAccessCache,
+        DistributedActivityFeedCache,
+        DistributedBouncerCache,
+        DistributedLogonTokenCache,
+        DistributedServerToAppServerAccessTokenCache,
+        DistributedSearchCache,
+        DistributedSecurityTrimmingCache,
+        DistributedActivityFeedLMTCache,
+        DistributedViewStateCache,
+        DistributedSharedWithUserCache,
+        DistributedUnifiedGroupsCache,
+        DistributedFileLockThrottlerCache,
+        DistributedResourceTallyCache,
+        DistributedHealthScoreCache,
+        DistributedClientSideAppUpdateTimeCache
+    }
+}
+"@
+                }
+                # SharePoint Server 2019
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16 -and
+                    $Global:SPDscHelper.CurrentStubBuildNumber.Build -gt 10000 -and
+                    $Global:SPDscHelper.CurrentStubBuildNumber.Build -lt 13000)
+                {
+                    Add-Type -Language CSharp -TypeDefinition @"
+namespace Microsoft.SharePoint.DistributedCaching.Utilities
+{
+    public enum SPDistributedCacheContainerType {
+        DistributedDefaultCache,
+        DistributedAccessCache,
+        DistributedActivityFeedCache,
+        DistributedBouncerCache,
+        DistributedLogonTokenCache,
+        DistributedServerToAppServerAccessTokenCache,
+        DistributedSearchCache,
+        DistributedSecurityTrimmingCache,
+        DistributedActivityFeedLMTCache,
+        DistributedViewStateCache,
+        DistributedSharedWithUserCache,
+        DistributedUnifiedGroupsCache,
+        DistributedFileLockThrottlerCache,
+        DistributedResourceTallyCache,
+        DistributedHealthScoreCache,
+        DistributedStopgapCache,
+        DistributedEdgeHeaderCache,
+        DistributedUnifiedAuditCache,
+        DistributedFileStorePerformanceTraceCache,
+        DistributedDbLevelFailoverCache,
+        DistributedUnifiedAppsCache,
+        DistributedSPOAuthTokenCache,
+        DistributedSPCertificateValidatorCache
+    }
+}
+"@
+                }
+                # SharePoint Server Subscription Edition
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16 -and
+                    $Global:SPDscHelper.CurrentStubBuildNumber.Build -gt 13000)
+                {
+                    Add-Type -Language CSharp -TypeDefinition @"
+namespace Microsoft.SharePoint.DistributedCaching.Utilities
+{
+    public enum SPDistributedCacheContainerType {
+        DistributedDefaultCache,
+        DistributedAccessCache,
+        DistributedActivityFeedCache,
+        DistributedBouncerCache,
+        DistributedLogonTokenCache,
+        DistributedServerToAppServerAccessTokenCache,
+        DistributedSearchCache,
+        DistributedSecurityTrimmingCache,
+        DistributedActivityFeedLMTCache,
+        DistributedViewStateCache,
+        DistributedSharedWithUserCache,
+        DistributedUnifiedGroupsCache,
+        DistributedFileLockThrottlerCache,
+        DistributedResourceTallyCache,
+        DistributedHealthScoreCache,
+        DistributedStopgapCache,
+        DistributedEdgeHeaderCache,
+        DistributedUnifiedAuditCache,
+        DistributedFileStorePerformanceTraceCache,
+        DistributedDbLevelFailoverCache,
+        DistributedUnifiedAppsCache,
+        DistributedSPOAuthTokenCache,
+        DistributedSPCertificateValidatorCache
+    }
+}
+"@
+                }
             }
 
             # Test contexts
             Context -Name "Some Distributed Cache Client Settings are Not Properly Configured" -Fixture {
                 BeforeAll {
                     Mock -CommandName Get-SPDistributedCacheClientSetting -MockWith {
-                        return @{
-                            MaxConnectionsToServer = 5
-                            RequestTimeout         = 2000
-                            ChannelOpenTimeOut     = 2000
-                        }
+                        $cacheSettings = [SPDistributedCacheClientSettings]::new()
+                        $cacheSettings.MaxConnectionsToServer = 5
+                        $cacheSettings.RequestTimeout = 2000
+                        $cacheSettings.ChannelOpenTimeOut = 2000
+                        return $cacheSettings
                     }
 
                     $testParams = @{
@@ -192,11 +322,11 @@ try
             Context -Name "All Distributed Cache Client Settings are properly Configured" -Fixture {
                 BeforeAll {
                     Mock -CommandName Get-SPDistributedCacheClientSetting -MockWith {
-                        return @{
-                            MaxConnectionsToServer = 1
-                            RequestTimeout         = 3000
-                            ChannelOpenTimeOut     = 3000
-                        }
+                        $cacheSettings = [SPDistributedCacheClientSettings]::new()
+                        $cacheSettings.MaxConnectionsToServer = 1
+                        $cacheSettings.RequestTimeout = 3000
+                        $cacheSettings.ChannelOpenTimeOut = 3000
+                        return $cacheSettings
                     }
 
                     $testParams = @{
@@ -299,11 +429,11 @@ try
                 Context -Name "SP2016+ parameters specified with SP2013" -Fixture {
                     BeforeAll {
                         Mock -CommandName Get-SPDistributedCacheClientSetting -MockWith {
-                            return @{
-                                MaxConnectionsToServer = 1
-                                RequestTimeout         = 3000
-                                ChannelOpenTimeOut     = 3000
-                            }
+                            $cacheSettings = [SPDistributedCacheClientSettings]::new()
+                            $cacheSettings.MaxConnectionsToServer = 1
+                            $cacheSettings.RequestTimeout = 3000
+                            $cacheSettings.ChannelOpenTimeOut = 3000
+                            return $cacheSettings
                         }
                         $testParams = @{
                             IsSingleInstance            = "Yes"
@@ -335,11 +465,11 @@ try
                 Context -Name "SP2019+ parameters specified with older versions" -Fixture {
                     BeforeAll {
                         Mock -CommandName Get-SPDistributedCacheClientSetting -MockWith {
-                            return @{
-                                MaxConnectionsToServer = 1
-                                RequestTimeout         = 3000
-                                ChannelOpenTimeOut     = 3000
-                            }
+                            $cacheSettings = [SPDistributedCacheClientSettings]::new()
+                            $cacheSettings.MaxConnectionsToServer = 1
+                            $cacheSettings.RequestTimeout = 3000
+                            $cacheSettings.ChannelOpenTimeOut = 3000
+                            return $cacheSettings
                         }
                         $testParams = @{
                             IsSingleInstance            = "Yes"
