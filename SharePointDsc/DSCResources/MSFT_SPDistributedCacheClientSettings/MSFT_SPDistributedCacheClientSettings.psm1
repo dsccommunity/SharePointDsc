@@ -1066,7 +1066,7 @@ function Set-TargetResource
         #endregion
 
         # Get available Cache Container Types
-        $parameterToContainerTypeMapping = [Enum]::GetNames([Microsoft.SharePoint.DistributedCaching.Utilities.SPDistributedCacheContainerType])
+        $containerTypes = [Enum]::GetNames([Microsoft.SharePoint.DistributedCaching.Utilities.SPDistributedCacheContainerType])
 
         foreach ($parameter in $parameterToContainerTypeMapping.Keys)
         {
