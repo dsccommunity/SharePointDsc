@@ -8,23 +8,24 @@ class MSFT_SPClaimTypeMapping
 };
 
 
-[ClassVersion("1.2.0.0"), FriendlyName("SPTrustedIdentityTokenIssuer")]
+[ClassVersion("1.3.0.0"), FriendlyName("SPTrustedIdentityTokenIssuer")]
 class MSFT_SPTrustedIdentityTokenIssuer : OMI_BaseResource
 {
     [Key, Description("Name of the SPTrustedIdentityTokenIssuer")] String Name;
     [Required, Description("Description of the SPTrustedIdentityTokenIssuer")] String Description;
-    [Write, Description("Default Realm that is passed to identity provider")] String Realm;
-    [Write, Description("URL of the identity provider where user is redirected to for authentication")] String SignInUrl;
-    [Write, Description("Required for OIDC trust: Specify the identity of the issuer")] String RegisteredIssuerName;
-    [Write, Description("Required for OIDC trust: specify the sign-in URL of the issuer")] String AuthorizationEndPointUri;
-    [Write, Description("Required for OIDC trust: specify the client identifier of the issuer")] String DefaultClientIdentifier;
-    [Write, Description("Required for OIDC trust: specify the sign-out URL of the issuer")] String SignOutUrl;
     [Required, Description("Identity claim type that uniquely identifies the user")] String IdentifierClaim;
     [Required, Description("Array of MSFT_SPClaimTypeMapping to use with cmdlet New-SPClaimTypeMapping"), EmbeddedInstance("MSFT_SPClaimTypeMapping")] String ClaimsMappings[];
+    [Write, Description("Uri of the metadata endpoint of the identity provider")] String MetadataEndPoint;
     [Write, Description("Specify the thumbprint of the signing certificate, which must be located in certificate store LocalMachine\\My")] String SigningCertificateThumbprint;
     [Write, Description("Specify the file path to the signing certificate if it is not stored in the local certificate store already")] String SigningCertificateFilePath;
+    [Write, Description("Specify the identity of the issuer")] String RegisteredIssuerName;
+    [Write, Description("Specific to SAML: Default Realm that is passed to identity provider")] String Realm;
+    [Write, Description("Specific to SAML: URL of the identity provider where user is redirected to for authentication")] String SignInUrl;
+    [Write, Description("Specific to SAML: Sign-out URL")] String ProviderSignOutUri;
+    [Write, Description("Specific to SAML: WReply parameter allows SharePoint to specify the return URL to the 3rd party STS upon successful authentication")] Boolean UseWReplyParameter;
+    [Write, Description("Specific to OIDC: specify the client identifier of the issuer")] String DefaultClientIdentifier;
+    [Write, Description("Specific to OIDC: specify the sign-in URL of the issuer")] String AuthorizationEndPointUri;
+    [Write, Description("Specific to OIDC: specify the sign-out URL of the issuer")] String SignOutUrl;
     [Write, Description("Name of a claims provider to set with this SPTrustedIdentityTokenIssuer")] String ClaimProviderName;
-    [Write, Description("Sign-out URL")] String ProviderSignOutUri;
-    [Write, Description("WReply parameter allows SharePoint to specify the return URL to the 3rd party STS upon successful authentication")] Boolean UseWReplyParameter;
     [Write, Description("Present if the SPTrustedIdentityTokenIssuer should be created, or Absent if it should be removed"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
 };
