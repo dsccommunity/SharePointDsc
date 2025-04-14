@@ -278,12 +278,7 @@ function Set-TargetResource
                 throw $message
             }
 
-            $isOidcProtocol = $false
-            if ($false -eq $PSBoundParameters.ContainsKey("DefaultClientIdentifier"))
-            {
-                $isOidcProtocol = $true
-            }
-
+            $isOidcProtocol = $PSBoundParameters.ContainsKey("DefaultClientIdentifier")
             if ($true -eq $isOidcProtocol)
             {
                 # OIDC protocol
@@ -406,7 +401,7 @@ function Set-TargetResource
                 $runParams.Add("Name", $params.Name)
                 $runParams.Add("Description", $params.Description)
 
-                $logMessage = "Creating SPTrustedIdentityTokenIssuer '$Name' "
+                $logMessage = "Creating SPTrustedIdentityTokenIssuer '$($params.Name)' "
                 $isOidcProtocol = $false
                 if ($false -eq [String]::IsNullOrWhiteSpace($params.DefaultClientIdentifier))
                 {
@@ -585,11 +580,11 @@ function Set-TargetResource
     }
     else
     {
-        Write-Verbose "Removing SPTrustedIdentityTokenIssuer '$Name'"
         $null = Invoke-SPDscCommand -Arguments $PSBoundParameters `
             -ScriptBlock {
             $params = $args[0]
             $Name = $params.Name
+            Write-Verbose "Removing SPTrustedIdentityTokenIssuer '$Name'"
             # SPTrustedIdentityTokenIssuer must be removed from each zone of each web app before
             # it can be deleted
             Get-SPWebApplication | ForEach-Object -Process {
@@ -743,12 +738,7 @@ function Test-TargetResource
         throw $message
     }
 
-    $isOidcProtocol = $false
-    if ($false -eq $PSBoundParameters.ContainsKey("DefaultClientIdentifier"))
-    {
-        $isOidcProtocol = $true
-    }
-
+    $isOidcProtocol = $PSBoundParameters.ContainsKey("DefaultClientIdentifier")
     if ($true -eq $isOidcProtocol)
     {
         # OIDC protocol
