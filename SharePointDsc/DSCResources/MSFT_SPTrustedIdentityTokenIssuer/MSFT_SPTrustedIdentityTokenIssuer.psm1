@@ -1,5 +1,4 @@
-function Get-TargetResource
-{
+function Get-TargetResource {
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
     param
@@ -89,18 +88,15 @@ function Get-TargetResource
         $claimsMappings = @()
         $spTrust = Get-SPTrustedIdentityTokenIssuer -Identity $params.Name `
             -ErrorAction SilentlyContinue
-        if ($spTrust)
-        {
+        if ($spTrust) {
             $description = $spTrust.Description
-            if ($null -ne $trust.MetadataEndPoint)
-            {
+            if ($null -ne $trust.MetadataEndPoint) {
                 $metadataEndpoint = $spTrust.MetadataEndPoint.ToString()
             }
             $realm = $spTrust.DefaultProviderRealm
             $signInUrl = $spTrust.ProviderUri.OriginalString
             $registeredIssuerName = $spTrust.RegisteredIssuerName
-            if ($false -eq [String]::IsNullOrWhiteSpace($spTrust.AuthorizationEndPointUri))
-            {
+            if ($false -eq [String]::IsNullOrWhiteSpace($spTrust.AuthorizationEndPointUri)) {
                 $authorizationEndPointUri = $spTrust.AuthorizationEndPointUri.ToString()
             }
             $defaultClientIdentifier = $spTrust.DefaultClientIdentifier
@@ -109,8 +105,7 @@ function Get-TargetResource
             $SigningCertificateThumbprint = $spTrust.SigningCertificate.Thumbprint
             $currentState = "Present"
             $claimProviderName = $sptrust.ClaimProviderName
-            if ($false -eq [String]::IsNullOrWhiteSpace($spTrust.ProviderSignOutUri))
-            {
+            if ($false -eq [String]::IsNullOrWhiteSpace($spTrust.ProviderSignOutUri)) {
                 $providerSignOutUri = $sptrust.ProviderSignOutUri.OriginalString
             }
             $useWReplyParameter = $sptrust.UseWReplyParameter
@@ -123,8 +118,7 @@ function Get-TargetResource
                 }
             }
         }
-        else
-        {
+        else {
             $description = ""
             $metadataEndpoint = ""
             $realm = ""
@@ -164,8 +158,7 @@ function Get-TargetResource
     return $result
 }
 
-function Set-TargetResource
-{
+function Set-TargetResource {
     [CmdletBinding()]
     param
     (
@@ -249,14 +242,11 @@ function Set-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    if ($Ensure -eq "Present")
-    {
-        if ($CurrentValues.Ensure -eq "Absent")
-        {
+    if ($Ensure -eq "Present") {
+        if ($CurrentValues.Ensure -eq "Absent") {
             # Ensure that at least one parameter is specified between Realm (SAML trust) or DefaultClientIdentifier (OIDC trust)
             if ($false -eq $PSBoundParameters.ContainsKey("Realm") -and
-                $false -eq $PSBoundParameters.ContainsKey("DefaultClientIdentifier"))
-            {
+                $false -eq $PSBoundParameters.ContainsKey("DefaultClientIdentifier")) {
                 $message = ("At least one of the following parameters must be specified: " + `
                         "Realm (for SAML trust), DefaultClientIdentifier (for OIDC trust).")
                 Add-SPDscEvent -Message $message `
@@ -268,8 +258,7 @@ function Set-TargetResource
 
             # Ensure that parameters Realm (SAML trust) or DefaultClientIdentifier (OIDC trust) are not both set
             if ($true -eq $PSBoundParameters.ContainsKey("Realm") -and
-                $true -eq $PSBoundParameters.ContainsKey("DefaultClientIdentifier"))
-            {
+                $true -eq $PSBoundParameters.ContainsKey("DefaultClientIdentifier")) {
                 $message = ("Parameters Realm (for SAML trust) and DefaultClientIdentifier (for OIDC trust) cannot be both set.")
                 Add-SPDscEvent -Message $message `
                     -EntryType 'Error' `
@@ -279,12 +268,10 @@ function Set-TargetResource
             }
 
             $isOidcProtocol = $PSBoundParameters.ContainsKey("DefaultClientIdentifier")
-            if ($true -eq $isOidcProtocol)
-            {
+            if ($true -eq $isOidcProtocol) {
                 # OIDC protocol
                 $productVersion = Get-SPDscInstalledProductVersion
-                if ($productVersion.FileMajorPart -ne 16 -or $productVersion.FileBuildPart -le 13000)
-                {
+                if ($productVersion.FileMajorPart -ne 16 -or $productVersion.FileBuildPart -le 13000) {
                     $message = ("OIDC protocol can only be used with SharePoint Server Subscription Edition.")
                     Add-SPDscEvent -Message $message `
                         -EntryType 'Error' `
@@ -293,11 +280,9 @@ function Set-TargetResource
                     throw $message
                 }
 
-                if ($false -eq $PSBoundParameters.ContainsKey("MetadataEndPoint"))
-                {
+                if ($false -eq $PSBoundParameters.ContainsKey("MetadataEndPoint")) {
                     if ($true -eq $PSBoundParameters.ContainsKey("SigningCertificateThumbprint") -and
-                        $true -eq $PSBoundParameters.ContainsKey("SigningCertificateFilePath"))
-                    {
+                        $true -eq $PSBoundParameters.ContainsKey("SigningCertificateFilePath")) {
                         $message = ("Cannot use both parameters SigningCertificateThumbprint and SigningCertificateFilePath at the same time.")
                         Add-SPDscEvent -Message $message `
                             -EntryType 'Error' `
@@ -307,8 +292,7 @@ function Set-TargetResource
                     }
 
                     if ($false -eq $PSBoundParameters.ContainsKey("SigningCertificateThumbprint") -and
-                        $false -eq $PSBoundParameters.ContainsKey("SigningCertificateFilePath"))
-                    {
+                        $false -eq $PSBoundParameters.ContainsKey("SigningCertificateFilePath")) {
                         $message = ("At least one of the following parameters must be specified: " + `
                                 "SigningCertificateThumbprint, SigningCertificateFilePath.")
                         Add-SPDscEvent -Message $message `
@@ -323,8 +307,7 @@ function Set-TargetResource
                     if ($true -eq $PSBoundParameters.ContainsKey("DefaultClientIdentifier") -and (
                             $false -eq $PSBoundParameters.ContainsKey("AuthorizationEndPointUri") -or
                             $false -eq $PSBoundParameters.ContainsKey("RegisteredIssuerName") -or
-                            $false -eq $PSBoundParameters.ContainsKey("SignOutUrl") ))
-                    {
+                            $false -eq $PSBoundParameters.ContainsKey("SignOutUrl") )) {
                         $message = ("If parameter DefaultClientIdentifier is set, then either parameter MetadataEndPoint must also be set, or the following parameters: " + `
                                 "AuthorizationEndPointUri, RegisteredIssuerName, DefaultClientIdentifier and SignOutUrl.")
                         Add-SPDscEvent -Message $message `
@@ -334,14 +317,12 @@ function Set-TargetResource
                         throw $message
                     }
                 }
-                else
-                {
+                else {
                     # Parameter MetadataEndPoint is set: Ensure that parameters fetched from the metadata endpoint are not set
                     if ($true -eq $PSBoundParameters.ContainsKey("RegisteredIssuerName") -or
                         $true -eq $PSBoundParameters.ContainsKey("AuthorizationEndPointUri") -or
                         $true -eq $PSBoundParameters.ContainsKey("SignOutUrl")
-                    )
-                    {
+                    ) {
                         $message = ("None of those parameters should be specified if parameter MetadataEndPoint is set: " + `
                                 "RegisteredIssuerName, AuthorizationEndPointUri, SignOutUrl.")
                         Add-SPDscEvent -Message $message `
@@ -352,12 +333,10 @@ function Set-TargetResource
                     }
                 }
             }
-            else
-            {
+            else {
                 # SAML protocol
                 if ($true -eq $PSBoundParameters.ContainsKey("SigningCertificateThumbprint") -and
-                    $true -eq $PSBoundParameters.ContainsKey("SigningCertificateFilePath"))
-                {
+                    $true -eq $PSBoundParameters.ContainsKey("SigningCertificateFilePath")) {
                     $message = ("Cannot use both parameters SigningCertificateThumbprint and SigningCertificateFilePath at the same time.")
                     Add-SPDscEvent -Message $message `
                         -EntryType 'Error' `
@@ -367,8 +346,7 @@ function Set-TargetResource
                 }
 
                 if ($false -eq $PSBoundParameters.ContainsKey("SigningCertificateThumbprint") -and
-                    $false -eq $PSBoundParameters.ContainsKey("SigningCertificateFilePath"))
-                {
+                    $false -eq $PSBoundParameters.ContainsKey("SigningCertificateFilePath")) {
                     $message = ("At least one of the following parameters must be specified: " + `
                             "SigningCertificateThumbprint, SigningCertificateFilePath.")
                     Add-SPDscEvent -Message $message `
@@ -380,8 +358,7 @@ function Set-TargetResource
 
                 # SAML trust: If parameter Realm is set, then parameter SignInUrl is required
                 if ($true -eq $PSBoundParameters.ContainsKey("Realm") -and
-                    $false -eq $PSBoundParameters.ContainsKey("SignInUrl"))
-                {
+                    $false -eq $PSBoundParameters.ContainsKey("SignInUrl")) {
                     $message = ("Parameter Realm was set but SignInUrl is not set. Parameter SignInUrl required when Realm is set.")
                     Add-SPDscEvent -Message $message `
                         -EntryType 'Error' `
@@ -403,27 +380,23 @@ function Set-TargetResource
 
                 $logMessage = "Creating SPTrustedIdentityTokenIssuer '$($params.Name)' "
                 $isOidcProtocol = $false
-                if ($false -eq [String]::IsNullOrWhiteSpace($params.DefaultClientIdentifier))
-                {
+                if ($false -eq [String]::IsNullOrWhiteSpace($params.DefaultClientIdentifier)) {
                     $isOidcProtocol = $true
                     $logMessage += "for OIDC protocol "
                     $runParams.Add("DefaultClientIdentifier", $params.DefaultClientIdentifier)
 
-                    if ($params.MetadataEndPoint)
-                    {
+                    if ($params.MetadataEndPoint) {
                         $logMessage += "using metadata endpoint " + $params.MetadataEndPoint + "."
                         $runParams.Add("MetadataEndPoint", $params.MetadataEndPoint)
                     }
-                    else
-                    {
+                    else {
                         $logMessage += "using manually specified parameters."
                         $runParams.Add("RegisteredIssuerName", $params.RegisteredIssuerName)
                         $runParams.Add("AuthorizationEndPointUri", $params.AuthorizationEndPointUri)
                         $runParams.Add("SignOutUrl", $params.SignOutUrl)
                     }
                 }
-                else
-                {
+                else {
                     $logMessage += "for SAML protocol (always using manually specified parameters)."
                     $runParams.Add("Realm", $params.Realm)
                     $runParams.Add("UseWReply", $params.UseWReplyParameter)
@@ -431,16 +404,13 @@ function Set-TargetResource
                 }
 
                 # Fetching data (including the signing certificate) from the MetadataEndPoint works only for OIDC protocol
-                if (!$params.MetadataEndPoint -or $false -eq $isOidcProtocol)
-                {
+                if (!$params.MetadataEndPoint -or $false -eq $isOidcProtocol) {
                     # Get the signing certificate
-                    if ($params.SigningCertificateThumbprint)
-                    {
+                    if ($params.SigningCertificateThumbprint) {
                         Write-Verbose -Message ("Getting signing certificate with thumbprint " + `
                                 "$($params.SigningCertificateThumbprint) from the certificate store 'LocalMachine\My'")
 
-                        if ($params.SigningCertificateThumbprint -notmatch "^[A-Fa-f0-9]{40}$")
-                        {
+                        if ($params.SigningCertificateThumbprint -notmatch "^[A-Fa-f0-9]{40}$") {
                             $message = ("Parameter SigningCertificateThumbprint does not match valid format '^[A-Fa-f0-9]{40}$'.")
                             Add-SPDscEvent -Message $message `
                                 -EntryType 'Error' `
@@ -453,8 +423,7 @@ function Set-TargetResource
                             $_.Thumbprint -match $params.SigningCertificateThumbprint
                         }
 
-                        if (!$cert)
-                        {
+                        if (!$cert) {
                             $message = ("Signing certificate with thumbprint $($params.SigningCertificateThumbprint) " + `
                                     "was not found in certificate store 'LocalMachine\My'.")
                             Add-SPDscEvent -Message $message `
@@ -464,8 +433,7 @@ function Set-TargetResource
                             throw $message
                         }
 
-                        if ($cert.HasPrivateKey)
-                        {
+                        if ($cert.HasPrivateKey) {
                             $message = ("SharePoint requires that the private key of the signing certificate" + `
                                     " is not installed in the certificate store.")
                             Add-SPDscEvent -Message $message `
@@ -475,16 +443,13 @@ function Set-TargetResource
                             throw $message
                         }
                     }
-                    else
-                    {
+                    else {
                         Write-Verbose -Message "Getting signing certificate from file system path '$($params.SigningCertificateFilePath)'"
-                        try
-                        {
+                        try {
                             $cert = New-Object -TypeName "System.Security.Cryptography.X509Certificates.X509Certificate2" `
                                 -ArgumentList @($params.SigningCertificateFilePath)
                         }
-                        catch
-                        {
+                        catch {
                             $message = ("Signing certificate was not found in path '$($params.SigningCertificateFilePath)'.")
                             Add-SPDscEvent -Message $message `
                                 -EntryType 'Error' `
@@ -503,12 +468,10 @@ function Set-TargetResource
                     $spClaimTypeMappingParams.Add("IncomingClaimTypeDisplayName", $_.Name)
                     $spClaimTypeMappingParams.Add("IncomingClaimType", $_.IncomingClaimType)
 
-                    if ($null -eq $_.LocalClaimType)
-                    {
+                    if ($null -eq $_.LocalClaimType) {
                         $spClaimTypeMappingParams.Add("LocalClaimType", $_.IncomingClaimType)
                     }
-                    else
-                    {
+                    else {
                         $spClaimTypeMappingParams.Add("LocalClaimType", $_.LocalClaimType)
                     }
 
@@ -519,8 +482,7 @@ function Set-TargetResource
                 $mappings = ($claimsMappingsArray | Where-Object -FilterScript {
                         $_.InputClaimType -like $params.IdentifierClaim
                     })
-                if ($null -eq $mappings)
-                {
+                if ($null -eq $mappings) {
                     $message = ("IdentifierClaim does not match any claim type specified in ClaimsMappings.")
                     Add-SPDscEvent -Message $message `
                         -EntryType 'Error' `
@@ -534,8 +496,7 @@ function Set-TargetResource
                 Write-Verbose -Message $logMessage
                 $trust = New-SPTrustedIdentityTokenIssuer @runParams
 
-                if ($null -eq $trust)
-                {
+                if ($null -eq $trust) {
                     $message = "SharePoint failed to create the SPTrustedIdentityTokenIssuer."
                     Add-SPDscEvent -Message $message `
                         -EntryType 'Error' `
@@ -545,31 +506,25 @@ function Set-TargetResource
                 }
 
                 # Trust created: Set the parameters that cannot be set when creating the trust
-                if ($false -eq [String]::IsNullOrWhiteSpace($params.ClaimProviderName))
-                {
+                if ($false -eq [String]::IsNullOrWhiteSpace($params.ClaimProviderName)) {
                     $claimProvider = (Get-SPClaimProvider | Where-Object -FilterScript {
                             $_.DisplayName -eq $params.ClaimProviderName
                         })
-                    if ($null -ne $claimProvider)
-                    {
+                    if ($null -ne $claimProvider) {
                         $trust.ClaimProviderName = $params.ClaimProviderName
                     }
                 }
 
-                if ($false -eq $isOidcProtocol)
-                {
-                    if ($params.ProviderSignOutUri)
-                    {
+                if ($false -eq $isOidcProtocol) {
+                    if ($params.ProviderSignOutUri) {
                         $installedVersion = Get-SPDscInstalledProductVersion
                         # This property does not exist in SharePoint 2013
-                        if ($installedVersion.FileMajorPart -ne 15)
-                        {
+                        if ($installedVersion.FileMajorPart -ne 15) {
                             $trust.ProviderSignOutUri = New-Object -TypeName System.Uri ($params.ProviderSignOutUri)
                         }
                     }
 
-                    if ($params.MetadataEndPoint)
-                    {
+                    if ($params.MetadataEndPoint) {
                         $trust.MetadataEndPoint = $params.MetadataEndPoint
                     }
                 }
@@ -578,8 +533,7 @@ function Set-TargetResource
             }
         }
     }
-    else
-    {
+    else {
         $null = Invoke-SPDscCommand -Arguments $PSBoundParameters `
             -ScriptBlock {
             $params = $args[0]
@@ -597,16 +551,14 @@ function Set-TargetResource
                     $providers = Get-SPAuthenticationProvider -WebApplication $wa.Url `
                         -Zone $zone `
                         -ErrorAction SilentlyContinue
-                    if (!$providers)
-                    {
+                    if (!$providers) {
                         return
                     }
                     $trustedProviderToRemove = $providers | Where-Object -FilterScript {
                         $_ -is [Microsoft.SharePoint.Administration.SPTrustedAuthenticationProvider] `
                             -and $_.LoginProviderName -like $params.Name
                     }
-                    if ($trustedProviderToRemove)
-                    {
+                    if ($trustedProviderToRemove) {
                         Write-Verbose -Message ("Removing SPTrustedAuthenticationProvider " + `
                                 "'$Name' from web app '$webAppUrl' in zone " + `
                                 "'$zone'")
@@ -614,8 +566,7 @@ function Set-TargetResource
                         $update = $true
                     }
                 }
-                if ($update)
-                {
+                if ($update) {
                     $wa.Update()
                 }
             }
@@ -629,8 +580,7 @@ function Set-TargetResource
     }
 }
 
-function Test-TargetResource
-{
+function Test-TargetResource {
     [CmdletBinding()]
     [OutputType([Boolean])]
     param
@@ -715,8 +665,7 @@ function Test-TargetResource
 
     # Ensure that at least one parameter is specified between Realm (SAML trust) or DefaultClientIdentifier (OIDC trust)
     if ($false -eq $PSBoundParameters.ContainsKey("Realm") -and
-        $false -eq $PSBoundParameters.ContainsKey("DefaultClientIdentifier"))
-    {
+        $false -eq $PSBoundParameters.ContainsKey("DefaultClientIdentifier")) {
         $message = ("At least one of the following parameters must be specified: " + `
                 "Realm (for SAML trust), DefaultClientIdentifier (for OIDC trust).")
         Add-SPDscEvent -Message $message `
@@ -728,8 +677,7 @@ function Test-TargetResource
 
     # Ensure that parameters Realm (SAML trust) or DefaultClientIdentifier (OIDC trust) are not both set
     if ($true -eq $PSBoundParameters.ContainsKey("Realm") -and
-        $true -eq $PSBoundParameters.ContainsKey("DefaultClientIdentifier"))
-    {
+        $true -eq $PSBoundParameters.ContainsKey("DefaultClientIdentifier")) {
         $message = ("Parameters Realm (for SAML trust) and DefaultClientIdentifier (for OIDC trust) cannot be both set.")
         Add-SPDscEvent -Message $message `
             -EntryType 'Error' `
@@ -739,12 +687,10 @@ function Test-TargetResource
     }
 
     $isOidcProtocol = $PSBoundParameters.ContainsKey("DefaultClientIdentifier")
-    if ($true -eq $isOidcProtocol)
-    {
+    if ($true -eq $isOidcProtocol) {
         # OIDC protocol
         $productVersion = Get-SPDscInstalledProductVersion
-        if ($productVersion.FileMajorPart -ne 16 -or $productVersion.FileBuildPart -le 13000)
-        {
+        if ($productVersion.FileMajorPart -ne 16 -or $productVersion.FileBuildPart -le 13000) {
             $message = ("OIDC protocol can only be used with SharePoint Server Subscription Edition.")
             Add-SPDscEvent -Message $message `
                 -EntryType 'Error' `
@@ -753,11 +699,9 @@ function Test-TargetResource
             throw $message
         }
 
-        if ($false -eq $PSBoundParameters.ContainsKey("MetadataEndPoint"))
-        {
+        if ($false -eq $PSBoundParameters.ContainsKey("MetadataEndPoint")) {
             if ($true -eq $PSBoundParameters.ContainsKey("SigningCertificateThumbprint") -and
-                $true -eq $PSBoundParameters.ContainsKey("SigningCertificateFilePath"))
-            {
+                $true -eq $PSBoundParameters.ContainsKey("SigningCertificateFilePath")) {
                 $message = ("Cannot use both parameters SigningCertificateThumbprint and SigningCertificateFilePath at the same time.")
                 Add-SPDscEvent -Message $message `
                     -EntryType 'Error' `
@@ -767,8 +711,7 @@ function Test-TargetResource
             }
 
             if ($false -eq $PSBoundParameters.ContainsKey("SigningCertificateThumbprint") -and
-                $false -eq $PSBoundParameters.ContainsKey("SigningCertificateFilePath"))
-            {
+                $false -eq $PSBoundParameters.ContainsKey("SigningCertificateFilePath")) {
                 $message = ("At least one of the following parameters must be specified: " + `
                         "SigningCertificateThumbprint, SigningCertificateFilePath.")
                 Add-SPDscEvent -Message $message `
@@ -783,8 +726,7 @@ function Test-TargetResource
             if ($true -eq $PSBoundParameters.ContainsKey("DefaultClientIdentifier") -and (
                     $false -eq $PSBoundParameters.ContainsKey("AuthorizationEndPointUri") -or
                     $false -eq $PSBoundParameters.ContainsKey("RegisteredIssuerName") -or
-                    $false -eq $PSBoundParameters.ContainsKey("SignOutUrl") ))
-            {
+                    $false -eq $PSBoundParameters.ContainsKey("SignOutUrl") )) {
                 $message = ("If parameter DefaultClientIdentifier is set, then either parameter MetadataEndPoint must also be set, or the following parameters: " + `
                         "AuthorizationEndPointUri, RegisteredIssuerName, DefaultClientIdentifier and SignOutUrl.")
                 Add-SPDscEvent -Message $message `
@@ -794,14 +736,12 @@ function Test-TargetResource
                 throw $message
             }
         }
-        else
-        {
+        else {
             # Parameter MetadataEndPoint is set: Ensure that parameters fetched from the metadata endpoint are not set
             if ($true -eq $PSBoundParameters.ContainsKey("RegisteredIssuerName") -or
                 $true -eq $PSBoundParameters.ContainsKey("AuthorizationEndPointUri") -or
                 $true -eq $PSBoundParameters.ContainsKey("SignOutUrl")
-            )
-            {
+            ) {
                 $message = ("None of those parameters should be specified if parameter MetadataEndPoint is set: " + `
                         "RegisteredIssuerName, AuthorizationEndPointUri, SignOutUrl.")
                 Add-SPDscEvent -Message $message `
@@ -812,12 +752,10 @@ function Test-TargetResource
             }
         }
     }
-    else
-    {
+    else {
         # SAML protocol
         if ($true -eq $PSBoundParameters.ContainsKey("SigningCertificateThumbprint") -and
-            $true -eq $PSBoundParameters.ContainsKey("SigningCertificateFilePath"))
-        {
+            $true -eq $PSBoundParameters.ContainsKey("SigningCertificateFilePath")) {
             $message = ("Cannot use both parameters SigningCertificateThumbprint and SigningCertificateFilePath at the same time.")
             Add-SPDscEvent -Message $message `
                 -EntryType 'Error' `
@@ -827,8 +765,7 @@ function Test-TargetResource
         }
 
         if ($false -eq $PSBoundParameters.ContainsKey("SigningCertificateThumbprint") -and
-            $false -eq $PSBoundParameters.ContainsKey("SigningCertificateFilePath"))
-        {
+            $false -eq $PSBoundParameters.ContainsKey("SigningCertificateFilePath")) {
             $message = ("At least one of the following parameters must be specified: " + `
                     "SigningCertificateThumbprint, SigningCertificateFilePath.")
             Add-SPDscEvent -Message $message `
@@ -840,8 +777,7 @@ function Test-TargetResource
 
         # SAML trust: If parameter Realm is set, then parameter SignInUrl is required
         if ($true -eq $PSBoundParameters.ContainsKey("Realm") -and
-            $false -eq $PSBoundParameters.ContainsKey("SignInUrl"))
-        {
+            $false -eq $PSBoundParameters.ContainsKey("SignInUrl")) {
             $message = ("Parameter Realm was set but SignInUrl is not set. Parameter SignInUrl required when Realm is set.")
             Add-SPDscEvent -Message $message `
                 -EntryType 'Error' `
@@ -866,8 +802,7 @@ function Test-TargetResource
     return $result
 }
 
-function Export-TargetResource
-{
+function Export-TargetResource {
     $VerbosePreference = "SilentlyContinue"
     $ParentModuleBase = Get-Module "SharePointDsc" -ListAvailable | Select-Object -ExpandProperty Modulebase
     $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPTrustedIdentityTokenIssuer\MSFT_SPTrustedIdentityTokenIssuer.psm1" -Resolve
@@ -878,10 +813,8 @@ function Export-TargetResource
 
     $i = 1
     $total = $tips.Length
-    foreach ($tip in $tips)
-    {
-        try
-        {
+    foreach ($tip in $tips) {
+        try {
             $tokenName = $tip.Name
             Write-Host "Scanning Trusted Identity Token Issuer [$i/$total] {$tokenName}"
 
@@ -895,20 +828,16 @@ function Export-TargetResource
             }
             $fake = New-CimInstance -ClassName Win32_Process -Property $property -Key Handle -ClientOnly
 
-            if (!$params.Contains("ClaimsMappings"))
-            {
+            if (!$params.Contains("ClaimsMappings")) {
                 $params.Add("ClaimsMappings", $fake)
             }
             $results = Get-TargetResource @params
 
             $foundOne = $false
-            foreach ($ctm in $results.ClaimsMappings)
-            {
+            foreach ($ctm in $results.ClaimsMappings) {
                 $ctmResult = Get-SPDscClaimTypeMapping -params $ctm
-                if ($null -ne $ctmResult)
-                {
-                    if (!$foundOne)
-                    {
+                if ($null -ne $ctmResult) {
+                    if (!$foundOne) {
                         $PartialContent += "        `$members = @();`r`n"
                         $foundOne = $true
                     }
@@ -916,16 +845,14 @@ function Export-TargetResource
                 }
             }
 
-            if ($foundOne)
-            {
+            if ($foundOne) {
                 $results.ClaimsMappings = "`$members"
             }
 
             $PartialContent += "        SPTrustedIdentityTokenIssuer " + [System.Guid]::NewGuid().toString() + "`r`n"
             $PartialContent += "        {`r`n"
 
-            if ($null -ne $results.Get_Item("SigningCertificateThumbprint") -and $results.Contains("SigningCertificateFilePath"))
-            {
+            if ($null -ne $results.Get_Item("SigningCertificateThumbprint") -and $results.Contains("SigningCertificateFilePath")) {
                 $results.Remove("SigningCertificateFilePath")
             }
 
@@ -937,8 +864,7 @@ function Export-TargetResource
             $Content += $PartialContent
             $i++
         }
-        catch
-        {
+        catch {
             $_
             $Global:ErrorLog += "[Trusted Identity Token Issuer]" + $tip.Name + "`r`n"
             $Global:ErrorLog += "$_`r`n`r`n"
