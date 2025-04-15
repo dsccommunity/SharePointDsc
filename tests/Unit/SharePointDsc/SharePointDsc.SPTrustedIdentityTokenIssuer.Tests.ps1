@@ -220,6 +220,57 @@ try
                     }
                 }
 
+                Context -Name "The OIDC SPTrustedLoginProvider does not exist but should, using the MetadataEndPoint parameter" -Fixture {
+                    BeforeAll {
+                        $testParams = @{
+                            Name                    = "Contoso"
+                            Description             = "Contoso"
+                            DefaultClientIdentifier = "fae5bd07-be63-4a64-a28c-7931a4ebf62b"
+                            MetadataEndPoint        = "https://adfs.contoso.com/adfs/.well-known/openid-configuration"
+                            IdentifierClaim         = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                            ClaimsMappings          = @(
+                            (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                                    Name              = "Email"
+                                    IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                                } -ClientOnly)
+                            (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                                    Name              = "Role"
+                                    IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
+                                    LocalClaimType    = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                                } -ClientOnly)
+                            )
+                            ClaimProviderName       = "LDAPCP"
+                            Ensure                  = "Present"
+                        }
+
+                        Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith {
+                            return $null
+                        }
+
+                        Mock -CommandName New-SPTrustedIdentityTokenIssuer -MockWith {
+                            $sptrust = [pscustomobject]@{
+                                ImportTrustCertificate   = $null
+                                Name                     = ""
+                                Description              = ""
+                                RegisteredIssuerName     = ""
+                                AuthorizationEndPointUri = ""
+                                DefaultClientIdentifier  = ""
+                                SignOutUrl               = ""
+                                IdentifierClaim          = ""
+                                ClaimsMappings           = $null
+                                ClaimProviderName        = ""
+                            }
+                            $sptrust | Add-Member -Name Update -MemberType ScriptMethod -Value { }
+                            return $sptrust
+                        }
+                    }
+
+                    It "Should call cmdlet New-SPTrustedIdentityTokenIssuer" {
+                        Set-TargetResource @testParams
+                        Assert-MockCalled New-SPTrustedIdentityTokenIssuer
+                    }
+                }
+
                 Context -Name "The OIDC SPTrustedLoginProvider already exists and should not be changed" -Fixture {
                     BeforeAll {
                         $testParams = @{
