@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SPDistributedCacheClientSettings
   - Resource threw an error on SharePoint Server Subscription Edition with Build >= 16.0.18526.20080.
 
+### Changed
+
+- SPTrustedIdentityTokenIssuer
+  - Added parameter `MetadataEndPoint`.
+
 ## [5.6.1] - 2025-01-29
 
 ### Fixed
