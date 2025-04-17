@@ -5,7 +5,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## Fixed
+### Fixed
 
 - SPDistributedCacheClientSettings
   - Resource threw an error on SharePoint Server Subscription Edition with Build >= 16.0.18526.20080.
