@@ -26,6 +26,8 @@ class MSFT_SPTrustedIdentityTokenIssuer : OMI_BaseResource
     [Write, Description("Specific to OIDC: specify the client identifier of the issuer")] String DefaultClientIdentifier;
     [Write, Description("Specific to OIDC: specify the sign-in URL of the issuer")] String AuthorizationEndPointUri;
     [Write, Description("Specific to OIDC: specify the sign-out URL of the issuer")] String SignOutUrl;
+    [Write, Description("Specific to OIDC: specify the list of scopes (space separated) sent to the identity provider during the sign-in")] String OidcScope;
+    [Write, Description("Specific to OIDC: Instruct SharePoint to redirect users upon successful sign-in using the state parameter")] Boolean UseStateToRedirect;
     [Write, Description("Name of a claims provider to set with this SPTrustedIdentityTokenIssuer")] String ClaimProviderName;
     [Write, Description("Present if the SPTrustedIdentityTokenIssuer should be created, or Absent if it should be removed"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
 };
