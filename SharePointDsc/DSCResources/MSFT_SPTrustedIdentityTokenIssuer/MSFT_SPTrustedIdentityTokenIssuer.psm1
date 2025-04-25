@@ -45,6 +45,16 @@ function Get-TargetResource
         [String]
         $SignOutUrl,
 
+        # OIDC-specific
+        [Parameter()]
+        [String]
+        $OidcScope,
+
+        # OIDC-specific
+        [Parameter()]
+        [System.Boolean]
+        $UseStateToRedirect,
+
         [Parameter(Mandatory = $true)]
         [String]
         $IdentifierClaim,
@@ -209,6 +219,16 @@ function Set-TargetResource
         [Parameter()]
         [String]
         $SignOutUrl,
+
+        # OIDC-specific
+        [Parameter()]
+        [String]
+        $OidcScope,
+
+        # OIDC-specific
+        [Parameter()]
+        [System.Boolean]
+        $UseStateToRedirect,
 
         [Parameter(Mandatory = $true)]
         [String]
@@ -396,16 +416,16 @@ function Set-TargetResource
                 -ScriptBlock {
                 $params = $args[0]
                 $eventSource = $args[1]
+                $installedVersion = Get-SPDscInstalledProductVersion
 
                 $runParams = @{ }
                 $runParams.Add("Name", $params.Name)
                 $runParams.Add("Description", $params.Description)
 
                 $logMessage = "Creating SPTrustedIdentityTokenIssuer '$($params.Name)' "
-                $isOidcProtocol = $false
-                if ($false -eq [String]::IsNullOrWhiteSpace($params.DefaultClientIdentifier))
+                $isOidcProtocol = ![String]::IsNullOrWhiteSpace($params.DefaultClientIdentifier)
+                if ($isOidcProtocol)
                 {
-                    $isOidcProtocol = $true
                     $logMessage += "for OIDC protocol "
                     $runParams.Add("DefaultClientIdentifier", $params.DefaultClientIdentifier)
 
@@ -420,6 +440,18 @@ function Set-TargetResource
                         $runParams.Add("RegisteredIssuerName", $params.RegisteredIssuerName)
                         $runParams.Add("AuthorizationEndPointUri", $params.AuthorizationEndPointUri)
                         $runParams.Add("SignOutUrl", $params.SignOutUrl)
+                    }
+
+                    if (![String]::IsNullOrWhiteSpace($params.OidcScope))
+                    {
+                        $runParams.Add("Scope", $params.OidcScope)
+                    }
+
+                    # OIDC Parameter UseStateToRedirect was introduced in 2022-06 CU (16.0.14931.20418): https://support.microsoft.com/help/5002224
+                    if ($null -ne $params.UseStateToRedirect -and
+                        $installedVersion.FileBuildPart -ge 14931)
+                    {
+                        $runParams.Add("UseStateToRedirect", $params.UseStateToRedirect)
                     }
                 }
                 else
@@ -560,7 +592,6 @@ function Set-TargetResource
                 {
                     if ($params.ProviderSignOutUri)
                     {
-                        $installedVersion = Get-SPDscInstalledProductVersion
                         # This property does not exist in SharePoint 2013
                         if ($installedVersion.FileMajorPart -ne 15)
                         {
@@ -675,6 +706,16 @@ function Test-TargetResource
         [Parameter()]
         [String]
         $SignOutUrl,
+
+        # OIDC-specific
+        [Parameter()]
+        [String]
+        $OidcScope,
+
+        # OIDC-specific
+        [Parameter()]
+        [System.Boolean]
+        $UseStateToRedirect,
 
         [Parameter(Mandatory = $true)]
         [String]

@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - SPTrustedIdentityTokenIssuer
-  - Added parameter `MetadataEndPoint`.
+  - Added parameters `MetadataEndPoint`, `OidcScope` and `UseStateToRedirect`.
 
 ## [5.6.1] - 2025-01-29
 
