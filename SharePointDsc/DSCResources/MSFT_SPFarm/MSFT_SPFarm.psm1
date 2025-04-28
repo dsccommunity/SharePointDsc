@@ -89,7 +89,18 @@ function Get-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $SkipRegisterAsDistributedCacheHost = $true
+        $SkipRegisterAsDistributedCacheHost = $true,
+
+        [Parameter()]
+        [System.String]
+        [ValidateSet("Mandatory",
+            "Optional",
+            "Strict")]
+        $DatabaseConnectionEncryption,
+
+        [Parameter()]
+        [System.String]
+        $DatabaseServerCertificateHostName
     )
 
     Write-Verbose -Message "Getting the settings of the current local SharePoint Farm (if any)"
@@ -317,6 +328,41 @@ function Get-TargetResource
                     }
                 }
             }
+            # Parameter only exists at Share Point Subscription Edition 25h1
+            if ($installedVersion.FileMajorPart -eq 16 -and $installedVersion.ProductBuildPart -ge 18526)
+            {
+                # Get Farm Connection String
+                $getSPFarmConnectionString = @{
+                    Key         = "hklm:SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\$($installedVersion.FileMajorPart).0\Secure\ConfigDB"
+                    Value       = 'dsn'
+                    ErrorAction = 'SilentlyContinue'
+                }
+                $connectionString = Get-SPDscRegistryKey @getSPFarmConnectionString
+                $sqlConnectionString = [Microsoft.Data.SqlClient.SqlConnectionStringBuilder]::new($connectionString)
+
+                # DatabaseConnectionEncryption
+                $databaseConnectionEncryptionValue = if ([Microsoft.Data.SqlClient.SqlConnectionEncryptOption]::Mandatory -eq $sqlConnectionString.Encrypt)
+                {
+                    'Mandatory'
+                }
+                elseif ([Microsoft.Data.SqlClient.SqlConnectionEncryptOption]::Optional -eq $sqlConnectionString.Encrypt)
+                {
+                    'Optional'
+                }
+                elseif ([Microsoft.Data.SqlClient.SqlConnectionEncryptOption]::Strict -eq $sqlConnectionString.Encrypt)
+                {
+                    'Strict'
+                }
+                else
+                {
+                    $null
+                }
+                $returnValue.Add("DatabaseConnectionEncryption", $databaseConnectionEncryptionValue)
+
+                # DatabaseServerCertificateHostName
+                $returnValue.Add("DatabaseServerCertificateHostName", $sqlConnectionString.HostNameInCertificate)
+
+            }
             return $returnValue
         }
 
@@ -457,7 +503,18 @@ function Set-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $SkipRegisterAsDistributedCacheHost = $true
+        $SkipRegisterAsDistributedCacheHost = $true,
+
+        [Parameter()]
+        [System.String]
+        [ValidateSet("Mandatory",
+            "Optional",
+            "Strict")]
+        $DatabaseConnectionEncryption,
+
+        [Parameter()]
+        [System.String]
+        $DatabaseServerCertificateHostName
     )
 
     Write-Verbose -Message "Setting local SP Farm settings"
@@ -913,6 +970,23 @@ function Set-TargetResource
                         }
                         $executeArgs.Add("ServerRoleOptional", $true)
                     }
+
+                    # DatabaseConnectionEncryption
+                    if ($params.ContainsKey("DatabaseConnectionEncryption") -eq $true)
+                    {
+                        if ($buildVersion -ge 18526)
+                        {
+                            $executeArgs.Add("DatabaseConnectionEncryption", $params.DatabaseConnectionEncryption)
+                        }
+                    }
+                    # DatabaseServerCertificateHostName
+                    if ($params.ContainsKey("DatabaseServerCertificateHostName") -eq $true)
+                    {
+                        if ($buildVersion -ge 18526)
+                        {
+                            $executeArgs.Add("DatabaseServerCertificateHostName", $params.DatabaseServerCertificateHostName)
+                        }
+                    }
                 }
                 Default
                 {
@@ -1340,7 +1414,18 @@ function Test-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $SkipRegisterAsDistributedCacheHost = $true
+        $SkipRegisterAsDistributedCacheHost = $true,
+
+        [Parameter()]
+        [System.String]
+        [ValidateSet("Mandatory",
+            "Optional",
+            "Strict")]
+        $DatabaseConnectionEncryption,
+
+        [Parameter()]
+        [System.String]
+        $DatabaseServerCertificateHostName
     )
 
     Write-Verbose -Message "Testing local SP Farm settings"
