@@ -105,6 +105,18 @@ $Script:SPSEFeatures = @("NET-WCF-Pipe-Activation45",
     "WAS", "WAS-Process-Model", "WAS-Config-APIs", "Web-Mgmt-Console",
     "Web-Mgmt-Tools")
 
+$Script:SPSEWinCoreFeatures = @("NET-WCF-Pipe-Activation45",
+    "NET-WCF-HTTP-Activation45", "NET-WCF-TCP-Activation45",
+    "Web-Server", "Web-WebServer", "Web-Common-Http",
+    "Web-Static-Content", "Web-Default-Doc", "Web-Dir-Browsing",
+    "Web-Http-Errors", "Web-App-Dev", "Web-Asp-Net45", "Web-Net-Ext45",
+    "Web-ISAPI-Ext", "Web-ISAPI-Filter", "Web-Health", "Web-Http-Logging",
+    "Web-Log-Libraries", "Web-Request-Monitor", "Web-Http-Tracing",
+    "Web-Security", "Web-Basic-Auth", "Web-Windows-Auth", "Web-Filtering",
+    "Web-Performance", "Web-Stat-Compression", "Web-Dyn-Compression",
+    "WAS", "WAS-Process-Model", "WAS-Config-APIs",
+    "Web-Mgmt-Tools")
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -388,8 +400,17 @@ function Get-TargetResource
                 }
                 elseif ($osVersion.Build -ge 20000)
                 {
-                    Write-Verbose -Message "OS Version: Windows Server 2022"
-                    $WindowsFeatures = Get-WindowsFeature -Name $Script:SPSEFeatures
+                    $OSServerLevel = Get-ComputerInfo | Select-Object $OSServerLevel
+                    if ($OSServerLevel -eq "FullServer")
+                    {
+                        Write-Verbose -Message "OS Version: Windows Server 2022"
+                        $WindowsFeatures = Get-WindowsFeature -Name $Script:SPSEFeatures
+                    }
+                    elseif ($OSServerLevel -eq "ServerCore")
+                    {
+                        Write-Verbose -Message "OS Version: Windows Server 2022 Core"
+                        $WindowsFeatures = Get-WindowsFeature -Name $Script:SPSEWinCoreFeatures
+                    }
                 }
                 else
                 {
@@ -628,6 +649,7 @@ function Get-TargetResource
         MSVCRT11          = $MSVCRT11
         MSVCRT14          = $MSVCRT14
         MSVCRT141         = $MSVCRT141
+        MSVCRT142         = $MSVCRT142
         KB3092423         = $KB3092423
         ODBC              = $ODBC
         DotNetFx          = $DotNetFx
