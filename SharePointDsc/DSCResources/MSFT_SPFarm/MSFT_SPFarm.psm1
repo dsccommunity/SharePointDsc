@@ -331,36 +331,12 @@ function Get-TargetResource
             # Parameter only exists at Share Point Subscription Edition 25h1
             if ($installedVersion.FileMajorPart -eq 16 -and $installedVersion.ProductBuildPart -ge 18526)
             {
+                $ConnectionEncryption = Get-SPDscConfigDBConnectionEncryption
                 # Get Farm Connection String
-                $getSPFarmConnectionString = @{
-                    Key         = "hklm:SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\$($installedVersion.FileMajorPart).0\Secure\ConfigDB"
-                    Value       = 'dsn'
-                    ErrorAction = 'SilentlyContinue'
-                }
-                $connectionString = Get-SPDscRegistryKey @getSPFarmConnectionString
-                $sqlConnectionString = [Microsoft.Data.SqlClient.SqlConnectionStringBuilder]::new($connectionString)
-
-                # DatabaseConnectionEncryption
-                $databaseConnectionEncryptionValue = if ([Microsoft.Data.SqlClient.SqlConnectionEncryptOption]::Mandatory -eq $sqlConnectionString.Encrypt)
-                {
-                    'Mandatory'
-                }
-                elseif ([Microsoft.Data.SqlClient.SqlConnectionEncryptOption]::Optional -eq $sqlConnectionString.Encrypt)
-                {
-                    'Optional'
-                }
-                elseif ([Microsoft.Data.SqlClient.SqlConnectionEncryptOption]::Strict -eq $sqlConnectionString.Encrypt)
-                {
-                    'Strict'
-                }
-                else
-                {
-                    $null
-                }
-                $returnValue.Add("DatabaseConnectionEncryption", $databaseConnectionEncryptionValue)
+                $returnValue.Add("DatabaseConnectionEncryption", $ConnectionEncryption.DatabaseConnectionEncryption)
 
                 # DatabaseServerCertificateHostName
-                $returnValue.Add("DatabaseServerCertificateHostName", $sqlConnectionString.HostNameInCertificate)
+                $returnValue.Add("DatabaseServerCertificateHostName", $ConnectionEncryption.DatabaseServerCertificateHostName)
 
             }
             return $returnValue
@@ -988,7 +964,7 @@ function Set-TargetResource
                         }
                     }
                 }
-                Default
+                default
                 {
                     $message = ("An unknown version of SharePoint (Major version $_) " +
                         "was detected. Only versions 15 (SharePoint 2013) and" +
