@@ -40,7 +40,7 @@
             "name": "Run current unit test (SPSE)",
             "script": "${file}",
             "args": [
-                "${workspaceRoot}/tests/Unit/Stubs/SharePoint/16.0.14326.20450/SharePointServer.psm1"
+                "${workspaceRoot}/tests/Unit/Stubs/SharePoint/16.0.18526.20508/SharePointServer.psm1"
             ],
             "cwd": "${file}",
             "createTemporaryIntegratedConsole": true
@@ -85,7 +85,7 @@
             "script": "${workspaceRoot}/.vscode/GetTestCoverage.ps1",
             "args": [
                 "${file}",
-                "${workspaceRoot}/tests/Unit/Stubs/SharePoint/16.0.14326.20450/SharePointServer.psm1"
+                "${workspaceRoot}/tests/Unit/Stubs/SharePoint/16.0.18526.20508/SharePointServer.psm1"
             ],
             "createTemporaryIntegratedConsole": true
         },
