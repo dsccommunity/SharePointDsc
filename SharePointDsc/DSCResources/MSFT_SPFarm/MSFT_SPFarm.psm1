@@ -92,13 +92,14 @@ function Get-TargetResource
         $SkipRegisterAsDistributedCacheHost = $true,
 
         [Parameter()]
-        [System.String]
         [ValidateSet("Mandatory",
             "Optional",
             "Strict")]
+        [System.String]
         $DatabaseConnectionEncryption,
 
         [Parameter()]
+        [ValidateNotNullOrEmpty()]
         [System.String]
         $DatabaseServerCertificateHostName
     )
