@@ -11706,7 +11706,8 @@ function New-SPTrustedIdentityTokenIssuer
     [Parameter(ParameterSetName = 'UPABackedParameterSet')]
     [Parameter(ParameterSetName = 'OIDCParameterSet', Mandatory = $true)]
     [ValidateNotNull()]
-    [System.Security.Cryptography.X509Certificates.X509Certificate2[]]
+    [object]
+    #[System.Security.Cryptography.X509Certificates.X509Certificate2[]]
     ${ImportTrustCertificate},
 
     [Parameter(ParameterSetName = 'OIDCWithPublicKeyParameterSet', Mandatory = $true)]
