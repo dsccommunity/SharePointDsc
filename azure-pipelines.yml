@@ -110,7 +110,7 @@ stages:
             displayName: "Run Unit Test for SP2013"
             inputs:
               filePath: "./build.ps1"
-              arguments: "-Tasks test -PesterScript @(@{ Path = '$(Build.SourcesDirectory)/Tests/Unit'; Parameters = @{SharePointCmdletModule = '$(Build.SourcesDirectory)/tests/Unit/Stubs/SharePoint/15.0.4805.1000/Microsoft.SharePoint.PowerShell.psm1' }})"
+              arguments: "-Tasks test -PesterScript @(@{ Path = '$(Build.SourcesDirectory)/tests/Unit'; Parameters = @{SharePointCmdletModule = '$(Build.SourcesDirectory)/tests/Unit/Stubs/SharePoint/15.0.4805.1000/Microsoft.SharePoint.PowerShell.psm1' }})"
               pwsh: false
 
           - task: PublishTestResults@2
@@ -146,7 +146,7 @@ stages:
             displayName: "Run Unit Test for SP2016"
             inputs:
               filePath: "./build.ps1"
-              arguments: "-Tasks test -PesterScript @(@{ Path = '$(Build.SourcesDirectory)/Tests/Unit'; Parameters = @{SharePointCmdletModule = '$(Build.SourcesDirectory)/tests/Unit/Stubs/SharePoint/16.0.4456.1000/Microsoft.SharePoint.PowerShell.psm1' }})"
+              arguments: "-Tasks test -PesterScript @(@{ Path = '$(Build.SourcesDirectory)/tests/Unit'; Parameters = @{SharePointCmdletModule = '$(Build.SourcesDirectory)/tests/Unit/Stubs/SharePoint/16.0.4456.1000/Microsoft.SharePoint.PowerShell.psm1' }})"
               pwsh: false
 
           - task: PublishTestResults@2
@@ -181,7 +181,7 @@ stages:
             displayName: "Run Unit Test for SP2019"
             inputs:
               filePath: "./build.ps1"
-              arguments: "-Tasks test -PesterScript @(@{ Path = '$(Build.SourcesDirectory)/Tests/Unit'; Parameters = @{SharePointCmdletModule = '$(Build.SourcesDirectory)/tests/Unit/Stubs/SharePoint/16.0.10337.12109/Microsoft.SharePoint.PowerShell.psm1' }})"
+              arguments: "-Tasks test -PesterScript @(@{ Path = '$(Build.SourcesDirectory)/tests/Unit'; Parameters = @{SharePointCmdletModule = '$(Build.SourcesDirectory)/tests/Unit/Stubs/SharePoint/16.0.10337.12109/Microsoft.SharePoint.PowerShell.psm1' }})"
               pwsh: false
 
           - task: PublishTestResults@2
@@ -216,7 +216,7 @@ stages:
             displayName: "Run Unit Test for SPSE"
             inputs:
               filePath: "./build.ps1"
-              arguments: "-Tasks test -PesterScript @(@{ Path = '$(Build.SourcesDirectory)/Tests/Unit'; Parameters = @{SharePointCmdletModule = '$(Build.SourcesDirectory)/tests/Unit/Stubs/SharePoint/16.0.18526.20508/SharePointServer.psm1' }})"
+              arguments: "-Tasks test -PesterScript @(@{ Path = '$(Build.SourcesDirectory)/tests/Unit'; Parameters = @{SharePointCmdletModule = '$(Build.SourcesDirectory)/tests/Unit/Stubs/SharePoint/16.0.18526.20508/SharePointServer.psm1' }})"
               pwsh: false
 
           - task: PublishTestResults@2
