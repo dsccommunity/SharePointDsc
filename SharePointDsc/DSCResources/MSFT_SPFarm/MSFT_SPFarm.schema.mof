@@ -18,6 +18,6 @@ class MSFT_SPFarm : OMI_BaseResource
     [Write, Description("Set to true to not register the server computer as a distributed cache host")] Boolean SkipRegisterAsDistributedCacheHost;
     [Write, Description("Should SQL Server authentication be used to connect to the database?")] Boolean UseSQLAuthentication;
     [Write, Description("If using SQL authentication, the SQL login to use to connect to the instance"), EmbeddedInstance("MSFT_Credential")] String DatabaseCredentials;
-    [Write, Description("SharePoint Subscription Edition 25H1 only - Specifies whether TLS encryption is used for the connection between SharePoint and the database."), ValueMap{"Mandatory","Optional","Strict"}, Values{"Mandatory","Optional","Strict"}] String DatabaseConnectionEncryption;
-    [Write, Description("SharePoint Subscription Edition 25H1 only - Sets the host name to use when validating the server certificate for the connection.")] String DatabaseServerCertificateHostName;
+    [Write, Description("SharePoint Subscription Edition 25H1 and later - Specifies whether TLS encryption is used for the connection between SharePoint and the database."), ValueMap{"Mandatory","Optional","Strict"}, Values{"Mandatory","Optional","Strict"}] String DatabaseConnectionEncryption;
+    [Write, Description("SharePoint Subscription Edition 25H1 and later - Sets the host name to use when validating the server certificate for the connection.")] String DatabaseServerCertificateHostName;
 };
