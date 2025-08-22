@@ -378,11 +378,11 @@ try
                         Mock -CommandName Remove-SPTrustedIdentityTokenIssuer -MockWith { }
                     }
 
-                    It "Should return absent from the get method" {
+                    It "Should return present from the get method" {
                         (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                     }
 
-                    It "Should return true from the test method" {
+                    It "Should return false from the test method" {
                         Test-TargetResource @testParams | Should -Be $false
                     }
 
@@ -943,11 +943,11 @@ try
                     Mock -CommandName Remove-SPTrustedIdentityTokenIssuer -MockWith { }
                 }
 
-                It "Should return absent from the get method" {
+                It "Should return present from the get method" {
                     (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
-                It "Should return true from the test method" {
+                It "Should return false from the test method" {
                     Test-TargetResource @testParams | Should -Be $false
                 }
 
