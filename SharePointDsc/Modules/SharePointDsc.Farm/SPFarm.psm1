@@ -370,7 +370,7 @@ function Get-SPDscConfigDBConnectionEncryption
     (
     )
 
-    Write-Verbose -Message "Removing lock for database $Database"
+    Write-Verbose -Message "Getting SQL Connection String from registry"
 
     $installedVersion = Get-SPDscInstalledProductVersion
 
