@@ -370,7 +370,7 @@ function Get-SPDscConfigDBConnectionEncryption
     (
     )
 
-    Write-Verbose -Message "Getting SQL Connection String from registry"
+    Write-Verbose -Message "Getting SQL Connection String from registry to extract Database Connection Encryption and Database Server Certificate Hostname"
 
     $installedVersion = Get-SPDscInstalledProductVersion
 
