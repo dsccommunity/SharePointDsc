@@ -223,6 +223,9 @@ function Add-SPPeoplePickerSearchADDomain
     [pscredential]
     ${Credential},
 
+    [switch]
+    ${SecureSocketsLayer},
+
     [Parameter(ValueFromPipeline = $true)]
     [object]
     ${AssignmentCollection})
@@ -594,7 +597,7 @@ function Add-SPShellAdmin
 
     [Parameter(ValueFromPipeline = $true)]
     [object]
-    ${database},
+    ${Database},
 
     [Parameter(ValueFromPipeline = $true)]
     [object]
@@ -780,6 +783,15 @@ function Backup-SPConfigurationDatabase
     [Parameter(ParameterSetName = 'ShowTree', Mandatory = $true)]
     [switch]
     ${ShowTree},
+
+    [Parameter(ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
+    [ValidateSet('Mandatory', 'True', 'Optional', 'False', 'Strict')]
+    [object]
+    ${DatabaseConnectionEncryption},
+
+    [Parameter(ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
+    [string]
+    ${DatabaseServerCertificateHostName},
 
     [Parameter(ValueFromPipeline = $true)]
     [object]
@@ -1310,6 +1322,14 @@ function Connect-SPConfigurationDatabase
     [object]
     ${LocalServerRole},
 
+    [Parameter(Mandatory = $true)]
+    [ValidateSet('Mandatory', 'True', 'Optional', 'False', 'Strict')]
+    [object]
+    ${DatabaseConnectionEncryption},
+
+    [string]
+    ${DatabaseServerCertificateHostName},
+
     [Parameter(ValueFromPipeline = $true)]
     [object]
     ${AssignmentCollection})
@@ -1553,6 +1573,28 @@ function Copy-SPTaxonomyGroups
 }
 
 
+function Deploy-SPVariation
+{
+  [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+  param(
+    [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
+    [object]
+    ${Identity},
+
+    [switch]
+    ${Recurse},
+
+    [string]
+    ${Label},
+
+    [Parameter(ValueFromPipeline = $true)]
+    [object]
+    ${AssignmentCollection})
+
+
+}
+
+
 function Disable-ProjectServerLicense
 {
   [CmdletBinding()]
@@ -1588,6 +1630,35 @@ function Disable-SPBusinessDataCatalogEntity
     [ValidateNotNull()]
     [object]
     ${Identity},
+
+    [Parameter(ValueFromPipeline = $true)]
+    [object]
+    ${AssignmentCollection})
+
+
+}
+
+
+function Disable-SPCustomerFeedbackForFarm
+{
+  [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+  param(
+    [Parameter(ValueFromPipeline = $true)]
+    [object]
+    ${AssignmentCollection})
+
+
+}
+
+
+function Disable-SPCustomerFeedbackForUser
+{
+  [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+  param(
+    [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
+    [ValidateNotNull()]
+    [string]
+    ${UserSid},
 
     [Parameter(ValueFromPipeline = $true)]
     [object]
@@ -1908,6 +1979,35 @@ function Enable-SPBusinessDataCatalogEntity
     [ValidateNotNull()]
     [object]
     ${Identity},
+
+    [Parameter(ValueFromPipeline = $true)]
+    [object]
+    ${AssignmentCollection})
+
+
+}
+
+
+function Enable-SPCustomerFeedbackForFarm
+{
+  [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+  param(
+    [Parameter(ValueFromPipeline = $true)]
+    [object]
+    ${AssignmentCollection})
+
+
+}
+
+
+function Enable-SPCustomerFeedbackForUser
+{
+  [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+  param(
+    [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
+    [ValidateNotNull()]
+    [string]
+    ${UserSid},
 
     [Parameter(ValueFromPipeline = $true)]
     [object]
@@ -4627,6 +4727,18 @@ function Get-SPFeature
 }
 
 
+function Get-SPFeatureReleasePreference
+{
+  [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+  param(
+    [Parameter(ValueFromPipeline = $true)]
+    [object]
+    ${AssignmentCollection})
+
+
+}
+
+
 function Get-SPFlightsInfo
 {
   [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
@@ -4665,6 +4777,27 @@ function Get-SPHelpCollection
   param(
     [string]
     ${Name},
+
+    [Parameter(ValueFromPipeline = $true)]
+    [object]
+    ${AssignmentCollection})
+
+
+}
+
+
+function Get-SPHybridDocVroomId
+{
+  [CmdletBinding()]
+  param(
+    [Parameter(ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
+    [string]
+    ${TenantInstanceId},
+
+    [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
+    [ValidateNotNull()]
+    [string]
+    ${AccessUrl},
 
     [Parameter(ValueFromPipeline = $true)]
     [object]
@@ -5957,7 +6090,7 @@ function Get-SPShellAdmin
   param(
     [Parameter(Position = 0, ValueFromPipeline = $true)]
     [object]
-    ${database},
+    ${Database},
 
     [Parameter(ValueFromPipeline = $true)]
     [object]
@@ -6680,6 +6813,22 @@ function Get-SPUserSolutionAllowList
     [ValidateNotNull()]
     [object]
     ${WebApplication},
+
+    [Parameter(ValueFromPipeline = $true)]
+    [object]
+    ${AssignmentCollection})
+
+
+}
+
+
+function Get-SPVariationJob
+{
+  [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+  param(
+    [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
+    [object]
+    ${Identity},
 
     [Parameter(ValueFromPipeline = $true)]
     [object]
@@ -9051,6 +9200,15 @@ function New-SPConfigurationDatabase
     [switch]
     ${ServerRoleOptional},
 
+    [Parameter(ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
+    [ValidateSet('Mandatory', 'True', 'Optional', 'False', 'Strict')]
+    [object]
+    ${DatabaseConnectionEncryption},
+
+    [Parameter(ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
+    [string]
+    ${DatabaseServerCertificateHostName},
+
     [Parameter(ValueFromPipeline = $true)]
     [object]
     ${AssignmentCollection})
@@ -9355,6 +9513,9 @@ function New-SPEnterpriseSearchCrawlContentSource
     [Alias('p')]
     [object]
     ${CrawlPriority},
+
+    [object]
+    ${HttpProtocol},
 
     [System.Nullable[int]]
     ${MaxPageEnumerationDepth},
@@ -10337,6 +10498,11 @@ function New-SPEnterpriseSearchServiceApplication
     [bool]
     ${CloudIndex},
 
+    [Parameter(ParameterSetName = 'DefaultParameterSet')]
+    [Parameter(ParameterSetName = 'DatabasePlacement')]
+    [object]
+    ${IngestEndpoint},
+
     [Parameter(ValueFromPipeline = $true)]
     [object]
     ${AssignmentCollection})
@@ -10418,6 +10584,32 @@ function New-SPEnterpriseSearchTopology
     [Parameter(ParameterSetName = 'Clone')]
     [object]
     ${SearchTopology},
+
+    [Parameter(ValueFromPipeline = $true)]
+    [object]
+    ${AssignmentCollection})
+
+
+}
+
+
+function New-SPEvoSecurityTokenServiceApplicationProxy
+{
+  [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+  param(
+    [Parameter(Mandatory = $true)]
+    [ValidateNotNullOrEmpty()]
+    [string]
+    ${Name},
+
+    [Parameter(Mandatory = $true)]
+    [ValidateNotNullOrEmpty()]
+    [string]
+    ${TrustedSecurityTokenIssuerIdentity},
+
+    [ValidateNotNull()]
+    [switch]
+    ${DefaultProxyGroup},
 
     [Parameter(ValueFromPipeline = $true)]
     [object]
@@ -11492,6 +11684,7 @@ function New-SPTrustedIdentityTokenIssuer
     [Parameter(ParameterSetName = 'ActiveDirectoryBackedParameterSet', Mandatory = $true)]
     [Parameter(ParameterSetName = 'UPABackedParameterSet', Mandatory = $true)]
     [Parameter(ParameterSetName = 'OIDCParameterSet', Mandatory = $true)]
+    [Parameter(ParameterSetName = 'OIDCWithPublicKeyParameterSet', Mandatory = $true)]
     [Parameter(ParameterSetName = 'OIDCMetadataParameterSetName', Mandatory = $true)]
     [ValidateNotNullOrEmpty()]
     [string]
@@ -11502,6 +11695,7 @@ function New-SPTrustedIdentityTokenIssuer
     [Parameter(ParameterSetName = 'ActiveDirectoryBackedParameterSet', Mandatory = $true)]
     [Parameter(ParameterSetName = 'UPABackedParameterSet', Mandatory = $true)]
     [Parameter(ParameterSetName = 'OIDCParameterSet', Mandatory = $true)]
+    [Parameter(ParameterSetName = 'OIDCWithPublicKeyParameterSet', Mandatory = $true)]
     [Parameter(ParameterSetName = 'OIDCMetadataParameterSetName', Mandatory = $true)]
     [ValidateNotNullOrEmpty()]
     [string]
@@ -11516,6 +11710,11 @@ function New-SPTrustedIdentityTokenIssuer
     #[System.Security.Cryptography.X509Certificates.X509Certificate2[]]
     ${ImportTrustCertificate},
 
+    [Parameter(ParameterSetName = 'OIDCWithPublicKeyParameterSet', Mandatory = $true)]
+    [ValidateNotNullOrEmpty()]
+    [string]
+    ${PublicKey},
+
     [Parameter(ParameterSetName = 'MetadataEndPointParameterSet', Mandatory = $true)]
     [Parameter(ParameterSetName = 'OIDCMetadataParameterSetName', Mandatory = $true)]
     [ValidateNotNull()]
@@ -11526,6 +11725,7 @@ function New-SPTrustedIdentityTokenIssuer
     [Parameter(ParameterSetName = 'MetadataEndPointParameterSet', Mandatory = $true)]
     [Parameter(ParameterSetName = 'UPABackedParameterSet', Mandatory = $true)]
     [Parameter(ParameterSetName = 'OIDCParameterSet', Mandatory = $true)]
+    [Parameter(ParameterSetName = 'OIDCWithPublicKeyParameterSet', Mandatory = $true)]
     [Parameter(ParameterSetName = 'OIDCMetadataParameterSetName', Mandatory = $true)]
     [ValidateNotNull()]
     [object[]]
@@ -11543,6 +11743,7 @@ function New-SPTrustedIdentityTokenIssuer
     [Parameter(ParameterSetName = 'MetadataEndPointParameterSet', Mandatory = $true)]
     [Parameter(ParameterSetName = 'UPABackedParameterSet', Mandatory = $true)]
     [Parameter(ParameterSetName = 'OIDCParameterSet', Mandatory = $true)]
+    [Parameter(ParameterSetName = 'OIDCWithPublicKeyParameterSet', Mandatory = $true)]
     [Parameter(ParameterSetName = 'OIDCMetadataParameterSetName', Mandatory = $true)]
     [ValidateNotNullOrEmpty()]
     [string]
@@ -11551,6 +11752,7 @@ function New-SPTrustedIdentityTokenIssuer
     [Parameter(ParameterSetName = 'BasicParameterSet')]
     [Parameter(ParameterSetName = 'MetadataEndPointParameterSet')]
     [Parameter(ParameterSetName = 'OIDCParameterSet')]
+    [Parameter(ParameterSetName = 'OIDCWithPublicKeyParameterSet')]
     [Parameter(ParameterSetName = 'OIDCMetadataParameterSetName')]
     [object]
     ${ClaimProvider},
@@ -11575,6 +11777,9 @@ function New-SPTrustedIdentityTokenIssuer
     ${UseDefaultConfiguration},
 
     [Parameter(ParameterSetName = 'UPABackedParameterSet', Mandatory = $true)]
+    [Parameter(ParameterSetName = 'OIDCParameterSet')]
+    [Parameter(ParameterSetName = 'OIDCWithPublicKeyParameterSet')]
+    [Parameter(ParameterSetName = 'OIDCMetadataParameterSetName')]
     [switch]
     ${UseUPABackedClaimProvider},
 
@@ -11583,11 +11788,18 @@ function New-SPTrustedIdentityTokenIssuer
     [string]
     ${IdentifierClaimIs},
 
+    [Parameter(ParameterSetName = 'OIDCParameterSet')]
+    [Parameter(ParameterSetName = 'OIDCWithPublicKeyParameterSet')]
+    [Parameter(ParameterSetName = 'OIDCMetadataParameterSetName')]
+    [switch]
+    ${UseStateToRedirect},
+
     [Parameter(ParameterSetName = 'BasicParameterSet')]
     [Parameter(ParameterSetName = 'MetadataEndPointParameterSet')]
     [Parameter(ParameterSetName = 'ActiveDirectoryBackedParameterSet')]
     [Parameter(ParameterSetName = 'UPABackedParameterSet')]
     [Parameter(ParameterSetName = 'OIDCParameterSet', Mandatory = $true)]
+    [Parameter(ParameterSetName = 'OIDCWithPublicKeyParameterSet', Mandatory = $true)]
     [ValidateNotNullOrEmpty()]
     [string]
     ${SignOutUrl},
@@ -11596,25 +11808,37 @@ function New-SPTrustedIdentityTokenIssuer
     [Parameter(ParameterSetName = 'ActiveDirectoryBackedParameterSet')]
     [Parameter(ParameterSetName = 'UPABackedParameterSet')]
     [Parameter(ParameterSetName = 'OIDCParameterSet', Mandatory = $true)]
+    [Parameter(ParameterSetName = 'OIDCWithPublicKeyParameterSet', Mandatory = $true)]
     [ValidateNotNullOrEmpty()]
     [string]
     ${RegisteredIssuerName},
 
     [Parameter(ParameterSetName = 'OIDCParameterSet', Mandatory = $true)]
+    [Parameter(ParameterSetName = 'OIDCWithPublicKeyParameterSet', Mandatory = $true)]
     [Parameter(ParameterSetName = 'OIDCMetadataParameterSetName', Mandatory = $true)]
     [ValidateNotNullOrEmpty()]
     [string]
     ${DefaultClientIdentifier},
 
+    [Parameter(ParameterSetName = 'OIDCParameterSet')]
+    [Parameter(ParameterSetName = 'OIDCWithPublicKeyParameterSet')]
+    [Parameter(ParameterSetName = 'OIDCMetadataParameterSetName')]
+    [ValidateNotNullOrEmpty()]
+    [System.Collections.Generic.Dictionary[uri, string]]
+    ${ScopedClientIdentifier},
+
     [Parameter(ParameterSetName = 'OIDCParameterSet', Mandatory = $true)]
+    [Parameter(ParameterSetName = 'OIDCWithPublicKeyParameterSet', Mandatory = $true)]
     [uri]
     ${AuthorizationEndPointUri},
 
     [Parameter(ParameterSetName = 'OIDCParameterSet')]
+    [Parameter(ParameterSetName = 'OIDCWithPublicKeyParameterSet')]
     [System.Collections.Generic.List[string]]
     ${ResponseTypesSupported},
 
     [Parameter(ParameterSetName = 'OIDCParameterSet')]
+    [Parameter(ParameterSetName = 'OIDCWithPublicKeyParameterSet')]
     [Parameter(ParameterSetName = 'OIDCMetadataParameterSetName')]
     [ValidateNotNullOrEmpty()]
     [string]
@@ -14090,7 +14314,7 @@ function Remove-SPShellAdmin
 
     [Parameter(ValueFromPipeline = $true)]
     [object]
-    ${database},
+    ${Database},
 
     [Parameter(ValueFromPipeline = $true)]
     [object]
@@ -15058,6 +15282,28 @@ function Repair-SPSite
 
     [switch]
     ${RunAlways},
+
+    [Parameter(ValueFromPipeline = $true)]
+    [object]
+    ${AssignmentCollection})
+
+
+}
+
+
+function Repair-SPVariation
+{
+  [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+  param(
+    [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
+    [object]
+    ${Identity},
+
+    [switch]
+    ${Recurse},
+
+    [string]
+    ${Label},
 
     [Parameter(ValueFromPipeline = $true)]
     [object]
@@ -16059,6 +16305,30 @@ function Set-SPBusinessDataCatalogThrottleConfig
 }
 
 
+function Set-SPCacheClusterSecurity
+{
+  [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+  param(
+    [Parameter(Mandatory = $true, Position = 0)]
+    [Alias('Mode')]
+    [ValidateSet('None', 'Transport')]
+    [string]
+    ${SecurityMode},
+
+    [Parameter(Mandatory = $true, Position = 1)]
+    [Alias('Level')]
+    [ValidateSet('None', 'Sign', 'EncryptAndSign')]
+    [string]
+    ${ProtectionLevel},
+
+    [Parameter(ValueFromPipeline = $true)]
+    [object]
+    ${AssignmentCollection})
+
+
+}
+
+
 function Set-SPCentralAdministration
 {
   [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
@@ -16668,6 +16938,9 @@ function Set-SPEnterpriseSearchCrawlContentSource
     [Alias('p')]
     [object]
     ${CrawlPriority},
+
+    [object]
+    ${HttpProtocol},
 
     [Parameter(ParameterSetName = 'Daily', Mandatory = $true)]
     [Parameter(ParameterSetName = 'Weekly')]
@@ -17562,7 +17835,7 @@ function Set-SPEnterpriseSearchService
 
 function Set-SPEnterpriseSearchServiceApplication
 {
-  [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+  [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
   param(
     [Parameter(Mandatory = $true, Position = 0, ValueFromPipeline = $true)]
     [object]
@@ -17603,6 +17876,9 @@ function Set-SPEnterpriseSearchServiceApplication
 
     [securestring]
     ${DatabasePassword},
+
+    [object]
+    ${IngestEndpoint},
 
     [Parameter(ValueFromPipeline = $true)]
     [object]
@@ -17723,6 +17999,22 @@ function Set-SPFarmConfig
 
     [System.Nullable[uint32]]
     ${MaxSiteSubscriptionSettingsValueLength},
+
+    [Parameter(ValueFromPipeline = $true)]
+    [object]
+    ${AssignmentCollection})
+
+
+}
+
+
+function Set-SPFeatureReleasePreference
+{
+  [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+  param(
+    [Parameter(Mandatory = $true, HelpMessage = 'Feature release ring to be set, Standard means standard release while Early means early release.')]
+    [object]
+    ${FeatureReleaseRing},
 
     [Parameter(ValueFromPipeline = $true)]
     [object]
@@ -18418,6 +18710,9 @@ function Set-SPPeoplePickerConfig
 
     [switch]
     ${NoWindowsAccountsForNonWindowsAuthenticationMode},
+
+    [switch]
+    ${SecureSocketsLayer},
 
     [Parameter(ValueFromPipeline = $true)]
     [object]
@@ -20276,6 +20571,10 @@ function Set-SPTrustedIdentityTokenIssuer
     [string]
     ${Realm},
 
+    [Parameter(ParameterSetName = 'OIDCParameterSet')]
+    [switch]
+    ${UseStateToRedirect},
+
     [Parameter(ParameterSetName = 'BasicParameterSet')]
     [Parameter(ParameterSetName = 'MetadataEndPointParameterSet')]
     [Parameter(ParameterSetName = 'ImportCertificateParameterSet')]
@@ -20299,6 +20598,11 @@ function Set-SPTrustedIdentityTokenIssuer
     ${DefaultClientIdentifier},
 
     [Parameter(ParameterSetName = 'OIDCParameterSet')]
+    [ValidateNotNullOrEmpty()]
+    [System.Collections.Generic.Dictionary[uri, string]]
+    ${ScopedClientIdentifier},
+
+    [Parameter(ParameterSetName = 'OIDCParameterSet')]
     [uri]
     ${AuthorizationEndPointUri},
 
@@ -20310,6 +20614,11 @@ function Set-SPTrustedIdentityTokenIssuer
     [ValidateNotNullOrEmpty()]
     [string]
     ${Scope},
+
+    [Parameter(ParameterSetName = 'OIDCParameterSet')]
+    [ValidateNotNullOrEmpty()]
+    [string]
+    ${PublicKey},
 
     [Parameter(ValueFromPipeline = $true)]
     [object]
@@ -20741,6 +21050,7 @@ function Set-SPWebApplication
 
     [Parameter(ParameterSetName = 'UpdateClaimSettings', Mandatory = $true)]
     [Parameter(ParameterSetName = 'UpdateIISSettings', Mandatory = $true)]
+    [Parameter(ParameterSetName = 'UpdateOneDriveSyncScope', Mandatory = $true)]
     [object]
     ${Zone},
 
@@ -20840,6 +21150,10 @@ function Set-SPWebApplication
 
     [switch]
     ${NotProvisionGlobally},
+
+    [Parameter(ParameterSetName = 'UpdateOneDriveSyncScope', Mandatory = $true)]
+    [string]
+    ${OneDriveSyncScope},
 
     [Parameter(ValueFromPipeline = $true)]
     [object]
@@ -21789,6 +22103,28 @@ function Test-SPSite
 
     [switch]
     ${RunAlways},
+
+    [Parameter(ValueFromPipeline = $true)]
+    [object]
+    ${AssignmentCollection})
+
+
+}
+
+
+function Test-SPVariation
+{
+  [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+  param(
+    [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
+    [object]
+    ${Identity},
+
+    [switch]
+    ${Recurse},
+
+    [string]
+    ${Label},
 
     [Parameter(ValueFromPipeline = $true)]
     [object]

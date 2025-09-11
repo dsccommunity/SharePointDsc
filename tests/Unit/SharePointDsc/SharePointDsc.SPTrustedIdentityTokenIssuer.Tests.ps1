@@ -50,7 +50,7 @@ try
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
-                Invoke-Command -Scriptblock $Global:SPDscHelper.InitializeScript -NoNewScope
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Mocks for all contexts
                 Mock -CommandName Get-ChildItem -MockWith {
@@ -177,11 +177,11 @@ try
                             SignOutUrl                   = "https://adfs.contoso.com/adfs/oauth2/logout"
                             IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
                             ClaimsMappings               = @(
-                            (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                                (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
                                     Name              = "Email"
                                     IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
                                 } -ClientOnly)
-                            (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                                (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
                                     Name              = "Role"
                                     IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
                                     LocalClaimType    = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
@@ -229,11 +229,11 @@ try
                             MetadataEndPoint        = "https://adfs.contoso.com/adfs/.well-known/openid-configuration"
                             IdentifierClaim         = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
                             ClaimsMappings          = @(
-                            (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                                (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
                                     Name              = "Email"
                                     IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
                                 } -ClientOnly)
-                            (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                                (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
                                     Name              = "Role"
                                     IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
                                     LocalClaimType    = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
@@ -282,11 +282,11 @@ try
                             SignOutUrl                   = "https://adfs.contoso.com/adfs/oauth2/logout"
                             IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
                             ClaimsMappings               = @(
-                            (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                                (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
                                     Name              = "Email"
                                     IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
                                 } -ClientOnly)
-                            (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                                (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
                                     Name              = "Role"
                                     IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
                                     LocalClaimType    = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
@@ -328,11 +328,11 @@ try
                             SignOutUrl                   = "https://adfs.contoso.com/adfs/oauth2/logout"
                             IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
                             ClaimsMappings               = @(
-                            (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                                (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
                                     Name              = "Email"
                                     IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
                                 } -ClientOnly)
-                            (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                                (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
                                     Name              = "Role"
                                     IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
                                     LocalClaimType    = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
@@ -378,11 +378,11 @@ try
                         Mock -CommandName Remove-SPTrustedIdentityTokenIssuer -MockWith { }
                     }
 
-                    It "Should return absent from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
+                    It "Should return present from the get method" {
+                        (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                     }
 
-                    It "Should return true from the test method" {
+                    It "Should return false from the test method" {
                         Test-TargetResource @testParams | Should -Be $false
                     }
 
@@ -435,11 +435,11 @@ try
                             SignOutUrl                   = "https://adfs.contoso.com/adfs/oauth2/logout"
                             IdentifierClaim              = "IdentityClaimTypeNotSpecifiedInClaimsMappings"
                             ClaimsMappings               = @(
-                            (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                                (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
                                     Name              = "Email"
                                     IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
                                 } -ClientOnly)
-                            (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                                (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
                                     Name              = "Role"
                                     IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
                                     LocalClaimType    = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
@@ -476,11 +476,11 @@ try
                             SignOutUrl                   = "https://adfs.contoso.com/adfs/oauth2/logout"
                             IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
                             ClaimsMappings               = @(
-                            (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                                (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
                                     Name              = "Email"
                                     IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
                                 } -ClientOnly)
-                            (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                                (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
                                     Name              = "Role"
                                     IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
                                     LocalClaimType    = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
@@ -943,11 +943,11 @@ try
                     Mock -CommandName Remove-SPTrustedIdentityTokenIssuer -MockWith { }
                 }
 
-                It "Should return absent from the get method" {
+                It "Should return present from the get method" {
                     (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
-                It "Should return true from the test method" {
+                It "Should return false from the test method" {
                     Test-TargetResource @testParams | Should -Be $false
                 }
 

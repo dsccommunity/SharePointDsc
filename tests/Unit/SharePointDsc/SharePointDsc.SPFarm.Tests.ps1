@@ -133,6 +133,13 @@ try
                     $Global:SPDscHelper.CurrentStubBuildNumber.Build -gt 13000)
                 {
                     Mock -CommandName Update-SPFlightsConfigFile -MockWith { }
+                    Mock -CommandName Get-SPDscConfigDBConnectionEncryption -MockWith {
+                        $return = [PSCustomObject]@{
+                            DatabaseConnectionEncryption      = 'Optional'
+                            DatabaseServerCertificateHostName = $null
+                        }
+                        return $return
+                    }
                 }
 
                 function Add-SPDscEvent
@@ -314,6 +321,11 @@ try
                         AdminContentDatabaseName = "SP_AdminContent"
                         RunCentralAdmin          = $false
                     }
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16 -and
+                        $Global:SPDscHelper.CurrentStubBuildNumber.Build -ge 18526)
+                    {
+                        $testParams.Add('DatabaseConnectionEncryption', 'Optional')
+                    }
 
                     Mock -CommandName Get-SPDscRegistryKey -MockWith {
                         if ($Value -eq "Location")
@@ -433,6 +445,12 @@ try
                         RunCentralAdmin          = $false
                     }
 
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16 -and
+                        $Global:SPDscHelper.CurrentStubBuildNumber.Build -ge 18526)
+                    {
+                        $testParams.Add('DatabaseConnectionEncryption', 'Optional')
+                    }
+
                     Mock -CommandName Get-SPDscRegistryKey -MockWith {
                         if ($Value -eq "Location")
                         {
@@ -535,6 +553,11 @@ try
                         AdminContentDatabaseName = "SP_AdminContent"
                         RunCentralAdmin          = $true
                     }
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16 -and
+                        $Global:SPDscHelper.CurrentStubBuildNumber.Build -ge 18526)
+                    {
+                        $testParams.Add('DatabaseConnectionEncryption', 'Optional')
+                    }
 
                     Mock -CommandName Get-SPDscRegistryKey -MockWith {
                         if ($Value -eq "Location")
@@ -626,6 +649,11 @@ try
                         Passphrase               = $mockPassphrase
                         AdminContentDatabaseName = "SP_AdminContent"
                         RunCentralAdmin          = $true
+                    }
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16 -and
+                        $Global:SPDscHelper.CurrentStubBuildNumber.Build -ge 18526)
+                    {
+                        $testParams.Add('DatabaseConnectionEncryption', 'Optional')
                     }
 
                     Mock -CommandName Get-SPDscRegistryKey -MockWith {
@@ -1550,6 +1578,11 @@ try
                         CentralAdministrationUrl = "http://admin.contoso.com"
                         RunCentralAdmin          = $true
                     }
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16 -and
+                        $Global:SPDscHelper.CurrentStubBuildNumber.Build -ge 18526)
+                    {
+                        $testParams.Add('DatabaseConnectionEncryption', 'Optional')
+                    }
 
                     Mock -CommandName Get-SPDscRegistryKey -MockWith {
                         if ($Value -eq "Location")
@@ -1636,6 +1669,11 @@ try
                         AdminContentDatabaseName = "SP_AdminContent"
                         CentralAdministrationUrl = "https://admin.contoso.com"
                         RunCentralAdmin          = $true
+                    }
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16 -and
+                        $Global:SPDscHelper.CurrentStubBuildNumber.Build -ge 18526)
+                    {
+                        $testParams.Add('DatabaseConnectionEncryption', 'Optional')
                     }
 
                     Mock -CommandName Get-SPDscRegistryKey -MockWith {
@@ -2485,6 +2523,11 @@ try
                             AdminContentDatabaseName = "SP_AdminContent"
                             ApplicationCredentialKey = $mockPassphrase
                             RunCentralAdmin          = $false
+                        }
+                        if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16 -and
+                            $Global:SPDscHelper.CurrentStubBuildNumber.Build -ge 18526)
+                        {
+                            $testParams.Add('DatabaseConnectionEncryption', 'Optional')
                         }
 
                         Mock -CommandName Get-SPDscRegistryKey -MockWith {

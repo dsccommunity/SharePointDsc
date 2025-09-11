@@ -89,7 +89,19 @@ function Get-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $SkipRegisterAsDistributedCacheHost = $true
+        $SkipRegisterAsDistributedCacheHost = $true,
+
+        [Parameter()]
+        [ValidateSet("Mandatory",
+            "Optional",
+            "Strict")]
+        [System.String]
+        $DatabaseConnectionEncryption,
+
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $DatabaseServerCertificateHostName
     )
 
     Write-Verbose -Message "Getting the settings of the current local SharePoint Farm (if any)"
@@ -317,6 +329,17 @@ function Get-TargetResource
                     }
                 }
             }
+            # Parameter only exists at Share Point Subscription Edition 25h1
+            if ($installedVersion.FileMajorPart -eq 16 -and $installedVersion.ProductBuildPart -ge 18526)
+            {
+                $ConnectionEncryption = Get-SPDscConfigDBConnectionEncryption
+                # Get Farm Connection String
+                $returnValue.Add("DatabaseConnectionEncryption", $ConnectionEncryption.DatabaseConnectionEncryption)
+
+                # DatabaseServerCertificateHostName
+                $returnValue.Add("DatabaseServerCertificateHostName", $ConnectionEncryption.DatabaseServerCertificateHostName)
+
+            }
             return $returnValue
         }
 
@@ -457,7 +480,19 @@ function Set-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $SkipRegisterAsDistributedCacheHost = $true
+        $SkipRegisterAsDistributedCacheHost = $true,
+
+        [Parameter()]
+        [ValidateSet("Mandatory",
+            "Optional",
+            "Strict")]
+        [System.String]
+        $DatabaseConnectionEncryption,
+
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $DatabaseServerCertificateHostName
     )
 
     Write-Verbose -Message "Setting local SP Farm settings"
@@ -913,8 +948,25 @@ function Set-TargetResource
                         }
                         $executeArgs.Add("ServerRoleOptional", $true)
                     }
+
+                    # DatabaseConnectionEncryption
+                    if ($params.ContainsKey("DatabaseConnectionEncryption") -eq $true)
+                    {
+                        if ($buildVersion -ge 18526)
+                        {
+                            $executeArgs.Add("DatabaseConnectionEncryption", $params.DatabaseConnectionEncryption)
+                        }
+                    }
+                    # DatabaseServerCertificateHostName
+                    if ($params.ContainsKey("DatabaseServerCertificateHostName") -eq $true)
+                    {
+                        if ($buildVersion -ge 18526)
+                        {
+                            $executeArgs.Add("DatabaseServerCertificateHostName", $params.DatabaseServerCertificateHostName)
+                        }
+                    }
                 }
-                Default
+                default
                 {
                     $message = ("An unknown version of SharePoint (Major version $_) " +
                         "was detected. Only versions 15 (SharePoint 2013) and" +
@@ -1340,7 +1392,19 @@ function Test-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $SkipRegisterAsDistributedCacheHost = $true
+        $SkipRegisterAsDistributedCacheHost = $true,
+
+        [Parameter()]
+        [ValidateSet("Mandatory",
+            "Optional",
+            "Strict")]
+        [System.String]
+        $DatabaseConnectionEncryption,
+
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $DatabaseServerCertificateHostName
     )
 
     Write-Verbose -Message "Testing local SP Farm settings"

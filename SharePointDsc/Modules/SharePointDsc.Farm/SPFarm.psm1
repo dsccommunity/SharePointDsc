@@ -348,3 +348,60 @@ function Remove-SPDscConfigDBLock
         }
     }
 }
+
+<#
+
+.SYNOPSIS
+
+Get-SPDscConfigDBConnectionEncryption returns the current Value for the DatabaseConnectionEncryption and DatabaseServerCertificateHostName.
+
+.DESCRIPTION
+
+Get-SPDscConfigDBConnectionEncryption returns the current Value for the DatabaseConnectionEncryption and DatabaseServerCertificateHostName.
+
+.EXAMPLE
+
+Get-SPDscConfigDBConnectionEncryption
+
+#>
+function Get-SPDscConfigDBConnectionEncryption
+{
+    param
+    (
+    )
+
+    Write-Verbose -Message "Getting SQL Connection String from registry to extract Database Connection Encryption and Database Server Certificate Hostname"
+
+    $installedVersion = Get-SPDscInstalledProductVersion
+
+    $getSPFarmConnectionString = @{
+        Key         = "hklm:SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\$($installedVersion.FileMajorPart).0\Secure\ConfigDB"
+        Value       = 'dsn'
+        ErrorAction = 'SilentlyContinue'
+    }
+    $connectionString = Get-SPDscRegistryKey @getSPFarmConnectionString
+    $sqlConnectionString = [Microsoft.Data.SqlClient.SqlConnectionStringBuilder]::new($connectionString)
+
+    # DatabaseConnectionEncryption
+    $databaseConnectionEncryptionValue = if ([Microsoft.Data.SqlClient.SqlConnectionEncryptOption]::Mandatory -eq $sqlConnectionString.Encrypt)
+    {
+        'Mandatory'
+    }
+    elseif ([Microsoft.Data.SqlClient.SqlConnectionEncryptOption]::Optional -eq $sqlConnectionString.Encrypt)
+    {
+        'Optional'
+    }
+    elseif ([Microsoft.Data.SqlClient.SqlConnectionEncryptOption]::Strict -eq $sqlConnectionString.Encrypt)
+    {
+        'Strict'
+    }
+    else
+    {
+        $null
+    }
+    $return = [PSCustomObject]@{
+        DatabaseConnectionEncryption      = $databaseConnectionEncryptionValue
+        DatabaseServerCertificateHostName = $sqlConnectionString.HostNameInCertificate
+    }
+    return $return
+}
