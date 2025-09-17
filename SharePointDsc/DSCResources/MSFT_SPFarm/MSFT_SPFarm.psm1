@@ -227,9 +227,10 @@ function Get-TargetResource
     if ($null -ne $dsnValue)
     {
         Write-Verbose -Message "This node has already been connected to a farm"
-        $result = Invoke-SPDscCommand -Arguments $PSBoundParameters `
+        $result = Invoke-SPDscCommand -Arguments @($PSBoundParameters, $PSScriptRoot) `
             -ScriptBlock {
             $params = $args[0]
+            $scriptRoot = $args[1]
 
             try
             {
@@ -332,6 +333,9 @@ function Get-TargetResource
             # Parameter only exists at Share Point Subscription Edition 25h1
             if ($installedVersion.FileMajorPart -eq 16 -and $installedVersion.ProductBuildPart -ge 18526)
             {
+                $modulePath = "..\..\Modules\SharePointDsc.Farm\SPFarm.psm1"
+                Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve)
+
                 $ConnectionEncryption = Get-SPDscConfigDBConnectionEncryption
                 # Get Farm Connection String
                 $returnValue.Add("DatabaseConnectionEncryption", $ConnectionEncryption.DatabaseConnectionEncryption)
