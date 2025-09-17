@@ -7,7 +7,7 @@
             "name": "Run current unit test (SP2013)",
             "script": "${file}",
             "args": [
-                "${workspaceRoot}/Tests/Unit/Stubs/SharePoint/15.0.4805.1000/Microsoft.SharePoint.PowerShell.psm1"
+                "${workspaceRoot}/tests/Unit/Stubs/SharePoint/15.0.4805.1000/Microsoft.SharePoint.PowerShell.psm1"
             ],
             "cwd": "${file}",
             "createTemporaryIntegratedConsole": true
@@ -18,7 +18,7 @@
             "name": "Run current unit test (SP2016)",
             "script": "${file}",
             "args": [
-                "${workspaceRoot}/Tests/Unit/Stubs/SharePoint/16.0.4456.1000/Microsoft.SharePoint.PowerShell.psm1"
+                "${workspaceRoot}/tests/Unit/Stubs/SharePoint/16.0.4456.1000/Microsoft.SharePoint.PowerShell.psm1"
             ],
             "cwd": "${file}",
             "createTemporaryIntegratedConsole": true
@@ -29,7 +29,7 @@
             "name": "Run current unit test (SP2019)",
             "script": "${file}",
             "args": [
-                "${workspaceRoot}/Tests/Unit/Stubs/SharePoint/16.0.10337.12109/Microsoft.SharePoint.PowerShell.psm1"
+                "${workspaceRoot}/tests/Unit/Stubs/SharePoint/16.0.10337.12109/Microsoft.SharePoint.PowerShell.psm1"
             ],
             "cwd": "${file}",
             "createTemporaryIntegratedConsole": true
@@ -40,7 +40,7 @@
             "name": "Run current unit test (SPSE)",
             "script": "${file}",
             "args": [
-                "${workspaceRoot}/tests/Unit/Stubs/SharePoint/16.0.14326.20450/SharePointServer.psm1"
+                "${workspaceRoot}/tests/Unit/Stubs/SharePoint/16.0.18526.20508/SharePointServer.psm1"
             ],
             "cwd": "${file}",
             "createTemporaryIntegratedConsole": true
@@ -52,7 +52,7 @@
             "script": "${workspaceRoot}/.vscode/GetTestCoverage.ps1",
             "args": [
                 "${file}",
-                "${workspaceRoot}/Tests/Unit/Stubs/SharePoint/15.0.4805.1000/Microsoft.SharePoint.PowerShell.psm1"
+                "${workspaceRoot}/tests/Unit/Stubs/SharePoint/15.0.4805.1000/Microsoft.SharePoint.PowerShell.psm1"
             ],
             "createTemporaryIntegratedConsole": true
         },
@@ -63,7 +63,7 @@
             "script": "${workspaceRoot}/.vscode/GetTestCoverage.ps1",
             "args": [
                 "${file}",
-                "${workspaceRoot}/Tests/Unit/Stubs/SharePoint/16.0.4456.1000/Microsoft.SharePoint.PowerShell.psm1"
+                "${workspaceRoot}/tests/Unit/Stubs/SharePoint/16.0.4456.1000/Microsoft.SharePoint.PowerShell.psm1"
             ],
             "createTemporaryIntegratedConsole": true
         },
@@ -74,7 +74,7 @@
             "script": "${workspaceRoot}/.vscode/GetTestCoverage.ps1",
             "args": [
                 "${file}",
-                "${workspaceRoot}/Tests/Unit/Stubs/SharePoint/16.0.10337.12109/Microsoft.SharePoint.PowerShell.psm1"
+                "${workspaceRoot}/tests/Unit/Stubs/SharePoint/16.0.10337.12109/Microsoft.SharePoint.PowerShell.psm1"
             ],
             "createTemporaryIntegratedConsole": true
         },
@@ -85,7 +85,7 @@
             "script": "${workspaceRoot}/.vscode/GetTestCoverage.ps1",
             "args": [
                 "${file}",
-                "${workspaceRoot}/tests/Unit/Stubs/SharePoint/16.0.14326.20450/SharePointServer.psm1"
+                "${workspaceRoot}/tests/Unit/Stubs/SharePoint/16.0.18526.20508/SharePointServer.psm1"
             ],
             "createTemporaryIntegratedConsole": true
         },

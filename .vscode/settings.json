@@ -1,27 +1,13 @@
 {
-    "powershell.codeFormatting.autoCorrectAliases": true,
-    "powershell.codeFormatting.useCorrectCasing": true,
-    "powershell.codeFormatting.openBraceOnSameLine": false,
-    "powershell.codeFormatting.newLineAfterOpenBrace": true,
-    "powershell.codeFormatting.newLineAfterCloseBrace": true,
-    "powershell.codeFormatting.whitespaceBeforeOpenBrace": true,
-    "powershell.codeFormatting.whitespaceBeforeOpenParen": true,
-    "powershell.codeFormatting.whitespaceAroundOperator": true,
-    "powershell.codeFormatting.whitespaceAfterSeparator": true,
-    "powershell.codeFormatting.ignoreOneLineBlock": false,
-    "powershell.codeFormatting.pipelineIndentationStyle": "IncreaseIndentationAfterEveryPipeline",
-    "powershell.codeFormatting.preset": "Custom",
-    "powershell.codeFormatting.alignPropertyValuePairs": true,
-    "powershell.developer.bundledModulesPath": "${cwd}/output/RequiredModules",
-    "powershell.scriptAnalysis.settingsPath": ".vscode\\analyzersettings.psd1",
-    "powershell.scriptAnalysis.enable": true,
     "editor.formatOnSave": true,
-    "files.trimTrailingWhitespace": true,
-    "files.trimFinalNewlines": true,
-    "files.insertFinalNewline": true,
+
     "files.associations": {
         "*.ps1xml": "xml"
     },
+    "files.insertFinalNewline": true,
+    "files.trimFinalNewlines": true,
+    "files.trimTrailingWhitespace": true,
+
     "cSpell.words": [
         "COMPANYNAME",
         "ICONURI",
@@ -37,8 +23,34 @@
         "pscmdlet",
         "steppable"
     ],
+
+    "powershell.codeFormatting.addWhitespaceAroundPipe": true,
+    "powershell.codeFormatting.alignPropertyValuePairs": true,
+    "powershell.codeFormatting.autoCorrectAliases": true,
+    "powershell.codeFormatting.avoidSemicolonsAsLineTerminators": false,
+    "powershell.codeFormatting.ignoreOneLineBlock": false,
+    "powershell.codeFormatting.newLineAfterCloseBrace": true,
+    "powershell.codeFormatting.newLineAfterOpenBrace": true,
+    "powershell.codeFormatting.openBraceOnSameLine": false,
+    "powershell.codeFormatting.pipelineIndentationStyle": "IncreaseIndentationAfterEveryPipeline",
+    "powershell.codeFormatting.preset": "Custom",
+    "powershell.codeFormatting.trimWhitespaceAroundPipe": false,
+    "powershell.codeFormatting.useConstantStrings": false,
+    "powershell.codeFormatting.useCorrectCasing": true,
+    "powershell.codeFormatting.whitespaceAfterSeparator": true,
+    "powershell.codeFormatting.whitespaceAroundOperator": true,
+    "powershell.codeFormatting.whitespaceBeforeOpenBrace": true,
+    "powershell.codeFormatting.whitespaceBeforeOpenParen": true,
+    "powershell.codeFormatting.whitespaceBetweenParameters": false,
+    "powershell.codeFormatting.whitespaceInsideBrace": true,
+
+    "powershell.developer.bundledModulesPath": "${workspaceFolder}/output/RequiredModules",
+
+    "powershell.scriptAnalysis.enable": true,
+    "powershell.scriptAnalysis.settingsPath": ".vscode/analyzersettings.psd1",
+
     "[markdown]": {
-        "files.trimTrailingWhitespace": false,
-        "files.encoding": "utf8"
+        "files.encoding": "utf8",
+        "files.trimTrailingWhitespace": false
     }
 }

@@ -115,7 +115,7 @@ This executes all tests for SharePoint 2013 on the code. This can take several h
 ```
 **SharePoint Subscription Edition**
 ```PowerShell
- .\build.ps1 -Tasks test -PesterScript @(@{ Path = '<module_path>/Tests/Unit'; Parameters = @{SharePointCmdletModule = '<module_path>/Tests/Unit/Stubs/SharePoint/16.0.14326.20450/SharePointServer.psm1' }})
+ .\build.ps1 -Tasks test -PesterScript @(@{ Path = '<module_path>/Tests/Unit'; Parameters = @{SharePointCmdletModule = '<module_path>/Tests/Unit/Stubs/SharePoint/16.0.18526.20508/SharePointServer.psm1' }})
 ```
 
 We are also checking for compliance to the [coding style guide and other generic tests](https://github.com/PowerShell/DscResource.Tests#dsc-resource-common-meta-tests). You can run these tests locally by executing the following steps:

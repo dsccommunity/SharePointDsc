@@ -12,8 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- General
+  - Updates to VS Code workspace configuration
 - SPTrustedIdentityTokenIssuer
   - Added parameters `MetadataEndPoint`, `OidcScope` and `UseStateToRedirect`.
+- SPFarm
+  - Added parameters `DatabaseConnectionEncryption` and `DatabaseServerCertificateHostName`.
 
 ## [5.6.1] - 2025-01-29
 
