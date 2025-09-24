@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - SPDistributedCacheClientSettings
   - Resource threw an error on SharePoint Server Subscription Edition with Build >= 16.0.18526.20080.
+- SPInstallPrereqs
+  - Trigger a machine reboot when the installer returns the generic error 0x80004005, to allow a retry
 
 ### Changed
 
