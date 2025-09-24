@@ -1180,6 +1180,18 @@ function Set-TargetResource
                     "to reboot the machine before continuing.")
             $global:DSCMachineStatus = 1
         }
+        -2147467259
+        {
+            # This is the generic error 0x80004005, that should be fixed with a reboot
+            $message = ("The prerequisite installer has failed with an unknown error " + `
+                    "(exit code 0x80004005), that may be fixed with a machine reboot.")
+            Write-Verbose -Message $message
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            $global:DSCMachineStatus = 1
+        }
         default
         {
             $message = ("The prerequisite installer ran with the following unknown " + `
