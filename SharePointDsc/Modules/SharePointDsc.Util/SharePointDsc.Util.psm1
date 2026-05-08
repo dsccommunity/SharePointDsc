@@ -48,7 +48,7 @@ function Add-SPDscEvent
     try
     {
         Write-EventLog -LogName $LogName -Source $Source `
-            -EventId $EventID -Message $Message -EntryType $EntryType
+            -EventId $EventID -Message $Message -EntryType $EntryType -ErrorAction Stop
     }
     catch
     {
