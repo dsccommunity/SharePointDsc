@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - SPInstallPrereqs
   - Trigger a machine reboot when the installer returns error -1 (download of a package failed), to allow a retry.
+- SPProjectServerLicense
+  - Update the regex to correctly detect Project Server Subscription Edition.
 - SharePointDsc
   - Prevent random error "The registry key for the log "SPDsc" for source "MSFT_SPFarm" could not be opened" when
     running cmdlet `Write-EventLog` in function `Add-SPDscEvent`. It happens randomly in Windows Server 2025

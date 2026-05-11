@@ -50,7 +50,8 @@ function Get-TargetResource
             # SP2016 value is "Project Server 2016 : Active" (space after 2016)
             # SP2019 value is "Project Server 2019: Active" (no space after 2019)
             # SP2019 Preview value is "Project Server 2019 Preview: Active"
-            $regex = "Project Server [0-9]{4}\s*\w*: (?<Status>[a-zA-Z]+)"
+            # Subscription value is "Project Server Subscription Edition: Active"
+            $regex = "Project Server ([0-9]{4}|Subscription)\s*\w*: (?<Status>[a-zA-Z]+)"
 
             if ($currentLicense -match $regex)
             {
