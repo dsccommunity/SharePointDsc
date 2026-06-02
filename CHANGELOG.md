@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Prevent random error "The registry key for the log "SPDsc" for source "MSFT_SPFarm" could not be opened" when
     running cmdlet `Write-EventLog` in function `Add-SPDscEvent`. It happens randomly in Windows Server 2025
 
+### Changed
+
+- Pinned ModuleBuilder to v3.1.8 due to a Build issue
+
 ## [5.7.0] - 2025-10-22
 
 ### Fixed
