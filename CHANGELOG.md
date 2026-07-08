@@ -18,6 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     Template) on SharePoint Server Subscription Edition when run by the LCM, which caused a
     permanent drift. The site is now re-opened with the Central Admin system account token
     when the Owner is missing.
+  - Fixed the Get method returning an empty Name because it read the RootWeb Name property
+    (always empty on an SPWeb) instead of the Title. The site collection name is now read
+    from the RootWeb Title, resolved through the multilingual TitleResource when available.
 
 ## [5.7.1] - 2026-06-08
 
