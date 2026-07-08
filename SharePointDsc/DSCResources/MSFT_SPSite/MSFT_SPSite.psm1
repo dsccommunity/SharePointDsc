@@ -104,6 +104,9 @@ function Get-TargetResource
                 catch [System.Exception]
                 {
                     # Keep the site returned by Get-SPSite when the system-account re-open fails.
+                    Write-Verbose -Message ("Could not re-open site '$($params.Url)' with the " + `
+                            "Central Admin system account token; using the site returned by " + `
+                            "Get-SPSite. Error: $($_.Exception.Message)")
                 }
             }
         }

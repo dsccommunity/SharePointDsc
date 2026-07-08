@@ -5,6 +5,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- SPSite
+  - Fixed the Get method returning null Owner and RootWeb properties (OwnerAlias, Name,
+    Template) on SharePoint Server Subscription Edition when run by the LCM, which caused a
+    permanent drift. The site is now re-opened with the Central Admin system account token
+    when the Owner is missing.
+
 ## [5.7.1] - 2026-06-08
 
 ### Fixed
@@ -13,11 +21,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Trigger a machine reboot when the installer returns error -1 (download of a package failed), to allow a retry.
 - SPProjectServerLicense
   - Update the regex to correctly detect Project Server Subscription Edition.
-- SPSite
-  - Fixed the Get method returning null Owner and RootWeb properties (OwnerAlias, Name,
-    Template) on SharePoint Server Subscription Edition when run by the LCM, which caused a
-    permanent drift. The site is now re-opened with the Central Admin system account token
-    when the Owner is missing.
 - SharePointDsc
   - Prevent random error "The registry key for the log "SPDsc" for source "MSFT_SPFarm" could not be opened" when
     running cmdlet `Write-EventLog` in function `Add-SPDscEvent`. It happens randomly in Windows Server 2025
