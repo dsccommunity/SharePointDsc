@@ -369,6 +369,57 @@ try
                 }
             }
 
+            Context -Name "The site exists and its RootWeb name comes from the Title property" -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        Url        = "http://site.sharepoint.com"
+                        OwnerAlias = "DEMO\owner"
+                    }
+
+                    # The RootWeb Name property is empty on an SPWeb object; the site collection
+                    # name is held in the Title property (issue #1441). The get method must return
+                    # the Title, resolved through the multilingual TitleResource when available.
+                    $contextSiteImplementation = {
+                        $site = $siteImplementation.InvokeReturnAsIs()
+                        $site.WebApplication.Url = $testParams.Url
+                        $site.WebApplication.UseClaimsAuthentication = $false
+                        $site.Url = $testParams.Url
+                        $site.Owner = @{ UserLogin = "DEMO\owner" }
+                        $site.RootWeb.AssociatedVisitorGroup = "Visitors"
+                        $site.RootWeb.AssociatedMemberGroup = "Members"
+                        $site.RootWeb.AssociatedOwnerGroup = "Owners"
+                        $site.RootWeb.Name = ""
+                        $site.RootWeb.Title = "My Fancy Title"
+                        $site.RootWeb.UICulture = 1033
+                        $titleResource = @{ }
+                        $titleResource = $titleResource | Add-Member -MemberType ScriptMethod `
+                            -Name GetValueForUICulture -Value { return "My Fancy Title" } -PassThru
+                        $site.RootWeb.TitleResource = $titleResource
+                        return $site
+                    }
+
+                    Mock -CommandName New-Object -MockWith {
+                        $site = $contextSiteImplementation.InvokeReturnAsIs()
+                        $Script:SPDscSystemAccountSite = $site
+                        return $site
+                    } -ParameterFilter {
+                        $TypeName -eq "Microsoft.SharePoint.SPSite" -and
+                        $ArgumentList[0] -eq $testParams.Url -and
+                        $ArgumentList[1] -eq "CentralAdminSystemAccountUserToken"
+                    }
+
+                    Mock -CommandName Get-SPSite -MockWith {
+                        $site = $contextSiteImplementation.InvokeReturnAsIs()
+                        $Script:SPDscSite = $site
+                        return $site
+                    }
+                }
+
+                It "Should return the RootWeb Title as the Name from the get method" {
+                    (Get-TargetResource @testParams).Name | Should -Be "My Fancy Title"
+                }
+            }
+
             Context -Name "The site exists, but doesn't have default groups configured" -Fixture {
                 BeforeAll {
                     $testParams = @{
