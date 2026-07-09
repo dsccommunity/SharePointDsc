@@ -5,6 +5,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- CODEOWNERS
+  - Request reviews from the @dsccommunity/sharepointdsc team, with @ykuijs as the default
+    owner, aligning the file with the other DSC Community repositories.
+
 ### Fixed
 
 - SPSite
