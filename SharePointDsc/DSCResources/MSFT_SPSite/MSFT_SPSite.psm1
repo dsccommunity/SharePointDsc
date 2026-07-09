@@ -77,9 +77,38 @@ function Get-TargetResource
         if ($productVersion.FileMajorPart -eq 16 `
                 -and $productVersion.FileBuildPart -gt 13000)
         {
-            # On SharePoint Subscription Edition the Microsoft.SharePoint.SPSite Constructor never gets a Site Collection when run by the LCM.
-            # Fixes 1442: https://github.com/dsccommunity/SharePointDsc/issues/1442
+            # On SharePoint Subscription Edition the Microsoft.SharePoint.SPSite constructor by URL
+            # returns no site when run by the LCM, so retrieve the site with Get-SPSite (Fixes 1442).
+            # In that context the Owner and RootWeb properties of the returned site can come back
+            # $null (for example for a host-named site collection), which produces a permanent drift.
+            # When the Owner is missing, re-open the site with the Central Admin system account token
+            # using the site Id - the same pattern Set-TargetResource uses - so the properties are
+            # read reliably (Fixes 1453).
             $site = Get-SPSite -Identity $params.Url -ErrorAction SilentlyContinue
+
+            if ($null -ne $site -and $null -eq $site.Owner)
+            {
+                try
+                {
+                    $centralAdminWebApp = [Microsoft.SharePoint.Administration.SPAdministrationWebApplication]::Local
+                    $centralAdminSite = Get-SPSite -Identity $centralAdminWebApp.Url -ErrorAction Stop
+
+                    $siteAsSystem = New-Object "Microsoft.SharePoint.SPSite" `
+                        -ArgumentList @($site.Id, $centralAdminSite.SystemAccount.UserToken)
+
+                    if ($null -ne $siteAsSystem)
+                    {
+                        $site = $siteAsSystem
+                    }
+                }
+                catch [System.Exception]
+                {
+                    # Keep the site returned by Get-SPSite when the system-account re-open fails.
+                    Write-Verbose -Message ("Could not re-open site '$($params.Url)' with the " + `
+                            "Central Admin system account token; using the site returned by " + `
+                            "Get-SPSite. Error: $($_.Exception.Message)")
+                }
+            }
         }
         else
         {

@@ -369,6 +369,84 @@ try
                 }
             }
 
+            Context -Name "The site exists but returns no owner when retrieved on SharePoint Subscription Edition" -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        Url        = "http://site.sharepoint.com"
+                        OwnerAlias = "DEMO\owner"
+                    }
+
+                    # On SharePoint Subscription Edition, Get-SPSite retrieves the site (fix for
+                    # issue #1442) but its Owner and RootWeb properties come back null when run by
+                    # the LCM (issue #1453). Reproduce that by returning a site without an owner.
+                    Mock -CommandName Get-SPSite -MockWith {
+                        return @{
+                            Id                     = "11111111-1111-1111-1111-111111111111"
+                            HostHeaderIsSiteName   = $true
+                            WebApplication         = @{
+                                Url                     = $testParams.Url
+                                UseClaimsAuthentication = $false
+                            }
+                            Url                    = $testParams.Url
+                            Owner                  = $null
+                            SecondaryContact       = $null
+                            Quota                  = @{ QuotaId = 0 }
+                            RootWeb                = @{
+                                AssociatedVisitorGroup = "Visitors"
+                                AssociatedMemberGroup  = "Members"
+                                AssociatedOwnerGroup   = "Owners"
+                                Name                   = $null
+                                WebTemplate            = $null
+                                Configuration          = $null
+                            }
+                            AdministrationSiteType = "None"
+                        }
+                    } -ParameterFilter { $Identity -eq $testParams.Url }
+
+                    # Re-opening the site with the Central Admin system account token returns the
+                    # fully populated site, so the properties can be read reliably.
+                    Mock -CommandName New-Object -MockWith {
+                        $site = @{
+                            Id                     = "11111111-1111-1111-1111-111111111111"
+                            HostHeaderIsSiteName   = $true
+                            WebApplication         = @{
+                                Url                     = $testParams.Url
+                                UseClaimsAuthentication = $false
+                            }
+                            Url                    = $testParams.Url
+                            Owner                  = @{ UserLogin = "DEMO\owner"; Email = "owner@contoso.com" }
+                            SecondaryContact       = $null
+                            Quota                  = @{ QuotaId = 0 }
+                            RootWeb                = @{
+                                AssociatedVisitorGroup = "Visitors"
+                                AssociatedMemberGroup  = "Members"
+                                AssociatedOwnerGroup   = "Owners"
+                                Name                   = "TeamSite"
+                                WebTemplate            = "STS"
+                                Configuration          = 0
+                            }
+                            AdministrationSiteType = "None"
+                        }
+                        $Script:SPDscSystemAccountSite = $site
+                        return $site
+                    } -ParameterFilter {
+                        $TypeName -eq "Microsoft.SharePoint.SPSite" -and
+                        $ArgumentList[1] -eq "CentralAdminSystemAccountUserToken"
+                    }
+                }
+
+                It "Should read the owner and template from the get method" {
+                    $result = Get-TargetResource @testParams
+                    $result.OwnerAlias | Should -Be "DEMO\owner"
+                    $result.Template | Should -Be "STS#0"
+                    $result.Name | Should -Be "TeamSite"
+                }
+
+                It "Should return true from the test method" {
+                    Test-TargetResource @testParams | Should -Be $true
+                }
+            }
+
             Context -Name "The site exists, but doesn't have default groups configured" -Fixture {
                 BeforeAll {
                     $testParams = @{

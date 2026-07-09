@@ -11,6 +11,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Request reviews from the @dsccommunity/sharepointdsc team, with @ykuijs as the default
     owner, aligning the file with the other DSC Community repositories.
 
+### Fixed
+
+- SPSite
+  - Fixed the Get method returning null Owner and RootWeb properties (OwnerAlias, Name,
+    Template) on SharePoint Server Subscription Edition when run by the LCM, which caused a
+    permanent drift. The site is now re-opened with the Central Admin system account token
+    when the Owner is missing.
+
 ## [5.7.1] - 2026-06-08
 
 ### Fixed
