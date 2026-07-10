@@ -205,7 +205,10 @@ function Set-TargetResource
                         if ($null -eq $si)
                         {
                             $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
-                            $currentServer = "$currentServer.$domain"
+                            if ($currentServer -notlike "*.$domain")
+                            {
+                                $currentServer = "$currentServer.$domain"
+                            }
                         }
 
                         Write-Verbose "Waiting for cache on $currentServer"

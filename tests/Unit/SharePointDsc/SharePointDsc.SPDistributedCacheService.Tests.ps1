@@ -371,6 +371,42 @@ try
                 }
             }
 
+            Context -Name "Distributed cache is not configured, ServerProvisionOrder specified with an FQDN server name" -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        Name                 = "AppFabricCache"
+                        Ensure               = "Present"
+                        CacheSizeInMB        = 1024
+                        ServiceAccount       = "DOMAIN\user"
+                        ServerProvisionOrder = "Server1.contoso.com", $env:COMPUTERNAME
+                        CreateFirewallRules  = $true
+                    }
+
+                    Mock -CommandName Start-Sleep -MockWith { }
+
+                    Mock -CommandName Get-CimInstance -MockWith {
+                        return @{
+                            Domain = "contoso.com"
+                        }
+                    }
+                    Mock -CommandName Use-CacheCluster -MockWith {
+                        throw [Exception] "ERRPS001 Error in reading provider and connection string values."
+                    }
+                    $Global:SPDscDCacheOnline = $false
+
+                    # Returns no distributed cache instance for the FQDN name, forcing the
+                    # code path that appends the domain to the server name.
+                    Mock -CommandName Get-SPServiceInstance -MockWith {
+                        return @()
+                    } -ParameterFilter { $Server -eq "Server1.contoso.com" }
+                }
+
+                It "Should not append the domain again when the server name is already an FQDN" {
+                    Set-TargetResource @testParams
+                    Assert-MockCalled Get-SPServiceInstance -ParameterFilter { $Server -eq "Server1.contoso.com.contoso.com" } -Times 0 -Exactly
+                }
+            }
+
             Context -Name "Distributed cache is not configured, ServerProvisionOrder specified" -Fixture {
                 BeforeAll {
                     $testParams = @{
