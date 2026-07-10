@@ -211,6 +211,19 @@ function Get-TargetResource
                 $CreateDefaultGroups = $false
             }
 
+            # The RootWeb Name property is empty on an SPWeb object; the site collection name is
+            # held in the Title property. Use the multilingual TitleResource for the web's UI
+            # culture when available, falling back to the plain Title.
+            $rootWebName = $site.RootWeb.Title
+            try
+            {
+                $rootWebName = $site.RootWeb.TitleResource.GetValueForUICulture($site.RootWeb.UICulture)
+            }
+            catch
+            {
+                # Fall back to the plain Title when TitleResource / UICulture is unavailable.
+            }
+
             return @{
                 Url                      = $site.Url
                 OwnerAlias               = $owner
@@ -219,7 +232,7 @@ function Get-TargetResource
                 Description              = $site.RootWeb.Description
                 HostHeaderWebApplication = $HostHeaderWebApplication
                 Language                 = $site.RootWeb.Language
-                Name                     = $site.RootWeb.Name
+                Name                     = $rootWebName
                 OwnerEmail               = $site.Owner.Email
                 QuotaTemplate            = $quota
                 SecondaryEmail           = $site.SecondaryContact.Email
