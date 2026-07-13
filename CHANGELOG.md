@@ -25,7 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Fixed the domain being appended a second time when a server name in ServerProvisionOrder
     is already a fully qualified domain name (FQDN). The doubled domain (server.domain.domain)
     prevented the distributed cache from starting. The domain is now only added when the
-    server name is not already an FQDN.
+    server name is not already an FQDN (#1468).
 
 ## [5.7.1] - 2026-06-08
 
