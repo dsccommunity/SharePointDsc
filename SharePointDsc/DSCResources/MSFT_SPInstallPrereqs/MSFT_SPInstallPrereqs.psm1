@@ -1190,6 +1190,23 @@ function Set-TargetResource
                 -Source $MyInvocation.MyCommand.Source
             throw $message
         }
+        1000
+        {
+            # ExitCode 1000 is an undocumented failure result. The actual failed
+            # prerequisite is only recorded in the native PrerequisiteInstaller*.log.
+            # It is treated as a hard failure and never triggers a reboot.
+            $message = ("The prerequisite installer failed with undocumented exit code 1000. " + `
+                    "Review the latest PrerequisiteInstaller*.log in the temporary directory " + `
+                    "of the account running this resource ($env:TEMP). For offline " + `
+                    "installations, verify SXSpath points to the SXS store from matching " + `
+                    "Windows Server installation media, or preinstall all required Windows " + `
+                    "features from that source.")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
+        }
         1001
         {
             Write-Verbose -Message ("A pending restart is blocking the prerequisite " + `
