@@ -9,23 +9,24 @@ CopyPaths:
   - Modules
 Encoding: UTF8
 VersionedOutputDirectory: true
+BuiltModuleSubdirectory: module
 
 ####################################################
 #      ModuleBuilder Submodules Configuration      #
 ####################################################
 
 NestedModule:
-    DscResource.Common:
-      CopyOnly: true
-      Path: ./output/RequiredModules/DscResource.Common
-      AddToManifest: false
-      Exclude: PSGetModuleInfo.xml
+  DscResource.Common:
+    CopyOnly: true
+    Path: ./output/RequiredModules/DscResource.Common
+    AddToManifest: false
+    Exclude: PSGetModuleInfo.xml
 
 ####################################################
 #       Sampler Pipeline Configuration             #
 ####################################################
 BuildWorkflow:
-  '.':
+  ".":
     - build
     - test
 
@@ -86,9 +87,9 @@ CodeCoverage:
 
 DscTest:
   ExcludeTag:
-    - 'Common Tests - New Error-Level Script Analyzer Rules'
-    - 'Common Tests - Validate Localization'
-    - 'Common Tests - Validate Example Files To Be Published'
+    - "Common Tests - New Error-Level Script Analyzer Rules"
+    - "Common Tests - Validate Localization"
+    - "Common Tests - Validate Example Files To Be Published"
   Tag:
   ExcludeSourceFile:
     - output
@@ -102,11 +103,11 @@ DscTest:
 # module in the file RequiredModules.psd1.
 ModuleBuildTasks:
   Sampler:
-    - '*.build.Sampler.ib.tasks'
+    - "*.build.Sampler.ib.tasks"
   Sampler.GitHubTasks:
-    - '*.ib.tasks'
+    - "*.ib.tasks"
   DscResource.DocGenerator:
-    - 'Task.*'
+    - "Task.*"
 
 # Invoke-Build Header to be used to 'decorate' the terminal output of the tasks.
 TaskHeader: |
@@ -122,7 +123,7 @@ TaskHeader: |
 
 GitHubConfig:
   GitHubFilesToAdd:
-    - 'CHANGELOG.md'
+    - "CHANGELOG.md"
   GitHubConfigUserName: dscbot
   GitHubConfigUserEmail: dsccommunity@outlook.com
   UpdateChangelogOnPrerelease: false
@@ -136,6 +137,6 @@ DscResource.DocGenerator:
       - '\(.+?\)' # Match inline code-block
       - '\\(\\)' # Match escaped backslash
       - '\[[^\[]+\]\((.+?)\)' # Match markdown URL
-      - '_(.+?)_' # Match Italic (underscore)
+      - "_(.+?)_" # Match Italic (underscore)
       - '\*\*(.+?)\*\*' # Match bold
       - '\*(.+?)\*' # Match Italic (asterisk)
