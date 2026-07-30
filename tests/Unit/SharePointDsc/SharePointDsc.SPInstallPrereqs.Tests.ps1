@@ -270,6 +270,32 @@ try
 
                     { Set-TargetResource @testParams } | Should -Throw "Invalid command line parameters"
                 }
+
+                It "Should call the prerequisite installer from the set method and throw an actionable error for undocumented exit code 1000 without requesting a reboot" {
+                    Mock -CommandName Start-Process { return @{ ExitCode = 1000 } }
+                    Mock -CommandName Add-SPDscEvent { }
+                    $global:DSCMachineStatus = 0
+
+                    $exception = $null
+                    try
+                    {
+                        Set-TargetResource @testParams
+                    }
+                    catch
+                    {
+                        $exception = $_
+                    }
+
+                    $exception | Should -Not -BeNullOrEmpty
+                    $exception.Exception.Message | Should -Match '1000'
+                    $exception.Exception.Message | Should -Match 'PrerequisiteInstaller\*\.log'
+                    $exception.Exception.Message | Should -Match 'SXSpath'
+                    Assert-MockCalled -CommandName Start-Process -Scope It
+                    Assert-MockCalled -CommandName Add-SPDscEvent -Scope It -Times 1 -Exactly -ParameterFilter {
+                        $EntryType -eq 'Error' -and $EventID -eq 100
+                    }
+                    $global:DSCMachineStatus | Should -Be 0
+                }
             }
 
             Context -Name "Prerequisites are installed and should be" -Fixture {
@@ -910,7 +936,8 @@ try
                         return $true
                     }
 
-                    switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
+                    $stubBuildNumber = $Global:SPDscHelper.CurrentStubBuildNumber
+                    switch ($stubBuildNumber.Major)
                     {
                         15
                         {
@@ -918,7 +945,21 @@ try
                         }
                         16
                         {
-                            $requiredParams = @("SQLNCli", "Sync", "AppFabric", "IDFX11", "MSIPCClient", "KB3092423", "WCFDataServices56", "DotNetFx", "MSVCRT11", "MSVCRT14", "ODBC")
+                            if ($stubBuildNumber.Build -lt 10000)
+                            {
+                                # SharePoint 2016
+                                $requiredParams = @("SQLNCli", "Sync", "AppFabric", "IDFX11", "MSIPCClient", "KB3092423", "WCFDataServices56", "DotNetFx", "MSVCRT11", "MSVCRT14", "ODBC")
+                            }
+                            elseif ($stubBuildNumber.Build -le 12999)
+                            {
+                                # SharePoint 2019
+                                $requiredParams = @("SQLNCli", "Sync", "AppFabric", "IDFX11", "MSIPCClient", "KB3092423", "WCFDataServices56", "DotNet472", "MSVCRT11", "MSVCRT141")
+                            }
+                            else
+                            {
+                                # SharePoint Server Subscription Edition
+                                $requiredParams = @("DotNet48", "MSVCRT142")
+                            }
                         }
                         default
                         {
@@ -938,9 +979,11 @@ try
                                 RestartNeeded = "No"
                             })
                     }
+                    $global:DSCMachineStatus = 0
 
                     Set-TargetResource @testParams
                     Assert-MockCalled Install-WindowsFeature
+                    $global:DSCMachineStatus | Should -Be 0
                 }
 
                 It "feature install requires a reboot" {
@@ -951,6 +994,7 @@ try
                                 RestartNeeded = "Yes"
                             })
                     }
+                    $global:DSCMachineStatus = 0
 
                     Set-TargetResource @testParams
                     $global:DSCMachineStatus | Should -Be 1
@@ -964,6 +1008,7 @@ try
                                 RestartNeeded = "No"
                             })
                     }
+                    $global:DSCMachineStatus = 0
 
                     { Set-TargetResource @testParams } | Should -Throw "Error installing ExampleFeature"
                 }

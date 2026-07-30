@@ -26,6 +26,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     is already a fully qualified domain name (FQDN). The doubled domain (server.domain.domain)
     prevented the distributed cache from starting. The domain is now only added when the
     server name is not already an FQDN (#1468).
+- SPInstallPrereqs
+  - Improved diagnostics for PrerequisiteInstaller.exe exit code 1000. This undocumented
+    failure result is now treated as a hard failure that throws an actionable error pointing
+    to the native PrerequisiteInstaller*.log and, for offline installations, to the SXSpath
+    parameter, instead of a generic unknown exit code message. Exit code 1000 no longer
+    requests a reboot (#1482).
 
 ## [5.7.1] - 2026-06-08
 
@@ -82,7 +88,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SPSearchCrawlerImpactRule
   - Resource threw an error if the Crawler Impact Rule did not exist when
     running the Get Method
-
 
 ## [5.5.0] - 2024-04-22
 

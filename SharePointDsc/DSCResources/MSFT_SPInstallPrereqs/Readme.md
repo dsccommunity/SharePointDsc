@@ -52,3 +52,25 @@ https://docs.microsoft.com/en-us/sharepoint/install/hardware-and-software-requir
 
 SharePoint Subscription:
 https://learn.microsoft.com/en-us/sharepoint/install/software-requirements-for-sharepoint-servers-for-sharepoint-server-subscription-edition
+
+## Troubleshooting
+
+### PrerequisiteInstaller.exe exit code 1000
+
+Exit code `1000` is an undocumented failure result from the
+PrerequisiteInstaller.exe. In contrast to exit code `3010`, which Microsoft
+documents as the restart-required result, `1000` is undocumented and does
+not point to a specific cause by itself. This resource treats it as a hard
+failure: it does not retry the installation and does not request a reboot.
+
+The prerequisite that actually failed is recorded in the native
+`PrerequisiteInstaller*.log` file. This log is written to the temporary
+directory of the account that runs the resource (for example, the account
+specified through `PsDscRunAsCredential`). Review the most recent log to
+find the underlying failure.
+
+For offline installations, a common cause is a failed Windows feature
+installation because the required feature payload is missing. In that case,
+set the `SXSpath` parameter to the SXS store from Windows Server installation
+media that matches the target operating system, or preinstall all required
+Windows features from that same source.
