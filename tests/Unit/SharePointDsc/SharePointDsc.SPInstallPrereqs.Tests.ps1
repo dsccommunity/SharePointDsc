@@ -936,7 +936,8 @@ try
                         return $true
                     }
 
-                    switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
+                    $stubBuildNumber = $Global:SPDscHelper.CurrentStubBuildNumber
+                    switch ($stubBuildNumber.Major)
                     {
                         15
                         {
@@ -944,7 +945,21 @@ try
                         }
                         16
                         {
-                            $requiredParams = @("SQLNCli", "Sync", "AppFabric", "IDFX11", "MSIPCClient", "KB3092423", "WCFDataServices56", "DotNetFx", "MSVCRT11", "MSVCRT14", "ODBC")
+                            if ($stubBuildNumber.Build -lt 10000)
+                            {
+                                # SharePoint 2016
+                                $requiredParams = @("SQLNCli", "Sync", "AppFabric", "IDFX11", "MSIPCClient", "KB3092423", "WCFDataServices56", "DotNetFx", "MSVCRT11", "MSVCRT14", "ODBC")
+                            }
+                            elseif ($stubBuildNumber.Build -le 12999)
+                            {
+                                # SharePoint 2019
+                                $requiredParams = @("SQLNCli", "Sync", "AppFabric", "IDFX11", "MSIPCClient", "KB3092423", "WCFDataServices56", "DotNet472", "MSVCRT11", "MSVCRT141")
+                            }
+                            else
+                            {
+                                # SharePoint Server Subscription Edition
+                                $requiredParams = @("DotNet48", "MSVCRT142")
+                            }
                         }
                         default
                         {
@@ -964,9 +979,11 @@ try
                                 RestartNeeded = "No"
                             })
                     }
+                    $global:DSCMachineStatus = 0
 
                     Set-TargetResource @testParams
                     Assert-MockCalled Install-WindowsFeature
+                    $global:DSCMachineStatus | Should -Be 0
                 }
 
                 It "feature install requires a reboot" {
@@ -977,6 +994,7 @@ try
                                 RestartNeeded = "Yes"
                             })
                     }
+                    $global:DSCMachineStatus = 0
 
                     Set-TargetResource @testParams
                     $global:DSCMachineStatus | Should -Be 1
@@ -990,6 +1008,7 @@ try
                                 RestartNeeded = "No"
                             })
                     }
+                    $global:DSCMachineStatus = 0
 
                     { Set-TargetResource @testParams } | Should -Throw "Error installing ExampleFeature"
                 }
