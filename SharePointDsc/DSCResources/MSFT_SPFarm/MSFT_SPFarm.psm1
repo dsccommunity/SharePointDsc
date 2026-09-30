@@ -101,7 +101,19 @@ function Get-TargetResource
         [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.String]
-        $DatabaseServerCertificateHostName
+        $DatabaseServerCertificateHostName,
+
+        [Parameter()]
+        [System.String]
+        $CentralAdministrationCertificateThumbprint,
+
+        [Parameter()]
+        [System.Boolean]
+        $UseServerNameIndication,
+
+        [Parameter()]
+        [System.Boolean]
+        $AllowLegacyEncryption
     )
 
     Write-Verbose -Message "Getting the settings of the current local SharePoint Farm (if any)"
@@ -344,6 +356,34 @@ function Get-TargetResource
                 $returnValue.Add("DatabaseServerCertificateHostName", $ConnectionEncryption.DatabaseServerCertificateHostName)
 
             }
+
+            # Central Administration HTTPS certificate binding (Subscription Edition only)
+            if ($installedVersion.FileMajorPart -eq 16 -and $installedVersion.FileBuildPart -ge 13000)
+            {
+                $caCertThumbprint = $null
+                $caUseSni = $null
+                $caAllowLegacy = $null
+
+                $caSecureBindings = $centralAdminSite.GetIisSettingsWithFallback("Default").SecureBindings
+                if ($null -ne $caSecureBindings -and $caSecureBindings.Count -gt 0)
+                {
+                    $caBinding = $caSecureBindings[0]
+
+                    # Guard against a cert-less HTTPS binding: reading Certificate.Thumbprint when
+                    # Certificate is $null throws a PropertyNotFoundException, which would abort the
+                    # entire configuration run (not just this resource).
+                    if ($null -ne $caBinding.Certificate -and $null -ne $caBinding.Certificate.Thumbprint)
+                    {
+                        $caCertThumbprint = $caBinding.Certificate.Thumbprint
+                    }
+                    $caUseSni = $caBinding.UseServerNameIndication
+                    $caAllowLegacy = -not $caBinding.DisableLegacyTls
+                }
+
+                $returnValue.Add("CentralAdministrationCertificateThumbprint", $caCertThumbprint)
+                $returnValue.Add("UseServerNameIndication", $caUseSni)
+                $returnValue.Add("AllowLegacyEncryption", $caAllowLegacy)
+            }
             return $returnValue
         }
 
@@ -496,7 +536,19 @@ function Set-TargetResource
         [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.String]
-        $DatabaseServerCertificateHostName
+        $DatabaseServerCertificateHostName,
+
+        [Parameter()]
+        [System.String]
+        $CentralAdministrationCertificateThumbprint,
+
+        [Parameter()]
+        [System.Boolean]
+        $UseServerNameIndication,
+
+        [Parameter()]
+        [System.Boolean]
+        $AllowLegacyEncryption
     )
 
     Write-Verbose -Message "Setting local SP Farm settings"
@@ -514,6 +566,40 @@ function Set-TargetResource
 
     $PSBoundParameters.SkipRegisterAsDistributedCacheHost = $SkipRegisterAsDistributedCacheHost
     $supportsFlighting = $false
+
+    # The Central Administration certificate binding parameters rely on SharePoint Certificate
+    # Management, which only exists on Subscription Edition. Fail fast on older versions so the
+    # settings are not silently ignored.
+    $osVersion = Get-SPDscOSVersion
+    if ($PSBoundParameters.ContainsKey("AllowLegacyEncryption") -and `
+        ($osVersion.Major -ne 10 -or $osVersion.Build -ne 20348))
+    {
+        $message = ("You cannot specify the AllowLegacyEncryption parameter when using " + `
+                "Windows Server 2019 or earlier.")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
+    }
+
+    if ($PSBoundParameters.ContainsKey("CentralAdministrationCertificateThumbprint") -or `
+            $PSBoundParameters.ContainsKey("UseServerNameIndication") -or `
+            $PSBoundParameters.ContainsKey("AllowLegacyEncryption"))
+    {
+        $productVersion = Get-SPDscInstalledProductVersion
+        if ($productVersion.FileMajorPart -ne 16 -or $productVersion.FileBuildPart -lt 13000)
+        {
+            $message = ("The parameters CentralAdministrationCertificateThumbprint, " + `
+                    "UseServerNameIndication and AllowLegacyEncryption are only supported on " + `
+                    "SharePoint Server Subscription Edition.")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
+        }
+    }
 
     if ($PSBoundParameters.ContainsKey("CentralAdministrationUrl"))
     {
@@ -741,6 +827,47 @@ function Set-TargetResource
                             SecureSocketsLayer   = $isCentralAdminUrlHttps
                         }
                         New-SPWebApplicationExtension @webAppParams
+
+                        if ($isCentralAdminUrlHttps -and `
+                                $params.ContainsKey("CentralAdministrationCertificateThumbprint"))
+                        {
+                            $caCertParams = @{
+                                Thumbprint = $params.CentralAdministrationCertificateThumbprint
+                                HostHeader = $desiredUri.Host
+                                Port       = $desiredUri.Port
+                            }
+                            if ($params.ContainsKey("UseServerNameIndication"))
+                            {
+                                $caCertParams.Add("UseServerNameIndication", $params.UseServerNameIndication)
+                            }
+                            if ($params.ContainsKey("AllowLegacyEncryption"))
+                            {
+                                $caCertParams.Add("AllowLegacyEncryption", $params.AllowLegacyEncryption)
+                            }
+                            Set-SPDscCentralAdministrationCertificate @caCertParams
+                        }
+                    }
+                    elseif ($isCentralAdminUrlHttps -and `
+                            $params.ContainsKey("CentralAdministrationCertificateThumbprint"))
+                    {
+                        # URL, host and port already match; only the certificate binding needs to be
+                        # (re)applied. Rebind in place without destroying the web application.
+                        Write-Verbose -Message ("Binding certificate to the existing Central " + `
+                                "Administration HTTPS binding")
+                        $caCertParams = @{
+                            Thumbprint = $params.CentralAdministrationCertificateThumbprint
+                            HostHeader = $desiredUri.Host
+                            Port       = $desiredUri.Port
+                        }
+                        if ($params.ContainsKey("UseServerNameIndication"))
+                        {
+                            $caCertParams.Add("UseServerNameIndication", $params.UseServerNameIndication)
+                        }
+                        if ($params.ContainsKey("AllowLegacyEncryption"))
+                        {
+                            $caCertParams.Add("AllowLegacyEncryption", $params.AllowLegacyEncryption)
+                        }
+                        Set-SPDscCentralAdministrationCertificate @caCertParams
                     }
                 }
             }
@@ -1253,6 +1380,25 @@ function Set-TargetResource
                             }
 
                             New-SPWebApplicationExtension @webAppParams
+
+                            if ($isCentralAdminUrlHttps -and `
+                                    $params.ContainsKey("CentralAdministrationCertificateThumbprint"))
+                            {
+                                $caCertParams = @{
+                                    Thumbprint = $params.CentralAdministrationCertificateThumbprint
+                                    HostHeader = $desiredUri.Host
+                                    Port       = $desiredUri.Port
+                                }
+                                if ($params.ContainsKey("UseServerNameIndication"))
+                                {
+                                    $caCertParams.Add("UseServerNameIndication", $params.UseServerNameIndication)
+                                }
+                                if ($params.ContainsKey("AllowLegacyEncryption"))
+                                {
+                                    $caCertParams.Add("AllowLegacyEncryption", $params.AllowLegacyEncryption)
+                                }
+                                Set-SPDscCentralAdministrationCertificate @caCertParams
+                            }
                         }
                     }
                 }
@@ -1408,7 +1554,19 @@ function Test-TargetResource
         [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.String]
-        $DatabaseServerCertificateHostName
+        $DatabaseServerCertificateHostName,
+
+        [Parameter()]
+        [System.String]
+        $CentralAdministrationCertificateThumbprint,
+
+        [Parameter()]
+        [System.Boolean]
+        $UseServerNameIndication,
+
+        [Parameter()]
+        [System.Boolean]
+        $AllowLegacyEncryption
     )
 
     Write-Verbose -Message "Testing local SP Farm settings"
@@ -1457,15 +1615,32 @@ function Test-TargetResource
     Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
-    $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
-        -Source $($MyInvocation.MyCommand.Source) `
-        -DesiredValues $PSBoundParameters `
-        -ValuesToCheck @("Ensure",
+    $valuesToCheck = @("Ensure",
         "RunCentralAdmin",
         "CentralAdministrationUrl",
         "CentralAdministrationPort",
         "CentralAdministrationAuth",
         "DeveloperDashboard")
+
+    # Only compare the Central Administration certificate binding parameters when the caller
+    # specified them, so farms that do not manage the binding via DSC are left untouched.
+    if ($PSBoundParameters.ContainsKey("CentralAdministrationCertificateThumbprint"))
+    {
+        $valuesToCheck += "CentralAdministrationCertificateThumbprint"
+    }
+    if ($PSBoundParameters.ContainsKey("UseServerNameIndication"))
+    {
+        $valuesToCheck += "UseServerNameIndication"
+    }
+    if ($PSBoundParameters.ContainsKey("AllowLegacyEncryption"))
+    {
+        $valuesToCheck += "AllowLegacyEncryption"
+    }
+
+    $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+        -Source $($MyInvocation.MyCommand.Source) `
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck $valuesToCheck
 
     Write-Verbose -Message "Test-TargetResource returned $result"
 

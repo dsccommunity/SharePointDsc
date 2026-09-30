@@ -60,6 +60,18 @@ server in the farm. ApplicationCredentialKey is only supported for SharePoint 20
 If SkipRegisterAsDistributedCacheHost is set to true, the server is not registered
 as a distributed cache host.
 
+On SharePoint Server Subscription Edition, the Central Administration HTTPS binding
+can be bound to a managed certificate. When CentralAdministrationUrl begins with
+HTTPS, specify CentralAdministrationCertificateThumbprint with the thumbprint of a
+certificate that has already been imported into SharePoint Certificate Management
+(for example using the SPCertificate resource). Add a DependsOn on that certificate
+to guarantee it is imported before the binding is created. UseServerNameIndication
+enables Server Name Indication (SNI) on the binding, which is required when hosting
+multiple SSL sites with different certificates on the same IP and port.
+AllowLegacyEncryption allows legacy (TLS 1.0/1.1) encryption on the binding and
+requires Windows Server 2022. These three parameters are ignored on SharePoint
+versions earlier than Subscription Edition.
+
 NOTE:
 When using SharePoint 2016 and later and enabling the Developer Dashboard,
 please make sure you also provision the Usage and Health service application

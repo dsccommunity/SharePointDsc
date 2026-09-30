@@ -405,3 +405,140 @@ function Get-SPDscConfigDBConnectionEncryption
     }
     return $return
 }
+
+<#
+
+.SYNOPSIS
+
+Set-SPDscCentralAdministrationCertificate binds a managed certificate to the Central
+Administration HTTPS binding on the Default zone.
+
+.DESCRIPTION
+
+Set-SPDscCentralAdministrationCertificate resolves a certificate from SharePoint Certificate
+Management (the EndEntity store) by thumbprint and binds it to the Central Administration web
+application HTTPS binding using Set-SPWebApplication. It is only usable on SharePoint Server
+Subscription Edition.
+
+If the certificate is not present in Certificate Management the function throws immediately
+(fail-fast), so the caller can ensure ordering (e.g. an SPCertificate resource with a DependsOn).
+Because a freshly imported certificate can be transiently non-bindable, the bind is retried a
+bounded number of times and verified against the resulting binding thumbprint.
+
+.PARAMETER Thumbprint
+
+The thumbprint of the managed certificate to bind.
+
+.PARAMETER HostHeader
+
+The host header of the Central Administration HTTPS binding.
+
+.PARAMETER Port
+
+The port of the Central Administration HTTPS binding.
+
+.PARAMETER UseServerNameIndication
+
+Specifies whether Server Name Indication (SNI) is enabled on the binding.
+
+.PARAMETER AllowLegacyEncryption
+
+Specifies whether legacy (TLS 1.0/1.1) encryption is allowed on the binding.
+
+.EXAMPLE
+
+Set-SPDscCentralAdministrationCertificate -Thumbprint "AB12..." -HostHeader "admin.contoso.com" -Port 443 -UseServerNameIndication $true
+
+#>
+function Set-SPDscCentralAdministrationCertificate
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $Thumbprint,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $HostHeader,
+
+        [Parameter(Mandatory = $true)]
+        [System.UInt32]
+        $Port,
+
+        [Parameter()]
+        [System.Boolean]
+        $UseServerNameIndication,
+
+        [Parameter()]
+        [System.Boolean]
+        $AllowLegacyEncryption
+    )
+
+    $cert = Get-SPCertificate -Thumbprint $Thumbprint -Store 'EndEntity' -ErrorAction SilentlyContinue
+    if ($null -eq $cert)
+    {
+        # Ordering problem rather than a timing one: the certificate must already exist in
+        # Certificate Management. Fail fast so the caller adds it first (e.g. SPCertificate +
+        # DependsOn) instead of retrying a state that cannot resolve itself.
+        throw ("No certificate found in SharePoint Certificate Management with thumbprint " + `
+                "'$Thumbprint'. Make sure the certificate is imported first (for example using " + `
+                "the SPCertificate resource) and use DependsOn to enforce the correct order.")
+    }
+
+    $maxAttempts = 3
+    $delaySeconds = 10
+
+    for ($attempt = 1; $attempt -le $maxAttempts; $attempt++)
+    {
+        $ca = Get-SPWebApplication -IncludeCentralAdministration | Where-Object -FilterScript {
+            $_.IsAdministrationWebApplication -eq $true
+        }
+
+        $setParams = @{
+            Identity           = $ca
+            Zone               = 'Default'
+            Port               = $Port
+            HostHeader         = $HostHeader
+            SecureSocketsLayer = $true
+            Certificate        = $cert
+        }
+        if ($PSBoundParameters.ContainsKey('UseServerNameIndication'))
+        {
+            $setParams.Add('UseServerNameIndication', $UseServerNameIndication)
+        }
+        if ($PSBoundParameters.ContainsKey('AllowLegacyEncryption'))
+        {
+            $setParams.Add('AllowLegacyEncryption', $AllowLegacyEncryption)
+        }
+
+        Set-SPWebApplication @setParams | Out-Null
+
+        # Verify the binding actually carries the desired thumbprint. Guard against a cert-less
+        # binding so reading Certificate.Thumbprint does not throw.
+        $ca = Get-SPWebApplication -IncludeCentralAdministration | Where-Object -FilterScript {
+            $_.IsAdministrationWebApplication -eq $true
+        }
+        $binding = $ca.GetIisSettingsWithFallback('Default').SecureBindings[0]
+        if ($null -ne $binding -and `
+                $null -ne $binding.Certificate -and `
+                $binding.Certificate.Thumbprint -eq $Thumbprint)
+        {
+            Write-Verbose -Message ("Central Administration HTTPS binding is now bound to " + `
+                    "certificate '$Thumbprint'.")
+            return
+        }
+
+        if ($attempt -lt $maxAttempts)
+        {
+            Write-Verbose -Message ("The Central Administration certificate binding has not taken " + `
+                    "effect yet (attempt $attempt/$maxAttempts). Waiting $delaySeconds seconds " + `
+                    "before retrying...")
+            Start-Sleep -Seconds $delaySeconds
+        }
+    }
+
+    throw ("Failed to bind certificate '$Thumbprint' to the Central Administration HTTPS " + `
+            "binding after $maxAttempts attempts.")
+}
