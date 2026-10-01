@@ -410,6 +410,73 @@ function Get-SPDscConfigDBConnectionEncryption
 
 .SYNOPSIS
 
+Get-SPDscCentralAdminSecureBinding returns the secure binding to manage for the Central
+Administration HTTPS endpoint.
+
+.DESCRIPTION
+
+Get-SPDscCentralAdminSecureBinding selects, from a zone's SecureBindings collection, the binding
+that matches the target host header and port. Central Administration normally has a single secure
+binding, so when no explicit match is found (for example an IP-based binding with no host header)
+the first binding is returned. Returns $null when there are no secure bindings.
+
+.PARAMETER SecureBindings
+
+The SecureBindings collection of the zone's IIS settings.
+
+.PARAMETER HostHeader
+
+The target host header.
+
+.PARAMETER Port
+
+The target port.
+
+.EXAMPLE
+
+Get-SPDscCentralAdminSecureBinding -SecureBindings $bindings -HostHeader "admin.contoso.com" -Port 443
+
+#>
+function Get-SPDscCentralAdminSecureBinding
+{
+    [CmdletBinding()]
+    [OutputType([System.Object])]
+    param
+    (
+        [Parameter()]
+        [System.Object]
+        $SecureBindings,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $HostHeader,
+
+        [Parameter(Mandatory = $true)]
+        [System.UInt32]
+        $Port
+    )
+
+    if ($null -eq $SecureBindings -or $SecureBindings.Count -eq 0)
+    {
+        return $null
+    }
+
+    $match = $SecureBindings | Where-Object -FilterScript {
+        $_.HostHeader -eq $HostHeader -and $_.Port -eq $Port
+    } | Select-Object -First 1
+
+    if ($null -ne $match)
+    {
+        return $match
+    }
+
+    return $SecureBindings[0]
+}
+
+<#
+
+.SYNOPSIS
+
 Test-SPDscCentralAdminBindingMatch indicates whether a secure binding already carries the
 desired certificate and settings.
 
@@ -586,11 +653,11 @@ function Set-SPDscCentralAdministrationCertificate
             $_.IsAdministrationWebApplication -eq $true
         }
 
-        # Select the binding for the target host header and port; there can be more than one secure
-        # binding on the zone, so SecureBindings[0] is not reliably the one being managed.
-        $binding = $ca.GetIisSettingsWithFallback('Default').SecureBindings | Where-Object -FilterScript {
-            $_.HostHeader -eq $HostHeader -and $_.Port -eq $Port
-        } | Select-Object -First 1
+        # Central Administration normally has a single secure binding; prefer the one matching the
+        # target host header and port, and fall back to the first entry otherwise.
+        $binding = Get-SPDscCentralAdminSecureBinding `
+            -SecureBindings $ca.GetIisSettingsWithFallback('Default').SecureBindings `
+            -HostHeader $HostHeader -Port $Port
 
         # Idempotence: skip the (re)bind when the binding already matches the desired settings. This
         # keeps a Set triggered by an unrelated property drift from re-applying the binding.
@@ -625,9 +692,9 @@ function Set-SPDscCentralAdministrationCertificate
         $ca = Get-SPWebApplication -IncludeCentralAdministration | Where-Object -FilterScript {
             $_.IsAdministrationWebApplication -eq $true
         }
-        $binding = $ca.GetIisSettingsWithFallback('Default').SecureBindings | Where-Object -FilterScript {
-            $_.HostHeader -eq $HostHeader -and $_.Port -eq $Port
-        } | Select-Object -First 1
+        $binding = Get-SPDscCentralAdminSecureBinding `
+            -SecureBindings $ca.GetIisSettingsWithFallback('Default').SecureBindings `
+            -HostHeader $HostHeader -Port $Port
         if (Test-SPDscCentralAdminBindingMatch -Binding $binding @matchParams)
         {
             Write-Verbose -Message ("Central Administration HTTPS binding is now bound to " + `

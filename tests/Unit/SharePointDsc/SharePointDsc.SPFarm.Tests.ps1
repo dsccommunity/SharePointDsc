@@ -3319,6 +3319,57 @@ try
                                 -UseServerNameIndication $true } | Should -Not -Throw
                         Assert-MockCalled -CommandName "Set-SPWebApplication" -ModuleName 'SPFarm' -Times 0 -Exactly
                     }
+
+                    It "Should fall back to the first binding when no host header matches" {
+                        $global:SPDscCABindingThumb = $null
+                        Mock -CommandName Get-SPCertificate -ModuleName 'SPFarm' -MockWith {
+                            return @{ Thumbprint = "1111111111111111111111111111111111111111" }
+                        }
+                        Mock -CommandName Set-SPWebApplication -ModuleName 'SPFarm' -MockWith {
+                            $global:SPDscCABindingThumb = "1111111111111111111111111111111111111111"
+                        }
+                        Mock -CommandName Get-SPWebApplication -ModuleName 'SPFarm' -MockWith {
+                            $webapp = @{
+                                IsAdministrationWebApplication = $true
+                                IisSettings                    = [ordered]@{
+                                    Default = @{
+                                        SecureBindings = @(
+                                            @{
+                                                HostHeader              = ""
+                                                Port                    = 443
+                                                Certificate             = if ($global:SPDscCABindingThumb)
+                                                {
+                                                    @{ Thumbprint = $global:SPDscCABindingThumb }
+                                                }
+                                                else
+                                                {
+                                                    $null
+                                                }
+                                                UseServerNameIndication = $true
+                                                DisableLegacyTls        = $true
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                            $webapp | Add-Member -MemberType ScriptMethod -Name GetIisSettingsWithFallback -Value {
+                                [CmdletBinding()]
+                                param(
+                                    [Parameter(Mandatory = $true)]
+                                    [string]
+                                    $Zone
+                                )
+
+                                return $this.IisSettings[$Zone]
+                            }
+                            return $webapp
+                        }
+                        { Set-SPDscCentralAdministrationCertificate `
+                                -Thumbprint "1111111111111111111111111111111111111111" `
+                                -HostHeader "admin.contoso.com" `
+                                -Port 443 } | Should -Not -Throw
+                        Assert-MockCalled -CommandName "Set-SPWebApplication" -ModuleName 'SPFarm'
+                    }
                 }
             }
         }
