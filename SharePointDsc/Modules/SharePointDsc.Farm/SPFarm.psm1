@@ -410,6 +410,81 @@ function Get-SPDscConfigDBConnectionEncryption
 
 .SYNOPSIS
 
+Test-SPDscCentralAdminBindingMatch indicates whether a secure binding already carries the
+desired certificate and settings.
+
+.DESCRIPTION
+
+Test-SPDscCentralAdminBindingMatch returns $true when the supplied secure binding is bound to
+the certificate identified by Thumbprint and, when specified, matches the desired SNI and legacy
+encryption settings. It guards against a cert-less binding so that reading Certificate.Thumbprint
+on a $null certificate does not throw.
+
+.PARAMETER Binding
+
+The secure binding object to evaluate. May be $null (returns $false).
+
+.PARAMETER Thumbprint
+
+The thumbprint the binding is expected to carry.
+
+.PARAMETER UseServerNameIndication
+
+When specified, the expected Server Name Indication (SNI) setting of the binding.
+
+.PARAMETER AllowLegacyEncryption
+
+When specified, the expected legacy encryption setting of the binding.
+
+.EXAMPLE
+
+Test-SPDscCentralAdminBindingMatch -Binding $binding -Thumbprint "AB12..." -UseServerNameIndication $true
+
+#>
+function Test-SPDscCentralAdminBindingMatch
+{
+    [CmdletBinding()]
+    [OutputType([System.Boolean])]
+    param
+    (
+        [Parameter()]
+        [System.Object]
+        $Binding,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $Thumbprint,
+
+        [Parameter()]
+        [System.Boolean]
+        $UseServerNameIndication,
+
+        [Parameter()]
+        [System.Boolean]
+        $AllowLegacyEncryption
+    )
+
+    if ($null -eq $Binding -or $null -eq $Binding.Certificate -or $Binding.Certificate.Thumbprint -ne $Thumbprint)
+    {
+        return $false
+    }
+    if ($PSBoundParameters.ContainsKey('UseServerNameIndication') -and `
+            $Binding.UseServerNameIndication -ne $UseServerNameIndication)
+    {
+        return $false
+    }
+    if ($PSBoundParameters.ContainsKey('AllowLegacyEncryption') -and `
+        (-not $Binding.DisableLegacyTls) -ne $AllowLegacyEncryption)
+    {
+        return $false
+    }
+    return $true
+}
+
+<#
+
+.SYNOPSIS
+
 Set-SPDscCentralAdministrationCertificate binds a managed certificate to the Central
 Administration HTTPS binding on the Default zone.
 
@@ -490,10 +565,40 @@ function Set-SPDscCentralAdministrationCertificate
     $maxAttempts = 3
     $delaySeconds = 10
 
+    $hasSni = $PSBoundParameters.ContainsKey('UseServerNameIndication')
+    $hasLegacy = $PSBoundParameters.ContainsKey('AllowLegacyEncryption')
+
+    $matchParams = @{
+        Thumbprint = $Thumbprint
+    }
+    if ($hasSni)
+    {
+        $matchParams.Add('UseServerNameIndication', $UseServerNameIndication)
+    }
+    if ($hasLegacy)
+    {
+        $matchParams.Add('AllowLegacyEncryption', $AllowLegacyEncryption)
+    }
+
     for ($attempt = 1; $attempt -le $maxAttempts; $attempt++)
     {
         $ca = Get-SPWebApplication -IncludeCentralAdministration | Where-Object -FilterScript {
             $_.IsAdministrationWebApplication -eq $true
+        }
+
+        # Select the binding for the target host header and port; there can be more than one secure
+        # binding on the zone, so SecureBindings[0] is not reliably the one being managed.
+        $binding = $ca.GetIisSettingsWithFallback('Default').SecureBindings | Where-Object -FilterScript {
+            $_.HostHeader -eq $HostHeader -and $_.Port -eq $Port
+        } | Select-Object -First 1
+
+        # Idempotence: skip the (re)bind when the binding already matches the desired settings. This
+        # keeps a Set triggered by an unrelated property drift from re-applying the binding.
+        if (Test-SPDscCentralAdminBindingMatch -Binding $binding @matchParams)
+        {
+            Write-Verbose -Message ("Central Administration HTTPS binding is already bound to " + `
+                    "certificate '$Thumbprint'.")
+            return
         }
 
         $setParams = @{
@@ -504,26 +609,26 @@ function Set-SPDscCentralAdministrationCertificate
             SecureSocketsLayer = $true
             Certificate        = $cert
         }
-        if ($PSBoundParameters.ContainsKey('UseServerNameIndication'))
+        if ($hasSni)
         {
             $setParams.Add('UseServerNameIndication', $UseServerNameIndication)
         }
-        if ($PSBoundParameters.ContainsKey('AllowLegacyEncryption'))
+        if ($hasLegacy)
         {
             $setParams.Add('AllowLegacyEncryption', $AllowLegacyEncryption)
         }
 
         Set-SPWebApplication @setParams | Out-Null
 
-        # Verify the binding actually carries the desired thumbprint. Guard against a cert-less
-        # binding so reading Certificate.Thumbprint does not throw.
+        # Verify the binding actually carries the desired thumbprint. Right after an import the
+        # certificate can be transiently non-bindable, so retry a bounded number of times.
         $ca = Get-SPWebApplication -IncludeCentralAdministration | Where-Object -FilterScript {
             $_.IsAdministrationWebApplication -eq $true
         }
-        $binding = $ca.GetIisSettingsWithFallback('Default').SecureBindings[0]
-        if ($null -ne $binding -and `
-                $null -ne $binding.Certificate -and `
-                $binding.Certificate.Thumbprint -eq $Thumbprint)
+        $binding = $ca.GetIisSettingsWithFallback('Default').SecureBindings | Where-Object -FilterScript {
+            $_.HostHeader -eq $HostHeader -and $_.Port -eq $Port
+        } | Select-Object -First 1
+        if (Test-SPDscCentralAdminBindingMatch -Binding $binding @matchParams)
         {
             Write-Verbose -Message ("Central Administration HTTPS binding is now bound to " + `
                     "certificate '$Thumbprint'.")

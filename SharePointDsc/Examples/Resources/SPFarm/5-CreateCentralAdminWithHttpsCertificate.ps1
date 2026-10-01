@@ -34,12 +34,13 @@ Updated author, copyright notice, and URLs.
 <#
 
 .DESCRIPTION
- This example shows how to provision Central Administration on a vanity HTTPS URL and bind a
- managed certificate to its binding on SharePoint Server Subscription Edition. The certificate
- is first imported into SharePoint Certificate Management using the SPCertificate resource, and
- SPFarm binds it to the Central Administration HTTPS binding. The DependsOn makes sure the
- certificate is imported before the binding is created. UseServerNameIndication enables Server
- Name Indication (SNI) on the binding.
+ This example configures Central Administration on a vanity HTTPS URL on an existing
+ SharePoint farm and binds a managed certificate to its binding on SharePoint Server
+ Subscription Edition. Run this configuration only after the local farm exists. The
+ certificate is first imported into SharePoint Certificate Management using the
+ SPCertificate resource, and SPFarm binds it to the Central Administration HTTPS
+ binding. The DependsOn makes sure the certificate is imported before the binding is
+ created. UseServerNameIndication enables Server Name Indication (SNI) on the binding.
 
 #>
 

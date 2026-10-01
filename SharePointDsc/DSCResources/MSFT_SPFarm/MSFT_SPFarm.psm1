@@ -358,26 +358,33 @@ function Get-TargetResource
             }
 
             # Central Administration HTTPS certificate binding (Subscription Edition only)
-            if ($installedVersion.FileMajorPart -eq 16 -and $installedVersion.FileBuildPart -ge 13000)
+            if ($installedVersion.FileMajorPart -eq 16 -and $installedVersion.ProductBuildPart -ge 13000)
             {
                 $caCertThumbprint = $null
                 $caUseSni = $null
                 $caAllowLegacy = $null
 
-                $caSecureBindings = $centralAdminSite.GetIisSettingsWithFallback("Default").SecureBindings
-                if ($null -ne $caSecureBindings -and $caSecureBindings.Count -gt 0)
+                # GetIisSettingsWithFallback is always available on a real SPWebApplication; the
+                # guard keeps Get-TargetResource from throwing in the (test) case where the object
+                # does not expose it. Get should never throw, as that aborts the whole run.
+                if ($null -ne $centralAdminSite -and `
+                    ($centralAdminSite | Get-Member -Name 'GetIisSettingsWithFallback' -MemberType 'Method', 'ScriptMethod'))
                 {
-                    $caBinding = $caSecureBindings[0]
-
-                    # Guard against a cert-less HTTPS binding: reading Certificate.Thumbprint when
-                    # Certificate is $null throws a PropertyNotFoundException, which would abort the
-                    # entire configuration run (not just this resource).
-                    if ($null -ne $caBinding.Certificate -and $null -ne $caBinding.Certificate.Thumbprint)
+                    $caSecureBindings = $centralAdminSite.GetIisSettingsWithFallback("Default").SecureBindings
+                    if ($null -ne $caSecureBindings -and $caSecureBindings.Count -gt 0)
                     {
-                        $caCertThumbprint = $caBinding.Certificate.Thumbprint
+                        $caBinding = $caSecureBindings[0]
+
+                        # Guard against a cert-less HTTPS binding: reading Certificate.Thumbprint when
+                        # Certificate is $null throws a PropertyNotFoundException, which would abort the
+                        # entire configuration run (not just this resource).
+                        if ($null -ne $caBinding.Certificate -and $null -ne $caBinding.Certificate.Thumbprint)
+                        {
+                            $caCertThumbprint = $caBinding.Certificate.Thumbprint
+                        }
+                        $caUseSni = $caBinding.UseServerNameIndication
+                        $caAllowLegacy = -not $caBinding.DisableLegacyTls
                     }
-                    $caUseSni = $caBinding.UseServerNameIndication
-                    $caAllowLegacy = -not $caBinding.DisableLegacyTls
                 }
 
                 $returnValue.Add("CentralAdministrationCertificateThumbprint", $caCertThumbprint)
@@ -572,7 +579,7 @@ function Set-TargetResource
     # settings are not silently ignored.
     $osVersion = Get-SPDscOSVersion
     if ($PSBoundParameters.ContainsKey("AllowLegacyEncryption") -and `
-        ($osVersion.Major -ne 10 -or $osVersion.Build -ne 20348))
+        ($osVersion.Major -ne 10 -or $osVersion.Build -lt 20348))
     {
         $message = ("You cannot specify the AllowLegacyEncryption parameter when using " + `
                 "Windows Server 2019 or earlier.")
@@ -588,7 +595,7 @@ function Set-TargetResource
             $PSBoundParameters.ContainsKey("AllowLegacyEncryption"))
     {
         $productVersion = Get-SPDscInstalledProductVersion
-        if ($productVersion.FileMajorPart -ne 16 -or $productVersion.FileBuildPart -lt 13000)
+        if ($productVersion.FileMajorPart -ne 16 -or $productVersion.ProductBuildPart -lt 13000)
         {
             $message = ("The parameters CentralAdministrationCertificateThumbprint, " + `
                     "UseServerNameIndication and AllowLegacyEncryption are only supported on " + `

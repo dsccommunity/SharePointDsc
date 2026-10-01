@@ -3232,19 +3232,40 @@ try
                     }
 
                     It "Should throw in the set method when the OS is not Windows Server 2022" {
-                        { Set-TargetResource @testParams } | Should -Throw "*Windows Server 2019 or earlier*"
+                        { Set-TargetResource @testParams } | Should -Throw "Windows Server 2019 or earlier"
                     }
                 }
 
-                Context -Name "The Set-SPDscCentralAdministrationCertificate helper binds a managed certificate" -Fixture {                    BeforeAll {
-                        Mock -CommandName Set-SPWebApplication -MockWith { }
-                        Mock -CommandName Get-SPWebApplication -MockWith {
+                Context -Name "The Set-SPDscCentralAdministrationCertificate helper binds a managed certificate" -Fixture {
+                    BeforeAll {
+                        Mock -CommandName Start-Sleep -ModuleName 'SPFarm' -MockWith { }
+
+                        # The binding starts without the certificate ($global:SPDscCABindingThumb is
+                        # $null) and Set-SPWebApplication flips it to the bound thumbprint, so the
+                        # helper's verification loop can observe the bind taking effect.
+                        Mock -CommandName Set-SPWebApplication -ModuleName 'SPFarm' -MockWith {
+                            $global:SPDscCABindingThumb = "1111111111111111111111111111111111111111"
+                        }
+                        Mock -CommandName Get-SPWebApplication -ModuleName 'SPFarm' -MockWith {
                             $webapp = @{
                                 IsAdministrationWebApplication = $true
                                 IisSettings                    = [ordered]@{
                                     Default = @{
                                         SecureBindings = @(
-                                            @{ Certificate = @{ Thumbprint = "1111111111111111111111111111111111111111" } }
+                                            @{
+                                                HostHeader              = "admin.contoso.com"
+                                                Port                    = 443
+                                                Certificate             = if ($global:SPDscCABindingThumb)
+                                                {
+                                                    @{ Thumbprint = $global:SPDscCABindingThumb }
+                                                }
+                                                else
+                                                {
+                                                    $null
+                                                }
+                                                UseServerNameIndication = $true
+                                                DisableLegacyTls        = $true
+                                            }
                                         )
                                     }
                                 }
@@ -3264,15 +3285,17 @@ try
                     }
 
                     It "Should throw a clear error when the certificate is not in Certificate Management" {
-                        Mock -CommandName Get-SPCertificate -MockWith { return $null }
+                        $global:SPDscCABindingThumb = $null
+                        Mock -CommandName Get-SPCertificate -ModuleName 'SPFarm' -MockWith { return $null }
                         { Set-SPDscCentralAdministrationCertificate `
                                 -Thumbprint "1111111111111111111111111111111111111111" `
                                 -HostHeader "admin.contoso.com" `
-                                -Port 443 } | Should -Throw "*No certificate found*"
+                                -Port 443 } | Should -Throw "No certificate found"
                     }
 
                     It "Should bind the certificate and not throw when the certificate exists" {
-                        Mock -CommandName Get-SPCertificate -MockWith {
+                        $global:SPDscCABindingThumb = $null
+                        Mock -CommandName Get-SPCertificate -ModuleName 'SPFarm' -MockWith {
                             return @{ Thumbprint = "1111111111111111111111111111111111111111" }
                         }
                         { Set-SPDscCentralAdministrationCertificate `
@@ -3280,7 +3303,21 @@ try
                                 -HostHeader "admin.contoso.com" `
                                 -Port 443 `
                                 -UseServerNameIndication $true } | Should -Not -Throw
-                        Assert-MockCalled -CommandName "Set-SPWebApplication"
+                        Assert-MockCalled -CommandName "Set-SPWebApplication" -ModuleName 'SPFarm'
+                    }
+
+                    It "Should not call Set-SPWebApplication when the certificate is already bound" {
+                        $global:SPDscCABindingThumb = "1111111111111111111111111111111111111111"
+                        Mock -CommandName Get-SPCertificate -ModuleName 'SPFarm' -MockWith {
+                            return @{ Thumbprint = "1111111111111111111111111111111111111111" }
+                        }
+                        Mock -CommandName Set-SPWebApplication -ModuleName 'SPFarm' -MockWith { }
+                        { Set-SPDscCentralAdministrationCertificate `
+                                -Thumbprint "1111111111111111111111111111111111111111" `
+                                -HostHeader "admin.contoso.com" `
+                                -Port 443 `
+                                -UseServerNameIndication $true } | Should -Not -Throw
+                        Assert-MockCalled -CommandName "Set-SPWebApplication" -ModuleName 'SPFarm' -Times 0 -Exactly
                     }
                 }
             }

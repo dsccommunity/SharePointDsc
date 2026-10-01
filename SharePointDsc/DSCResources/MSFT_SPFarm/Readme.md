@@ -69,8 +69,9 @@ to guarantee it is imported before the binding is created. UseServerNameIndicati
 enables Server Name Indication (SNI) on the binding, which is required when hosting
 multiple SSL sites with different certificates on the same IP and port.
 AllowLegacyEncryption allows legacy (TLS 1.0/1.1) encryption on the binding and
-requires Windows Server 2022. These three parameters are ignored on SharePoint
-versions earlier than Subscription Edition.
+requires Windows Server 2022 or later. Specifying any of these three parameters on
+a SharePoint version earlier than Subscription Edition causes the Set method to
+throw.
 
 NOTE:
 When using SharePoint 2016 and later and enabling the Developer Dashboard,
