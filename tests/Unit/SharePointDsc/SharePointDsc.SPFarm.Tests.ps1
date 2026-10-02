@@ -2990,6 +2990,430 @@ try
                     Export-TargetResource | Should -Match $result
                 }
             }
+
+            if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16 -and
+                $Global:SPDscHelper.CurrentStubBuildNumber.Build -ge 13000)
+            {
+                Context -Name "CA is running on HTTPS with a cert-less binding and a certificate thumbprint is specified" -Fixture {
+                    BeforeAll {
+                        $testParams = @{
+                            IsSingleInstance                           = "Yes"
+                            Ensure                                     = "Present"
+                            FarmConfigDatabaseName                     = "SP_Config"
+                            DatabaseServer                             = "sql.contoso.com"
+                            FarmAccount                                = $mockFarmAccount
+                            Passphrase                                 = $mockPassphrase
+                            AdminContentDatabaseName                   = "SP_AdminContent"
+                            RunCentralAdmin                            = $true
+                            CentralAdministrationUrl                   = "https://admin.contoso.com"
+                            CentralAdministrationPort                  = 443
+                            CentralAdministrationAuth                  = "NTLM"
+                            CentralAdministrationCertificateThumbprint = "1111111111111111111111111111111111111111"
+                        }
+
+                        Mock -CommandName Get-SPFarm -MockWith {
+                            return @{
+                                Name                     = $testParams.FarmConfigDatabaseName
+                                DatabaseServer           = @{ Name = $testParams.DatabaseServer }
+                                AdminContentDatabaseName = $testParams.AdminContentDatabaseName
+                                Services                 = @{
+                                    TypeName         = "Central Administration"
+                                    ApplicationPools = @{ Name = "SharePoint Central Administration v4" }
+                                }
+                            }
+                        }
+                        Mock -CommandName Get-SPDscConfigDBStatus -MockWith {
+                            return @{ Locked = $false; ValidPermissions = $true; DatabaseExists = $true }
+                        }
+                        Mock -CommandName "Get-SPDscSQLInstanceStatus" -MockWith { return @{ MaxDOPCorrect = $true } }
+                        Mock -CommandName Get-SPDatabase -MockWith {
+                            return @(@{
+                                    Name                 = $testParams.FarmConfigDatabaseName
+                                    Type                 = "Configuration Database"
+                                    NormalizedDataSource = $testParams.DatabaseServer
+                                })
+                        }
+                        Mock -CommandName Get-SPWebApplication -MockWith {
+                            $webapp = @{
+                                ContentDatabases               = @(@{ Name = $testParams.AdminContentDatabaseName })
+                                Url                            = $testParams.CentralAdministrationUrl
+                                IsAdministrationWebApplication = $true
+                                IisSettings                    = [ordered]@{
+                                    Default = @{
+                                        DisableKerberos = $true
+                                        SecureBindings  = @(
+                                            @{
+                                                HostHeader              = "admin.contoso.com"
+                                                Port                    = "443"
+                                                Certificate             = $null
+                                                UseServerNameIndication = $true
+                                                DisableLegacyTls        = $true
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+
+                            $webapp | Add-Member -MemberType ScriptMethod -Name GetIisSettingsWithFallback -Value {
+                                [CmdletBinding()]
+                                param(
+                                    [Parameter(Mandatory = $true)]
+                                    [string]
+                                    $Zone
+                                )
+
+                                return $this.IisSettings[$Zone]
+                            }
+
+                            return $webapp
+                        }
+                        Mock -CommandName Get-CimInstance -MockWith { return @{ Domain = "domain.com" } }
+                        Mock -CommandName Get-SPServiceInstance -MockWith {
+                            switch ($global:SPDscSIRunCount)
+                            {
+                                { 2 -contains $_ }
+                                {
+                                    $global:SPDscSIRunCount++
+                                    return @(
+                                        @{ Name = "WSS_Administration"; Status = "Online" } |
+                                            Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                                                return @{ Name = "SPWebServiceInstance" }
+                                            } -PassThru -Force
+                                    )
+                                }
+                                { 0, 1 -contains $_ } { $global:SPDscSIRunCount++; return $null }
+                            }
+                        }
+                        Mock -CommandName Set-SPDscCentralAdministrationCertificate -MockWith { }
+                    }
+
+                    It "Should return a null certificate thumbprint from the Get method without throwing" {
+                        $global:SPDscSIRunCount = 2
+                        $result = Get-TargetResource @testParams
+                        $result.CentralAdministrationCertificateThumbprint | Should -BeNullOrEmpty
+                    }
+
+                    It "Should return false from the test method" {
+                        $global:SPDscSIRunCount = 2
+                        Test-TargetResource @testParams | Should -Be $false
+                    }
+
+                    It "Should bind the certificate to the existing Central Admin binding in the set method" {
+                        $global:SPDscSIRunCount = 2
+                        Set-TargetResource @testParams
+                        Assert-MockCalled -CommandName "Set-SPDscCentralAdministrationCertificate"
+                    }
+                }
+
+                Context -Name "CA is running on HTTPS and the correct certificate is already bound" -Fixture {
+                    BeforeAll {
+                        $testParams = @{
+                            IsSingleInstance                           = "Yes"
+                            Ensure                                     = "Present"
+                            FarmConfigDatabaseName                     = "SP_Config"
+                            DatabaseServer                             = "sql.contoso.com"
+                            FarmAccount                                = $mockFarmAccount
+                            Passphrase                                 = $mockPassphrase
+                            AdminContentDatabaseName                   = "SP_AdminContent"
+                            RunCentralAdmin                            = $true
+                            CentralAdministrationUrl                   = "https://admin.contoso.com"
+                            CentralAdministrationPort                  = 443
+                            CentralAdministrationAuth                  = "NTLM"
+                            CentralAdministrationCertificateThumbprint = "1111111111111111111111111111111111111111"
+                        }
+
+                        Mock -CommandName Get-SPFarm -MockWith {
+                            return @{
+                                Name                     = $testParams.FarmConfigDatabaseName
+                                DatabaseServer           = @{ Name = $testParams.DatabaseServer }
+                                AdminContentDatabaseName = $testParams.AdminContentDatabaseName
+                                Services                 = @{
+                                    TypeName         = "Central Administration"
+                                    ApplicationPools = @{ Name = "SharePoint Central Administration v4" }
+                                }
+                            }
+                        }
+                        Mock -CommandName Get-SPDscConfigDBStatus -MockWith {
+                            return @{ Locked = $false; ValidPermissions = $true; DatabaseExists = $true }
+                        }
+                        Mock -CommandName "Get-SPDscSQLInstanceStatus" -MockWith { return @{ MaxDOPCorrect = $true } }
+                        Mock -CommandName Get-SPDatabase -MockWith {
+                            return @(@{
+                                    Name                 = $testParams.FarmConfigDatabaseName
+                                    Type                 = "Configuration Database"
+                                    NormalizedDataSource = $testParams.DatabaseServer
+                                })
+                        }
+                        Mock -CommandName Get-SPWebApplication -MockWith {
+                            $webapp = @{
+                                ContentDatabases               = @(@{ Name = $testParams.AdminContentDatabaseName })
+                                Url                            = $testParams.CentralAdministrationUrl
+                                IsAdministrationWebApplication = $true
+                                IisSettings                    = [ordered]@{
+                                    Default = @{
+                                        DisableKerberos = $true
+                                        SecureBindings  = @(
+                                            @{
+                                                HostHeader              = "admin.contoso.com"
+                                                Port                    = "443"
+                                                Certificate             = @{ Thumbprint = $testParams.CentralAdministrationCertificateThumbprint }
+                                                UseServerNameIndication = $true
+                                                DisableLegacyTls        = $true
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+
+                            $webapp | Add-Member -MemberType ScriptMethod -Name GetIisSettingsWithFallback -Value {
+                                [CmdletBinding()]
+                                param(
+                                    [Parameter(Mandatory = $true)]
+                                    [string]
+                                    $Zone
+                                )
+
+                                return $this.IisSettings[$Zone]
+                            }
+
+                            return $webapp
+                        }
+                        Mock -CommandName Get-CimInstance -MockWith { return @{ Domain = "domain.com" } }
+                        Mock -CommandName Get-SPServiceInstance -MockWith {
+                            switch ($global:SPDscSIRunCount)
+                            {
+                                { 2 -contains $_ }
+                                {
+                                    $global:SPDscSIRunCount++
+                                    return @(
+                                        @{ Name = "WSS_Administration"; Status = "Online" } |
+                                            Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                                                return @{ Name = "SPWebServiceInstance" }
+                                            } -PassThru -Force
+                                    )
+                                }
+                                { 0, 1 -contains $_ } { $global:SPDscSIRunCount++; return $null }
+                            }
+                        }
+                    }
+
+                    It "Should return the bound certificate thumbprint from the Get method" {
+                        $global:SPDscSIRunCount = 2
+                        $result = Get-TargetResource @testParams
+                        $result.CentralAdministrationCertificateThumbprint | Should -Be $testParams.CentralAdministrationCertificateThumbprint
+                    }
+
+                    It "Should return true from the test method" {
+                        $global:SPDscSIRunCount = 2
+                        Test-TargetResource @testParams | Should -Be $true
+                    }
+                }
+
+                Context -Name "AllowLegacyEncryption is specified on Windows Server 2019 or earlier" -Fixture {
+                    BeforeAll {
+                        $testParams = @{
+                            IsSingleInstance                           = "Yes"
+                            Ensure                                     = "Present"
+                            FarmConfigDatabaseName                     = "SP_Config"
+                            DatabaseServer                             = "sql.contoso.com"
+                            FarmAccount                                = $mockFarmAccount
+                            Passphrase                                 = $mockPassphrase
+                            AdminContentDatabaseName                   = "SP_AdminContent"
+                            RunCentralAdmin                            = $true
+                            CentralAdministrationUrl                   = "https://admin.contoso.com"
+                            CentralAdministrationPort                  = 443
+                            CentralAdministrationCertificateThumbprint = "1111111111111111111111111111111111111111"
+                            AllowLegacyEncryption                      = $true
+                        }
+
+                        Mock -CommandName Get-SPDscOSVersion -MockWith {
+                            return [PSCustomObject]@{ Major = 10; Minor = 0; Build = 17763 }
+                        }
+                    }
+
+                    It "Should throw in the set method when the OS is not Windows Server 2022" {
+                        { Set-TargetResource @testParams } | Should -Throw "Windows Server 2019 or earlier"
+                    }
+                }
+
+                Context -Name "Test-SPDscCentralAdminBindingMatch" -Fixture {
+                    It "Should return false for a null binding" {
+                        Test-SPDscCentralAdminBindingMatch -Binding $null -Thumbprint "ABC" | Should -Be $false
+                    }
+
+                    It "Should return false for a cert-less binding" {
+                        $b = @{ Certificate = $null; UseServerNameIndication = $true; DisableLegacyTls = $true }
+                        Test-SPDscCentralAdminBindingMatch -Binding $b -Thumbprint "ABC" | Should -Be $false
+                    }
+
+                    It "Should return true when the thumbprint matches and no extra settings are requested" {
+                        $b = @{ Certificate = @{ Thumbprint = "ABC" }; UseServerNameIndication = $true; DisableLegacyTls = $true }
+                        Test-SPDscCentralAdminBindingMatch -Binding $b -Thumbprint "ABC" | Should -Be $true
+                    }
+
+                    It "Should return false when the requested SNI setting differs" {
+                        $b = @{ Certificate = @{ Thumbprint = "ABC" }; UseServerNameIndication = $false; DisableLegacyTls = $true }
+                        Test-SPDscCentralAdminBindingMatch -Binding $b -Thumbprint "ABC" -UseServerNameIndication $true | Should -Be $false
+                    }
+
+                    It "Should return true when the thumbprint and SNI setting both match" {
+                        $b = @{ Certificate = @{ Thumbprint = "ABC" }; UseServerNameIndication = $true; DisableLegacyTls = $true }
+                        Test-SPDscCentralAdminBindingMatch -Binding $b -Thumbprint "ABC" -UseServerNameIndication $true | Should -Be $true
+                    }
+                }
+
+                Context -Name "Get-SPDscCentralAdminSecureBinding" -Fixture {
+                    It "Should return null when there are no secure bindings" {
+                        Get-SPDscCentralAdminSecureBinding -SecureBindings @() -HostHeader "admin.contoso.com" -Port 443 | Should -BeNullOrEmpty
+                    }
+
+                    It "Should return the binding matching the host header and port" {
+                        $bindings = @(
+                            @{ HostHeader = "other.contoso.com"; Port = 443; Tag = "other" },
+                            @{ HostHeader = "admin.contoso.com"; Port = 443; Tag = "target" }
+                        )
+                        (Get-SPDscCentralAdminSecureBinding -SecureBindings $bindings -HostHeader "admin.contoso.com" -Port 443).Tag | Should -Be "target"
+                    }
+
+                    It "Should fall back to the first binding when no host header matches" {
+                        $bindings = @(
+                            @{ HostHeader = ""; Port = 443; Tag = "first" }
+                        )
+                        (Get-SPDscCentralAdminSecureBinding -SecureBindings $bindings -HostHeader "admin.contoso.com" -Port 443).Tag | Should -Be "first"
+                    }
+                }
+
+                Context -Name "The Set-SPDscCentralAdministrationCertificate helper" -Fixture {
+                    BeforeAll {
+                        Mock -CommandName Start-Sleep -ModuleName 'SPFarm' -MockWith { }
+                        Mock -CommandName Set-SPWebApplication -ModuleName 'SPFarm' -MockWith { }
+                    }
+
+                    It "Should skip the bind without throwing when the certificate is not in Certificate Management" {
+                        Mock -CommandName Get-SPCertificate -ModuleName 'SPFarm' -MockWith { return $null }
+                        { Set-SPDscCentralAdministrationCertificate `
+                                -Thumbprint "1111111111111111111111111111111111111111" `
+                                -HostHeader "admin.contoso.com" `
+                                -Port 443 -WarningAction SilentlyContinue } | Should -Not -Throw
+                        Assert-MockCalled -CommandName "Set-SPWebApplication" -ModuleName 'SPFarm' -Times 0 -Exactly
+                    }
+
+                    It "Should not call Set-SPWebApplication when the certificate is already bound" {
+                        Mock -CommandName Get-SPCertificate -ModuleName 'SPFarm' -MockWith {
+                            return @{ Thumbprint = "1111111111111111111111111111111111111111" }
+                        }
+                        # The binding already carries the certificate, so the helper is idempotent.
+                        Mock -CommandName Get-SPWebApplication -ModuleName 'SPFarm' -MockWith {
+                            $webapp = @{
+                                IsAdministrationWebApplication = $true
+                                IisSettings                    = [ordered]@{
+                                    Default = @{
+                                        SecureBindings = @(
+                                            @{
+                                                HostHeader              = "admin.contoso.com"
+                                                Port                    = 443
+                                                Certificate             = @{ Thumbprint = "1111111111111111111111111111111111111111" }
+                                                UseServerNameIndication = $true
+                                                DisableLegacyTls        = $true
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                            $webapp | Add-Member -MemberType ScriptMethod -Name GetIisSettingsWithFallback -Value {
+                                param($Zone)
+                                return $this.IisSettings[$Zone]
+                            }
+                            return $webapp
+                        }
+                        { Set-SPDscCentralAdministrationCertificate `
+                                -Thumbprint "1111111111111111111111111111111111111111" `
+                                -HostHeader "admin.contoso.com" `
+                                -Port 443 `
+                                -UseServerNameIndication $true } | Should -Not -Throw
+                        Assert-MockCalled -CommandName "Set-SPWebApplication" -ModuleName 'SPFarm' -Times 0 -Exactly
+                    }
+
+                    It "Should bind the certificate when it is present but not yet bound" {
+                        # Get-SPCertificate is called once before the bind loop; use it to reset the
+                        # shared read counter in the SPFarm module scope. The Get-SPWebApplication mock
+                        # then returns a cert-less binding on the first (pre-check) read and the bound
+                        # binding on the second (verification) read, so the helper observes the bind.
+                        Mock -CommandName Get-SPCertificate -ModuleName 'SPFarm' -MockWith {
+                            $script:caGetCount = 0
+                            return @{ Thumbprint = "1111111111111111111111111111111111111111" }
+                        }
+                        Mock -CommandName Get-SPWebApplication -ModuleName 'SPFarm' -MockWith {
+                            $script:caGetCount++
+                            $thumb = if ($script:caGetCount -ge 2) { "1111111111111111111111111111111111111111" } else { $null }
+                            $webapp = @{
+                                IsAdministrationWebApplication = $true
+                                IisSettings                    = [ordered]@{
+                                    Default = @{
+                                        SecureBindings = @(
+                                            @{
+                                                HostHeader              = "admin.contoso.com"
+                                                Port                    = 443
+                                                Certificate             = if ($thumb) { @{ Thumbprint = $thumb } } else { $null }
+                                                UseServerNameIndication = $true
+                                                DisableLegacyTls        = $true
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                            $webapp | Add-Member -MemberType ScriptMethod -Name GetIisSettingsWithFallback -Value {
+                                param($Zone)
+                                return $this.IisSettings[$Zone]
+                            }
+                            return $webapp
+                        }
+                        { Set-SPDscCentralAdministrationCertificate `
+                                -Thumbprint "1111111111111111111111111111111111111111" `
+                                -HostHeader "admin.contoso.com" `
+                                -Port 443 `
+                                -UseServerNameIndication $true } | Should -Not -Throw
+                        Assert-MockCalled -CommandName "Set-SPWebApplication" -ModuleName 'SPFarm' -Times 1 -Exactly
+                    }
+
+                    It "Should select the binding via fallback when no host header matches" {
+                        # The only binding has an empty host header, so the helper must fall back to it
+                        # (rather than failing to find a match). It already carries the certificate, so
+                        # the idempotent helper should not call Set-SPWebApplication at all.
+                        Mock -CommandName Get-SPCertificate -ModuleName 'SPFarm' -MockWith {
+                            return @{ Thumbprint = "1111111111111111111111111111111111111111" }
+                        }
+                        Mock -CommandName Get-SPWebApplication -ModuleName 'SPFarm' -MockWith {
+                            $webapp = @{
+                                IsAdministrationWebApplication = $true
+                                IisSettings                    = [ordered]@{
+                                    Default = @{
+                                        SecureBindings = @(
+                                            @{
+                                                HostHeader              = ""
+                                                Port                    = 443
+                                                Certificate             = @{ Thumbprint = "1111111111111111111111111111111111111111" }
+                                                UseServerNameIndication = $true
+                                                DisableLegacyTls        = $true
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                            $webapp | Add-Member -MemberType ScriptMethod -Name GetIisSettingsWithFallback -Value {
+                                param($Zone)
+                                return $this.IisSettings[$Zone]
+                            }
+                            return $webapp
+                        }
+                        { Set-SPDscCentralAdministrationCertificate `
+                                -Thumbprint "1111111111111111111111111111111111111111" `
+                                -HostHeader "admin.contoso.com" `
+                                -Port 443 } | Should -Not -Throw
+                        Assert-MockCalled -CommandName "Set-SPWebApplication" -ModuleName 'SPFarm' -Times 0 -Exactly
+                    }
+                }
+            }
         }
     }
 }

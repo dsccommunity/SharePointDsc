@@ -26,6 +26,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     is already a fully qualified domain name (FQDN). The doubled domain (server.domain.domain)
     prevented the distributed cache from starting. The domain is now only added when the
     server name is not already an FQDN (#1468).
+- SPFarm
+  - Fixed [#1436](https://github.com/dsccommunity/SharePointDsc/issues/1436): the Central
+    Administration HTTPS binding was created without a certificate, leaving it unreachable over
+    HTTPS on SharePoint Server Subscription Edition. Added the parameters
+    `CentralAdministrationCertificateThumbprint`, `UseServerNameIndication` and
+    `AllowLegacyEncryption` to bind a managed certificate (SharePoint Certificate Management) to
+    the Central Administration HTTPS binding, on both the initial provisioning and the
+    reprovisioning of an existing Central Administration. The Get/Test methods now read the bound
+    thumbprint safely, handling a cert-less binding without throwing.
 
 ## [5.7.1] - 2026-06-08
 

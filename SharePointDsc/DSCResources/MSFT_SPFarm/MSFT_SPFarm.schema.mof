@@ -20,4 +20,7 @@ class MSFT_SPFarm : OMI_BaseResource
     [Write, Description("If using SQL authentication, the SQL login to use to connect to the instance"), EmbeddedInstance("MSFT_Credential")] String DatabaseCredentials;
     [Write, Description("SharePoint Subscription Edition 25H1 and later - Specifies whether TLS encryption is used for the connection between SharePoint and the database."), ValueMap{"Mandatory","Optional","Strict"}, Values{"Mandatory","Optional","Strict"}] String DatabaseConnectionEncryption;
     [Write, Description("SharePoint Subscription Edition 25H1 and later - Sets the host name to use when validating the server certificate for the connection.")] String DatabaseServerCertificateHostName;
+    [Write, Description("SharePoint Subscription Edition only - Specifies the certificate thumbprint of the SSL certificate to bind to the Central Administration HTTPS binding. Make sure the certificate is added to Certificate Management (e.g. using the SPCertificate resource) first.")] String CentralAdministrationCertificateThumbprint;
+    [Write, Description("SharePoint Subscription Edition only - Specifies whether Server Name Indication (SNI) is enabled on the Central Administration HTTPS binding.")] Boolean UseServerNameIndication;
+    [Write, Description("SharePoint Subscription Edition only - Specifies whether legacy (TLS 1.0/1.1) encryption is allowed on the Central Administration HTTPS binding. Requires Windows Server 2022.")] Boolean AllowLegacyEncryption;
 };
